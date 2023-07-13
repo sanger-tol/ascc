@@ -1,0 +1,10 @@
+assembly_path: /lustre/scratch123/tol/teams/tola/treeval_runs/DTOL/nxCaeImpe1_1/raw/ref.fa
+assembly_title: icPhiPlag1
+pacbio_multiplexing_barcode_names: something
+pacbio_reads_path: /lustre/scratch123/tol/projects/tol-nematodes/data/Caenorhabditis/Caenorhabditis_imperialis/genomic_data/nxCaeImpe1/pacbio/fasta/
+sci_name: 'Caenorhabditis imperialis'
+taxid: 6239
+mito_fasta_path: 'NA'
+plastid_fasta_path: 'NA'
+kmer_len: 7
+nt_database: /data/blastdb/Supported/NT/current/nt/

@@ -13,8 +13,9 @@ class WorkflowAscc {
     public static void initialise(params, log) {
 
 
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (!params.input) {
+            log.error "Make sure your --input is a yaml file, following the standard set in the assets directory."
+            System.exit(1)
         }
     }
 
