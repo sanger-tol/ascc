@@ -32,7 +32,7 @@ workflow YAML_INPUT {
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path )
                 kmer_len:                                       ( data.kmer_len )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path )
-                ncbi_lineage_path:                              ( data.ncbi_lineage_path )
+                ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path )
                 busco_lineages_folder:                          ( data.busco_lineages_folder )
 
         }
