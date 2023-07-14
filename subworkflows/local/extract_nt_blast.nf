@@ -19,7 +19,7 @@ workflow EXTRACT_NT_BLAST {
 
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
-    //
+    // NOTE: needs to be installed once accepted by NF-core
     SEQKIT_SLIDING ( input_genome )
     ch_versions             = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 

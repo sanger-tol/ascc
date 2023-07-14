@@ -13,31 +13,40 @@ workflow YAML_INPUT {
         .map { file -> readYAML(file) }
         .set { yamlfile }
 
-    // 
+    //
     // LOGIC: PARSES THE TOP LEVEL OF YAML VALUES
-    // 
+    //
     yamlfile
         .flatten()
-        .multiMap { data -> 
-                assembly_title:                                 ( data.assembly_title )
-                pacbio_reads:                                   ( data.pacbio_reads_path )
-                assembly_path:                                  ( file(data.assembly_path) )
-                pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names )
-                sci_name:                                       ( data.sci_name )
-                taxid:                                          ( data.taxid )
-                mito_fasta_path:                                ( data.mito_fasta_path )
-                plastid_fasta_path:                             ( data.plastid_fasta_path )
-                nt_database:                                    ( data.nt_database )
-                reference_proteomes:                            ( data.reference_proteomes )
-                nt_kraken_db_path:                              ( data.nt_kraken_db_path )
-                kmer_len:                                       ( data.kmer_len )
-                ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path )
-                ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path )
-                busco_lineages_folder:                          ( data.busco_lineages_folder )
+        .multiMap { data ->
+                assembly_title:                                 ( data.assembly_title                   )
+                pacbio_reads:                                   ( data.pacbio_reads_path                )
+                assembly_path:                                  ( file(data.assembly_path)              )
+                pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
+                sci_name:                                       ( data.sci_name                         )
+                taxid:                                          ( data.taxid                            )
+                mito_fasta_path:                                ( data.mito_fasta_path                  )
+                plastid_fasta_path:                             ( data.plastid_fasta_path               )
+                nt_database:                                    ( data.nt_database                      )
+                reference_proteomes:                            ( data.reference_proteomes              )
+                nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
+                kmer_len:                                       ( data.kmer_len                         )
+                ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
+                ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
+                busco_lineages_folder:                          ( data.busco_lineages_folder            )
+                seqkit_values                       :           ( data.seqkit                           )
 
         }
         .set{ group }
 
+    group
+        .seqkit_values
+        .flatten()
+        .multiMap { data ->
+            sliding_value                           :           ( data.sliding                          )
+            window_value                            :           ( data.window                           )
+        }
+        .set { seqkit }
 
     emit:
     pacbio_reads                     = group.pacbio_reads
@@ -49,6 +58,8 @@ workflow YAML_INPUT {
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
+    seqkit_sliding                   = seqkit.sliding_value
+    seqkit_window                    = seqkit.window_value
     versions                         = ch_versions.ifEmpty(null)
 }
 

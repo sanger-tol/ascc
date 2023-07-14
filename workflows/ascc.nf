@@ -49,10 +49,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 workflow ASCC {
 
     main:
-    // These have been hardcoded into the modules.config
-    params.blast_chunk_size = 6000
-    params.blast_chunk_step_size = 100000
-
     ch_versions = Channel.empty()
 
     input_ch = Channel.fromPath(params.input, checkIfExists: true)
@@ -64,6 +60,9 @@ workflow ASCC {
         input_ch
     )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
+
+    //Channel.fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
+//        .set { blast_db }
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
@@ -86,20 +85,23 @@ workflow ASCC {
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
     GENERATE_GENOME.out.reference_tuple
-        .map { meta, ref ->
+        .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
+        .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
+        .map { meta, ref, sliding, window ->
             tuple([ id      : meta.id,
-                    sliding : params.blast_chunk_size,
-                    window  : params.blast_chunk_step_size
+                    sliding : sliding,
+                    window  : window
                 ],
                 file(ref)
             )}
         .set { modified_input }
-    modified_input.map{it[0].sliding}.view()
+
+    YAML_INPUT.out.nt_database.view()
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
     EXTRACT_NT_BLAST (
-        GENERATE_GENOME.out.reference_tuple,
+        modified_input,
         YAML_INPUT.out.nt_database,
         YAML_INPUT.out.ncbi_taxonomy_path,
         YAML_INPUT.out.ncbi_rankedlineage_path
