@@ -20,11 +20,13 @@ WorkflowAscc.initialise(params, log)
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
+include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
+include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,10 +49,47 @@ workflow ASCC {
 
     ch_versions = Channel.empty()
 
+    input_ch = Channel.fromPath(params.input, checkIfExists: true)
+
+    //
+    // SUBWORKFLOW: DECODE YAML INTO PARAMETERS FOR PIPELINE
+    //
+    YAML_INPUT ( input_ch )
+    ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
+
+    //
+    // SUBWORKFLOW: GENERATE GENOME FILE
+    //
+    GENERATE_GENOME (
+        YAML_INPUT.out.assembly_title,
+        YAML_INPUT.out.reference
+    )
+
+    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
+    //
+    EXTRACT_TIARA_HITS (
+        GENERATE_GENOME.out.reference_tuple
+    )
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())
+
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    // EXTRACT_NT-BLAST ()
+    EXTRACT_NT-BLAST ()
+
+    //
+    // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
+    emit:
+    software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
+    versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }
 
 /*
