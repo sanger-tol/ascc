@@ -1,5 +1,5 @@
 process BLAST_CHUNK_TO_FULL {
-    tag: "${meta.id}"
+    tag "${meta.id}"
     label 'process_low'
 
     conda ""

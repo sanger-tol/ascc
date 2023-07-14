@@ -1,42 +1,26 @@
 // MODULE IMPORT BLOCK
 include { BLAST_BLASTN          } from '../../modules/nf-core/blast/blastn/main'
-include { SEQKIT_SLIDING        } from '../../modules/nf-core/seqkit/sliding/main'
+include { SEQKIT_SLIDING        } from '../../modules/local/sliding'
 
 include { BLAST_CHUNK_TO_FULL   } from '../../modules/local/blast_chunk_to_full'
 include { REFORMAT_FULL_OUTFMT6 } from '../../modules/local/reformat_full_outfmt6'
 include { BLAST_GET_TOP_HITS    } from '../../modules/local/blast_get_top_hits'
 include { GET_LINEAGE_FOR_TOP   } from '../../modules/local/get_lineage_for_top'
 
-workflow EXTRACT_NT-BLAST {
+workflow EXTRACT_NT_BLAST {
     take:
-    input_genome        //Channel.of([ [ id: sample_id ], fasta ])
-    sliding_value       //
-    window_value        //
-    blastn_db_path      //
-    ncbi_taxonomy_path  //
-    ncbi_lineage_path   //
-
+    input_genome            // Channel.of([ [ id: sample_id ], fasta ])
+    blastn_db_path          // Channel.of( path )
+    ncbi_taxonomy_path      // Channel.of( path )
+    ncbi_lineage_path       // Channel.of( path )
 
     main:
     ch_versions             = Channel.empty()
 
-    input_genome
-        .combine( sliding_value )
-        .combine( window_value )
-        .map { it =>
-            tuple([ id: it[0].id,
-                    window: it[3],
-                    sliding: it[2]
-                ],
-                it[1]
-            )
-        }
-        .set( modified_input )
-
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
     //
-    SEQKIT_SLIDING ( modified_input )
+    SEQKIT_SLIDING ( input_genome )
     ch_versions             = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
     //
@@ -46,15 +30,16 @@ workflow EXTRACT_NT-BLAST {
         SEQKIT_SLIDING.out.fastx,
         blastn_db_path
     )
-    ch_versions             = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+    ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //
     // LOGIC: MERGE WITH INPUT GENOME TO TAKE SAMPLE_ID
     //
-    BLAST_BLASTN.out.db
+    BLAST_BLASTN.out.txt
         .combine ( input_genome )
-        .map { it =>
+        .map { it ->
             tuple( it[1],
+                    it[2],
                     it[0]
             )
         }
@@ -75,14 +60,14 @@ workflow EXTRACT_NT-BLAST {
     //
     // MODULE:
     //
-    BLAST_GET_TOP_HITS ( REFORMAT_FULL_OUTFMT6.out.formatted )
+    BLAST_GET_TOP_HITS ( REFORMAT_FULL_OUTFMT6.out.full )
     ch_versions             = ch_versions.mix(BLAST_GET_TOP_HITS.out.versions)
 
     //
     // MODULE:
     //
     GET_LINEAGE_FOR_TOP (
-        BLAST_GET_TOP_HITS.out.hits,
+        BLAST_GET_TOP_HITS.out.tophits,
         ncbi_taxonomy_path,
         ncbi_lineage_path
     )
@@ -90,7 +75,6 @@ workflow EXTRACT_NT-BLAST {
 
 
     emit:
-    full_table              = BLAST_BLASTN.out.full_table
     versions                = ch_versions.ifEmpty(null)
 
 }

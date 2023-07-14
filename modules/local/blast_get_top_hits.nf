@@ -1,5 +1,5 @@
 process BLAST_GET_TOP_HITS {
-    tag: "${meta.id}"
+    tag "${meta.id}"
     label 'process_low'
 
     conda ""

@@ -23,6 +23,7 @@ WorkflowAscc.initialise(params, log)
 include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
 include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
 include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
+include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -47,6 +48,11 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 workflow ASCC {
 
+    main:
+    // These have been hardcoded into the modules.config
+    params.blast_chunk_size = 6000
+    params.blast_chunk_step_size = 100000
+
     ch_versions = Channel.empty()
 
     input_ch = Channel.fromPath(params.input, checkIfExists: true)
@@ -54,7 +60,9 @@ workflow ASCC {
     //
     // SUBWORKFLOW: DECODE YAML INTO PARAMETERS FOR PIPELINE
     //
-    YAML_INPUT ( input_ch )
+    YAML_INPUT (
+        input_ch
+    )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
     //
@@ -64,7 +72,6 @@ workflow ASCC {
         YAML_INPUT.out.assembly_title,
         YAML_INPUT.out.reference
     )
-
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
     //
@@ -73,12 +80,31 @@ workflow ASCC {
     EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
 
+    //
+    // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
+    //
+    GENERATE_GENOME.out.reference_tuple
+        .map { meta, ref ->
+            tuple([ id      : meta.id,
+                    sliding : params.blast_chunk_size,
+                    window  : params.blast_chunk_step_size
+                ],
+                file(ref)
+            )}
+        .set { modified_input }
+    modified_input.map{it[0].sliding}.view()
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    EXTRACT_NT-BLAST ()
+    EXTRACT_NT_BLAST (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.nt_database,
+        YAML_INPUT.out.ncbi_taxonomy_path,
+        YAML_INPUT.out.ncbi_rankedlineage_path
+    )
+    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS

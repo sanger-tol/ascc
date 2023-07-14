@@ -23,6 +23,8 @@ workflow GENERATE_GENOME {
         }
         .set { reference_ch }
 
+    // THIS IS HERE FOR FUTURE EXPANSION
+
     emit:
     reference_tuple = reference_ch
     versions        = ch_versions.ifEmpty(null)

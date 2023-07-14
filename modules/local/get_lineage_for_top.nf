@@ -1,5 +1,5 @@
 process GET_LINEAGE_FOR_TOP {
-    tag: "${meta.id}"
+    tag "${meta.id}"
     label 'process_low'
 
     conda ""

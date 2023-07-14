@@ -1,5 +1,5 @@
 process REFORMAT_FULL_OUTFMT6 {
-    tag: "${meta.id}"
+    tag "${meta.id}"
     label 'process_low'
 
     conda ""
