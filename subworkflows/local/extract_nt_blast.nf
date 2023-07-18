@@ -1,7 +1,7 @@
 // MODULE IMPORT BLOCK
 include { BLAST_BLASTN          } from '../../modules/nf-core/blast/blastn/main'
-include { SEQKIT_SLIDING        } from '../../modules/local/sliding'
 
+include { SEQKIT_SLIDING        } from '../../modules/nf-core/seqkit/sliding/main'
 include { BLAST_CHUNK_TO_FULL   } from '../../modules/local/blast_chunk_to_full'
 include { REFORMAT_FULL_OUTFMT6 } from '../../modules/local/reformat_full_outfmt6'
 include { BLAST_GET_TOP_HITS    } from '../../modules/local/blast_get_top_hits'

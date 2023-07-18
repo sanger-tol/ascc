@@ -96,7 +96,6 @@ workflow ASCC {
             )}
         .set { modified_input }
 
-    YAML_INPUT.out.nt_database.view()
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //

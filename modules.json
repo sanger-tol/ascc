@@ -33,6 +33,13 @@
                             "modules"
                         ]
                     },
+                    "seqkit/sliding": {
+                        "branch": "master",
+                        "git_sha": "0aa251c4ce7318c86b9868d8cb8dd6dd5d7da849",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
                     "tiara/tiara": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",

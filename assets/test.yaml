@@ -7,7 +7,7 @@ taxid: 6239
 mito_fasta_path: 'NA'
 plastid_fasta_path: 'NA'
 kmer_len: 7
-nt_database: /data/blastdb/Supported/NT/current/nt/
+nt_database: /data/blastdb/Supported/NT/current/
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/
 ncbi_rankedlineage_path:  /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
