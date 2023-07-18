@@ -28,23 +28,13 @@ include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-<<<<<<< HEAD
 include { RUN_NT_KRAKEN } from '..//subworkflows/local/run_nt_kraken'
-=======
->>>>>>> dev
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-<<<<<<< HEAD
-
-//
-// MODULE: Installed directly from nf-core/modules
-//
-=======
->>>>>>> dev
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -53,54 +43,22 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-<<<<<<< HEAD
-// Info required for completion email and summary
-=======
-
->>>>>>> dev
 
 workflow ASCC {
 
     main:
     ch_versions = Channel.empty()
 
-<<<<<<< HEAD
-    input_ch = Channel.fromPath(params.input, checkIfExists: true)
-
-    //
-    // SUBWORKFLOW: DECODE YAML INTO PARAMETERS FOR PIPELINE
-    //
-    YAML_INPUT (
-        input_ch
-    )
-    ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
-
-    //
-    // SUBWORKFLOW: GENERATE GENOME FILE
-    //
-    GENERATE_GENOME (
-        YAML_INPUT.out.assembly_title,
-        YAML_INPUT.out.reference
-    )
-    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
-=======
 
     input_ch = Channel.fromPath(params.input, checkIfExists: true)
 
     YAML_INPUT ( input_ch )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
-    GENERATE_GENOME ( YAML_INPUT.out.assembly_title,
-                      YAML_INPUT.out.reference
+    GENERATE_GENOME (   YAML_INPUT.out.assembly_title,
+                        YAML_INPUT.out.reference
     )
-
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
-
-    EXTRACT_TIARA_HITS (
-        GENERATE_GENOME.out.reference_tuple
-    )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())
->>>>>>> dev
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
@@ -110,13 +68,15 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
 
-<<<<<<< HEAD
     //
     // SUBWORKFLOW:
     //
     RUN_NT_KRAKEN (
-        GENERATE_GENOME.out.reference_tuple
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.nt_kraken_db_path,
+        YAML_INPUT.out.ncbi_rankedlineage_path
     )
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
@@ -127,11 +87,9 @@ workflow ASCC {
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
-=======
     emit:
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
->>>>>>> dev
 }
 
 /*

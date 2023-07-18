@@ -15,11 +15,20 @@ workflow RUN_NT_KRAKEN {
     main:
     ch_versions     = Channel.empty()
 
+    assembly_fasta
+        .map{ it ->
+            tuple([id: it[0].id,
+                    single_end: true
+                ],
+                it[1]
+            )
+        }
+        .set { modified_input }
     //
     // MODULE: Kraken2 run on assembly fasta.
     //
-    KRAKEN2_KRAKEN2 ( 
-        assembly_fasta,      // val(meta), path(reads)
+    KRAKEN2_KRAKEN2 (
+        modified_input,      // val(meta), path(reads)
         nt_kraken_db_path,   // path db
         false,               // val save_output_fastqs
         true                 // val save_reads_assignment
@@ -29,12 +38,12 @@ workflow RUN_NT_KRAKEN {
     //
     // MODULE: Get lineage for kraken output.
     //
-    GET_LINEAGE_FOR_KRAKEN ( 
+    GET_LINEAGE_FOR_KRAKEN (
         KRAKEN2_KRAKEN2.out.classified_reads_assignment,
         ncbi_rankedlineage_path
     )
     ch_versions = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
-    
+
     emit:
     KRAKEN2_KRAKEN2.out.classified_reads_assignment
     KRAKEN2_KRAKEN2.out.report
