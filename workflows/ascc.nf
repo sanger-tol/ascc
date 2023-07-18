@@ -15,37 +15,36 @@ log.info logo + paramsSummaryLog(workflow) + citation
 
 WorkflowAscc.initialise(params, log)
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
+include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
+include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+<<<<<<< HEAD
 include { RUN_NT_KRAKEN } from '..//subworkflows/local/run_nt_kraken'
+=======
+>>>>>>> dev
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+<<<<<<< HEAD
 
 //
 // MODULE: Installed directly from nf-core/modules
 //
+=======
+>>>>>>> dev
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -54,13 +53,18 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+<<<<<<< HEAD
 // Info required for completion email and summary
+=======
+
+>>>>>>> dev
 
 workflow ASCC {
 
     main:
     ch_versions = Channel.empty()
 
+<<<<<<< HEAD
     input_ch = Channel.fromPath(params.input, checkIfExists: true)
 
     //
@@ -79,6 +83,24 @@ workflow ASCC {
         YAML_INPUT.out.reference
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+=======
+
+    input_ch = Channel.fromPath(params.input, checkIfExists: true)
+
+    YAML_INPUT ( input_ch )
+    ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
+
+    GENERATE_GENOME ( YAML_INPUT.out.assembly_title,
+                      YAML_INPUT.out.reference
+    )
+
+    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+
+    EXTRACT_TIARA_HITS (
+        GENERATE_GENOME.out.reference_tuple
+    )
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())
+>>>>>>> dev
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
@@ -88,6 +110,7 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
 
+<<<<<<< HEAD
     //
     // SUBWORKFLOW:
     //
@@ -104,6 +127,11 @@ workflow ASCC {
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
+=======
+    emit:
+    software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
+    versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
+>>>>>>> dev
 }
 
 /*
