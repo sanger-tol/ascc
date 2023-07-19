@@ -28,6 +28,7 @@ include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { RUN_NT_KRAKEN } from '..//subworkflows/local/run_nt_kraken'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,9 +44,9 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 */
 
 
-
 workflow ASCC {
 
+    main:
     ch_versions = Channel.empty()
 
 
@@ -54,16 +55,33 @@ workflow ASCC {
     YAML_INPUT ( input_ch )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
-    GENERATE_GENOME ( YAML_INPUT.out.assembly_title,
-                      YAML_INPUT.out.reference
+    GENERATE_GENOME (   YAML_INPUT.out.assembly_title,
+                        YAML_INPUT.out.reference
     )
-
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
+    //
     EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+
+    //
+    // SUBWORKFLOW:
+    //
+    RUN_NT_KRAKEN (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.nt_kraken_db_path,
+        YAML_INPUT.out.ncbi_rankedlineage_path
+    )
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
+    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+    // ! There is currently no tooling to help you write a sample sheet schema
+
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
@@ -88,6 +106,8 @@ workflow.onComplete {
     if (params.hook_url) {
         NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
     }
+    // TreeValProject.summary(workflow, reference_tuple, summary_params, projectDir)
+
 }
 
 /*
