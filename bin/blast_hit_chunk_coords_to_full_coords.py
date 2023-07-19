@@ -72,8 +72,8 @@ def main(in_path, blast_type):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__, version='1.0')
-    parser.add_argument("-v", type=str, help="Version information")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-v", action='version', version='1.0')
     parser.add_argument("in_path", type=str, help="Path to BLAST results file")
     parser.add_argument("blast_type", type=str, help="BLAST type: 'nucleotide' or 'diamond'", choices=["nucleotide", "diamond"])
     args = parser.parse_args()

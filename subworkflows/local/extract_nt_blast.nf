@@ -33,22 +33,9 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //
-    // LOGIC: MERGE WITH INPUT GENOME TO TAKE SAMPLE_ID
-    //
-    BLAST_BLASTN.out.txt
-        .combine ( input_genome )
-        .map { it ->
-            tuple( it[1],
-                    it[2],
-                    it[0]
-            )
-        }
-        .set { mapped_db }
-
-    //
     // MODULE:
     //
-    BLAST_CHUNK_TO_FULL ( mapped_db )
+    BLAST_CHUNK_TO_FULL ( BLAST_BLASTN.out.txt )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
     //

@@ -16,6 +16,7 @@ import sys
 
 if sys.argv[1] == '-v':
     print('1.0.0')
+    sys.exit()
 else:
     in_path = sys.argv[1]
 

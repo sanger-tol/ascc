@@ -2,10 +2,10 @@ process BLAST_CHUNK_TO_FULL {
     tag "${meta.id}"
     label 'process_low'
 
-    conda ""
+    conda "conda-forge::python=3.9 conda-forge::pandas=1.5.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-    '' :
-    '' }"
+        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
+        'quay.io/biocontainers/pandas:1.5.2' }"
 
     input:
     tuple val(meta), path(chunked)
@@ -15,12 +15,14 @@ process BLAST_CHUNK_TO_FULL {
     path "versions.yml"                             , emit: versions
 
     script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    python3 blast_hit_chunk_coords_to_full_coords.py ${chunked}/${meta.id}_nt_blast_chunks.out ${args} > full_coords.tsv
+    blast_hit_chunk_coords_to_full_coords.py ${chunked} ${args} > full_coords.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        blast_hit_chunk_coords_to_full_coords: \$(python3 blast_hit_chunk_coords_to_full_coords.py -v)
+        blast_hit_chunk_coords_to_full_coords: \$(blast_hit_chunk_coords_to_full_coords.py -v)
     END_VERSIONS
     """
 
@@ -30,7 +32,7 @@ process BLAST_CHUNK_TO_FULL {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        blast_hit_chunk_coords_to_full_coords: \$(python3 blast_hit_chunk_coords_to_full_coords.py -v)
+        blast_hit_chunk_coords_to_full_coords: \$(blast_hit_chunk_coords_to_full_coords.py -v)
     END_VERSIONS
     """
 }

@@ -140,7 +140,8 @@ def main(blast_output_path, out_folder, accession2taxid_folder, lineages_path, c
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__, version='1.0.0')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-v", action='version', version='1.0')
     parser.add_argument("blast_output_path", type=str, help="Path to BLAST output file (format 6)")
     parser.add_argument("out_folder", type=str, help="Folder for output files")
     parser.add_argument("accession2taxid_folder", type=str, help="Path to folder with *.accession2taxid files, downloaded from NCBI FTP")
