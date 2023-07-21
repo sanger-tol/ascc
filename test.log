@@ -1,0 +1,61 @@
+N E X T F L O W  ~  version 23.04.1
+Launching `main.nf` [deadly_mcclintock] DSL2 - revision: ac6801d332
+
+
+------------------------------------------------------
+  sanger-tol/ascc v1.0dev
+------------------------------------------------------
+Core Nextflow options
+  runName                   : deadly_mcclintock
+  containerEngine           : singularity
+  launchDir                 : /nfs/treeoflife-01/teams/tola/users/yy5/ascc/ascc
+  workDir                   : /nfs/treeoflife-01/teams/tola/users/yy5/ascc/ascc/work
+  projectDir                : /nfs/treeoflife-01/teams/tola/users/yy5/ascc/ascc
+  userName                  : yy5
+  profile                   : singularity,sanger
+  configFiles               : 
+
+Input/output options
+  input                     : assets/test.yaml
+  outdir                    : ../PIPELINE_OUTPUT/test
+
+Institutional config options
+  config_profile_description: The Wellcome Sanger Institute HPC cluster (farm5) profile
+  config_profile_contact    : Priyanka Surana (@priyanka-surana)
+  config_profile_url        : https://www.sanger.ac.uk
+
+Max job request options
+  max_cpus                  : 256
+  max_memory                : 683 GB
+  max_time                  : 24d 20h 31m 24s
+
+!! Only displaying parameters that differ from the pipeline defaults !!
+------------------------------------------------------
+If you use sanger-tol/ascc for your analysis please cite:
+
+* The nf-core framework
+  https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+  https://github.com/sanger-tol/ascc/blob/master/CITATIONS.md
+
+[-        ] process > SANGERTOL_ASCC:ASCC:EXTRACT... -
+[-        ] process > SANGERTOL_ASCC:ASCC:CUSTOM_... -
+
+[-        ] process > SANGERTOL_ASCC:ASCC:EXTRACT... -
+[-        ] process > SANGERTOL_ASCC:ASCC:CUSTOM_... -
+[/lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxi, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxs, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.taxa.tsv, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.meta.jsonl, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.blast_div.tsv.gz]
+
+[-        ] process > SANGERTOL_ASCC:ASCC:EXTRACT... [  0%] 0 of 1
+[-        ] process > SANGERTOL_ASCC:ASCC:CUSTOM_... -
+[/lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxi, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxs, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.taxa.tsv, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.meta.jsonl, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.blast_div.tsv.gz]
+
+executor >  lsf (1)
+[bf/ebb247] process > SANGERTOL_ASCC:ASCC:EXTRACT... [  0%] 0 of 1
+[-        ] process > SANGERTOL_ASCC:ASCC:CUSTOM_... -
+[/lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxi, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxs, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.taxa.tsv, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.meta.jsonl, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.blast_div.tsv.gz]
+
+executor >  lsf (1)
+[bf/ebb247] process > SANGERTOL_ASCC:ASCC:EXTRACT... [  0%] 0 of 1
+[-        ] process > SANGERTOL_ASCC:ASCC:CUSTOM_... -
+[/lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxi, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.gxs, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.taxa.tsv, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.meta.jsonl, /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.2.3/all.blast_div.tsv.gz]

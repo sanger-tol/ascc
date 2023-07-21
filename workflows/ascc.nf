@@ -24,6 +24,7 @@ WorkflowAscc.initialise(params, log)
 include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
 include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
 include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
+include { EXTRACT_FCSGX        } from '../subworkflows/local/extract_fcsgx'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -54,16 +55,22 @@ workflow ASCC {
     YAML_INPUT ( input_ch )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
-    GENERATE_GENOME ( YAML_INPUT.out.assembly_title,
+    GENERATE_GENOME ( YAML_INPUT.out.taxid,
                       YAML_INPUT.out.reference
     )
 
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
-    EXTRACT_TIARA_HITS (
+    /*EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions.first())*/
+
+    EXTRACT_FCSGX (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.fcs_gx_database_path
+    )
+
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

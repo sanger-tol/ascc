@@ -19,6 +19,13 @@
                             "modules"
                         ]
                     },
+                    "fcs/fcsgx": {
+                        "branch": "master",
+                        "git_sha": "9d186efe469ff5c1176eab3e9328af29ea663136",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "f2d63bd5b68925f98f572eed70993d205cc694b7",

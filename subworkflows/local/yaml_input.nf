@@ -34,7 +34,7 @@ workflow YAML_INPUT {
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path )
                 busco_lineages_folder:                          ( data.busco_lineages_folder )
-
+                fcs_gx_database_path:                           ( data.fcs_gx_database_path )
         }
         .set{ group }
 
@@ -49,6 +49,7 @@ workflow YAML_INPUT {
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
+    fcs_gx_database_path             = group.fcs_gx_database_path           
     versions                         = ch_versions.ifEmpty(null)
 }
 

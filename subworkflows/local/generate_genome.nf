@@ -6,7 +6,7 @@
 
 workflow GENERATE_GENOME {
     take:
-    assembly_title     // Channel val(assembly_title)
+    taxid     // Channel val(taxid)
     reference  // Channel [ val(meta), path(file) ]
 
     main:
@@ -16,9 +16,9 @@ workflow GENERATE_GENOME {
     // LOGIC: GENERATES A REFERENCE DATA TUPLE
     //
     reference
-        .combine( assembly_title )
+        .combine( taxid )
         .map { it ->
-            tuple ([id: it[1]],
+            tuple ([taxid: it[1]],
                     it[0])
         }
         .set { reference_ch }
