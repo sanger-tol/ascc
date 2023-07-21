@@ -18,6 +18,13 @@ workflow EXTRACT_FCSGX {
     .collect()
     .set {fcsgxdb}
 
+
+    /*fcsgxpath
+    .map { dbpath -> file(dbpath + '/*') }
+    .collect()
+    .set {fcsgxdb}*/
+
+
     fcsgxdb.view()
 
     FCS_FCSGX (
