@@ -1,11 +1,11 @@
-assembly_path: /lustre/scratch123/tol/teams/tola/treeval_runs/DTOL/nxCaeImpe1_1/raw/ref.fa
-assembly_title: nxCaeImpe1
+assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
+assembly_title: asccTinyTest
 pacbio_multiplexing_barcode_names: something
-pacbio_reads_path: /lustre/scratch123/tol/projects/tol-nematodes/data/Caenorhabditis/Caenorhabditis_imperialis/genomic_data/nxCaeImpe1/pacbio/fasta/
-sci_name: 'Caenorhabditis imperialis'
-taxid: 6239
-mito_fasta_path: 'NA'
-plastid_fasta_path: 'NA'
+pacbio_reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
+sci_name: 'Plasmodium yoelii yoelii 17XNL'
+taxid: 352914
+mito_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+plastid_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
 nt_database: /data/blastdb/Supported/NT/current/
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
