@@ -1,0 +1,17 @@
+assembly_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20220128_ascc_poyelii/Pyoeliiyoelii17XNL_assembly.fa
+assembly_title: pyoelii
+pacbio_multiplexing_barcode_names: something
+pacbio_reads_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20220128_ascc_poyelii/
+sci_name: "Plasmodium yoelii yoelii 17XNL"
+taxid: 352914
+mito_fasta_path: 'NA'
+plastid_fasta_path: 'NA'
+kmer_len: 7
+nt_database: /data/blastdb/Supported/NT/current/
+nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
+ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/ncbi_taxonomy/20230509_accession2taxid/
+ncbi_rankedlineage_path:  /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
+busco_lineages_folder:  /lustre/scratch123/tol/resources/busco/data/v5/2021-03-14/lineages
+seqkit:
+  sliding: 10000
+  window: 6000

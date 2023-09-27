@@ -28,6 +28,7 @@ include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { RUN_NT_KRAKEN } from '..//subworkflows/local/run_nt_kraken'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,6 +109,16 @@ workflow ASCC {
     ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
     //
+    // SUBWORKFLOW:
+    //
+    RUN_NT_KRAKEN (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.nt_kraken_db_path,
+        YAML_INPUT.out.ncbi_rankedlineage_path
+    )
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+    //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
     CUSTOM_DUMPSOFTWAREVERSIONS (
@@ -133,6 +144,8 @@ workflow.onComplete {
     if (params.hook_url) {
         NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
     }
+    // TreeValProject.summary(workflow, reference_tuple, summary_params, projectDir)
+
 }
 
 /*
