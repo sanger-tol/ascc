@@ -84,7 +84,6 @@ workflow ASCC {
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    GENERATE_GENOME.out.reference_tuple.view()
     GENERATE_GENOME.out.reference_tuple
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
@@ -93,10 +92,10 @@ workflow ASCC {
                     sliding : sliding,
                     window  : window
                 ],
-                ref
+                file(ref)
             )}
         .set { modified_input }
-    modified_input.view()
+
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
