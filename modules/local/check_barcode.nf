@@ -11,6 +11,7 @@ process CHECK_BARCODE {
     tuple val(meta)     , path(barcodes)
     tuple val(meta2)    , path(pacbio_dir)
     tuple val(meta3)    , path(multiplex_csv)
+
     output:
     stdout              , emit: debarcoded
     path "versions.yml" , emit: versions
@@ -18,9 +19,6 @@ process CHECK_BARCODE {
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     def args    = task.ext.args     ?: ''
-    //barcode_fasta = file path
-    //pacbio_dir = /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
-    //multiplex_name = "bca101,bcc202"
     """
     pacbio_barcode_check.py \\
         ${barcode_fasta} \\
@@ -34,10 +32,8 @@ process CHECK_BARCODE {
     """
 
     stub:
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
-    def args    = task.ext.args     ?: ''
     """
-    touch ${prefix}.txt
+    echo "BARCODES FOUND!"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
