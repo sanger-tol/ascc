@@ -48,9 +48,44 @@
                         ],
                         "patch": "modules/nf-core/kraken2/kraken2/kraken2-kraken2.diff"
                     },
+                    "minimap2/align": {
+                        "branch": "master",
+                        "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "minimap2/index": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "f2d63bd5b68925f98f572eed70993d205cc694b7",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "samtools/depth": {
+                        "branch": "master",
+                        "git_sha": "a1ffbc1fd87bd5a829e956cc26ec9cc53af3e817",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "samtools/index": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "samtools/sort": {
+                        "branch": "master",
+                        "git_sha": "a0f7be95788366c1923171e358da7d049eb440f9",
                         "installed_by": [
                             "modules"
                         ]
