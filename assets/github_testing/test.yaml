@@ -1,12 +1,13 @@
-assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
+assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 assembly_title: asccTinyTest
-pacbio_multiplexing_barcode_names: something
-pacbio_reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
+pacbio_multiplexing_barcode_names: ""
+pacbio_reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio/
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
-mito_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
-plastid_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
+mito_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+plastid_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
+## Below this point will need updating as more subworkflows are built
 nt_database: /data/blastdb/Supported/NT/current/
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/
