@@ -77,10 +77,10 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    EXTRACT_TIARA_HITS (
+/*     EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions) */
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
@@ -100,23 +100,23 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    EXTRACT_NT_BLAST (
+/*     EXTRACT_NT_BLAST (
         modified_input,
         YAML_INPUT.out.nt_database,
         YAML_INPUT.out.ncbi_taxonomy_path,
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions) */
 
     //
     // SUBWORKFLOW:
     //
-    RUN_NT_KRAKEN (
+/*     RUN_NT_KRAKEN (
         GENERATE_GENOME.out.reference_tuple,
         YAML_INPUT.out.nt_kraken_db_path,
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions) */
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
