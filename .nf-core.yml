@@ -15,6 +15,9 @@ lint:
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
     - .github/ISSUE_TEMPLATE/bug_report.yml
+    - LICENSE
+    - .github/workflows/linting.yml
+    - lib/NfcoreTemplate.groovy
   nextflow_config:
     - manifest.name
     - manifest.homePage
