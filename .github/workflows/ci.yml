@@ -35,6 +35,11 @@ jobs:
         with:
           version: "${{ matrix.NXF_VER }}"
 
+      - name: Download test data
+        # Download A fungal test data set that is full enough to show some real output.
+        run: |
+          curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyData.tar.gz | tar xzf -
+
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
