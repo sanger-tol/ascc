@@ -13,8 +13,8 @@ import sys
 import pandas as pd
 
 
-if sys.argv[1] == '-v':
-    print('1.0.0')
+if sys.argv[1] == "-v":
+    print("1.0.0")
     sys.exit()
 else:
     in_path = sys.argv[1]

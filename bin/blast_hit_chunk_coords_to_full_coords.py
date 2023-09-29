@@ -11,6 +11,7 @@ Adapted by Damon-Lee Pointon @DLBPointon
 import general_purpose_functions as gpf
 import argparse
 
+
 def process_nucleotide_blast_file(in_path):
     """
     Converts coordinates in a nucleotide BLAST file
@@ -70,11 +71,12 @@ def main(in_path, blast_type):
         process_diamond_file(in_path)
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-v", action='version', version='1.0')
+    parser.add_argument("-v", action="version", version="1.0")
     parser.add_argument("in_path", type=str, help="Path to BLAST results file")
-    parser.add_argument("blast_type", type=str, help="BLAST type: 'nucleotide' or 'diamond'", choices=["nucleotide", "diamond"])
+    parser.add_argument(
+        "blast_type", type=str, help="BLAST type: 'nucleotide' or 'diamond'", choices=["nucleotide", "diamond"]
+    )
     args = parser.parse_args()
     main(args.in_path, args.blast_type)

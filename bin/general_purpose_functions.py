@@ -4,23 +4,23 @@ General purpose functions
 File for functions that can be reused in many Python scripts
 """
 # MIT License
-# 
+#
 # Copyright (c) 2020-2021 Genome Research Ltd.
-# 
+#
 # Author: Eerik Aunin (ea10@sanger.ac.uk)
-# 
+#
 # This file is a part of the Genome Decomposition Analysis (GDA) pipeline.
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -100,7 +100,7 @@ def print_with_fixed_row_length(seq, max_length):
     Input: 1) a string 2) maximum line length in output
     Output: the input string printed to STDOUT in chunks with fixed maximum line length
     """
-    split_seq = [seq[i:i+max_length] for i in range(0, len(seq), max_length)]
+    split_seq = [seq[i : i + max_length] for i in range(0, len(seq), max_length)]
     for line in split_seq:
         print(line)
 
@@ -110,7 +110,7 @@ def split_with_fixed_row_length(seq, max_length):
     Input: 1) a string 2) maximum line length in output
     Output: the input string split in chunks with fixed maximum line length
     """
-    split_seq = [seq[i:i + max_length] for i in range(0, len(seq), max_length)]
+    split_seq = [seq[i : i + max_length] for i in range(0, len(seq), max_length)]
     return split_seq
 
 
@@ -118,7 +118,7 @@ def reverse_complement(seq):
     """
     Returns the reverse complement of a DNA sequence
     """
-    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N', 'a': 't', 'c': 'g', 'g': 'c', 't': 'a', 'n': 'n'}
+    complement = {"A": "T", "C": "G", "G": "C", "T": "A", "N": "N", "a": "t", "c": "g", "g": "c", "t": "a", "n": "n"}
     reverse_comp = "".join(complement.get(base, base) for base in reversed(seq))
     return reverse_comp
 
@@ -137,7 +137,7 @@ def read_fasta_in_chunks(in_path):
                 if seq != "":
                     yield (current_seq_header, seq)
                 seq = ""
-                current_seq_header = line[1:len(line)]
+                current_seq_header = line[1 : len(line)]
             else:
                 seq += line
     if seq != "":
@@ -150,7 +150,7 @@ def list_to_chunks(lst, n):
     https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
     """
     for i in range(0, len(lst), n):
-        yield lst[i: i + n]
+        yield lst[i : i + n]
 
 
 def string_to_chunks(line, n):
@@ -158,7 +158,7 @@ def string_to_chunks(line, n):
     Function for splitting a string every nth character
     https://stackoverflow.com/questions/9475241/split-string-every-nth-character
     """
-    return [line[i: i + n] for i in range(0, len(line), n)]
+    return [line[i : i + n] for i in range(0, len(line), n)]
 
 
 def run_system_command(system_command, verbose=True, dry_run=False, tries=1, expected_exit_code=0):
@@ -173,20 +173,25 @@ def run_system_command(system_command, verbose=True, dry_run=False, tries=1, exp
                 time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if i > 0:
                     try_counter_string = ", try {}".format(i + 1)
-                out_message = "<{}, {}{}> executing command: {}\n".format(time_now, triggering_script_name, try_counter_string, system_command)
+                out_message = "<{}, {}{}> executing command: {}\n".format(
+                    time_now, triggering_script_name, try_counter_string, system_command
+                )
                 sys.stderr.write(out_message)
             try:
-                output = subprocess.check_output(system_command, stderr=subprocess.STDOUT, shell=True, timeout=None, universal_newlines=True)
+                output = subprocess.check_output(
+                    system_command, stderr=subprocess.STDOUT, shell=True, timeout=None, universal_newlines=True
+                )
                 break
             except subprocess.CalledProcessError as exc:
-                out_errormessage = "<" + triggering_script_name + "> " + " exited with error code " + str(exc.returncode)
+                out_errormessage = (
+                    "<" + triggering_script_name + "> " + " exited with error code " + str(exc.returncode)
+                )
                 if exc.output.isspace() == False:
                     out_errormessage += ". Error message: " + exc.output
                 if i == tries - 1:
                     if exc.returncode != expected_exit_code:
                         sys.stderr.write(out_errormessage + "\n")
                         os.kill(os.getpid(), signal.SIGINT)
-
 
 
 def check_if_file_exists(in_path):
@@ -219,9 +224,11 @@ def get_file_paths(in_folder_path, extension):
         sys.exit(1)
     return selected_file_paths
 
+
 def main():
     # Placeholder for accessing version.
     pass
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)

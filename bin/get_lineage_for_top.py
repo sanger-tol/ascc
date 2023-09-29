@@ -13,6 +13,7 @@ import general_purpose_functions as gpf
 import argparse
 import os
 
+
 def extract_accessions_from_blast_output(blast_output_path, accessions_set_out_path):
     """
     Input: 1) path to BLAST output file (format 6), 2) path for output file
@@ -74,7 +75,7 @@ def get_accession_to_lineage_dict(accession2taxid_dict, lineages_path):
         split_line = [n.strip() for n in split_line]
         taxid = split_line[0]
         if taxid in taxid_values:
-            lineage = ",".join(split_line[1:len(split_line)])
+            lineage = ",".join(split_line[1 : len(split_line)])
             taxid2lineage_dict[taxid] = lineage
     return taxid2lineage_dict
 
@@ -118,7 +119,11 @@ def main(blast_output_path, out_folder, accession2taxid_folder, lineages_path, c
     out_list = list()
     if column_name_prefix != "":
         column_name_prefix += "_"
-    out_list.append("scaff,{0}blast_accession,{0}blast_score,{0}blast_taxid,{0}blast_species,{0}blast_genus,{0}blast_family,{0}blast_order,{0}blast_class,{0}blast_phylum,{0}blast_kingdom,{0}blast_superkingdom,{0}blast_no_rank,{0}blast_empty".format(column_name_prefix))
+    out_list.append(
+        "scaff,{0}blast_accession,{0}blast_score,{0}blast_taxid,{0}blast_species,{0}blast_genus,{0}blast_family,{0}blast_order,{0}blast_class,{0}blast_phylum,{0}blast_kingdom,{0}blast_superkingdom,{0}blast_no_rank,{0}blast_empty".format(
+            column_name_prefix
+        )
+    )
     for key in blast_results_dict:
         contig_results_dict = blast_results_dict[key]
         for result_key in contig_results_dict:
@@ -141,11 +146,24 @@ def main(blast_output_path, out_folder, accession2taxid_folder, lineages_path, c
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-v", action='version', version='1.0')
+    parser.add_argument("-v", action="version", version="1.0")
     parser.add_argument("blast_output_path", type=str, help="Path to BLAST output file (format 6)")
     parser.add_argument("out_folder", type=str, help="Folder for output files")
-    parser.add_argument("accession2taxid_folder", type=str, help="Path to folder with *.accession2taxid files, downloaded from NCBI FTP")
+    parser.add_argument(
+        "accession2taxid_folder", type=str, help="Path to folder with *.accession2taxid files, downloaded from NCBI FTP"
+    )
     parser.add_argument("lineages_path", type=str, help="Path NCBI rankedlineage.dmp file, downloaded from NCBI FTP")
-    parser.add_argument("--column_name_prefix", type=str, help="Prefix that will be added to column names in the output CSV file. Default: empty string", default="")
+    parser.add_argument(
+        "--column_name_prefix",
+        type=str,
+        help="Prefix that will be added to column names in the output CSV file. Default: empty string",
+        default="",
+    )
     args = parser.parse_args()
-    main(args.blast_output_path, args.out_folder, args.accession2taxid_folder, args.lineages_path, args.column_name_prefix)
+    main(
+        args.blast_output_path,
+        args.out_folder,
+        args.accession2taxid_folder,
+        args.lineages_path,
+        args.column_name_prefix,
+    )

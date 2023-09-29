@@ -14,8 +14,8 @@ Adapted by Damon-Lee Pointon @DLBPointon
 import sys
 import general_purpose_functions as gpf
 
-if sys.argv[1] == '-v':
-    print('1.0.0')
+if sys.argv[1] == "-v":
+    print("1.0.0")
     sys.exit()
 else:
     in_path = sys.argv[1]
@@ -43,5 +43,23 @@ for line in in_data:
     sphylums = split_line[15]
     salltitles = split_line[16]
 
-    out_line = "\t".join([qseqid, staxids, bitscore, qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore])
+    out_line = "\t".join(
+        [
+            qseqid,
+            staxids,
+            bitscore,
+            qseqid,
+            sseqid,
+            pident,
+            length,
+            mismatch,
+            gapopen,
+            qstart,
+            qend,
+            sstart,
+            send,
+            evalue,
+            bitscore,
+        ]
+    )
     print(out_line)
