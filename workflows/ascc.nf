@@ -24,6 +24,7 @@ include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
 include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
 include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
+include { RUN_FCSADAPTOR       } from '../subworkflows/local/run_fcsadaptor'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -85,7 +86,7 @@ workflow ASCC {
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    GENERATE_GENOME.out.reference_tuple
+    /*GENERATE_GENOME.out.reference_tuple
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
         .map { meta, ref, sliding, window ->
@@ -95,7 +96,7 @@ workflow ASCC {
                 ],
                 file(ref)
             )}
-        .set { modified_input }
+        .set { modified_input }*/
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
@@ -111,12 +112,10 @@ workflow ASCC {
     //
     // SUBWORKFLOW:
     //
-/*     RUN_NT_KRAKEN (
-        GENERATE_GENOME.out.reference_tuple,
-        YAML_INPUT.out.nt_kraken_db_path,
-        YAML_INPUT.out.ncbi_rankedlineage_path
+    RUN_FCSADAPTOR (
+        GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions) */
+    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions) 
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
