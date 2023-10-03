@@ -19,7 +19,7 @@ workflow RUN_FCSADAPTOR {
     FCS_FCSADAPTOR_PROK (
         reference_tuple      // val(meta), path(fasta)
     )
-    ch_versions = ch_versions.mix(FCS_FCSADAPTOR_PROK.out.versions)
+    ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_PROK.out.versions)
 
     //
     // MODULE: FCS_FCSADAPTOR run with eukaryote settings
@@ -27,7 +27,7 @@ workflow RUN_FCSADAPTOR {
     FCS_FCSADAPTOR_EUK (
         reference_tuple      // val(meta), path(fasta)
     )
-    ch_versions = ch_versions.mix(FCS_FCSADAPTOR_EUK.out.versions)
+    ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_EUK.out.versions)
 
     emit:
     FCS_FCSADAPTOR_EUK.out.adaptor_report
