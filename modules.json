@@ -30,6 +30,11 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
+                    "fcs/fcsadaptor": {
+                        "branch": "master",
+                        "git_sha": "5a35af8b60d45425c4b9193e567d16b614d93dbe",
+                        "installed_by": ["modules"]
+                    },
                     "kraken2/kraken2": {
                         "branch": "master",
                         "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
