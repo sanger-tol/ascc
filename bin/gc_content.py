@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Script for finding the GC content of each sequence in a multiFASTA file
+
+Written by Eerik Aunin @eeaunin
+
+Adapted by Damon-Lee Pointon @DLBPointon
 """
 
 import argparse
