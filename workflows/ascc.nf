@@ -95,7 +95,7 @@ workflow ASCC {
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    /*GENERATE_GENOME.out.reference_tuple
+    /*YAML_INPUT.out.reference_tuple
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
         .map { meta, ref, sliding, window ->
@@ -122,7 +122,7 @@ workflow ASCC {
     // SUBWORKFLOW:
     //
     RUN_FCSADAPTOR (
-        GENERATE_GENOME.out.reference_tuple
+        YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
