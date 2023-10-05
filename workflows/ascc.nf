@@ -69,7 +69,7 @@ workflow ASCC {
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
     GC_CONTENT (
-        YAML_INPUT.out.ref_tuple
+        YAML_INPUT.out.reference_tuple
     )
 
     //Channel
@@ -80,7 +80,7 @@ workflow ASCC {
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
     GENERATE_GENOME (
-        YAML_INPUT.out.ref_tuple
+        YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
