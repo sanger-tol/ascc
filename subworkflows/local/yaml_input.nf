@@ -48,9 +48,27 @@ workflow YAML_INPUT {
         }
         .set { seqkit }
 
+    group.assembly_title
+        .combine( group.assembly_path )
+        .map { id, file ->
+            tuple(  [   id: meta.id ],
+                    file
+            )
+        }
+        .set { ch_reference }
+
+    group.assembly_title
+        .combine( group.pacbio_reads )
+        .map { id, file ->
+            tuple(  [   id: meta.id ],
+                    file
+            )
+        }
+        .set { ch_pacbio }
+
     emit:
-    pacbio_reads                     = group.pacbio_reads
-    reference                        = group.assembly_path
+    reference_tuple                  = ch_reference
+    pacbio_tuple                     = ch_pacbio
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
     nt_database                      = group.nt_database

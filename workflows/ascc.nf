@@ -20,16 +20,21 @@ WorkflowAscc.initialise(params, log)
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
-include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
-include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
-include { RUN_FCSADAPTOR       } from '../subworkflows/local/run_fcsadaptor'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { RUN_NT_KRAKEN } from '..//subworkflows/local/run_nt_kraken'
+include { YAML_INPUT                    } from '../subworkflows/local/yaml_input'
+include { GENERATE_GENOME               } from '../subworkflows/local/generate_genome'
+include { EXTRACT_TIARA_HITS            } from '../subworkflows/local/extract_tiara_hits'
+include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt_blast'
+include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
+include { RUN_NT_KRAKEN                 } from '..//subworkflows/local/run_nt_kraken'
+
+//
+// MODULE: Local modules
+//
+include { GC_CONTENT                    } from '../modules/local/gc_content'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,7 +45,7 @@ include { RUN_NT_KRAKEN } from '..//subworkflows/local/run_nt_kraken'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,15 +68,19 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
-    //Channel.fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
-//        .set { blast_db }
+    GC_CONTENT (
+        YAML_INPUT.out.ref_tuple
+    )
+
+    //Channel
+    //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
+    //  .set { blast_db }
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
     GENERATE_GENOME (
-        YAML_INPUT.out.assembly_title,
-        YAML_INPUT.out.reference
+        YAML_INPUT.out.ref_tuple
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
@@ -115,7 +124,7 @@ workflow ASCC {
     RUN_FCSADAPTOR (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions) 
+    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
