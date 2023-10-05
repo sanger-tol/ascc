@@ -71,6 +71,7 @@ workflow ASCC {
     GC_CONTENT (
         YAML_INPUT.out.reference_tuple
     )
+    ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
 
     //Channel
     //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
