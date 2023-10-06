@@ -13,8 +13,8 @@ process PARSE_FCSGX_RESULT {
 
 
     output:
-    tuple val(meta), path( "*.csv" )                , emit: fcsgxresult
-    path "versions.yml"                             , emit: versions
+    tuple val(meta), path( "*.csv" ), emit: fcsgxresult
+    path "versions.yml", emit: versions
 
     script:
     def args = task.ext.args ?: ''
