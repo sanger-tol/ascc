@@ -5,7 +5,7 @@ process PARSE_FCSGX_RESULT {
     conda "conda-forge::python=3.9"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.9' :
-        'biocontainers/python:3.9' }
+        'biocontainers/python:3.9' }"
 
     input:
     tuple val(meta), path(fcs_gx_reports_folder)
