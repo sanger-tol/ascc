@@ -33,6 +33,7 @@ process PARSE_FCSGX_RESULT {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
         parse_fcsgx_result: \$(parse_fcsgx_result.py -v)
     END_VERSIONS
     """

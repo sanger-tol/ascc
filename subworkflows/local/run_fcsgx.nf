@@ -4,10 +4,10 @@ include { PARSE_FCSGX_RESULT } from '../../modules/local/parse_fcsgx_result'
 workflow RUN_FCSGX {
 
     take:
-    reference     // Channel [ val(meta), path(file) ]
-    fcsgxpath
-    taxid
-    ncbi_rankedlineage_path
+    reference               // Channel [ val(meta), path(file) ]
+    fcsgxpath               // Channel path(file)
+    taxid                   // Channel val(taxid)
+    ncbi_rankedlineage_path // Channel path(file)
 
     main:
     ch_versions     = Channel.empty()
