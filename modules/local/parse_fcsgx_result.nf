@@ -11,7 +11,6 @@ process PARSE_FCSGX_RESULT {
     tuple val(meta), path(fcs_gx_reports_folder)
     path ncbi_rankedlineage_path
 
-
     output:
     tuple val(meta), path( "*.csv" ), emit: fcsgxresult
     path "versions.yml", emit: versions
