@@ -20,6 +20,15 @@ WorkflowAscc.initialise(params, log)
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+<<<<<<< HEAD
+=======
+include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
+include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
+include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
+include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
+include { ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
+include { RUN_FCSADAPTOR       } from '../subworkflows/local/run_fcsadaptor'
+>>>>>>> 27b3fe0 (Adding organellar blast subworkflow)
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
