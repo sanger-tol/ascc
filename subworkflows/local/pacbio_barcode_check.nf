@@ -14,7 +14,7 @@ workflow PACBIO_BARCODE_CHECK () {
     ch_versions             = Channel.empty()
 
     //
-    // MODULE:
+    // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
     CHECK_BARCODE (
         pacbio_tuple
