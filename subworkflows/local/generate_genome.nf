@@ -31,6 +31,7 @@ workflow GENERATE_GENOME {
     GNU_SORT (
         CUSTOM_GETCHROMSIZES.out.sizes
     )
+    ch_versions     = ch_versions.mix(  GNU_SORT.out.versions )
 
     //
     // MODULE: Cut out the largest scaffold size and use as comparator against 512MB

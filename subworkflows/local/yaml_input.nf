@@ -51,7 +51,7 @@ workflow YAML_INPUT {
     group.assembly_title
         .combine( group.assembly_path )
         .map { id, file ->
-            tuple(  [   id: meta.id ],
+            tuple(  [   id: id ],
                     file
             )
         }
@@ -60,7 +60,7 @@ workflow YAML_INPUT {
     group.assembly_title
         .combine( group.pacbio_reads )
         .map { id, file ->
-            tuple(  [   id: meta.id ],
+            tuple(  [   id: id ],
                     file
             )
         }
