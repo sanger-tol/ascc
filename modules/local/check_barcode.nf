@@ -8,8 +8,8 @@ process CHECK_BARCODE {
         'quay.io/biocontainers/pandas:1.5.2' }"
 
     input:
-    tuple val(meta)     , path(barcodes)
-    tuple val(meta2)    , path(pacbio_dir)
+    tuple val(meta)     , path(pacbio_dir)
+    tuple val(meta2)    , path(barcodes)
     tuple val(meta3)    , path(multiplex_csv)
 
     output:

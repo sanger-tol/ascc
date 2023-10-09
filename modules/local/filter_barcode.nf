@@ -8,7 +8,7 @@ process FILTER_BARCODE {
         'quay.io/biocontainers/pandas:1.5.2' }"
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta) , path(fasta)
     tuple val(meta2), path(barcodes)
 
     output:
