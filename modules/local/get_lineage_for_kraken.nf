@@ -44,6 +44,7 @@ process GET_LINEAGE_FOR_KRAKEN {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
+        pandas: \$(pip list | grep "pandas" | sed 's/[[:blank:]]//g' | sed 's/pandas//g')
         general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
         get_lineage_for_kraken_results.py: \$(get_lineage_for_kraken_results.py --version | cut -d' ' -f2)
     END_VERSIONS
