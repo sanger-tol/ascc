@@ -24,6 +24,7 @@ include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
 include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
 include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
+include { ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
 include { RUN_FCSADAPTOR       } from '../subworkflows/local/run_fcsadaptor'
 
 //
@@ -112,10 +113,18 @@ workflow ASCC {
     //
     // SUBWORKFLOW:
     //
+    ORGANELLAR_BLAST (
+        YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.organelle_tuple
+    )
+
+    //
+    // SUBWORKFLOW:
+    //
     RUN_FCSADAPTOR (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions) 
+    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
