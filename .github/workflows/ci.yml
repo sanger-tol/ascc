@@ -46,7 +46,7 @@ jobs:
           wget -c https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.gxs -O FCS_gx/test-only.gxs
           wget -c https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.meta.jsonl -O FCS_gx/test-only.meta.jsonl
           wget -c https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.blast_div.tsv.gz -O FCS_gx/test-only.blast_div.tsv.gz
-          pwd
+
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
