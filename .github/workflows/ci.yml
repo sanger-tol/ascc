@@ -57,7 +57,7 @@ jobs:
           mkdir busco_database
           curl -L https://tolit.cog.sanger.ac.uk/test-data/resources/busco/blobtoolkit.GCA_922984935.2.2023-08-03.lineages.tar.gz | tar -C busco_database -xzf -
 
-     - name: Download the kraken2 database
+      - name: Download the kraken2 database
         run: |
           mkdir kraken2
           curl -L https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/genome/db/kraken2.tar.gz | tar -C kraken2 -xzf -
