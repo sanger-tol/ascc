@@ -31,6 +31,7 @@ workflow YAML_INPUT {
                 reference_proteomes:                            ( data.reference_proteomes              )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
                 kmer_len:                                       ( data.kmer_len                         )
+                fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
@@ -76,6 +77,7 @@ workflow YAML_INPUT {
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
+    fcs_gx_database_path             = group.fcs_gx_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
     versions                         = ch_versions.ifEmpty(null)

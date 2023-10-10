@@ -30,6 +30,7 @@ include { EXTRACT_TIARA_HITS            } from '../subworkflows/local/extract_ti
 include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt_blast'
 include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
 include { RUN_NT_KRAKEN                 } from '..//subworkflows/local/run_nt_kraken'
+include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
 
 //
 // MODULE: Local modules
@@ -126,6 +127,17 @@ workflow ASCC {
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    
+    //
+    // SUBWORKFLOW:
+    //
+    RUN_FCSGX (
+       YAML_INPUT.out.reference,
+       YAML_INPUT.out.fcs_gx_database_path,
+       YAML_INPUT.out.taxid,
+       YAML_INPUT.out.ncbi_rankedlineage_path
+    )
+    ch_versions = ch_versions.mix(RUN_FCSGX.out.versions) 
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
