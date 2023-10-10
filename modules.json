@@ -44,7 +44,8 @@
                     "gnu/sort": {
                         "branch": "master",
                         "git_sha": "88f6e982fb8bd40488d837b3b08a65008e602840",
-
+                        "installed_by": ["modules"]
+                    },
                     "fcs/fcsgx": {
                         "branch": "master",
                         "git_sha": "8c4542e5d421c4690cf1fa6ec729e9304763fdaf",
