@@ -13,12 +13,22 @@ workflow PACBIO_BARCODE_CHECK () {
     main:
     ch_versions             = Channel.empty()
 
+    if (barcode_file.isEmpty("YES") == "YES") {
+        Channel
+            .fromPath("./assets/pacbio_adaptors.fa")
+            .set { barcodes }
+    } else {
+        Channel
+            .fromPath(barcode_file)
+            .set { barcodes }
+    }
+
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
     CHECK_BARCODE (
         pacbio_tuple
-        barcode_file,
+        barcodes,
         barcode_multiplex
     )
     ch_versions     = ch_versions.mix(CHECK_BARCODE.out.versions)
@@ -27,7 +37,7 @@ workflow PACBIO_BARCODE_CHECK () {
     // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
     //
     BLAST_MAKEBLASTDB (
-        barcode_file
+        barcodes
     )
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
