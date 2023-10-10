@@ -12,16 +12,30 @@ workflow PACBIO_BARCODE_CHECK () {
 
     main:
     ch_versions             = Channel.empty()
+    barcodes                = Channel.empty()
 
     if (barcode_file.isEmpty("YES") == "YES") {
         Channel
             .fromPath("./assets/pacbio_adaptors.fa")
+            .map { it ->
+                tuple(  [id: "pacbio_barcodes"],
+                        it
+                )
+            }
             .set { barcodes }
     } else {
         Channel
             .fromPath(barcode_file)
+            .map { it ->
+                tuple(  [id: "pacbio_barcodes"],
+                        it
+                )
+            }
             .set { barcodes }
     }
+
+
+    barcodes.view()
 
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
