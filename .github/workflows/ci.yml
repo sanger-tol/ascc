@@ -65,7 +65,7 @@ jobs:
       - name: Download the subset of NT database
         run: |
           mkdir NT_database
-          curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/nt.000.tar.gz | tar -C NT_database -xzf -
+          curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz | tar -C NT_database -xzf -
 
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
