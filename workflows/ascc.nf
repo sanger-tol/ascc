@@ -127,17 +127,17 @@ workflow ASCC {
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-    
+
     //
     // SUBWORKFLOW:
     //
     RUN_FCSGX (
-       YAML_INPUT.out.reference,
-       YAML_INPUT.out.fcs_gx_database_path,
-       YAML_INPUT.out.taxid,
-       YAML_INPUT.out.ncbi_rankedlineage_path
+        YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.fcs_gx_database_path,
+        YAML_INPUT.out.taxid,
+        YAML_INPUT.out.ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(RUN_FCSGX.out.versions) 
+    ch_versions = ch_versions.mix(RUN_FCSGX.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
