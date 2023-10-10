@@ -12,6 +12,7 @@ nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/n
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/
 ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
 busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-03-14/lineages
+fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb
 seqkit:
   sliding: 6000
   window: 100000
