@@ -1,4 +1,4 @@
-process GET_LINEAGE_FOR_TOP {
+process GC_CONTENT {
     tag "${meta.id}"
     label 'process_low'
 
@@ -8,22 +8,21 @@ process GET_LINEAGE_FOR_TOP {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(tophits)
-    path( ncbi_taxonomy_path )
-    path( ncbi_lineage_path )
+    tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path( "*.tsv" ) , emit: full
-    path "versions.yml"              , emit: versions
+    tuple val(meta), path( "*-gc.txt" ) , emit: txt
+    path "versions.yml"               , emit: versions
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    get_lineage_for_top.py ${tophits} ./ ${ncbi_taxonomy_path} ${ncbi_lineage_path} --column_name_prefix nt
+    gc_content.py ${fasta} > ${prefix}-gc.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py -v)
+        gc_content: \$(gc_content.py -v)
     END_VERSIONS
     """
 
@@ -34,7 +33,7 @@ process GET_LINEAGE_FOR_TOP {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py -v)
+        gc_content: \$(gc_content.py -v)
     END_VERSIONS
     """
 }

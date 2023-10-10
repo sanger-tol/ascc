@@ -20,6 +20,12 @@
                         "git_sha": "76cc4938c1f6ea5c7d83fed1eeffc146787f9543",
                         "installed_by": ["modules"]
                     },
+                    "custom/getchromsizes": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/custom/getchromsizes/custom-getchromsizes.diff"
+                    },
                     "diamond/blastx": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -33,6 +39,11 @@
                     "fcs/fcsadaptor": {
                         "branch": "master",
                         "git_sha": "5a35af8b60d45425c4b9193e567d16b614d93dbe",
+                        "installed_by": ["modules"]
+                    },
+                    "gnu/sort": {
+                        "branch": "master",
+                        "git_sha": "88f6e982fb8bd40488d837b3b08a65008e602840",
                         "installed_by": ["modules"]
                     },
                     "fcs/fcsgx": {
@@ -64,6 +75,11 @@
                     "samtools/depth": {
                         "branch": "master",
                         "git_sha": "a1ffbc1fd87bd5a829e956cc26ec9cc53af3e817",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/faidx": {
+                        "branch": "master",
+                        "git_sha": "fd742419940e01ba1c5ecb172c3e32ec840662fe",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
