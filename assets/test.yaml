@@ -1,5 +1,6 @@
-assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
+assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/genomic.fna
 assembly_title: asccTinyTest
+pacbio_barcodes: ''
 pacbio_multiplexing_barcode_names: something
 pacbio_reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
 sci_name: "Plasmodium yoelii yoelii 17XNL"

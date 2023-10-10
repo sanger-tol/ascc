@@ -25,6 +25,7 @@ include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
 include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
 include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
 include { RUN_FCSADAPTOR       } from '../subworkflows/local/run_fcsadaptor'
+include { PACBIO_BARCODE_CHECK } from '../subworkflows/local/pacbio_barcode_check'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -115,7 +116,17 @@ workflow ASCC {
     RUN_FCSADAPTOR (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions) 
+    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+
+    //
+    //
+    //
+    PACBIO_BARCODE_CHECK (
+        YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.pacbio_tuple,
+        YAML_INPUT.out.pacbio_barcodes
+        YAML_INPUT.out.pacbio_multiplex_codes,
+    )
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS

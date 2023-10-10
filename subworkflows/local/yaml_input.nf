@@ -22,6 +22,7 @@ workflow YAML_INPUT {
                 assembly_title:                                 ( data.assembly_title                   )
                 pacbio_reads:                                   ( data.pacbio_reads_path                )
                 assembly_path:                                  ( file(data.assembly_path)              )
+                pacbio_barcodes:                                ( data.pacbio_barcodes                  )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
                 sci_name:                                       ( data.sci_name                         )
                 taxid:                                          ( data.taxid                            )
@@ -34,7 +35,7 @@ workflow YAML_INPUT {
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
-                seqkit_values                       :           ( data.seqkit                           )
+                seqkit_values:                                  ( data.seqkit                           )
 
         }
         .set{ group }
@@ -50,6 +51,7 @@ workflow YAML_INPUT {
 
     emit:
     pacbio_reads                     = group.pacbio_reads
+    pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
     reference                        = group.assembly_path
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
