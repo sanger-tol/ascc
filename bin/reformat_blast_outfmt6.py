@@ -25,4 +25,4 @@ in_data = gpf.ll(in_path)
 for line in in_data:
     s = line.split()
     assert len(s) == 14
-    print(f"{s[0]}\t{s[4]}\t{s[5]}\t{s[6]}\t{s[7]}\t{s[8]}\t{s[9]}\t{s[10]}\t{s[11]}\t{s[12]}\t{s[13]}\t{s[2]}")
+    print('\t'.join( s[0:1] + s[4:] + s[2:3] ))
