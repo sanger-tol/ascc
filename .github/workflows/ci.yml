@@ -62,6 +62,11 @@ jobs:
           mkdir kraken2
           curl -L https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/genome/db/kraken2.tar.gz | tar -C kraken2 -xzf -
 
+      - name: Download the subset of NT database
+        run: |
+          mkdir NT_database
+          curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/nt.000.tar.gz | tar -C NT_database -xzf -
+
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters

@@ -8,7 +8,7 @@ mito_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoel
 plastid_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
 ## Below this point will need updating as more subworkflows are built
-nt_database: /data/blastdb/Supported/NT/current/
+nt_database: /home/runner/work/ascc/ascc/NT_database/
 nt_kraken_db_path: /home/runner/work/ascc/ascc/kraken2/kraken2
 ncbi_taxonomy_path: /home/runner/work/ascc/ascc/ncbi_taxdump/
 ncbi_rankedlineage_path: /home/runner/work/ascc/ascc/ncbi_taxdump/rankedlineage.dmp
