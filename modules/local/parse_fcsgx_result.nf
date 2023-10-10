@@ -1,4 +1,4 @@
-process GET_LINEAGE_FOR_TOP {
+process PARSE_FCSGX_RESULT {
     tag "${meta.id}"
     label 'process_low'
 
@@ -8,33 +8,33 @@ process GET_LINEAGE_FOR_TOP {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(tophits)
-    path( ncbi_taxonomy_path )
-    path( ncbi_lineage_path )
+    tuple val(meta), path(fcs_gx_reports_folder)
+    path ncbi_rankedlineage_path
 
     output:
-    tuple val(meta), path( "*.tsv" ) , emit: full
-    path "versions.yml"              , emit: versions
+    tuple val(meta), path( "*.csv" ), emit: fcsgxresult
+    path "versions.yml", emit: versions
 
     script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    get_lineage_for_top.py ${tophits} ./ ${ncbi_taxonomy_path} ${ncbi_lineage_path} --column_name_prefix nt
+    parse_fcsgx_result.py ${fcs_gx_reports_folder} ${ncbi_rankedlineage_path} > parsed_fcsgx.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py -v)
+        parse_fcsgx_result: \$(parse_fcsgx_result.py -v)
     END_VERSIONS
     """
 
     stub:
     """
-    touch full_coords.tsv
+    touch parsed_fcsgx.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py -v)
+        parse_fcsgx_result: \$(parse_fcsgx_result.py -v)
     END_VERSIONS
     """
 }
