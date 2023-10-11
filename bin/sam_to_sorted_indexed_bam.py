@@ -3,23 +3,23 @@
 Script conversion of .sam file with mapped reads to sorted and indexed .bam file
 """
 # MIT License
-# 
+#
 # Copyright (c) 2020-2021 Genome Research Ltd.
-# 
+#
 # Author: Eerik Aunin (ea10@sanger.ac.uk)
-# 
+#
 # This file is a part of the Genome Decomposition Analysis (GDA) pipeline.
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,7 @@ Script conversion of .sam file with mapped reads to sorted and indexed .bam file
 
 import general_purpose_functions as gpf
 import argparse
+
 
 def main(sam_file, threads, fasta_path):
     sam_file_extensionless_path = sam_file.split(".sam")[0]
@@ -50,11 +51,16 @@ def main(sam_file, threads, fasta_path):
     remove_unsorted_bam_command = "rm " + bam_file
     gpf.run_system_command(remove_unsorted_bam_command)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("sam_file", type=str, help="Path to input SAM file")
     parser.add_argument("--threads", type=int, help="Number of threads (default: 1)", default=1)
-    parser.add_argument("--fasta_path", type=str, help="Optional (needed when the reads have been mapped to a genome larger than 4Gb with minimap2): path the FASTA file to which the reads were mapped", default="")
+    parser.add_argument(
+        "--fasta_path",
+        type=str,
+        help="Optional (needed when the reads have been mapped to a genome larger than 4Gb with minimap2): path the FASTA file to which the reads were mapped",
+        default="",
+    )
     args = parser.parse_args()
     main(args.sam_file, args.threads, args.fasta_path)
-
