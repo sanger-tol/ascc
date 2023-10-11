@@ -68,7 +68,13 @@ jobs:
         run: |
           mkdir NT_database
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz | tar -C NT_database -xzf -
-
+    
+      - name: Download the subset of Diamond database
+        run: |
+          mkdir diamond
+          wget -c https://tolit.cog.sanger.ac.uk/test-data/resources/diamond/UP000000212_1234679_tax.dmnd -O diamond/UP000000212_1234679_tax.dmnd 
+          
+      - name: Run pipeline with test data
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
