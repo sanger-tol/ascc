@@ -14,6 +14,8 @@ ncbi_taxonomy_path: /home/runner/work/ascc/ascc/ncbi_taxdump/
 ncbi_rankedlineage_path: /home/runner/work/ascc/ascc/ncbi_taxdump/rankedlineage.dmp
 busco_lineages_folder: /home/runner/work/ascc/ascc/busco_database/lineages
 fcs_gx_database_path: /home/runner/work/ascc/ascc/FCS_gx/
+diamond_uniprot_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
+diamond_nr_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
 seqkit:
   sliding: 6000
   window: 100000
