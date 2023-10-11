@@ -74,6 +74,11 @@ jobs:
           mkdir diamond
           wget -c https://tolit.cog.sanger.ac.uk/test-data/resources/diamond/UP000000212_1234679_tax.dmnd -O diamond/UP000000212_1234679_tax.dmnd
 
+      - name: Download the vecscreen test data
+        run: |
+          mkdir vecscreen
+          wget -c https://tolit.cog.sanger.ac.uk/test-data/resources/vecscreen/GCA_900155405.1_PRJEB18760_genomic.fna -O vecscreen/GCA_900155405.1_PRJEB18760_genomic.fna
+
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
