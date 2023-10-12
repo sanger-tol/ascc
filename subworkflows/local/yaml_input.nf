@@ -37,6 +37,9 @@ workflow YAML_INPUT {
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
                 seqkit_values:                                  ( data.seqkit                           )
+                diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
+                diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
+                vecscreen_database_path:                        ( data.vecscreen_database_path          )
 
         }
         .set{ group }
@@ -89,6 +92,9 @@ workflow YAML_INPUT {
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
     fcs_gx_database_path             = group.fcs_gx_database_path
+    diamond_uniprot_database_path    = group.diamond_uniprot_database_path
+    diamond_nr_database_path         = group.diamond_nr_database_path
+    vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
     versions                         = ch_versions.ifEmpty(null)
