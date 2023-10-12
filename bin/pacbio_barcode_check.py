@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
 """
-Notes: Forces sys.exit(1) to kill pipeline
+Pacbio Barcode Check
+------------------------
+Looks for Pacbio barcodes in ref and data.
+If supplied barcodes arn't in data then pipeline dies.
 
 Originally written by Eerik Aunin @eeaunin
 
