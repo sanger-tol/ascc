@@ -11,6 +11,7 @@ include { GET_LARGEST_SCAFF     } from '../../modules/local/get_largest_scaff'
 workflow GENERATE_GENOME {
     take:
     to_chromsize    // tuple [[meta.id], file]
+    barcodes
 
     main:
     ch_versions     = Channel.empty()

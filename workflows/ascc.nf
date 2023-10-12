@@ -20,15 +20,6 @@ WorkflowAscc.initialise(params, log)
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-<<<<<<< HEAD
-include { YAML_INPUT           } from '../subworkflows/local/yaml_input'
-include { GENERATE_GENOME      } from '../subworkflows/local/generate_genome'
-include { EXTRACT_TIARA_HITS   } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST     } from '../subworkflows/local/extract_nt_blast'
-include { RUN_FCSADAPTOR       } from '../subworkflows/local/run_fcsadaptor'
-include { PACBIO_BARCODE_CHECK } from '../subworkflows/local/pacbio_barcode_check'
-=======
->>>>>>> dev
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -38,8 +29,9 @@ include { GENERATE_GENOME               } from '../subworkflows/local/generate_g
 include { EXTRACT_TIARA_HITS            } from '../subworkflows/local/extract_tiara_hits'
 include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt_blast'
 include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_NT_KRAKEN                 } from '..//subworkflows/local/run_nt_kraken'
+include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
+include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
 
 //
 // MODULE: Local modules
@@ -78,6 +70,9 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
+    //
+    // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
+    //
     GC_CONTENT (
         YAML_INPUT.out.reference_tuple
     )
@@ -91,22 +86,23 @@ workflow ASCC {
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
     GENERATE_GENOME (
-        YAML_INPUT.out.reference_tuple
+        YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.pacbio_barcodes
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-/*     EXTRACT_TIARA_HITS (
+    EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions) */
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    /*YAML_INPUT.out.reference_tuple
+    YAML_INPUT.out.reference_tuple
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
         .map { meta, ref, sliding, window ->
@@ -116,7 +112,7 @@ workflow ASCC {
                 ],
                 file(ref)
             )}
-        .set { modified_input }*/
+        .set { modified_input }
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
@@ -149,7 +145,7 @@ workflow ASCC {
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
     //
-    // SUBWORKFLOW:
+    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
     PACBIO_BARCODE_CHECK (
         YAML_INPUT.out.reference_tuple,
@@ -157,7 +153,7 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_barcodes,
         YAML_INPUT.out.pacbio_multiplex_codes
     )
-    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    //ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS

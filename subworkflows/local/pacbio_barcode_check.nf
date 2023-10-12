@@ -1,57 +1,62 @@
-import { CHECK_BARCODE          } from '../modules/local/check_barcode'
-import { BLAST_MAKEBLASTDB      } from '../modules/local/blast/makeblastdb'
-import { BLAST_BLASTN           } from '../modules/local/blast/blastn'
-import { FILTER_BARCODE         } from '../modules/local/filter_barcode'
+//
+// PACBIO_BARCODE_CHECK IDENTIFIED LOCATIONS OF BARCODE SEQUENCES IN THE INPUT ASSEMBLY
+//
 
-workflow PACBIO_BARCODE_CHECK () {
+//
+// MODULE IMPORT BLOCK
+//
+include { CHECK_BARCODE          } from '../../modules/local/check_barcode'
+include { BLAST_MAKEBLASTDB      } from '../../modules/nf-core/blast/makeblastdb'
+include { BLAST_BLASTN           } from '../../modules/nf-core/blast/blastn'
+include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
+
+workflow PACBIO_BARCODE_CHECK {
     take:
     reference_tuple
     pacbio_tuple
-    barcode_file
+    barcodes
     barcode_multiplex
 
     main:
     ch_versions             = Channel.empty()
-    barcodes                = Channel.empty()
-
-    if (barcode_file.isEmpty("YES") == "YES") {
-        Channel
-            .fromPath("./assets/pacbio_adaptors.fa")
-            .map { it ->
-                tuple(  [id: "pacbio_barcodes"],
-                        it
-                )
-            }
-            .set { barcodes }
-    } else {
-        Channel
-            .fromPath(barcode_file)
-            .map { it ->
-                tuple(  [id: "pacbio_barcodes"],
-                        it
-                )
-            }
-            .set { barcodes }
-    }
-
-
-    barcodes.view()
 
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
     CHECK_BARCODE (
-        pacbio_tuple
-        barcodes,
+        pacbio_tuple,
+        barcodes.map{it[1]},
         barcode_multiplex
     )
     ch_versions     = ch_versions.mix(CHECK_BARCODE.out.versions)
 
     //
+    // LOGIC: INCASE THE PIPELINE MANAGES TO CONTINUE AFTER FAILING CHECK_BARCODE
+    //          HERE WE ENSURE THE REST OF THE SUBWORKFLOW DOES NOT RUN
+    //
+    CHECK_BARCODE.out.result
+        .branch {
+            valid   :   it.toString().contains('BARCODES FOUND')
+            invalid :   it.toString().contains('FAILED')
+        }
+        .set { gatekeeping }
+
+    //
+    // LOGIC: ENSURE THE VALID CHANNEL IS MIXED WITH THE BARCODES CHANNEL
+    //          ACTS AS A GATEKEEPER FOR THE FLOW
+    //
+    gatekeeping.valid
+        .combine( barcodes )
+        .map {str, meta, file ->
+                file
+        }
+        .set {ch_new_barcodes}
+
+    //
     // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
     //
     BLAST_MAKEBLASTDB (
-        barcodes
+        ch_new_barcodes
     )
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
@@ -65,16 +70,33 @@ workflow PACBIO_BARCODE_CHECK () {
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //
-    // LOGIC: FOR I IN CSV LIST RUN FILTER BLAST
+    // LOGIC: FOR I (MAPPED TO OTHER CHANNELS) IN CSV LIST RUN FILTER BLAST
     //
-    // TODO: CLAFFIFY THIS BIT
+    barcode_multiplex
+        .map { it ->
+            tuple( it.split(',') )
+        }
+        .flatten()
+        .combine( reference_tuple )
+        .combine( BLAST_BLASTN.out.txt )
+        .multiMap { code, ref_meta, ref, blast_meta, blast ->
+            barcodes: code
+            reference: tuple( ref_meta, ref )
+            blastdata: tuple( blast_meta, blast )
+        }
+        .set {testing}
 
+    //
+    // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE
+    //
     FILTER_BARCODE (
-        reference_tuple,
-        //i in csv
+        testing.reference,
+        testing.blastdata,
+        testing.barcodes
     )
     ch_versions     = ch_versions.mix(FILTER_BARCODE.out.versions)
 
     emit:
     filtered        = FILTER_BARCODE.out.debarcoded
+    versions        = ch_versions.ifEmpty(null)
 }

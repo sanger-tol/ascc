@@ -22,7 +22,7 @@ workflow YAML_INPUT {
                 assembly_title:                                 ( data.assembly_title                   )
                 pacbio_reads:                                   ( data.pacbio_reads_path                )
                 assembly_path:                                  ( file(data.assembly_path)              )
-                pacbio_barcodes:                                ( data.pacbio_barcodes                  )
+                pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
                 sci_name:                                       ( data.sci_name                         )
                 taxid:                                          ( data.taxid                            )
@@ -68,9 +68,18 @@ workflow YAML_INPUT {
         }
         .set { ch_pacbio }
 
+    group.pacbio_barcodes
+        .map { file ->
+            tuple(  [   id: "pacbio barcodes"   ],
+                    file
+            )
+        }
+        .set { ch_barcodes }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
+    pacbio_barcodes                  = ch_barcodes
     pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
