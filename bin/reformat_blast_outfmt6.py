@@ -23,20 +23,6 @@ else:
 in_data = gpf.ll(in_path)
 
 for line in in_data:
-    split_line = line.split()
-    assert len(split_line) == 14
-    output_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
-        split_line[0],
-        split_line[4],
-        split_line[5],
-        split_line[6],
-        split_line[7],
-        split_line[8],
-        split_line[9],
-        split_line[10],
-        split_line[11],
-        split_line[12],
-        split_line[13],
-        split_line[2],
-    )
-    print(output_line)
+    s = line.split()
+    assert len(s) == 14
+    print("\t".join(s[0:1] + s[4:] + s[2:3]))

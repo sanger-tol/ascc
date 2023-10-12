@@ -31,10 +31,14 @@ workflow YAML_INPUT {
                 reference_proteomes:                            ( data.reference_proteomes              )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
                 kmer_len:                                       ( data.kmer_len                         )
+                fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
-                seqkit_values                       :           ( data.seqkit                           )
+                seqkit_values:                                  ( data.seqkit                           )
+                diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
+                diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
+                vecscreen_database_path:                        ( data.vecscreen_database_path          )
 
         }
         .set{ group }
@@ -48,9 +52,27 @@ workflow YAML_INPUT {
         }
         .set { seqkit }
 
+    group.assembly_title
+        .combine( group.assembly_path )
+        .map { id, file ->
+            tuple(  [   id: id ],
+                    file
+            )
+        }
+        .set { ch_reference }
+
+    group.assembly_title
+        .combine( group.pacbio_reads )
+        .map { id, file ->
+            tuple(  [   id: id ],
+                    file
+            )
+        }
+        .set { ch_pacbio }
+
     emit:
-    pacbio_reads                     = group.pacbio_reads
-    reference                        = group.assembly_path
+    reference_tuple                  = ch_reference
+    pacbio_tuple                     = ch_pacbio
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
     nt_database                      = group.nt_database
@@ -58,6 +80,10 @@ workflow YAML_INPUT {
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
+    fcs_gx_database_path             = group.fcs_gx_database_path
+    diamond_uniprot_database_path    = group.diamond_uniprot_database_path
+    diamond_nr_database_path         = group.diamond_nr_database_path
+    vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
     versions                         = ch_versions.ifEmpty(null)
