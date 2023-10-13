@@ -17,13 +17,13 @@ def main():
 
     # Filters through the list of files that nextflow passes in and ID's the one we want
     files_list = args.input
-    file_for_use = ''
-    for file in files_list.split(' '):
+    file_for_use = ""
+    for file in files_list.split(" "):
         if "assembly.ALL.unfiltered_scaffold_coverage.bed" in file:
             file_for_use = file
 
     # Catch in case it doesn't find anything
-    if file_for_use == '':
+    if file_for_use == "":
         sys.exit(1)
 
     recommendation_handle = open(args.output, "w")
