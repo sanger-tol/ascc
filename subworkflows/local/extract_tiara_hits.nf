@@ -1,7 +1,5 @@
 include { TIARA_TIARA } from '../../modules/nf-core/tiara/tiara/main'
 
-
-
 workflow EXTRACT_TIARA_HITS {
 
     take:
