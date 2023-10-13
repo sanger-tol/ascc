@@ -24,19 +24,21 @@ WorkflowAscc.initialise(params, log)
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { YAML_INPUT                    } from '../subworkflows/local/yaml_input'
-include { GENERATE_GENOME               } from '../subworkflows/local/generate_genome'
-include { EXTRACT_TIARA_HITS            } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt_blast'
-include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
-include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
-include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
+include { YAML_INPUT                                    } from '../subworkflows/local/yaml_input'
+include { GENERATE_GENOME                               } from '../subworkflows/local/generate_genome'
+include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'
+include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast'
+include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
+include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
+include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
+include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
+include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
+include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
 
 //
 // MODULE: Local modules
 //
-include { GC_CONTENT                    } from '../modules/local/gc_content'
+include { GC_CONTENT                                    } from '../modules/local/gc_content'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,7 +49,7 @@ include { GC_CONTENT                    } from '../modules/local/gc_content'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,16 +93,13 @@ workflow ASCC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     EXTRACT_TIARA_HITS (
-    EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    YAML_INPUT.out.reference_tuple
     YAML_INPUT.out.reference_tuple
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
@@ -111,7 +110,6 @@ workflow ASCC {
                 ],
                 file(ref)
             )}
-        .set { modified_input }
         .set { modified_input }
 
     //
@@ -127,12 +125,42 @@ workflow ASCC {
     ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions) */
 
     //
-    // SUBWORKFLOW: BLASTING FOR ORGANELLAR ASSEMBLIES IN GENOME
+    // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
     //
-    ORGANELLAR_BLAST (
+    YAML_INPUT.out.mito_tuple
+        .branch { meta, check ->
+            valid:      check != "NO MITO"
+            invalid:    check == "NO MITO"
+        }
+        .set { mito_check }
+
+    //
+    // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
+    //
+    MITO_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.organelle_tuple
+        mito_check.valid
     )
+    ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+
+    //
+    // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
+    //
+    YAML_INPUT.out.plastid_tuple
+        .branch { meta, check ->
+            valid:      check != "NO PLASTID"
+            invalid:    check == "NO PLASTID"
+        }
+        .set { plastid_check }
+
+    //
+    // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
+    //
+    PLASTID_ORGANELLAR_BLAST (
+        YAML_INPUT.out.reference_tuple,
+        plastid_check.valid
+    )
+    ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
     //
     // SUBWORKFLOW:

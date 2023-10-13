@@ -8,7 +8,7 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), path(files)
 
     output:
     tuple val(meta), path( "*bed" ) , emit: bed
@@ -16,10 +16,10 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
 
     script:
     def args    = task.ext.args ?: ''
-    def prefix  = task.ext.prefix ?: ''
+    def prefix  = task.ext.prefix ?: "${meta.id}-${meta.organelle}"
     """
     organelle_contamination_recommendation.py \\
-        --input ${bed} \\
+        --input "${files}" \\
         --output ${prefix}.bed
 
     cat <<-END_VERSIONS > versions.yml
