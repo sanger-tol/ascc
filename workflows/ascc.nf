@@ -78,14 +78,13 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
+    //
+    // MODULE:
+    //
     GC_CONTENT (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
-
-    //Channel
-    //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
-    //  .set { blast_db }
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
@@ -98,15 +97,15 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-/*     EXTRACT_TIARA_HITS (
+    EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions) */
+    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    /*YAML_INPUT.out.reference_tuple
+    YAML_INPUT.out.reference_tuple
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
         .map { meta, ref, sliding, window ->
@@ -116,14 +115,15 @@ workflow ASCC {
                 ],
                 file(ref)
             )}
-        .set { modified_input }*/
+        .set { modified_input }
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
+
 /*     EXTRACT_NT_BLAST (
         modified_input,
-        YAML_INPUT.out.nt_database,
+        YAML_INPUT.out.blast_nt_db,
         YAML_INPUT.out.ncbi_taxonomy_path,
         YAML_INPUT.out.ncbi_rankedlineage_path
     )

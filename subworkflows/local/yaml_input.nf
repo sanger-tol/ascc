@@ -70,12 +70,16 @@ workflow YAML_INPUT {
         }
         .set { ch_pacbio }
 
+    Channel
+        .fromPath( group.nt_database, checkIfExists=true )
+        .set { blast_db }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
-    nt_database                      = group.nt_database
+    nt_database                      = blast_nt_db
     nt_kraken_db_path                = group.nt_kraken_db_path
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
