@@ -2,10 +2,10 @@ process BLAST_GET_TOP_HITS {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "conda-forge::python=3.9"
+    conda "conda-forge::python=3.9 conda-forge::pandas=1.5.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.9' :
-        'biocontainers/python:3.9' }"
+        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
+        'quay.io/biocontainers/pandas:1.5.2' }"
 
     input:
     tuple val(meta), path(outfmt6)
