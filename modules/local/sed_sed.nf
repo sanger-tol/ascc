@@ -15,7 +15,8 @@ process SED_SED {
     path "versions.yml"             , emit: versions
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix  = task.ext.prefix ?: "${meta.id}"
+    def args    = task.ext.args ?: ""
     def VERSION = "9.1" // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
     sed $args ${fasta} > ${prefix}.fa

@@ -49,8 +49,8 @@ workflow YAML_INPUT {
         .seqkit_values
         .flatten()
         .multiMap { data ->
-            sliding_value                           :           ( data.sliding                          )
-            window_value                            :           ( data.window                           )
+            sliding_value                           :           ( data.sliding                                  )
+            window_value                            :           ( data.window                                   )
         }
         .set { seqkit }
 
@@ -80,6 +80,22 @@ workflow YAML_INPUT {
         }
         .set { ch_barcodes }
 
+    group.mito_fasta_path
+        .map{ it ->
+            tuple(  [   id: "mitochondrial_genome"  ],
+                    it
+            )
+        }
+        .set{ ch_mito }
+
+    group.plastid_fasta_path
+        .map{ it ->
+            tuple(  [   id: "plastid_genome"    ],
+                    it
+            )
+        }
+        .set{ ch_plastid }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
@@ -87,7 +103,7 @@ workflow YAML_INPUT {
     pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
-    nt_database                      = blast_nt_db
+    nt_database                      = group.nt_database
     nt_kraken_db_path                = group.nt_kraken_db_path
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
@@ -98,7 +114,12 @@ workflow YAML_INPUT {
     vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
+<<<<<<< HEAD
     dimensionality_reduction_methods = group.dimensionality_reduction_methods
+=======
+    mito_tuple                       = ch_mito
+    plastid_tuple                    = ch_plastid
+>>>>>>> 0497a94 (Completing organelle blast, modified python script to accept arrayList and parse inside script)
     versions                         = ch_versions.ifEmpty(null)
 }
 
