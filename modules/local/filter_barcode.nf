@@ -37,9 +37,9 @@ process FILTER_BARCODE {
     stub:
     def args        = task.ext.args     ?: ''
     def prefix      = task.ext.prefix   ?: "${meta.id}"
-    def barcodes    = "bc1008_BAK8A_OA"
+    def barcodes    = "bc1008"
     """
-    touch ${prefix}-${barcodes}-filtered.txt
+    touch ${prefix}_${barcodes}_filtered.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
