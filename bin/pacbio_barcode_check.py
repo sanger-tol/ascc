@@ -81,7 +81,9 @@ def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_nam
         sys.stderr.write(
             "Skipping the PacBio barcodes check, as no barcodes were specified by the user and no barcodes were found in PacBio read file names\n"
         )
-        print("Skipping the PacBio barcodes check, as no barcodes were specified by the user and no barcodes were found in PacBio read file names\n")
+        print(
+            "Skipping the PacBio barcodes check, as no barcodes were specified by the user and no barcodes were found in PacBio read file names\n"
+        )
         sys.exit(0)
 
     check_if_barcodes_exist_in_barcodes_fasta(barcodes_list, barcodes_fasta_path)
