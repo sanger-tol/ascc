@@ -24,11 +24,12 @@ process FILTER_BARCODE {
         --input ${fasta} \\
         --barcode ${barcodes} \\
         --blast ${blast_data} \\
-        --output ${prefix}-${barcodes}-filtered.txt
+        --output ${prefix}_${barcodes}_filtered.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
+        biopython: \$(python3 -c 'import Bio; print(Bio.__version__)'')
         filter_barcode_blast_results: \$(filter_barcode_blast_results.py -v)
     END_VERSIONS
     """
