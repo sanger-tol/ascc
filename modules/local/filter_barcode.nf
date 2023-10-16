@@ -29,7 +29,7 @@ process FILTER_BARCODE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        biopython: \$(python3 -c 'import Bio; print(Bio.__version__)'')
+        biopython: \$(python3 -c 'import Bio; print(Bio.__version__)')
         filter_barcode_blast_results: \$(filter_barcode_blast_results.py -v)
     END_VERSIONS
     """
