@@ -53,7 +53,7 @@ workflow PACBIO_BARCODE_CHECK {
         .set {ch_new_barcodes}
 
     //
-    // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
+    // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
     BLAST_MAKEBLASTDB (
         ch_new_barcodes
@@ -61,7 +61,7 @@ workflow PACBIO_BARCODE_CHECK {
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
     //
-    // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
+    // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
     //
     BLAST_BLASTN (
         reference_tuple,
