@@ -36,8 +36,8 @@ workflow PACBIO_BARCODE_CHECK {
     //
     CHECK_BARCODE.out.result
         .branch {
-            valid   :   it.toString().contains('BARCODES FOUND')
-            invalid :   it.toString().contains('FAILED')
+            valid   :   it.toString().contains('barcodes')
+            invalid :   !it.toString().contains('barcodes')
         }
         .set { gatekeeping }
 
