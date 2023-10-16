@@ -12,10 +12,10 @@ include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 
 workflow PACBIO_BARCODE_CHECK {
     take:
-    reference_tuple
-    pacbio_tuple
-    barcodes
-    barcode_multiplex
+    reference_tuple             // tuple    [[meta.id], reference ]
+    pacbio_tuple                // tuple    [[meta.id], pacbio-files]
+    barcodes                    // tuple    [[meta.id], barcode-file]
+    barcode_multiplex           // val      (csv-list-string)
 
     main:
     ch_versions             = Channel.empty()
