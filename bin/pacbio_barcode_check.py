@@ -4,7 +4,11 @@
 Pacbio Barcode Check
 ------------------------
 Looks for Pacbio barcodes in ref and data.
-If supplied barcodes arn't in data then pipeline dies.
+
+If any User-supplied barcodes arn't in data then pipeline dies.
+If no barcodes are found then pipeline carries on
+
+Based on a standard operating procedure developed by James Torrance
 
 Originally written by Eerik Aunin @eeaunin
 
@@ -53,7 +57,7 @@ def check_if_barcodes_exist_in_barcodes_fasta(barcodes_list, barcodes_fasta_path
             sys.exit(1)
 
     # If this print statement is reached, all user-supplied codes are present.
-    print("BARCODES FOUND\n")
+    print("The query barcodes exist in the barcodes database file")
 
 
 def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_names):
@@ -72,10 +76,12 @@ def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_nam
     if len(barcodes_list) == 0:
         barcodes_list = detect_barcodes_from_read_file_names(barcodes_fasta_path, pacbio_read_files)
 
+    # Here script should break successfully
     if len(barcodes_list) == 0:
         sys.stderr.write(
             "Skipping the PacBio barcodes check, as no barcodes were specified by the user and no barcodes were found in PacBio read file names\n"
         )
+        print("Skipping the PacBio barcodes check, as no barcodes were specified by the user and no barcodes were found in PacBio read file names\n")
         sys.exit(0)
 
     check_if_barcodes_exist_in_barcodes_fasta(barcodes_list, barcodes_fasta_path)
