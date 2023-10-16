@@ -32,6 +32,7 @@ include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsada
 include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
 include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
+include { RUN_DIAMOND                   } from '../subworkflows/local/run_diamond'
 
 //
 // MODULE: Local modules
@@ -113,6 +114,15 @@ workflow ASCC {
                 file(ref)
             )}
         .set { modified_input }
+
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    RUN_DIAMOND (
+        modified_input,
+        YAML_INPUT.out.diamond_nr_database_path
+    )
+    ch_versions = ch_versions.mix(RUN_DIAMOND.out.versions)
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST

@@ -1,4 +1,4 @@
-process REFORMAT_FULL_OUTFMT6 {
+process REFORMAT_DIAMOND_OUTFMT6 {
     tag "${meta.id}"
     label 'process_low'
 

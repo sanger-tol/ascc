@@ -1,4 +1,4 @@
-assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
+assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/genomic.fna
 assembly_title: asccTinyTest
 pacbio_barcodes: /home/runner/work/ascc/ascc/assets/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008_BAK8A_OA,bc1009_BAK8A_OA"
