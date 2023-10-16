@@ -3,7 +3,11 @@
 //
 // MODULE IMPORT BLOCK
 //
+<<<<<<< HEAD
 include { GET_KMER_COUNTS } from '../../modules/local/get_kmer_counts'
+=======
+include { GET_KMER_COUNTS } from '../../modules/local/get_kmers_count'
+>>>>>>> 25d5d64 (Add kmer count modules)
 include { KMER_COUNT_DIM_REDUCTION } from '../../modules/local/kmer_count_dim_reduction'
 
 workflow GET_KMERS_PROFILE {
