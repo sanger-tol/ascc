@@ -12,7 +12,7 @@ process GC_CONTENT {
 
     output:
     tuple val(meta), path( "*-gc.txt" ) , emit: txt
-    path "versions.yml"               , emit: versions
+    path "versions.yml"                 , emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"

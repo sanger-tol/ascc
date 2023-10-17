@@ -12,10 +12,10 @@ include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 
 workflow PACBIO_BARCODE_CHECK {
     take:
-    reference_tuple
-    pacbio_tuple
-    barcodes
-    barcode_multiplex
+    reference_tuple             // tuple    [[meta.id], reference ]
+    pacbio_tuple                // tuple    [[meta.id], pacbio-files]
+    barcodes                    // tuple    [[meta.id], barcode-file]
+    barcode_multiplex           // val      (csv-list-string)
 
     main:
     ch_versions             = Channel.empty()
@@ -36,8 +36,8 @@ workflow PACBIO_BARCODE_CHECK {
     //
     CHECK_BARCODE.out.result
         .branch {
-            valid   :   it.toString().contains('BARCODES FOUND')
-            invalid :   it.toString().contains('FAILED')
+            valid   :   it.toString().contains('barcodes')
+            invalid :   !it.toString().contains('barcodes')
         }
         .set { gatekeeping }
 
@@ -53,7 +53,7 @@ workflow PACBIO_BARCODE_CHECK {
         .set {ch_new_barcodes}
 
     //
-    // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
+    // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
     BLAST_MAKEBLASTDB (
         ch_new_barcodes
@@ -61,7 +61,7 @@ workflow PACBIO_BARCODE_CHECK {
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
     //
-    // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
+    // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
     //
     BLAST_BLASTN (
         reference_tuple,
