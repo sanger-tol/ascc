@@ -33,6 +33,10 @@ process KMER_COUNT_DIM_REDUCTION {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
+        tensorflow: \$(tensorflow --version | sed 's/tensorflow //g')
+        scikit-learn: \$(scikit-learn --version | sed 's/scikit-learn //g')
+        umap-learn: \$(umap-learn --version | sed 's/umap-learn //g')
+        matplotlib: \$(matplotlib --version | sed 's/matplotlib //g')
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
@@ -45,6 +49,10 @@ process KMER_COUNT_DIM_REDUCTION {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
+        tensorflow: \$(tensorflow --version | sed 's/tensorflow //g')
+        scikit-learn: \$(scikit-learn --version | sed 's/scikit-learn //g')
+        umap-learn: \$(umap-learn --version | sed 's/umap-learn //g')
+        matplotlib: \$(matplotlib --version | sed 's/matplotlib //g')
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """

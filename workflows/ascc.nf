@@ -78,7 +78,17 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
-
+    //
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONALITY WITH SELECTED METHODS
+    //
+    GET_KMER_COUNTS (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out
+        YAML_INPUT.out
+        YAML_INPUT.out
+        YAML_INPUT.out
+    )
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
@@ -87,7 +97,7 @@ workflow ASCC {
 
     emit:
 
-    
+
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }

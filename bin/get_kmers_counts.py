@@ -2,6 +2,7 @@
 """
 Script for counting kmer frequencies per sequence in a FASTA file
 Output (STDOUT): kmer counts as a CSV table
+Developed by Eerik Aunin (ea10@sanger.ac.uk)
 """
 
 import argparse
@@ -32,6 +33,7 @@ def main(fasta_path, out_path, kmer_size):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-v", "--version", action="version", version="1.0")
     parser.add_argument("fasta_path", type=str, help="Path to input FASTA file")
     parser.add_argument("out_path", type=str, help="Path for output CSV file")
     parser.add_argument("--kmer_size", type=int, help="kmer size (bp). Default: 7", default=7)
