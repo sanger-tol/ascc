@@ -189,7 +189,7 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_barcodes,
         YAML_INPUT.out.pacbio_multiplex_codes
     )
-    //ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS

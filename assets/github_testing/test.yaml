@@ -1,7 +1,7 @@
 assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 assembly_title: asccTinyTest
 pacbio_barcodes: /home/runner/work/ascc/ascc/assets/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc1008_BAK8A_OA,bc1009_BAK8A_OA"
+pacbio_multiplexing_barcode_names: "bc1008,bc1009"
 pacbio_reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio/
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
