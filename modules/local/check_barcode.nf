@@ -8,22 +8,23 @@ process CHECK_BARCODE {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta)     , path(barcodes)
-    tuple val(meta2)    , path(pacbio_dir)
-    tuple val(meta3)    , path(multiplex_csv)
+    tuple val(meta) , path(pacbio_dir)
+    path barcodes
+    val multiplex_csv
 
     output:
-    stdout              , emit: debarcoded
+    env OUTPUT          , emit: result
     path "versions.yml" , emit: versions
 
     script:
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
-    def args    = task.ext.args     ?: ''
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    def args        = task.ext.args     ?: ''
     """
-    pacbio_barcode_check.py \\
-        ${barcode_fasta} \\
-        ${pacbio_dir} \\
-        ${multiplex_csv}
+    OUTPUT=\$(\\
+        pacbio_barcode_check.py \\
+            -b ${barcodes} \\
+            -p ${pacbio_dir} \\
+            -m ${multiplex_csv})
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -34,7 +35,7 @@ process CHECK_BARCODE {
 
     stub:
     """
-    echo "BARCODES FOUND!"
+    OUTPUT="BARCODES FOUND"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
