@@ -300,6 +300,7 @@ def main(kmer_counts_file, out_folder, selected_methods, n_neighbors_setting, au
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-v", "--version", action="version", version="1.0")
     parser.add_argument("kmer_counts_file", type=str, help="Path to input CSV file with kmer counts")
     parser.add_argument("out_folder", type=str, help="Path to folder where output files will be written")
     parser.add_argument("--selected_methods", type=str, help="Comma separated string with the selected dimensionality reduction methods", default="pca")
