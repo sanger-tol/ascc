@@ -48,10 +48,28 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //
+    // LOGIC: FILTER BLAST RESULTS WITH LITTLE TO NO DATA
+    //
+    BLAST_BLASTN.out.txt
+        .map{ meta, file ->
+            tuple(  [   id: meta.id,
+                        sz: file.size() ],
+                    file(file)
+            )
+        }
+        .branch {
+            valid:  it[0].sz => 10
+            invalid: it[0].sz =< 9
+        }
+        .set { blast_check }
+
+    blast_check.valid.view()
+
+    //
     // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT
     //
     FILTER_COMMENTS (
-        BLAST_BLASTN.out.txt
+        blast_check.valid
     )
     ch_versions     = ch_versions.mix(FILTER_COMMENTS.out.versions)
 
