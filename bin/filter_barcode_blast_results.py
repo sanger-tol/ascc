@@ -48,6 +48,7 @@ def main():
             n_regions_for_record[record.id].append([n_instance.start(0) + 1, n_instance.end(0)])
 
     fasta_input_handle.close()
+
     with open(args.blast, "r") as blast_input_handle:
         for line in blast_input_handle:
             if not re.search("^#", line):
