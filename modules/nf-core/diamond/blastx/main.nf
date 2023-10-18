@@ -1,11 +1,11 @@
 process DIAMOND_BLASTX {
     tag "$meta.id"
-    label 'process_medium'
+    label 'process_high'
 
-    conda "bioconda::diamond=2.0.15"
+    conda "bioconda::diamond=2.1.8"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/diamond:2.0.15--hb97b32f_0' :
-        'biocontainers/diamond:2.0.15--hb97b32f_0' }"
+        'https://depot.galaxyproject.org/singularity/diamond:2.1.8--h43eeafb_0' :
+        'biocontainers/diamond:2.1.8--h43eeafb_0' }"
 
     input:
     tuple val(meta), path(fasta)
