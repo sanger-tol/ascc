@@ -114,7 +114,9 @@ workflow YAML_INPUT {
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
     mito_tuple                       = ch_mito
+    mito_var                         = "mitochondrial_genome"
     plastid_tuple                    = ch_plastid
+    plastid_var                      = "plastid_genome"
     versions                         = ch_versions.ifEmpty(null)
 }
 
