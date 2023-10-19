@@ -138,6 +138,7 @@ workflow ASCC {
     //
     MITO_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.mito_var,
         mito_check.valid
     )
     ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
@@ -157,6 +158,7 @@ workflow ASCC {
     //
     PLASTID_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.plastid_var,
         plastid_check.valid
     )
     ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
