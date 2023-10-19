@@ -11,6 +11,7 @@ include { ORGANELLE_CONTAMINATION_RECOMMENDATIONS    }   from '../../modules/loc
 workflow ORGANELLAR_BLAST {
     take:
     reference_tuple     // tuple([sample_id], reference_fasta)
+    organellar_var      // str
     organellar_tuple    // tuple([organelle], organellar_fasta)
 
     main:
@@ -48,22 +49,29 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //
-    // LOGIC: FILTER BLAST RESULTS WITH LITTLE TO NO DATA
+    // LOGIC: FILTER BLAST RESULTS WITH ONLY COMMENT LINES THESE SHOULD BE THOSE UNDER 250bytes
     //
     BLAST_BLASTN.out.txt
-        .map{ meta, file ->
-            tuple(  [   id: meta.id,
+        .combine ( organellar_tuple )
+        .map { meta, file, org_meta, org_file ->
+            tuple ( [   id: meta.id,
+                        og: org_meta.id,
                         sz: file.size() ],
-                    file(file)
+                    file
             )
         }
         .branch {
-            valid:  it[0].sz => 10
-            invalid: it[0].sz =< 9
+            valid:      it[0].sz >= 250
+            invalid:    it[0].sz <= 249
         }
         .set { blast_check }
 
-    blast_check.valid.view()
+    // How to get this printing blast_check.invalid.map{it[0].og} too?
+    if ( blast_check.invalid ) {
+        log.warn("BLAST RESULTS NOT AVAILABLE FOR $organellar_var.val")
+    } else {
+        log.warn("BLAST RESULTS FOUND FOR $organellar_var.val")
+    }
 
     //
     // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT

@@ -114,12 +114,11 @@ workflow YAML_INPUT {
     vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
-<<<<<<< HEAD
     dimensionality_reduction_methods = group.dimensionality_reduction_methods
-=======
     mito_tuple                       = ch_mito
+    mito_var                         = "mitochondrial_genome"
     plastid_tuple                    = ch_plastid
->>>>>>> 0497a94 (Completing organelle blast, modified python script to accept arrayList and parse inside script)
+    plastid_var                      = "plastid_genome"
     versions                         = ch_versions.ifEmpty(null)
 }
 
