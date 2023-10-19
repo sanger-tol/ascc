@@ -44,9 +44,27 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(REFORMAT_FULL_OUTFMT6.out.versions)
 
     //
+    // LOGIC:
+    //
+    REFORMAT_FULL_OUTFMT6.out.full
+        .map { meta, file ->
+            tuple(  [   id: meta.id,
+                        sz: file.size() ],
+                    file
+            )
+        }
+        .branch {
+            valid:      it[0].sz >= 1
+            invalid:    it[0].sz <= 0
+        }
+        .set { gatekeeper }
+
+    //
     // MODULE:
     //
-    BLAST_GET_TOP_HITS ( REFORMAT_FULL_OUTFMT6.out.full )
+    BLAST_GET_TOP_HITS (
+        gatekeeper.valid
+    )
     ch_versions             = ch_versions.mix(BLAST_GET_TOP_HITS.out.versions)
 
     //
