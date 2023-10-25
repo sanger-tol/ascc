@@ -166,7 +166,24 @@ workflow ASCC {
         params.n_neighbors_setting,
         params.autoencoder_epochs_count
     )
+<<<<<<< HEAD
     ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+=======
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+    //
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONALITY WITH SELECTED METHODS
+    //
+    GET_KMER_COUNTS (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out
+        YAML_INPUT.out
+        YAML_INPUT.out
+        YAML_INPUT.out
+    )
+    ch_versions = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+>>>>>>> f3bedf91dadb44d142e2a49589b50392c2efc44a
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
@@ -176,6 +193,8 @@ workflow ASCC {
     )
 
     emit:
+
+
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }
