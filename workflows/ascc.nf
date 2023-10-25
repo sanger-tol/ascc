@@ -176,7 +176,6 @@ workflow ASCC {
     )
 
     emit:
-
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }
