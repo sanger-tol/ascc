@@ -32,6 +32,7 @@ include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsada
 include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
 include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
+include { GET_KMERS_PROFILE             } from '../subworkflows/local/get_kmers_profile'
 
 //
 // MODULE: Local modules
@@ -70,17 +71,17 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
-    //
-    // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
-    //
-    GC_CONTENT (
-        YAML_INPUT.out.reference_tuple
-    )
-    ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
+    // //
+    // // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
+    // //
+    // GC_CONTENT (
+    //     YAML_INPUT.out.reference_tuple
+    // )
+    // ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
 
-    //Channel
-    //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
-    //  .set { blast_db }
+    // //Channel
+    // //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
+    // //  .set { blast_db }
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
@@ -91,69 +92,81 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
-    //
-    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
-    //
-    EXTRACT_TIARA_HITS (
-        GENERATE_GENOME.out.reference_tuple
-    )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+//     //
+//     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
+//     //
+//     EXTRACT_TIARA_HITS (
+//         GENERATE_GENOME.out.reference_tuple
+//     )
+//     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+
+//     //
+//     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
+//     //
+//     YAML_INPUT.out.reference_tuple
+//         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
+//         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
+//         .map { meta, ref, sliding, window ->
+//             tuple([ id      : meta.id,
+//                     sliding : sliding,
+//                     window  : window
+//                 ],
+//                 file(ref)
+//             )}
+//         .set { modified_input }
+
+//     //
+//     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+//     //
+// /*     EXTRACT_NT_BLAST (
+//         modified_input,
+//         YAML_INPUT.out.nt_database,
+//         YAML_INPUT.out.ncbi_taxonomy_path,
+//         YAML_INPUT.out.ncbi_rankedlineage_path
+//     )
+//     ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions) */
+
+//     //
+//     // SUBWORKFLOW:
+//     //
+//     RUN_FCSADAPTOR (
+//         YAML_INPUT.out.reference_tuple
+//     )
+//     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+
+//     //
+//     // SUBWORKFLOW:
+//     //
+//     RUN_FCSGX (
+//         YAML_INPUT.out.reference_tuple,
+//         YAML_INPUT.out.fcs_gx_database_path,
+//         YAML_INPUT.out.taxid,
+//         YAML_INPUT.out.ncbi_rankedlineage_path
+//     )
+//     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+
+//     //
+//     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
+//     //
+//     PACBIO_BARCODE_CHECK (
+//         YAML_INPUT.out.reference_tuple,
+//         YAML_INPUT.out.pacbio_tuple,
+//         YAML_INPUT.out.pacbio_barcodes,
+//         YAML_INPUT.out.pacbio_multiplex_codes
+//     )
+//     ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     //
-    // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
     //
-    YAML_INPUT.out.reference_tuple
-        .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
-        .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
-        .map { meta, ref, sliding, window ->
-            tuple([ id      : meta.id,
-                    sliding : sliding,
-                    window  : window
-                ],
-                file(ref)
-            )}
-        .set { modified_input }
-
-    //
-    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-    //
-/*     EXTRACT_NT_BLAST (
-        modified_input,
-        YAML_INPUT.out.nt_database,
-        YAML_INPUT.out.ncbi_taxonomy_path,
-        YAML_INPUT.out.ncbi_rankedlineage_path
+    GET_KMERS_PROFILE (
+        GENERATE_GENOME.out.reference_tuple,
+        params.kmer_size,
+        YAML_INPUT.out.dimensionality_reduction_methods,
+        params.n_neighbors_setting,
+        params.autoencoder_epochs_count
     )
-    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions) */
-
-    //
-    // SUBWORKFLOW:
-    //
-    RUN_FCSADAPTOR (
-        YAML_INPUT.out.reference_tuple
-    )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
-    //
-    // SUBWORKFLOW:
-    //
-    RUN_FCSGX (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.fcs_gx_database_path,
-        YAML_INPUT.out.taxid,
-        YAML_INPUT.out.ncbi_rankedlineage_path
-    )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
-    //
-    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
-    //
-    PACBIO_BARCODE_CHECK (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.pacbio_tuple,
-        YAML_INPUT.out.pacbio_barcodes,
-        YAML_INPUT.out.pacbio_multiplex_codes
-    )
-    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
@@ -163,8 +176,6 @@ workflow ASCC {
     )
 
     emit:
-
-
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }

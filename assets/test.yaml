@@ -1,4 +1,4 @@
-assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
+assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/genomic.fna
 assembly_title: asccTinyTest
 pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
@@ -8,6 +8,9 @@ taxid: 352914
 mito_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
 plastid_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
+dimensionality_reduction_methods: "pca"
+# all available methods 
+# "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
 nt_database: /data/blastdb/Supported/NT/current/
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/

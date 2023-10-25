@@ -32,6 +32,7 @@ workflow YAML_INPUT {
                 reference_proteomes:                            ( data.reference_proteomes              )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
                 kmer_len:                                       ( data.kmer_len                         )
+                dimensionality_reduction_methods:               ( data.dimensionality_reduction_methods )
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
@@ -97,6 +98,7 @@ workflow YAML_INPUT {
     vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
+    dimensionality_reduction_methods = group.dimensionality_reduction_methods
     versions                         = ch_versions.ifEmpty(null)
 }
 
