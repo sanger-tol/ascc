@@ -9,6 +9,7 @@ mito_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/orga
 plastid_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
 nt_database: /data/blastdb/Supported/NT/202308/dbv4/
+nt_database_prefix: nt
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
 ncbi_accessionids_folder: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/ncbi_taxonomy/20230509_accession2taxid/
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/

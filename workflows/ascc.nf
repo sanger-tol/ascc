@@ -117,6 +117,7 @@ workflow ASCC {
     //
     EXTRACT_NT_BLAST (
         modified_input,
+        YAML_INPUT.out.nt_dbprefix,
         YAML_INPUT.out.nt_database,
         YAML_INPUT.out.ncbi_accessions,
         YAML_INPUT.out.ncbi_rankedlineage_path

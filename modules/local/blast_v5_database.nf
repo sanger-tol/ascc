@@ -10,6 +10,7 @@ process BLAST_V5_DATABASE {
     input:
     tuple val(meta), path(fasta)
     path  db
+    val db_prefix
 
     output:
     tuple val(meta), path('*.txt'), emit: txt
@@ -24,7 +25,7 @@ process BLAST_V5_DATABASE {
     """
     blastn \\
         -num_threads $task.cpus \\
-        -db ${db}/nt \\
+        -db ${db}/${db_prefix} \\
         -query $fasta \\
         $args \\
         -out ${prefix}.txt

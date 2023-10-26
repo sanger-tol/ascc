@@ -66,12 +66,6 @@ workflow ORGANELLAR_BLAST {
         }
         .set { blast_check }
 
-    if ( blast_check.invalid ) {
-        log.warn("BLAST RESULTS NOT AVAILABLE FOR $organellar_var.val")
-    } else {
-        log.warn("BLAST RESULTS FOUND FOR $organellar_var.val")
-    }
-
     //
     // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT
     //

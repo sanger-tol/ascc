@@ -10,7 +10,9 @@ plastid_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiy
 kmer_len: 7
 ## Below this point will need updating as more subworkflows are built
 nt_database: /home/runner/work/ascc/ascc/NT_database/
+nt_database_prefix: 18S_fungal_sequences
 nt_kraken_db_path: /home/runner/work/ascc/ascc/kraken2/kraken2
+ncbi_accessionids_folder: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/ncbi_taxonomy/20230509_accession2taxid/
 ncbi_taxonomy_path: /home/runner/work/ascc/ascc/ncbi_taxdump/
 ncbi_rankedlineage_path: /home/runner/work/ascc/ascc/ncbi_taxdump/rankedlineage.dmp
 busco_lineages_folder: /home/runner/work/ascc/ascc/busco_database/lineages
