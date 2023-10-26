@@ -105,6 +105,7 @@ workflow YAML_INPUT {
     taxid                            = group.taxid
     nt_database                      = group.nt_database
     nt_kraken_db_path                = group.nt_kraken_db_path
+    ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder

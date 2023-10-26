@@ -13,9 +13,10 @@ dimensionality_reduction_methods: "pca,random_trees"
 # "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
 nt_database: /data/blastdb/Supported/NT/current/
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
+ncbi_accessionids_folder: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/ncbi_taxonomy/20230509_accession2taxid/
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/
 ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
-busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-03-14/lineages
+busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-08-27/lineages
 fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb
 vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database/adaptors_for_screening_euks.fa
 diamond_uniprot_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/uniprot/uniprot_reference_proteomes_with_taxonnames.dmnd
