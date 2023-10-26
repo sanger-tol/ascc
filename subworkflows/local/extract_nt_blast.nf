@@ -1,5 +1,5 @@
 // MODULE IMPORT BLOCK
-include { BLAST_BLASTN          } from '../../modules/nf-core/blast/blastn/main'
+include { BLAST_V5_DATABASE     } from '../../modules/local/blast_v5_database'
 include { SEQKIT_SLIDING        } from '../../modules/nf-core/seqkit/sliding/main'
 include { BLAST_CHUNK_TO_FULL   } from '../../modules/local/blast_chunk_to_full'
 include { REFORMAT_FULL_OUTFMT6 } from '../../modules/local/reformat_full_outfmt6'
@@ -10,7 +10,7 @@ workflow EXTRACT_NT_BLAST {
     take:
     input_genome            // Channel.of([ [ id: sample_id ], fasta ])
     blastn_db_path          // Channel.of( path )
-    ncbi_taxonomy_path      // Channel.of( path )
+    ncbi_accessions         // Channel.of( path )
     ncbi_lineage_path       // Channel.of( path )
 
     main:
@@ -18,33 +18,33 @@ workflow EXTRACT_NT_BLAST {
 
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
-    // NOTE: needs to be installed once accepted by NF-core
+    //
     SEQKIT_SLIDING ( input_genome )
     ch_versions             = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
     //
     // MODULE: BLASTS THE INPUT GENOME AGAINST A LOCAL NCBI DATABASE
     //
-    BLAST_BLASTN (
+    BLAST_V5_DATABASE (
         SEQKIT_SLIDING.out.fastx,
         blastn_db_path
     )
-    ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
+    ch_versions             = ch_versions.mix(BLAST_V5_DATABASE.out.versions)
 
     //
-    // MODULE:
+    // MODULE: CONVERT CHUNK_COORDINATES TO FULL_COORINDATES
     //
-    BLAST_CHUNK_TO_FULL ( BLAST_BLASTN.out.txt )
+    BLAST_CHUNK_TO_FULL ( BLAST_V5_DATABASE.out.txt )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
     //
-    // MODULE:
+    // MODULE: RE_ORDER THE DATA IN THE FULL_COORDINATE FILE
     //
     REFORMAT_FULL_OUTFMT6 ( BLAST_CHUNK_TO_FULL.out.full )
     ch_versions             = ch_versions.mix(REFORMAT_FULL_OUTFMT6.out.versions)
 
     //
-    // LOGIC:
+    // LOGIC: BRANCH DEPENDING ON WHETHER FILE HAS CONTENTS
     //
     REFORMAT_FULL_OUTFMT6.out.full
         .map { meta, file ->
@@ -72,7 +72,7 @@ workflow EXTRACT_NT_BLAST {
     //
     GET_LINEAGE_FOR_TOP (
         BLAST_GET_TOP_HITS.out.tophits,
-        ncbi_taxonomy_path,
+        ncbi_accessions,
         ncbi_lineage_path
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)

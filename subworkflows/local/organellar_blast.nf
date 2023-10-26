@@ -66,7 +66,6 @@ workflow ORGANELLAR_BLAST {
         }
         .set { blast_check }
 
-    // How to get this printing blast_check.invalid.map{it[0].og} too?
     if ( blast_check.invalid ) {
         log.warn("BLAST RESULTS NOT AVAILABLE FOR $organellar_var.val")
     } else {

@@ -33,6 +33,7 @@ workflow YAML_INPUT {
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                        )
                 kmer_len:                                       ( data.kmer_len                                 )
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path                     )
+                ncbi_accessionids:                              ( data.ncbi_accessionids_folder                 )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path                       )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path                  )
                 busco_lineages_folder:                          ( data.busco_lineages_folder                    )
@@ -104,6 +105,7 @@ workflow YAML_INPUT {
     taxid                            = group.taxid
     nt_database                      = group.nt_database
     nt_kraken_db_path                = group.nt_kraken_db_path
+    ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
