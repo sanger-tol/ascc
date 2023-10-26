@@ -9,6 +9,7 @@ include { GET_LINEAGE_FOR_TOP   } from '../../modules/local/get_lineage_for_top'
 workflow EXTRACT_NT_BLAST {
     take:
     input_genome            // Channel.of([ [ id: sample_id ], fasta ])
+    db_prefix               // Channel.of( name )
     blastn_db_path          // Channel.of( path )
     ncbi_accessions         // Channel.of( path )
     ncbi_lineage_path       // Channel.of( path )
@@ -27,7 +28,8 @@ workflow EXTRACT_NT_BLAST {
     //
     BLAST_V5_DATABASE (
         SEQKIT_SLIDING.out.fastx,
-        blastn_db_path
+        blastn_db_path,
+        db_prefix
     )
     ch_versions             = ch_versions.mix(BLAST_V5_DATABASE.out.versions)
 
