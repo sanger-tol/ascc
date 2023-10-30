@@ -42,6 +42,10 @@ workflow GET_KMERS_PROFILE {
     //
     ch_methods = dimensionality_reduction_methods.splitCsv(sep: ',')
 
+
+
+
+
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS 
     //

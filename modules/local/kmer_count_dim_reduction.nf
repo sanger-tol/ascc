@@ -4,13 +4,8 @@ process KMER_COUNT_DIM_REDUCTION {
     label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-<<<<<<< HEAD
         'https://depot.galaxyproject.org/singularity/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:2dc02878e5657bb1f787431c323c9d261fc6d520-0' :
         'biocontainers/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:2dc02878e5657bb1f787431c323c9d261fc6d520-0' }"
-=======
-        'https://depot.galaxyproject.org/singularity/mulled-v2-82f8313bfec228dfb77c1fa6363fb6be268e81e5:06e3fcd88e927d176149c5bdb78d3a5c7a688be1-0' :
-        'biocontainers/mulled-v2-82f8313bfec228dfb77c1fa6363fb6be268e81e5:06e3fcd88e927d176149c5bdb78d3a5c7a688be1-0' }"
->>>>>>> f3bedf91dadb44d142e2a49589b50392c2efc44a
 
     input:
     tuple val(meta), path(kmer_counts_file)
@@ -28,12 +23,17 @@ process KMER_COUNT_DIM_REDUCTION {
     script:
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
-    kmer_count_dim_reduction.py \\
-        $kmer_counts_file \\
-        ${prefix}_kmers_dim_reduction_embeddings.csv \\
-        --selected_methods $dimensionality_reduction_methods \\
-        --n_neighbors_setting $n_neighbors_setting \\
-        --autoencoder_epochs_count $autoencoder_epochs_count
+    if [ wc -l < $kmer_counts_file | -ge "3" ]]
+    then
+        kmer_count_dim_reduction.py \\
+            $kmer_counts_file \\
+            ${prefix}_kmers_dim_reduction_embeddings.csv \\
+            --selected_methods $dimensionality_reduction_methods \\
+            --n_neighbors_setting $n_neighbors_setting \\
+            --autoencoder_epochs_count $autoencoder_epochs_count
+    else
+        touch ${prefix}_kmers_dim_reduction_embeddings.csv
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
