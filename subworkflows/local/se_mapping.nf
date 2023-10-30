@@ -88,6 +88,7 @@ workflow SE_MAPPING {
         hifi.bool_cigar_bam
     )
 
+    ch_align_bams = MINIMAP2_ALIGN_HIFI.out.bam
 
     MINIMAP2_ALIGN_CLR (
         clr.read_tuple,
@@ -105,11 +106,34 @@ workflow SE_MAPPING {
         ont.bool_cigar_bam
     )
 
+    ch_align_bams
+        .mix( MINIMAP2_ALIGN_CLR.out.bam )
+        .mix( MINIMAP2_ALIGN_ONT.out.bam)
+        .set { ch_bams }
+
+    ch_bams
+        .map { meta, file ->
+            tuple( file )
+        }
+        .collect()
+        .map { file ->
+            tuple (
+                [ id    : file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
+                file
+            )
+        }
+        .set { collected_files_for_merge }
+
+    SAMTOOLS_MERGE(
+        collected_files_for_merge,
+        reference_tuple,
+        [[],[]]
+    )
+    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
+
     emit:
     versions       = ch_versions.ifEmpty(null)
-    hifi_bam_ch    = MINIMAP2_ALIGN_HIFI.out.bam
-    clr_bam_ch     = MINIMAP2_ALIGN_HIFI.out.bam
-    ont_bam_ch     = MINIMAP2_ALIGN_ONT.out.bam
+    mapped_bam     = SAMTOOLS_MERGE.out.bam
 }
 
 process GrabFiles {

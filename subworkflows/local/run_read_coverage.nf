@@ -63,6 +63,20 @@ workflow RUN_READ_COVERAGE {
     ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
 
 
+    SAMTOOLS_SORT (
+        SAMTOOLS_MERGE.out.bam
+    )
+    ch_versions = ch_versions.mix( SAMTOOLS_MERGE.out.versions )
+
+    SAMTOOLS_INDEX (
+        SAMTOOLS_SORT.out.bam
+    )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+
+    SAMTOOLS_DEPTH (
+        SAMTOOLS_SORT.out.bam
+    )
+    ch_versions = ch_versions.mix( SAMTOOLS_DEPTH.out.versions ) 
 
 
     emit:
