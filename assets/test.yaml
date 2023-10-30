@@ -1,7 +1,8 @@
 assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 assembly_title: asccTinyTest
 pacbio_multiplexing_barcode_names: something
-pacbio_reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
+reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
+platform: "hifi"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
 mito_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa

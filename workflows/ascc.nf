@@ -31,6 +31,7 @@ include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt
 include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
 include { RUN_NT_KRAKEN                 } from '..//subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
+include { RUN_READ_COVERAGE             } from '../subworkflows/local/run_read_coverage'
 
 //
 // MODULE: Local modules
@@ -69,10 +70,13 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(YAML_INPUT.out.versions)
 
-    GC_CONTENT (
-        YAML_INPUT.out.reference_tuple
+    RUN_READ_COVERAGE (
+        YAML_INPUT.out.reference_tuple,
+        YAML_INPUT.out.assembly_path,
+        YAML_INPUT.out.pacbio_tuple,
+        YAML_INPUT.out.platform
     )
-    ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
+    ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
     //Channel
     //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
@@ -81,10 +85,10 @@ workflow ASCC {
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
-    GENERATE_GENOME (
+    /*GENERATE_GENOME (
         YAML_INPUT.out.reference_tuple
     )
-    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)*/
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
@@ -123,7 +127,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW:
     //
-    RUN_FCSADAPTOR (
+    /*RUN_FCSADAPTOR (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
@@ -137,7 +141,7 @@ workflow ASCC {
         YAML_INPUT.out.taxid,
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(RUN_FCSGX.out.versions)
+    ch_versions = ch_versions.mix(RUN_FCSGX.out.versions)*/
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
