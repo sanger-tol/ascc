@@ -90,7 +90,7 @@ workflow ASCC {
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.pacbio_barcodes
     )
-    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+    ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)*/
 
 //     //
 //     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA

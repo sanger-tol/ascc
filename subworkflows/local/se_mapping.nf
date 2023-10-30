@@ -1,0 +1,126 @@
+include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_HIFI        } from '../../modules/nf-core/minimap2/align/main'
+include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_CLR         } from '../../modules/nf-core/minimap2/align/main'
+include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_ONT         } from '../../modules/nf-core/minimap2/align/main'
+
+workflow SE_MAPPING {
+
+    take:
+    reference_tuple          // Channel [ val(meta), path(file) ]
+    assembly_path            // Channel path(file)
+    pacbio_tuple             // Channel [ val(meta), val( str ) ]
+    platform                // Channel val( str )
+
+    main:
+    ch_versions     = Channel.empty()
+
+
+    //
+    // MODULE: GETS PACBIO READ PATHS FROM READS_PATH
+    //
+    ch_grabbed_read_paths       = GrabFiles( pacbio_tuple )
+
+    ch_grabbed_read_paths
+        .map { meta, files ->
+            tuple( files )
+        }
+        .flatten()
+        .set { ch_read_paths }
+
+    reference_tuple
+        .combine( ch_read_paths )
+        .combine( platform )
+        .map { meta, ref, read_path, platform ->
+            tuple(
+                [   id          : meta.id,
+                    single_end  : true,
+                    split_prefix: read_path.toString().split('/')[-1].split('.fa.gz')[0]
+                ],
+                read_path,
+                ref,
+                true,
+                false,
+                false,
+                platform
+            )
+        }
+        .branch {
+            hifi               : it[6] == "hifi"
+            clr                : it[6] == "clr"
+            ont                : it[6] == "ont"
+            }
+        .set { minimap_se_input }
+
+    minimap_se_input.hifi
+        .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
+            read_tuple          : tuple( meta, read_path)
+            ref                 : ref
+            bool_bam_ouput      : bam_output
+            bool_cigar_paf      : cigar_paf
+            bool_cigar_bam      : cigar_bam
+        }
+        .set { hifi }
+    
+    minimap_se_input.clr
+        .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
+            read_tuple          : tuple( meta, read_path)
+            ref                 : ref
+            bool_bam_ouput      : bam_output
+            bool_cigar_paf      : cigar_paf
+            bool_cigar_bam      : cigar_bam
+        }
+        .set { clr }
+    
+    minimap_se_input.ont
+        .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
+            read_tuple          : tuple( meta, read_path)
+            ref                 : ref
+            bool_bam_ouput      : bam_output
+            bool_cigar_paf      : cigar_paf
+            bool_cigar_bam      : cigar_bam
+        }
+        .set { ont }
+
+    MINIMAP2_ALIGN_HIFI (
+        hifi.read_tuple,
+        hifi.ref,
+        hifi.bool_bam_ouput,
+        hifi.bool_cigar_paf,
+        hifi.bool_cigar_bam
+    )
+
+
+    MINIMAP2_ALIGN_CLR (
+        clr.read_tuple,
+        clr.ref,
+        clr.bool_bam_ouput,
+        clr.bool_cigar_paf,
+        clr.bool_cigar_bam
+    )
+
+    MINIMAP2_ALIGN_ONT (
+        ont.read_tuple,
+        ont.ref,
+        ont.bool_bam_ouput,
+        ont.bool_cigar_paf,
+        ont.bool_cigar_bam
+    )
+
+    emit:
+    versions       = ch_versions.ifEmpty(null)
+    hifi_bam_ch    = MINIMAP2_ALIGN_HIFI.out.bam
+    clr_bam_ch     = MINIMAP2_ALIGN_HIFI.out.bam
+    ont_bam_ch     = MINIMAP2_ALIGN_ONT.out.bam
+}
+
+process GrabFiles {
+    tag "${meta.id}"
+    executor 'local'
+
+    input:
+    tuple val(meta), path("in")
+
+    output:
+    tuple val(meta), path("in/*fa.gz")
+
+    "true"
+}

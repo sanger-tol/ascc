@@ -20,7 +20,8 @@ workflow YAML_INPUT {
         .flatten()
         .multiMap { data ->
                 assembly_title:                                 ( data.assembly_title                   )
-                pacbio_reads:                                   ( data.pacbio_reads_path                )
+                reads_path:                                     ( data.reads_path                       )
+                platform:                                       ( data.platform                        )
                 assembly_path:                                  ( file(data.assembly_path)              )
                 pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
@@ -64,7 +65,7 @@ workflow YAML_INPUT {
         .set { ch_reference }
 
     group.assembly_title
-        .combine( group.pacbio_reads )
+        .combine( group.reads_path )
         .map { id, file ->
             tuple(  [   id: id ],
                     file
@@ -99,9 +100,14 @@ workflow YAML_INPUT {
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
+<<<<<<< HEAD
     pacbio_barcodes                  = ch_barcodes
     pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
+=======
+    platform                         = group.platform
+>>>>>>> 18d930b (add coverage)
     assembly_title                   = group.assembly_title
+    assembly_path                    = group.assembly_path
     taxid                            = group.taxid
     nt_database                      = group.nt_database
     nt_kraken_db_path                = group.nt_kraken_db_path
