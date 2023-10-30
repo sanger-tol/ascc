@@ -34,18 +34,11 @@ process KMER_COUNT_DIM_REDUCTION {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-<<<<<<< HEAD
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
         tensorflow: \$(python3 -c 'import tensorflow; print(tensorflow.__version__)')
         scikit-learn: \$(python3 -c 'import sklearn; sklearn.show_versions()')
         umap-learn: \$(python3 -c 'import umap; print(umap.__version__)')
         matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
-=======
-        tensorflow: \$(tensorflow --version | sed 's/tensorflow //g')
-        scikit-learn: \$(scikit-learn --version | sed 's/scikit-learn //g')
-        umap-learn: \$(umap-learn --version | sed 's/umap-learn //g')
-        matplotlib: \$(matplotlib --version | sed 's/matplotlib //g')
->>>>>>> f3bedf9 (Add to main workflow)
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """

@@ -55,6 +55,10 @@ workflow GET_KMERS_PROFILE {
         }
         .set{ ch_methods }
 
+
+
+
+
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS 
     //
