@@ -1,7 +1,8 @@
-include { SE_MAPPING                } from './se_mapping'
-//include { SE_MAPPING as SE_MAPPING_CLR                  } from './se_mapping'
-//include { SE_MAPPING as SE_MAPPING_ONT                  } from './se_mapping'
-//include { PE_MAPPING as PE_MAPPING_ILLUMINA             } from './pe_mapping'
+include { SE_MAPPING                                    } from './se_mapping'
+include { PE_MAPPING as PE_MAPPING_ILLUMINA             } from './pe_mapping'
+include { SAMTOOLS_MERGE                                } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_INDEX                                } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_DEPTH                                } from '../../modules/nf-core/samtools/depth/main'
 
 workflow RUN_READ_COVERAGE {
 
@@ -26,13 +27,42 @@ workflow RUN_READ_COVERAGE {
         platform
     )
     ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
+    ch_align_bams = SE_MAPPING.out.bam
 
-    PE_MAPPING (
+    PE_MAPPING_ILLUMINA  (
         reference_tuple,
         assembly_path,
         pacbio_tuple,
         platform
     )
+    ch_versions = ch_versions.mix(PE_MAPPING.out.versions)
+
+    ch_align_bams
+        .mix( PE_MAPPING.out.bam )
+        .set { ch_bams }
+
+    
+    ch_bams
+        .map { meta, file ->
+            tuple( file )
+        }
+        .collect()
+        .map { file ->
+            tuple (
+                [ id    : file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
+                file
+            )
+        }
+        .set { collected_files_for_merge }
+
+    SAMTOOLS_MERGE(
+        collected_files_for_merge,
+        reference_tuple,
+        [[],[]]
+    )
+    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
+
+
 
 
     emit:

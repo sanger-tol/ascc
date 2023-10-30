@@ -119,6 +119,13 @@
                             "modules"
                         ]
                     },
+                    "samtools/merge": {
+                        "branch": "master",
+                        "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
                     "samtools/sort": {
                         "branch": "master",
                         "git_sha": "a0f7be95788366c1923171e358da7d049eb440f9",
