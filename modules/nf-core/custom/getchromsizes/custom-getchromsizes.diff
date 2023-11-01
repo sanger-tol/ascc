@@ -1,18 +1,7 @@
 Changes in module 'nf-core/custom/getchromsizes'
 --- modules/nf-core/custom/getchromsizes/main.nf
 +++ modules/nf-core/custom/getchromsizes/main.nf
-@@ -1,5 +1,9 @@
-+// Forked from the nf-core module to:
-+//  1. allow selecting a different extension for the `sizes` channel
-+//  2. force all output files to be named according to the prefix
-+//  3. rename the input fasta file too and output it so that it can be "published"
- process CUSTOM_GETCHROMSIZES {
--    tag "$fasta"
-+    tag "$meta.id"
-     label 'process_single'
- 
-     conda "bioconda::samtools=1.16.1"
-@@ -8,22 +12,26 @@
+@@ -8,22 +8,27 @@
          'biocontainers/samtools:1.16.1--h6899075_1' }"
  
      input:
@@ -41,19 +30,20 @@ Changes in module 'nf-core/custom/getchromsizes'
      """
 -    samtools faidx $fasta
 -    cut -f 1,2 ${fasta}.fai > ${fasta}.sizes
++
 +    ln -s ${fasta} ${prefix}.fa
 +    samtools faidx ${prefix}.fa -o ${prefix}.fa.fai
 +    cut -f 1,2 ${prefix}.fa.fai > ${prefix}.${suffix}
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
-@@ -33,8 +41,9 @@
+@@ -33,8 +38,9 @@
  
      stub:
      """
 -    touch ${fasta}.fai
 -    touch ${fasta}.sizes
-+    ln -s ${fasta} ${prefix}.fa
++    touch ${prefix}.fa
 +    touch ${prefix}.fa.fai
 +    touch ${prefix}.${suffix}
  
