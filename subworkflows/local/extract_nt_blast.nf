@@ -1,5 +1,7 @@
 // MODULE IMPORT BLOCK
 include { BLAST_V5_DATABASE     } from '../../modules/local/blast_v5_database'
+include { BLAST_BLASTN as BLAST_BLASTN_MOD }   from '../../modules/nf-core/blast/blastn'
+
 include { SEQKIT_SLIDING        } from '../../modules/nf-core/seqkit/sliding/main'
 include { BLAST_CHUNK_TO_FULL   } from '../../modules/local/blast_chunk_to_full'
 include { REFORMAT_FULL_OUTFMT6 } from '../../modules/local/reformat_full_outfmt6'
@@ -9,7 +11,6 @@ include { GET_LINEAGE_FOR_TOP   } from '../../modules/local/get_lineage_for_top'
 workflow EXTRACT_NT_BLAST {
     take:
     input_genome            // Channel.of([ [ id: sample_id ], fasta ])
-    db_prefix               // Channel.of( name )
     blastn_db_path          // Channel.of( path )
     ncbi_accessions         // Channel.of( path )
     ncbi_lineage_path       // Channel.of( path )
@@ -26,17 +27,16 @@ workflow EXTRACT_NT_BLAST {
     //
     // MODULE: BLASTS THE INPUT GENOME AGAINST A LOCAL NCBI DATABASE
     //
-    BLAST_V5_DATABASE (
+    BLAST_BLASTN_MOD (
         SEQKIT_SLIDING.out.fastx,
-        blastn_db_path,
-        db_prefix
+        blastn_db_path
     )
-    ch_versions             = ch_versions.mix(BLAST_V5_DATABASE.out.versions)
+    ch_versions             = ch_versions.mix(BLAST_BLASTN_MOD.out.versions)
 
     //
     // MODULE: CONVERT CHUNK_COORDINATES TO FULL_COORINDATES
     //
-    BLAST_CHUNK_TO_FULL ( BLAST_V5_DATABASE.out.txt )
+    BLAST_CHUNK_TO_FULL ( BLAST_BLASTN_MOD.out.txt )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
     //

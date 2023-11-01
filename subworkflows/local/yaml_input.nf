@@ -29,7 +29,6 @@ workflow YAML_INPUT {
                 mito_fasta_path:                                ( data.mito_fasta_path      ?: "NO MITO"        )
                 plastid_fasta_path:                             ( data.plastid_fasta_path   ?: "NO PLASTID"     )
                 nt_database:                                    ( data.nt_database                              )
-                nt_database_prefix:                             ( data.nt_database_prefix                       )
                 reference_proteomes:                            ( data.reference_proteomes                      )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                        )
                 kmer_len:                                       ( data.kmer_len                                 )
@@ -105,7 +104,6 @@ workflow YAML_INPUT {
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
     nt_database                      = group.nt_database
-    nt_dbprefix                      = group.nt_database_prefix
     nt_kraken_db_path                = group.nt_kraken_db_path
     ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
