@@ -104,7 +104,6 @@ workflow YAML_INPUT {
     assembly_title                   = group.assembly_title
     taxid                            = group.taxid
     nt_database                      = group.nt_database
-    nt_dbprefix                      = group.nt_database_prefix
     nt_kraken_db_path                = group.nt_kraken_db_path
     ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
