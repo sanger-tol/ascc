@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script for finding the average coverage of each scaffold in a SAMtools depth output file.
-originally by Eerik Aunin (ea10)
+originally written by Eerik Aunin (ea10)
 re-wriiten by Yumi Sims (yy5)
 """
 
@@ -28,16 +28,12 @@ def process_data(in_data):
             "coverage_sum": scaffs_dict.get(scaff_name, {}).get("coverage_sum", 0) + coverage,
             "scaff_len": scaffs_dict.get(scaff_name, {}).get("scaff_len", 0) + 1
         }
-    
     return scaffs_dict
 
 def calculate_average_coverage(scaffs_dict):
     """Calculate average coverage for each scaffold."""
-    results = []
-    for scaff_name, data in scaffs_dict.items():
-        average_coverage = data["coverage_sum"] / data["scaff_len"]
-        results.append((scaff_name, average_coverage))
-    return results
+    return [(scaff_name, data["coverage_sum"] / data["scaff_len"]) for scaff_name, data in scaffs_dict.items()]
+
 
 def main():
     """Main function to run the script."""
