@@ -21,7 +21,7 @@ workflow YAML_INPUT {
         .multiMap { data ->
                 assembly_title:                                 ( data.assembly_title                   )
                 reads_path:                                     ( data.reads_path                       )
-                platform:                                       ( data.platform                        )
+                platform:                                       ( data.platform                         )
                 assembly_path:                                  ( file(data.assembly_path)              )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
                 sci_name:                                       ( data.sci_name                         )

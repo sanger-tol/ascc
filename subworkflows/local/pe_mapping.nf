@@ -1,4 +1,5 @@
 include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_ILLUMINA         } from '../../modules/nf-core/minimap2/align/main'
+include { SAMTOOLS_MERGE                                } from '../../modules/nf-core/samtools/merge/main'
 
 workflow PE_MAPPING {
 
@@ -26,8 +27,7 @@ workflow PE_MAPPING {
 
     reference_tuple
         .combine( ch_read_paths )
-        .combine( read_type )
-        .combine( se)
+        .combine( platform )
         .map { meta, ref, read_path, platform ->
             tuple(
                 [   id          : meta.id,
@@ -62,9 +62,31 @@ workflow PE_MAPPING {
         illumina_input.bool_cigar_bam
     )
 
+    ch_bams = MINIMAP2_ALIGN_ILLUMINA.out.bam
+
+    ch_bams
+        .map { meta, file ->
+            tuple( file )
+        }
+        .collect()
+        .map { file ->
+            tuple (
+                [ id    : file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
+                file
+            )
+        }
+        .set { collected_files_for_merge }
+    
+    SAMTOOLS_MERGE(
+        collected_files_for_merge,
+        reference_tuple,
+        [[],[]]
+    )
+    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
+
     emit:
     versions           = ch_versions.ifEmpty(null)
-    illumina_bam_ch    = MINIMAP2_ALIGN_ILLUMINA.out.bam
+    mapped_bam         = SAMTOOLS_MERGE.out.bam
 }
 
 process GrabFiles {
@@ -75,7 +97,7 @@ process GrabFiles {
     tuple val(meta), path("in")
 
     output:
-    tuple val(meta), path("in/*fasta.gz")
+    tuple val(meta), path("in/*fa.gz")
 
     "true"
 }
