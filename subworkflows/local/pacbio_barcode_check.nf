@@ -60,12 +60,20 @@ workflow PACBIO_BARCODE_CHECK {
     )
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
+    BLAST_MAKEBLASTDB.out.db
+        .map { it ->
+            tuple ( [   id: "pacbio_check"  ],
+                    it
+            )
+        }
+        .set { pacbio_check_db }
+
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
     //
     BLAST_BLASTN (
         reference_tuple,
-        BLAST_MAKEBLASTDB.out.db
+        pacbio_check_db
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 

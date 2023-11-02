@@ -8,8 +8,8 @@ process BLAST_BLASTN {
         'biocontainers/blast:2.14.1--pl5321h6f7f691_0' }"
 
     input:
-    tuple val(meta), path(fasta)
-    path  db
+    tuple val(meta),  path(fasta)
+    tuple val(meta2), path(db)
 
     output:
     tuple val(meta), path('*.txt'), emit: txt
@@ -19,18 +19,17 @@ process BLAST_BLASTN {
     task.ext.when == null || task.ext.when
 
     script:
-    def args        = task.ext.args ?: ''
-    def args2       = task.ext.args2 ?: '' // for ascc this is " | head -n1"
-    def prefix      = task.ext.prefix ?: "${meta.id}"
-    def dbprefix    = task.ext.dbprefix ?: ".nin" // for ascc this is ".[0-9]*\\.nin" as the database has many nt.{interger}.nin
+    def args        = task.ext.args     ?: ''
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    def db_prefix   = task.ext.dbprefix ?: "${meta2.db_prefix}"
     """
-    DB=`find -L ./ -name "*.nin" | sed 's/\\${dbprefix}\$//'${args2}`
+    DB=`find -L ./ -name "${db_prefix}.nin" | sed 's/\\.nin\$//'`
     blastn \\
         -num_threads $task.cpus \\
         -db \$DB \\
         -query $fasta \\
         $args \\
-        -out ${prefix}.txt
+        -out ${prefix}-${db_prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -39,10 +38,11 @@ process BLAST_BLASTN {
     """
 
     stub:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def args        = task.ext.args     ?: ''
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    def db_prefix   = task.ext.dbprefix ?: "${meta2.db_prefix}"
     """
-    touch ${prefix}.txt
+    touch ${prefix}-${db_prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
