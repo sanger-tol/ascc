@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Script for finding the average coverage of each scaffold in a SAMtools depth output file
+written by Eerik Aunin (ea10)
 """
 
 import sys

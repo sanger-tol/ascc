@@ -1,6 +1,7 @@
 include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_HIFI        } from '../../modules/nf-core/minimap2/align/main'
 include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_CLR         } from '../../modules/nf-core/minimap2/align/main'
 include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_ONT         } from '../../modules/nf-core/minimap2/align/main'
+include { SAMTOOLS_MERGE                                } from '../../modules/nf-core/samtools/merge/main'
 
 workflow SE_MAPPING {
 
@@ -12,7 +13,7 @@ workflow SE_MAPPING {
 
     main:
     ch_versions     = Channel.empty()
-
+    ch_align_bams   = Channel.empty()
 
     //
     // MODULE: GETS PACBIO READ PATHS FROM READS_PATH
@@ -49,7 +50,7 @@ workflow SE_MAPPING {
             ont                : it[6] == "ont"
             }
         .set { minimap_se_input }
-
+    
     minimap_se_input.hifi
         .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
             read_tuple          : tuple( meta, read_path)
@@ -80,36 +81,36 @@ workflow SE_MAPPING {
         }
         .set { ont }
 
-    MINIMAP2_ALIGN_HIFI (
-        hifi.read_tuple,
-        hifi.ref,
-        hifi.bool_bam_ouput,
-        hifi.bool_cigar_paf,
-        hifi.bool_cigar_bam
-    )
-
-    ch_align_bams = MINIMAP2_ALIGN_HIFI.out.bam
-
-    MINIMAP2_ALIGN_CLR (
-        clr.read_tuple,
-        clr.ref,
-        clr.bool_bam_ouput,
-        clr.bool_cigar_paf,
-        clr.bool_cigar_bam
-    )
-
-    MINIMAP2_ALIGN_ONT (
-        ont.read_tuple,
-        ont.ref,
-        ont.bool_bam_ouput,
-        ont.bool_cigar_paf,
-        ont.bool_cigar_bam
-    )
-
-    ch_align_bams
-        .mix( MINIMAP2_ALIGN_CLR.out.bam )
-        .mix( MINIMAP2_ALIGN_ONT.out.bam)
-        .set { ch_bams }
+    if ( platform.filter { it == "hifi" } ){
+        MINIMAP2_ALIGN_HIFI (
+            hifi.read_tuple,
+            hifi.ref,
+            hifi.bool_bam_ouput,
+            hifi.bool_cigar_paf,
+            hifi.bool_cigar_bam
+        )
+        ch_bams = MINIMAP2_ALIGN_HIFI.out.bam
+    } 
+    else if ( platform.filter { it == "clr" } ){
+        MINIMAP2_ALIGN_CLR (
+            clr.read_tuple,
+            clr.ref,
+            clr.bool_bam_ouput,
+            clr.bool_cigar_paf,
+            clr.bool_cigar_bam
+        )
+        ch_bams = MINIMAP2_ALIGN_CLR.out.bam
+    }
+    else if ( platform.filter { it == "ont" } ){
+        MINIMAP2_ALIGN_ONT (
+            ont.read_tuple,
+            ont.ref,
+            ont.bool_bam_ouput,
+            ont.bool_cigar_paf,
+            ont.bool_cigar_bam
+        )
+        ch_bams = MINIMAP2_ALIGN_ONT.out.bam
+    }
 
     ch_bams
         .map { meta, file ->
