@@ -39,12 +39,20 @@ workflow ORGANELLAR_BLAST {
     )
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
+    BLAST_MAKEBLASTDB.out.db
+        .map { it ->
+            tuple ( [   id: "organellar_check"  ],
+                    it
+            )
+        }
+        .set { organellar_check_db }
+
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
     //
     BLAST_BLASTN (
         SED_SED.out.sed,
-        BLAST_MAKEBLASTDB.out.db
+        organellar_check_db
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 

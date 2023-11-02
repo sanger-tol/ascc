@@ -25,18 +25,81 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
     //
+    // LOGIC: GLOB ALL *NIN FILES IN DIRECTORY AND SPLIT INTO CHANNELS
+    //
+
+    blastn_db_path
+        .map(
+            it -> file("${it}*") // glob all files in directory
+        )
+        .flatten() // flatten to file per channel
+        .map(
+            it ->
+                tuple (
+                    [   id: it.toString().split('/')[-1].split("\\....\$")[0] ], // get basename and trim off the extension, returns database prefix
+                    it                                                           // list of files
+                )
+        )
+        .groupTuple() // group files by id (which = db prefix)
+        .map {
+            meta, files ->
+                tuple (
+                    [   id: meta.id,
+                        file_count: files.size() ], // get number of files
+                        files
+                )
+        }
+        .filter { it[0].file_count >= 8 } // a database is made of 8 files, less than this means it is an accessory to the db
+        .set { databases_by_prefix }
+
+    databases_by_prefix
+        .combine( blastn_db_path )
+        .map { meta, files, rootpath ->
+            tuple( rootpath, meta.id )
+        }
+        .combine ( SEQKIT_SLIDING.out.fastx )
+        .multiMap { root, db_prefix, meta, ref ->
+            reference:  tuple( [ id:     meta.id ],
+                                ref
+                            )
+            nin_db:     tuple( [ id:    db_prefix   ],
+                                root
+                            )
+        }
+        .set { nin }
+
+    //
     // MODULE: BLASTS THE INPUT GENOME AGAINST A LOCAL NCBI DATABASE
     //
     BLAST_BLASTN_MOD (
-        SEQKIT_SLIDING.out.fastx,
-        blastn_db_path
+        nin.reference,
+        nin.nin_db
     )
     ch_versions             = ch_versions.mix(BLAST_BLASTN_MOD.out.versions)
+
+    input_genome
+        .map{ meta, file ->
+            meta.id
+        }
+        .set { id }
+
+    BLAST_BLASTN_MOD.out.txt
+        .map { meta, files ->
+            files
+        }
+        .collectFile( name: 'FULL_blast_results.txt', newLine: false) // concats all input files into one file!
+        .combine( id )
+        .map { file, identity ->
+            tuple(  [   id: identity    ],
+                    file
+                )
+            }
+        .set { blast_results }
 
     //
     // MODULE: CONVERT CHUNK_COORDINATES TO FULL_COORINDATES
     //
-    BLAST_CHUNK_TO_FULL ( BLAST_BLASTN_MOD.out.txt )
+    BLAST_CHUNK_TO_FULL ( blast_results )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
     //
@@ -79,8 +142,20 @@ workflow EXTRACT_NT_BLAST {
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
 
-
     emit:
     versions                = ch_versions.ifEmpty(null)
 
+}
+
+process get_string {
+    input:
+    val(nin)
+
+    output:
+    stdout
+
+    script:
+    """
+    echo $nin
+    """
 }
