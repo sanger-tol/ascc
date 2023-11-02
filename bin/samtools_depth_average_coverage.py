@@ -22,17 +22,12 @@ def process_data(in_data):
     
     for line in in_data:
         split_line = line.split()
-        scaff_name = split_line[0]
-        coverage = int(split_line[2])
+        scaff_name, coverage = split_line[0], int(split_line[2])
         
-        if scaff_name in scaffs_dict:
-            scaffs_dict[scaff_name]["coverage_sum"] += coverage
-            scaffs_dict[scaff_name]["scaff_len"] += 1
-        else:
-            scaffs_dict[scaff_name] = {
-                "coverage_sum": coverage,
-                "scaff_len": 1
-            }
+        scaffs_dict[scaff_name] = {
+            "coverage_sum": scaffs_dict.get(scaff_name, {}).get("coverage_sum", 0) + coverage,
+            "scaff_len": scaffs_dict.get(scaff_name, {}).get("scaff_len", 0) + 1
+        }
     
     return scaffs_dict
 
