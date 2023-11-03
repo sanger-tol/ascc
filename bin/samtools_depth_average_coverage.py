@@ -14,7 +14,7 @@ __version__ = '1.0.0'
 
 def display_version():
     """Display the script's version."""
-    print(f"samtools_depth_average_coverage: {__version__}")
+    print(f"{__version__}")
 
 def process_data(in_data):
     """Process the input data and calculate scaffold coverage."""
@@ -32,13 +32,16 @@ def process_data(in_data):
 
 def calculate_average_coverage(scaffs_dict):
     """Calculate average coverage for each scaffold."""
-    return [(scaff_name, data["coverage_sum"] / data["scaff_len"]) for scaff_name, data in scaffs_dict.items()]
-
+    results = []
+    for scaff_name, data in scaffs_dict.items():
+        average_coverage = data["coverage_sum"] / data["scaff_len"]
+        results.append((scaff_name, average_coverage))
+    return results
 
 def main():
     """Main function to run the script."""
     parser = argparse.ArgumentParser(description="Calculate average coverage for each scaffold.")
-    parser.add_argument('input_file', help='Path to the input SAMtools depth file')
+    parser.add_argument('input_file', nargs='?', help='Path to the input SAMtools depth file')
     parser.add_argument('--version', action='store_true', help='Display the version')
 
     args = parser.parse_args()
@@ -46,6 +49,11 @@ def main():
     if args.version:
         display_version()
         return
+
+    if not args.input_file:
+        print("Error: Missing input file. Please provide an input file.")
+        parser.print_help()
+        sys.exit(1)
 
     in_data = gpf.ll(args.input_file)
     scaffs_dict = process_data(in_data)

@@ -1,4 +1,4 @@
-process PARSE_FCSGX_RESULT {
+process SAMTOOLS_DEPTH_AVERAGE_COVERAG {
     tag "${meta.id}"
     label 'process_low'
 
@@ -8,33 +8,31 @@ process PARSE_FCSGX_RESULT {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(fcs_gx_reports_folder)
-    path ncbi_rankedlineage_path
+    tuple val(meta), path(depth)
 
     output:
-    tuple val(meta), path( "*.csv" ), emit: fcsgxresult
+    tuple val(meta), path( "*.txt" ), emit: average_coverage
     path "versions.yml", emit: versions
 
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    parse_fcsgx_result.py ${fcs_gx_reports_folder} ${ncbi_rankedlineage_path} > parsed_fcsgx.csv
+    samtools_depth_average_coverage.py $depth > ${prefix}_average_coverage.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        parse_fcsgx_result: \$(parse_fcsgx_result.py -v)
+        samtools_depth_average_coverage: \$(samtools_depth_average_coverage.py --version)
     END_VERSIONS
     """
 
     stub:
     """
-    touch parsed_fcsgx.csv
-
+    touch ${prefix}_average_coverage.txt
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        parse_fcsgx_result: \$(parse_fcsgx_result.py -v)
+        samtools_depth_average_coverage: \$(samtools_depth_average_coverage.py --version)
     END_VERSIONS
     """
 }
