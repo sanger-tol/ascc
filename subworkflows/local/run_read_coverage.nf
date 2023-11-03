@@ -20,7 +20,7 @@ workflow RUN_READ_COVERAGE {
 
     
     //
-    // MODULE: GETS PACBIO READ PATHS FROM READS_PATH
+    // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM, THEN RUN MINIMAP
     //
     if ( platform.filter { it == "hifi" } || platform.filter { it == "clr" } || platform.filter { it == "ont" } ) { 
         SE_MAPPING (
@@ -48,22 +48,35 @@ workflow RUN_READ_COVERAGE {
             .set { merged_bam }
     }
 
+    //
+    // MODULE: SORT MAPPED BAM
+    //
     SAMTOOLS_SORT (
         merged_bam
     )
     ch_versions = ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
+    //
+    // MODULE: INDEXING SORTED MAPPED BAM
+    //
     SAMTOOLS_INDEX (
         SAMTOOLS_SORT.out.bam
     )
     ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
+    //
+    // MODULE: GET READ DEPTH
+    //
     SAMTOOLS_DEPTH (
         SAMTOOLS_SORT.out.bam,
         [[],[]]
     )
     ch_versions = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
 
+    
+    //
+    // MODULE: COMPUTE THE AVERAGE COVERAGE
+    //
     SAMTOOLS_DEPTH_AVERAGE_COVERAG (
         SAMTOOLS_DEPTH.out.tsv
     )

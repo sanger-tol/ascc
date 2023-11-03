@@ -16,7 +16,7 @@ workflow SE_MAPPING {
     ch_align_bams   = Channel.empty()
 
     //
-    // MODULE: GETS PACBIO READ PATHS FROM READS_PATH
+    // PROCESS: GETS PACBIO READ PATHS FROM READS_PATH
     //
     ch_grabbed_read_paths       = GrabFiles( pacbio_tuple )
 
@@ -27,6 +27,9 @@ workflow SE_MAPPING {
         .flatten()
         .set { ch_read_paths }
 
+    //
+    // PROCESS: MAKE MINIMAP INPUT CHANNEL AND MAKE BRANCHES BASED ON INPUT READ TYPE
+    //
     reference_tuple
         .combine( ch_read_paths )
         .combine( platform )
@@ -50,7 +53,10 @@ workflow SE_MAPPING {
             ont                : it[6] == "ont"
             }
         .set { minimap_se_input }
-    
+
+    //
+    // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP HIFI MAPPING INPUT
+    //
     minimap_se_input.hifi
         .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
             read_tuple          : tuple( meta, read_path)
@@ -60,7 +66,10 @@ workflow SE_MAPPING {
             bool_cigar_bam      : cigar_bam
         }
         .set { hifi }
-    
+
+    //
+    // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP CLR MAPPING INPUT
+    //
     minimap_se_input.clr
         .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
             read_tuple          : tuple( meta, read_path)
@@ -70,7 +79,10 @@ workflow SE_MAPPING {
             bool_cigar_bam      : cigar_bam
         }
         .set { clr }
-    
+
+    //
+    // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP ONT MAPPING INPUT
+    //
     minimap_se_input.ont
         .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
             read_tuple          : tuple( meta, read_path)
@@ -81,6 +93,9 @@ workflow SE_MAPPING {
         }
         .set { ont }
 
+    //
+    // MOUDLES: MAPPING DIFFERENT TYPE OF READ AGAINIST REFERENCE
+    //
     if ( platform.filter { it == "hifi" } ){
         MINIMAP2_ALIGN_HIFI (
             hifi.read_tuple,
@@ -125,6 +140,9 @@ workflow SE_MAPPING {
         }
         .set { collected_files_for_merge }
 
+    //
+    // MODULE: MERGE ALL OUTPUT BAM
+    //
     SAMTOOLS_MERGE(
         collected_files_for_merge,
         reference_tuple,

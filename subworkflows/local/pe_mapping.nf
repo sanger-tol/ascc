@@ -14,7 +14,7 @@ workflow PE_MAPPING {
 
 
     //
-    // MODULE: GETS PACBIO READ PATHS FROM READS_PATH
+    // PROCESS: GETS PACBIO READ PATHS FROM READS_PATH
     //
     ch_grabbed_read_paths       = GrabFiles( pacbio_tuple )
 
@@ -25,6 +25,9 @@ workflow PE_MAPPING {
         .flatten()
         .set { ch_read_paths }
 
+    //
+    // PROCESS: MAKE MINIMAP INPUT CHANNEL
+    //
     reference_tuple
         .combine( ch_read_paths )
         .combine( platform )
@@ -44,6 +47,9 @@ workflow PE_MAPPING {
         }
         .set { pe_input }
 
+    //
+    // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS
+    //
     pe_input
         .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
             read_tuple          : tuple( meta, read_path)
@@ -54,6 +60,9 @@ workflow PE_MAPPING {
         }
         .set { illumina_input }
 
+    //
+    // MODULE: PAIRED END READ MAPPING USING MINIMAP
+    //
     MINIMAP2_ALIGN_ILLUMINA (
         illumina_input.read_tuple,
         illumina_input.ref,
@@ -76,7 +85,10 @@ workflow PE_MAPPING {
             )
         }
         .set { collected_files_for_merge }
-    
+
+    //
+    // MODULE: MERGE ALL OUTPUT BAM
+    //
     SAMTOOLS_MERGE(
         collected_files_for_merge,
         reference_tuple,
