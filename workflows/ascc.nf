@@ -34,6 +34,7 @@ include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
 include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
 include { RUN_READ_COVERAGE             } from '../subworkflows/local/run_read_coverage'
 
+
 //
 // MODULE: Local modules
 //
