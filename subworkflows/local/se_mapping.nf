@@ -1,7 +1,5 @@
-include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_HIFI        } from '../../modules/nf-core/minimap2/align/main'
-include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_CLR         } from '../../modules/nf-core/minimap2/align/main'
-include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_ONT         } from '../../modules/nf-core/minimap2/align/main'
-include { SAMTOOLS_MERGE                                } from '../../modules/nf-core/samtools/merge/main'
+include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_SE        } from '../../modules/nf-core/minimap2/align/main'
+include { SAMTOOLS_MERGE                             } from '../../modules/nf-core/samtools/merge/main'
 
 workflow SE_MAPPING {
 
@@ -37,7 +35,7 @@ workflow SE_MAPPING {
             tuple(
                 [   id          : meta.id,
                     single_end  : true,
-                    split_prefix: read_path.toString().split('/')[-1].split('.fa.gz')[0]
+                    readtype    : platform.toString()
                 ],
                 read_path,
                 ref,
@@ -47,17 +45,12 @@ workflow SE_MAPPING {
                 platform
             )
         }
-        .branch {
-            hifi               : it[6] == "hifi"
-            clr                : it[6] == "clr"
-            ont                : it[6] == "ont"
-            }
         .set { minimap_se_input }
 
     //
     // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP HIFI MAPPING INPUT
     //
-    minimap_se_input.hifi
+    minimap_se_input
         .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
             read_tuple          : tuple( meta, read_path)
             ref                 : ref
@@ -65,67 +58,21 @@ workflow SE_MAPPING {
             bool_cigar_paf      : cigar_paf
             bool_cigar_bam      : cigar_bam
         }
-        .set { hifi }
-
-    //
-    // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP CLR MAPPING INPUT
-    //
-    minimap_se_input.clr
-        .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
-            read_tuple          : tuple( meta, read_path)
-            ref                 : ref
-            bool_bam_ouput      : bam_output
-            bool_cigar_paf      : cigar_paf
-            bool_cigar_bam      : cigar_bam
-        }
-        .set { clr }
-
-    //
-    // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP ONT MAPPING INPUT
-    //
-    minimap_se_input.ont
-        .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
-            read_tuple          : tuple( meta, read_path)
-            ref                 : ref
-            bool_bam_ouput      : bam_output
-            bool_cigar_paf      : cigar_paf
-            bool_cigar_bam      : cigar_bam
-        }
-        .set { ont }
+        .set { se_input }
 
     //
     // MOUDLES: MAPPING DIFFERENT TYPE OF READ AGAINIST REFERENCE
     //
-    if ( platform.filter { it == "hifi" } ){
-        MINIMAP2_ALIGN_HIFI (
-            hifi.read_tuple,
-            hifi.ref,
-            hifi.bool_bam_ouput,
-            hifi.bool_cigar_paf,
-            hifi.bool_cigar_bam
-        )
-        ch_bams = MINIMAP2_ALIGN_HIFI.out.bam
-    } 
-    else if ( platform.filter { it == "clr" } ){
-        MINIMAP2_ALIGN_CLR (
-            clr.read_tuple,
-            clr.ref,
-            clr.bool_bam_ouput,
-            clr.bool_cigar_paf,
-            clr.bool_cigar_bam
-        )
-        ch_bams = MINIMAP2_ALIGN_CLR.out.bam
-    }
-    else if ( platform.filter { it == "ont" } ){
-        MINIMAP2_ALIGN_ONT (
-            ont.read_tuple,
-            ont.ref,
-            ont.bool_bam_ouput,
-            ont.bool_cigar_paf,
-            ont.bool_cigar_bam
-        )
-        ch_bams = MINIMAP2_ALIGN_ONT.out.bam
-    }
+
+    MINIMAP2_ALIGN_SE (
+            se_input.read_tuple,
+            se_input.ref,
+            se_input.bool_bam_ouput,
+            se_input.bool_cigar_paf,
+            se_input.bool_cigar_bam
+    )
+    ch_bams = MINIMAP2_ALIGN_SE.out.bam
+   
 
     ch_bams
         .map { meta, file ->
