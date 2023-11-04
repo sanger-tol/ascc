@@ -69,6 +69,11 @@ jobs:
           mkdir NT_database
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz | tar -C NT_database -xzf -
 
+      - name: Download the pacbio barcode
+        run: |
+          mkdir pacbio_barcode
+          wget -O pacbio_barcode/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip -c https://www.pacb.com/wp-content/uploads/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip && cd pacbio_barcode && unzip SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip && mv SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta pacbio_adaptors.fa && rm -rf SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip __MACOSX && cd ..
+
       - name: Download the subset of Diamond database
         run: |
           mkdir diamond
