@@ -35,7 +35,7 @@ workflow PE_MAPPING {
             tuple(
                 [   id          : meta.id,
                     single_end  : false,
-                    split_prefix: read_path.toString().split('/')[-1].split('.fasta.gz')[0]
+                    readtype: platform.toString()
                 ],
                 read_path,
                 ref,
