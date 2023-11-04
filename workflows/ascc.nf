@@ -31,7 +31,7 @@ include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt
 include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
 include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
-include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
+//include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
 include { RUN_READ_COVERAGE             } from '../subworkflows/local/run_read_coverage'
 
 
@@ -149,13 +149,13 @@ workflow ASCC {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    PACBIO_BARCODE_CHECK (
+    /*PACBIO_BARCODE_CHECK (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.pacbio_tuple,
         YAML_INPUT.out.pacbio_barcodes,
         YAML_INPUT.out.pacbio_multiplex_codes
     )
-    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)*/
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
