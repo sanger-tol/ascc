@@ -1,10 +1,10 @@
 import sys
 import re
 import os
+import pybedtools
 
 
 class BedTools:
-    # bedtools = '/software/grit/tools/bedtools-2.29.0/bin/bedtools'
     bedtools = "bedtools"
 
     def sort_and_merge_bed_file(self, bed_file):
@@ -35,35 +35,28 @@ class BedTools:
         return subtracted_bed_file
 
     def coverage_for_bed_file(self, bed_file):
-        coverage = 0
-
         with open(bed_file, "r") as bed_handle:
-            for line in bed_handle:
-                line = line.rstrip()
-                fields = re.split("\s+", line)
-                coverage += int(fields[2]) - int(fields[1])
-
+            lines = [line.strip() for line in bed_handle]
+            coverage = sum(int(fields[2]) - int(fields[1]) for line in lines for fields in [re.split("\s+", line)])
         return coverage
 
     def coverage_for_bed_file_by_scaffold(self, bed_file):
         coverage_for_scaffold = {}
-
         with open(bed_file, "r") as bed_handle:
             for line in bed_handle:
-                line = line.rstrip()
-                fields = re.split("\s+", line)
-                if fields[0] not in coverage_for_scaffold:
-                    coverage_for_scaffold[fields[0]] = 0
-                coverage_for_scaffold[fields[0]] += int(fields[2]) - int(fields[1])
-
-        return coverage_for_scaffold
+                fields = re.split("\s+", line.strip())
+                chrom, start, end = fields[0], int(fields[1]), int(fields[2])
+                coverage_for_scaffold[chrom] = coverage_for_scaffold.get(chrom, 0) + (end - start)
+                return coverage_for_scaffold
 
     def coords_to_bed(self, coord_list_for_sequence, bed_file):
-        bed_handle = open(bed_file, "w")
-        for sequence in coord_list_for_sequence:
-            for coord_pair in coord_list_for_sequence[sequence]:
-                bed_handle.write("\t".join([sequence, str(coord_pair[0] - 1), str(coord_pair[1])]) + "\n")
-        bed_handle.close()
+        with open(bed_file, "w") as bed_handle:
+            lines = [
+                f"{sequence}\t{start - 1}\t{end}\n"
+                for sequence, coord_pairs in coord_list_for_sequence.items()
+                for start, end in coord_pairs
+            ]
+            bed_handle.writelines(lines)
 
     def bed_to_coords(self, bed_file):
         coord_list_for_sequence = {}
