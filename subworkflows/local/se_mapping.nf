@@ -6,7 +6,7 @@ workflow SE_MAPPING {
     take:
     reference_tuple          // Channel [ val(meta), path(file) ]
     assembly_path            // Channel path(file)
-    pacbio_tuple             // Channel [ val(meta), val( str ) ]
+    pacbio_tuple             // Channel [ val(meta), path(file) ]
     platform                // Channel val( str )
 
     main:

@@ -20,7 +20,7 @@ workflow YAML_INPUT {
         .flatten()
         .multiMap { data ->
                 assembly_title:                                 ( data.assembly_title                   )
-                reads_path:                                     ( data.reads_path                       )
+                reads_path:                                     ( data.pacbio_reads_path                       )
                 platform:                                       ( data.platform                         )
                 assembly_path:                                  ( file(data.assembly_path)              )
                 pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
