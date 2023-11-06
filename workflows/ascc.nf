@@ -31,7 +31,7 @@ include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt
 include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
 include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
-//include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
+include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
 include { RUN_READ_COVERAGE             } from '../subworkflows/local/run_read_coverage'
 
 
@@ -164,7 +164,7 @@ workflow ASCC {
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.assembly_path,
         YAML_INPUT.out.pacbio_tuple,
-        YAML_INPUT.out.platform
+        YAML_INPUT.out.reads_type
     )
     ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
