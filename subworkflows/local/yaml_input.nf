@@ -36,6 +36,7 @@ workflow YAML_INPUT {
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
+                ncbi_accessionids:                              ( data.ncbi_accessionids_folder                 )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
                 seqkit_values:                                  ( data.seqkit                           )
                 diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
