@@ -110,7 +110,7 @@ process GrabFiles {
     tuple val(meta), path("in")
 
     output:
-    tuple val(meta), path("in/*.{fa,fasta}.gz")
+    tuple val(meta), path("in/*.fa.gz")
 
     "true"
 }
