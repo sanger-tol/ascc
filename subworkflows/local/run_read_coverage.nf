@@ -4,7 +4,7 @@ include { SAMTOOLS_MERGE                                } from '../../modules/nf
 include { SAMTOOLS_INDEX                                } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_SORT                                 } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_DEPTH                                } from '../../modules/nf-core/samtools/depth/main'
-include { SAMTOOLS_DEPTH_AVERAGE_COVERAG                } from '../../modules/local/samtools_depth_average_coverage'
+include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE                } from '../../modules/local/samtools_depth_average_coverage'
 
 workflow RUN_READ_COVERAGE {
 
@@ -77,12 +77,12 @@ workflow RUN_READ_COVERAGE {
     //
     // MODULE: COMPUTE THE AVERAGE COVERAGE
     //
-    SAMTOOLS_DEPTH_AVERAGE_COVERAG (
+    SAMTOOLS_DEPTH_AVERAGE_COVERAGE (
         SAMTOOLS_DEPTH.out.tsv
     )
-    ch_versions = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAG.out.versions )
+    ch_versions = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
 
     emit:
     versions       = ch_versions.ifEmpty(null)
-    tsv_ch         = SAMTOOLS_DEPTH_AVERAGE_COVERAG.out.average_coverage
+    tsv_ch         = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
 }

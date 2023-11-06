@@ -1,4 +1,4 @@
-process SAMTOOLS_DEPTH_AVERAGE_COVERAG {
+process SAMTOOLS_DEPTH_AVERAGE_COVERAGE {
     tag "${meta.id}"
     label 'process_low'
 
@@ -22,6 +22,7 @@ process SAMTOOLS_DEPTH_AVERAGE_COVERAG {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
         samtools_depth_average_coverage: \$(samtools_depth_average_coverage.py --version)
     END_VERSIONS
     """

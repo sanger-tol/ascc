@@ -2,20 +2,12 @@
 """
 Script for finding the average coverage of each scaffold in a SAMtools depth output file.
 originally written by Eerik Aunin (ea10)
-re-wriiten by Yumi Sims (yy5)
+refactored by Yumi Sims (yy5)
 """
 
 import sys
 import argparse
 import general_purpose_functions as gpf
-
-# Define the version number
-__version__ = "1.0.0"
-
-
-def display_version():
-    """Display the script's version."""
-    print(f"{__version__}")
 
 
 def process_data(in_data):
@@ -41,31 +33,23 @@ def calculate_average_coverage(scaffs_dict):
         results.append((scaff_name, average_coverage))
     return results
 
-
 def main():
-    """Main function to run the script."""
-    parser = argparse.ArgumentParser(description="Calculate average coverage for each scaffold.")
-    parser.add_argument("input_file", nargs="?", help="Path to the input SAMtools depth file")
-    parser.add_argument("--version", action="store_true", help="Display the version")
-
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("in_path", type=str, help="Path to SAMtools depth output file")
+    parser.add_argument("-v", "--version", action="version", version="1.0")
     args = parser.parse_args()
 
-    if args.version:
-        display_version()
-        return
+    try:
+        in_data = gpf.ll(args.in_path)
+        scaffs_dict = process_data(in_data)
+        results = calculate_average_coverage(scaffs_dict)
 
-    if not args.input_file:
-        print("Error: Missing input file. Please provide an input file.")
-        parser.print_help()
+        for scaff_name, average_coverage in results:
+            print(f"{scaff_name}, {average_coverage:.2f}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
         sys.exit(1)
-
-    in_data = gpf.ll(args.input_file)
-    scaffs_dict = process_data(in_data)
-    results = calculate_average_coverage(scaffs_dict)
-
-    for scaff_name, average_coverage in results:
-        print(f"{scaff_name}, {average_coverage:.2f}")
-
 
 if __name__ == "__main__":
     main()
+

@@ -7,7 +7,7 @@ workflow SE_MAPPING {
     reference_tuple          // Channel [ val(meta), path(file) ]
     assembly_path            // Channel path(file)
     pacbio_tuple             // Channel [ val(meta), path(file) ]
-    platform                // Channel val( str )
+    reads_type                // Channel val( str )
 
     main:
     ch_versions     = Channel.empty()
@@ -16,33 +16,33 @@ workflow SE_MAPPING {
     //
     // PROCESS: GETS PACBIO READ PATHS FROM READS_PATH
     //
-    ch_grabbed_read_paths       = GrabFiles( pacbio_tuple )
+    ch_grabbed_reads_path       = GrabFiles( pacbio_tuple )
 
-    ch_grabbed_read_paths
+    ch_grabbed_reads_path
         .map { meta, files ->
             tuple( files )
         }
         .flatten()
-        .set { ch_read_paths }
+        .set { ch_reads_path }
 
     //
     // PROCESS: MAKE MINIMAP INPUT CHANNEL AND MAKE BRANCHES BASED ON INPUT READ TYPE
     //
     reference_tuple
-        .combine( ch_read_paths )
-        .combine( platform )
-        .map { meta, ref, read_path, platform ->
+        .combine( ch_reads_path )
+        .combine( reads_type )
+        .map { meta, ref, reads_path, reads_type ->
             tuple(
                 [   id          : meta.id,
                     single_end  : true,
-                    readtype    : platform.toString()
+                    readtype    : reads_type.toString()
                 ],
-                read_path,
+                reads_path,
                 ref,
                 true,
                 false,
                 false,
-                platform
+                reads_type
             )
         }
         .set { minimap_se_input }
@@ -51,8 +51,8 @@ workflow SE_MAPPING {
     // PROCESS: MULTIMAP TO MAKE BOOLEAN ARGUMENTS FOR MINIMAP HIFI MAPPING INPUT
     //
     minimap_se_input
-        .multiMap { meta, read_path, ref, bam_output, cigar_paf, cigar_bam, platform ->
-            read_tuple          : tuple( meta, read_path)
+        .multiMap { meta, reads_path, ref, bam_output, cigar_paf, cigar_bam, reads_type ->
+            read_tuple          : tuple( meta, reads_path)
             ref                 : ref
             bool_bam_ouput      : bam_output
             bool_cigar_paf      : cigar_paf
