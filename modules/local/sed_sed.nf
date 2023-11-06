@@ -1,6 +1,6 @@
 process SED_SED {
-    tag "${meta.id}.mummer"
-    label "process_medium"
+    tag "${meta.id}"
+    label "process_low"
 
     conda "conda-forge::coreutils=9.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -8,18 +8,18 @@ process SED_SED {
             'docker.io/ubuntu:20.04' }"
 
     input:
-    tuple val(meta), path(in_fasta)
+    tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("*_fixed.fa")   , emit: mummer
-    path "versions.yml"                 , emit: versions
+    tuple val(meta), path("*.fa")   , emit: sed
+    path "versions.yml"             , emit: versions
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix  = task.ext.prefix ?: "${meta.id}"
+    def args    = task.ext.args ?: ""
     def VERSION = "9.1" // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
-    // args to be '/>/s/ //g'
     """
-    sed $args ${in_fasta} > ${prefix}_fixed.fa
+    sed $args ${fasta} > ${prefix}.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -32,7 +32,7 @@ process SED_SED {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def VERSION = "9.1" // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
-    touch ${prefix}.mummer
+    touch ${prefix}.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -19,27 +19,28 @@ workflow YAML_INPUT {
     yamlfile
         .flatten()
         .multiMap { data ->
-                assembly_title:                                 ( data.assembly_title                   )
-                pacbio_reads:                                   ( data.pacbio_reads_path                )
-                assembly_path:                                  ( file(data.assembly_path)              )
-                pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
-                pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
-                sci_name:                                       ( data.sci_name                         )
-                taxid:                                          ( data.taxid                            )
-                mito_fasta_path:                                ( data.mito_fasta_path                  )
-                plastid_fasta_path:                             ( data.plastid_fasta_path               )
-                nt_database:                                    ( data.nt_database                      )
-                reference_proteomes:                            ( data.reference_proteomes              )
-                nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
-                kmer_len:                                       ( data.kmer_len                         )
-                fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
-                ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
-                ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
-                busco_lineages_folder:                          ( data.busco_lineages_folder            )
-                seqkit_values:                                  ( data.seqkit                           )
-                diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
-                diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
-                vecscreen_database_path:                        ( data.vecscreen_database_path          )
+                assembly_title:                                 ( data.assembly_title                           )
+                pacbio_reads:                                   ( data.pacbio_reads_path                        )
+                assembly_path:                                  ( file(data.assembly_path)                      )
+                pacbio_barcodes:                                ( file(data.pacbio_barcodes)                    )
+                pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names        )
+                sci_name:                                       ( data.sci_name                                 )
+                taxid:                                          ( data.taxid                                    )
+                mito_fasta_path:                                ( data.mito_fasta_path      ?: "NO MITO"        )
+                plastid_fasta_path:                             ( data.plastid_fasta_path   ?: "NO PLASTID"     )
+                nt_database:                                    ( data.nt_database                              )
+                reference_proteomes:                            ( data.reference_proteomes                      )
+                nt_kraken_db_path:                              ( data.nt_kraken_db_path                        )
+                kmer_len:                                       ( data.kmer_len                                 )
+                fcs_gx_database_path:                           ( data.fcs_gx_database_path                     )
+                ncbi_accessionids:                              ( data.ncbi_accessionids_folder                 )
+                ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path                       )
+                ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path                  )
+                busco_lineages_folder:                          ( data.busco_lineages_folder                    )
+                seqkit_values:                                  ( data.seqkit                                   )
+                diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path            )
+                diamond_nr_database_path:                       ( data.diamond_nr_database_path                 )
+                vecscreen_database_path:                        ( data.vecscreen_database_path                  )
 
         }
         .set{ group }
@@ -48,8 +49,8 @@ workflow YAML_INPUT {
         .seqkit_values
         .flatten()
         .multiMap { data ->
-            sliding_value                           :           ( data.sliding                          )
-            window_value                            :           ( data.window                           )
+            sliding_value                           :           ( data.sliding                                  )
+            window_value                            :           ( data.window                                   )
         }
         .set { seqkit }
 
@@ -79,6 +80,22 @@ workflow YAML_INPUT {
         }
         .set { ch_barcodes }
 
+    group.mito_fasta_path
+        .map{ it ->
+            tuple(  [   id: "mitochondrial_genome"  ],
+                    it
+            )
+        }
+        .set{ ch_mito }
+
+    group.plastid_fasta_path
+        .map{ it ->
+            tuple(  [   id: "plastid_genome"    ],
+                    it
+            )
+        }
+        .set{ ch_plastid }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
@@ -88,6 +105,7 @@ workflow YAML_INPUT {
     taxid                            = group.taxid
     nt_database                      = group.nt_database
     nt_kraken_db_path                = group.nt_kraken_db_path
+    ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
@@ -97,6 +115,10 @@ workflow YAML_INPUT {
     vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
+    mito_tuple                       = ch_mito
+    mito_var                         = "mitochondrial_genome"
+    plastid_tuple                    = ch_plastid
+    plastid_var                      = "plastid_genome"
     versions                         = ch_versions.ifEmpty(null)
 }
 

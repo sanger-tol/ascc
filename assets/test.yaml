@@ -1,22 +1,24 @@
-assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
+assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/ncbi_dataset/data/reheadered.fna
 assembly_title: asccTinyTest
 pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
-pacbio_reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
+pacbio_reads_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/pacbio/
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
-mito_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
-plastid_fasta_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
+mito_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+plastid_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
-nt_database: /data/blastdb/Supported/NT/current/
+nt_database: /data/blastdb/Supported/NT/202308/dbv4/
+nt_database_prefix: nt
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
+ncbi_accessionids_folder: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/ncbi_taxonomy/20230509_accession2taxid/
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/
 ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
-busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-03-14/lineages
+busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-08-27/lineages
 fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb
 vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database/adaptors_for_screening_euks.fa
 diamond_uniprot_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/uniprot/uniprot_reference_proteomes_with_taxonnames.dmnd
-diamond_nr_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/proteins2/nr.dmnd
+diamond_nr_database_path: /lustre/scratch123/tol/resources/nr/latest/nr.dmnd
 seqkit:
-  sliding: 6000
-  window: 100000
+  sliding: 100000
+  window: 6000
