@@ -9,16 +9,16 @@ process GET_LINEAGE_FOR_TOP {
 
     input:
     tuple val(meta), path(tophits)
-    path( ncbi_taxonomy_path )
+    path( accessions_folder )
     path( ncbi_lineage_path )
 
     output:
-    tuple val(meta), path( "*.tsv" ) , emit: full
+    tuple val(meta), path( "*.csv" ) , emit: full
     path "versions.yml"              , emit: versions
 
     script:
     """
-    get_lineage_for_top.py ${tophits} ./ ${ncbi_taxonomy_path} ${ncbi_lineage_path} --column_name_prefix nt
+    get_lineage_for_top.py ${tophits} ./ ${accessions_folder} ${ncbi_lineage_path} --column_name_prefix nt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -2,14 +2,14 @@ process BLAST_BLASTN {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::blast=2.14.1"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/blast:2.14.1--pl5321h6f7f691_0':
         'biocontainers/blast:2.14.1--pl5321h6f7f691_0' }"
 
     input:
-    tuple val(meta), path(fasta)
-    path  db
+    tuple val(meta),  path(fasta)
+    tuple val(meta2), path(db)
 
     output:
     tuple val(meta), path('*.txt'), emit: txt
@@ -19,16 +19,17 @@ process BLAST_BLASTN {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def args        = task.ext.args     ?: ''
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    def db_prefix   = task.ext.dbprefix ?: "${meta2.db_prefix}"
     """
-    DB=`find -L ./ -name "*.ndb" | sed 's/\\.ndb\$//'`
+    DB=`find -L ./ -name "${db_prefix}.nin" | sed 's/\\.nin\$//'`
     blastn \\
         -num_threads $task.cpus \\
         -db \$DB \\
         -query $fasta \\
         $args \\
-        -out ${prefix}.txt
+        -out ${prefix}-${db_prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -37,10 +38,11 @@ process BLAST_BLASTN {
     """
 
     stub:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def args        = task.ext.args     ?: ''
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    def db_prefix   = task.ext.dbprefix ?: "${meta2.db_prefix}"
     """
-    touch ${prefix}.txt
+    touch ${prefix}-${db_prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

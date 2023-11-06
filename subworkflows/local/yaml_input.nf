@@ -49,8 +49,8 @@ workflow YAML_INPUT {
         .seqkit_values
         .flatten()
         .multiMap { data ->
-            sliding_value                           :           ( data.sliding                          )
-            window_value                            :           ( data.window                           )
+            sliding_value                           :           ( data.sliding                                  )
+            window_value                            :           ( data.window                                   )
         }
         .set { seqkit }
 
@@ -80,6 +80,22 @@ workflow YAML_INPUT {
         }
         .set { ch_barcodes }
 
+    group.mito_fasta_path
+        .map{ it ->
+            tuple(  [   id: "mitochondrial_genome"  ],
+                    it
+            )
+        }
+        .set{ ch_mito }
+
+    group.plastid_fasta_path
+        .map{ it ->
+            tuple(  [   id: "plastid_genome"    ],
+                    it
+            )
+        }
+        .set{ ch_plastid }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
@@ -91,6 +107,7 @@ workflow YAML_INPUT {
     taxid                            = group.taxid
     nt_database                      = group.nt_database
     nt_kraken_db_path                = group.nt_kraken_db_path
+    ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
@@ -100,6 +117,10 @@ workflow YAML_INPUT {
     vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
+    mito_tuple                       = ch_mito
+    mito_var                         = "mitochondrial_genome"
+    plastid_tuple                    = ch_plastid
+    plastid_var                      = "plastid_genome"
     versions                         = ch_versions.ifEmpty(null)
 }
 
