@@ -17,7 +17,9 @@ def main():
 
     # Filters through the list of files that nextflow passes in and ID's the one we want
     files_list = args.input
-    file_for_use = next((file for file in files_list.split() if "assembly.ALL.unfiltered_scaffold_coverage.bed" in file), None)
+    file_for_use = next(
+        (file for file in files_list.split() if "assembly.ALL.unfiltered_scaffold_coverage.bed" in file), None
+    )
     if file_for_use is None:
         sys.exit(1)
 
