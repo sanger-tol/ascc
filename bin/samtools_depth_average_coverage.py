@@ -33,6 +33,7 @@ def calculate_average_coverage(scaffs_dict):
         results.append((scaff_name, average_coverage))
     return results
 
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("in_path", type=str, help="Path to SAMtools depth output file")
@@ -50,6 +51,6 @@ def main():
         print(f"An error occurred: {e}")
         sys.exit(1)
 
+
 if __name__ == "__main__":
     main()
-
