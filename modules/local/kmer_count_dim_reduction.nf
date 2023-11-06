@@ -9,7 +9,7 @@ process KMER_COUNT_DIM_REDUCTION {
 
     input:
     tuple val(meta), path(kmer_counts_file)
-    val dimensionality_reduction_methods
+    val dimensionality_reduction_method
     val n_neighbors_setting
     val autoencoder_epochs_count
 
@@ -23,17 +23,13 @@ process KMER_COUNT_DIM_REDUCTION {
     script:
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
-    if [ wc -l < $kmer_counts_file | -ge "3" ]]
-    then
-        kmer_count_dim_reduction.py \\
-            $kmer_counts_file \\
-            ${prefix}_kmers_dim_reduction_embeddings.csv \\
-            --selected_methods $dimensionality_reduction_methods \\
-            --n_neighbors_setting $n_neighbors_setting \\
-            --autoencoder_epochs_count $autoencoder_epochs_count
-    else
-        touch ${prefix}_kmers_dim_reduction_embeddings.csv
-    fi
+
+    kmer_count_dim_reduction.py \\
+        $kmer_counts_file \\
+        ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_embeddings.csv \\
+        --selected_methods $dimensionality_reduction_method \\
+        --n_neighbors_setting $n_neighbors_setting \\
+        --autoencoder_epochs_count $autoencoder_epochs_count
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -55,6 +51,7 @@ process KMER_COUNT_DIM_REDUCTION {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
+        pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
         tensorflow: \$(tensorflow --version | sed 's/tensorflow //g')
         scikit-learn: \$(scikit-learn --version | sed 's/scikit-learn //g')
         umap-learn: \$(umap-learn --version | sed 's/umap-learn //g')

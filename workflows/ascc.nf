@@ -161,10 +161,10 @@ workflow ASCC {
     //
     GET_KMERS_PROFILE (
         GENERATE_GENOME.out.reference_tuple,
-        params.kmer_size,
+        Channel.from(params.kmer_size),
         YAML_INPUT.out.dimensionality_reduction_methods,
-        params.n_neighbors_setting,
-        params.autoencoder_epochs_count
+        Channel.from(params.n_neighbors_setting),
+        Channel.from(params.autoencoder_epochs_count)
     )
     ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
