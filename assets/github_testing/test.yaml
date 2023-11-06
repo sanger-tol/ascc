@@ -2,7 +2,7 @@ assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17
 assembly_title: asccTinyTest
 pacbio_barcodes: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
-pacbio_reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio/
+pacbio_reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio
 platform: "hifi"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
