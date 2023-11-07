@@ -13,6 +13,7 @@ import gzip
 import sys
 import argparse
 from pathlib import Path
+import general_purpose_functions as gpf
 
 
 def main():
@@ -104,7 +105,7 @@ def main():
                     # if not os.path.isfile(length_file):
 
                     # Replaced the exonerate fastalength binary with a Python script (EA)
-                    os.system("fastalength.py " + assembly_file + " > " + length_file)
+                    fastalength(assembly_file, length_file)
                     length_for_sequence = parse_fastalength_file(length_file)
 
                     coverage_file_base_name = args.extracts_dir + assembly_name + "." + output_section_name
@@ -136,11 +137,16 @@ def write_coverage_file(coverage_file_base_name, merged_bed_file, length_for_seq
     # Record coverage
     merged_coord_list_for_sequence = bedtools.bed_to_coords(merged_bed_file)
     coverage_for_sequence = bedtools.coverage_for_bed_file_by_scaffold(merged_bed_file)
+    
     percentage_coverage_for_sequence = {}
     for sequence in coverage_for_sequence:
-        percentage_coverage_for_sequence[sequence] = (
-            coverage_for_sequence[sequence] / length_for_sequence[sequence] * 100
-        )
+        if sequence in length_for_sequence:
+            percentage_coverage_for_sequence[sequence] = (
+                coverage_for_sequence[sequence] / length_for_sequence[sequence] * 100
+            )
+        else:
+            # Handle missing sequence length information
+            percentage_coverage_for_sequence[sequence] = 0
 
     coverage_threshold = 1
 
@@ -211,6 +217,16 @@ def write_coverage_file(coverage_file_base_name, merged_bed_file, length_for_seq
                     )
                 )
 
+def fastalength(input_path, length_file):
+    fasta_data = gpf.read_fasta_in_chunks(input_path)
+    with open(length_file, 'w') as length_file_handle:
+        for header, seq in fasta_data:
+            if header is not None:  # Check if header is not None
+                if " " in header:
+                    header = header.replace(" ", "_")
+                result = f"{len(seq)} {header}"
+                print(result)
+                length_file_handle.write(result + '\n')
 
 # Parse fastalength file
 def parse_fastalength_file(length_file):

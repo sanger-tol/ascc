@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 <<<<<<< HEAD
 assembly_title: asccTest
@@ -5,6 +6,9 @@ pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_ada
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
 pacbio_reads_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/pacbio/
 =======
+=======
+assembly_path: /lustre/scratch124/tol/projects/tol/data/insects/Polyommatus_atlantica/assembly/draft/treeval/ilPolAtla1_merged/raw/ref.fa
+>>>>>>> 4a92aaa (refine bedtools and other scripts)
 assembly_title: asccTinyTest
 reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
 reads_type: "hifi"
