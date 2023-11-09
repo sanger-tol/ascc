@@ -153,8 +153,6 @@ workflow ASCC {
         }
         .set { plastid_check }
 
-    plastid_check.valid.view()
-
     //
     // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
     //

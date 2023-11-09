@@ -93,7 +93,7 @@ workflow ORGANELLAR_BLAST {
     //
     // LOGIC: COMBINE CHANNELS INTO FORMAT OF ID, ORGANELLE ID AND FILES
     //
-    EXTRACT_CONTAMINANTS.out.bed
+    EXTRACT_CONTAMINANTS.out.contamination_bed
         .combine ( organellar_tuple )
         .map { blast_meta, blast_txt, organelle_meta, organelle_fasta ->
             tuple( [    id          :   blast_meta.id,
