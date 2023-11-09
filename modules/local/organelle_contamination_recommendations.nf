@@ -11,8 +11,8 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
     tuple val(meta), path(files)
 
     output:
-    tuple val(meta), path( "*bed" ) , emit: bed
-    path "versions.yml"             , emit: versions
+    tuple val(meta), path( "*contamination_recommendation" ) , emit: recomendations
+    path "versions.yml"                                      , emit: versions
 
     script:
     def args    = task.ext.args ?: ''
@@ -20,7 +20,7 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
     """
     organelle_contamination_recommendation.py \\
         --input "${files}" \\
-        --output ${prefix}.bed
+        --output ${prefix}.contamination_recommendation
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -31,7 +31,7 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
 
     stub:
     def args    = task.ext.args ?: ''
-    def prefix  = task.ext.prefix ?: ''
+    def prefix  = task.ext.prefix ?: "${meta.id}-${meta.organelle}"
     """
     touch ${prefix}.bed
 
