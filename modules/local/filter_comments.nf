@@ -8,7 +8,7 @@ process FILTER_COMMENTS {
             'docker.io/ubuntu:20.04' }"
 
     input:
-    tuple val(meta), path(busco)
+    tuple val(meta), path(blast_results)
 
     output:
     tuple val(meta), path( "*txt" ) , emit: txt
@@ -18,8 +18,10 @@ process FILTER_COMMENTS {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
     def VERSION = "9.1" // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+
+    // EXPLAINER: AWK with space as delimiter, if first value of line is not '#' and column 4 (length of hit) >= 200 then print line and save to file
     """
-    cat ${busco} | awk '\$4>=200' | grep -v '#' > ${prefix}_filtered_busco.txt
+    awk -v OFS=" " '{ if (\$1 ~ /^[^#]/ && \$4 >= 200) {print \$0} }' ${blast_results} > ${prefix}_filtered_busco.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
