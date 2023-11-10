@@ -29,7 +29,7 @@ process BLAST_BLASTN {
         -db \$DB \\
         -query $fasta \\
         $args \\
-        -out ${prefix}-${db_prefix}.txt
+        -out ${prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -42,7 +42,7 @@ process BLAST_BLASTN {
     def prefix      = task.ext.prefix   ?: "${meta.id}"
     def db_prefix   = task.ext.dbprefix ?: "${meta2.db_prefix}"
     """
-    touch ${prefix}-${db_prefix}.txt
+    touch ${prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

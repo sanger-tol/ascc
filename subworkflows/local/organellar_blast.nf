@@ -40,9 +40,10 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
     BLAST_MAKEBLASTDB.out.db
-        .map { it ->
-            tuple ( [   id: "organellar_check"  ],
-                    it
+        .combine( organellar_tuple )
+        .map { db_path, meta, organelle ->
+            tuple ( meta,
+                    db_path
             )
         }
         .set { organellar_check_db }
@@ -68,25 +69,32 @@ workflow ORGANELLAR_BLAST {
                     file
             )
         }
-        .branch {
-            valid:      it[0].sz >= 250
-            invalid:    it[0].sz <= 249
-        }
         .set { blast_check }
 
     //
-    // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT
+    // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT, ALSO BLAST result
     //
     FILTER_COMMENTS (
-        blast_check.valid
+        blast_check
     )
     ch_versions     = ch_versions.mix(FILTER_COMMENTS.out.versions)
 
     //
-    // MODULE: EXTRACT CONTAMINANTS FROM THE BUSCO REPORT
+    // LOGIC: IF FILTER_COMMENTS RETURNS FILE WITH NO LINES THEN SUBWORKFLOWS STOPS
+    //
+    FILTER_COMMENTS.out.txt
+        .branch { meta, file ->
+            valid: file.countLines() >= 1
+            invalid : file.countLines() < 1
+        }
+        .set {no_comments}
+
+    //
+    // MODULE: EXTRACT CONTAMINANTS FROM THE BLAST REPORT
     //
     EXTRACT_CONTAMINANTS (
-        FILTER_COMMENTS.out.txt
+        FILTER_COMMENTS.out.txt,
+        reference_tuple
     )
     ch_versions     = ch_versions.mix(EXTRACT_CONTAMINANTS.out.versions)
 
@@ -114,7 +122,7 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.versions)
 
     emit:
-    organlle_report = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recomendations
+    organelle_report = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recomendations
     versions        = ch_versions.ifEmpty(null)
 
 }

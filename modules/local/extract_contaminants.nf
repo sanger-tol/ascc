@@ -2,12 +2,13 @@ process EXTRACT_CONTAMINANTS {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "conda-forge::python=3.9 conda-forge::biopython=1.78"
+    conda "conda-forge::python=3.9 conda-forge::biopython=1.78 conda-forge::pybedtools=0.9.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.78' :
         'biocontainers/biopython:1.78' }"
 
     input:
+    tuple val(meta), path(blast_data)
     tuple val(meta), path(fasta)
 
     output:
@@ -18,8 +19,8 @@ process EXTRACT_CONTAMINANTS {
     def args    = task.ext.args ?: ''
     """
     extract_contaminants_by_type.py \\
-        ${fasta} \\
-        $args
+        ${blast_data} \\
+        --assembly_file ${fasta} \\
 
 
     cat <<-END_VERSIONS > versions.yml
