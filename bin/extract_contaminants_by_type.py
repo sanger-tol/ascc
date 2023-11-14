@@ -196,16 +196,18 @@ def write_coverage_file(coverage_file_base_name, merged_bed_file, length_for_seq
                     )
                 )
 
+
 def fastalength(input_path, length_file):
     fasta_data = gpf.read_fasta_in_chunks(input_path)
-    with open(length_file, 'w') as length_file_handle:
+    with open(length_file, "w") as length_file_handle:
         for header, seq in fasta_data:
             if header is not None:  # Check if header is not None
                 if " " in header:
                     header = header.replace(" ", "_")
                 result = f"{len(seq)} {header}"
                 print(result)
-                length_file_handle.write(result + '\n')
+                length_file_handle.write(result + "\n")
+
 
 # Parse fastalength file
 def parse_fastalength_file(length_file):
@@ -239,6 +241,7 @@ def extract_sequence(seq_record, start, end, margin):
     extracted_slice.name = extracted_slice.id
 
     return extracted_slice
+
 
 if __name__ == "__main__":
     main()
