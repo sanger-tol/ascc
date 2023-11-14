@@ -10,8 +10,9 @@ from itertools import groupby
 Script from James Torrance (jt8) and Eerik Aunin (ea10)
 refactored by Yumi sims (yy5)
 """
+
+
 class BedTools:
-    
     def __init__(self):
         pass
 
@@ -34,8 +35,7 @@ class BedTools:
         merged_bed_file = self.sort_and_merge_bed_file(bed_file_1)
         os.system("mv " + merged_bed_file + " " + bed_file_1)
 
-
-    def subtract_b_from_a(self,bed_file_1, bed_file_2):
+    def subtract_b_from_a(self, bed_file_1, bed_file_2):
         if not os.path.exists(bed_file_1) or not os.path.exists(bed_file_2):
             raise FileNotFoundError("One or both of the input BED files do not exist.")
         output_file_name = os.path.splitext(os.path.basename(bed_file_1))[0] + ".subtracted.bed"
@@ -54,7 +54,6 @@ class BedTools:
             coverage = sum(int(fields[2]) - int(fields[1]) for line in lines for fields in [re.split("\s+", line)])
         return coverage
 
-
     def coverage_for_bed_file_by_scaffold(self, bed_file):
         with open(bed_file, "r") as bed_handle:
             fields_list = [re.split("\s+", line.strip()) for line in bed_handle]
@@ -69,7 +68,6 @@ class BedTools:
                     pass
             coverage_for_scaffold[chrom] = total_coverage
         return coverage_for_scaffold
-
 
     def coords_to_bed(self, coord_list_for_sequence, bed_file):
         with open(bed_file, "w") as bed_handle:
@@ -95,4 +93,3 @@ class BedTools:
                         pass
 
         return dict(coord_list_for_sequence)
-
