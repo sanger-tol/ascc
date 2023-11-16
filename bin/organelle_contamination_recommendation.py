@@ -8,7 +8,9 @@ import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Create an organellar contamination report text file based on the organellar contamination BED file")
+    parser = argparse.ArgumentParser(
+        description="Create an organellar contamination report text file based on the organellar contamination BED file"
+    )
     parser.add_argument("--input", type=str, help="Input BED file", default=None)
     parser.add_argument("--output", type=str, help="Output recommendation", default=None)
     parser.add_argument("-v", action="version", version="1.0")
