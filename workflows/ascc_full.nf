@@ -97,13 +97,10 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-
-    /*
     EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-    */
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
@@ -134,66 +131,54 @@ workflow ASCC {
     //
     // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
     //
-
-    /*
     YAML_INPUT.out.mito_tuple
         .branch { meta, check ->
             valid:      check != "NO MITO"
             invalid:    check == "NO MITO"
         }
         .set { mito_check }
-    */
 
     //
     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
     //
-    /*
     MITO_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.mito_var,
         mito_check.valid
     )
     ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
-    */
 
     //
     // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
     //
-    /*
     YAML_INPUT.out.plastid_tuple
         .branch { meta, check ->
             valid:      check != "NO PLASTID"
             invalid:    check == "NO PLASTID"
         }
         .set { plastid_check }
-    */
 
     //
     // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
     //
-    /*
     PLASTID_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.plastid_var,
         plastid_check.valid
     )
     ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
-    */
 
     //
     // SUBWORKFLOW:
     //
-    /*
     RUN_FCSADAPTOR (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-    */
 
     //
     // SUBWORKFLOW:
     //
-    /*
     RUN_FCSGX (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.fcs_gx_database_path,
@@ -201,7 +186,6 @@ workflow ASCC {
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-    */
 
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
@@ -217,7 +201,6 @@ workflow ASCC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    /*
     RUN_READ_COVERAGE (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.assembly_path,
@@ -225,19 +208,10 @@ workflow ASCC {
         YAML_INPUT.out.reads_type
     )
     ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    */
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
-
-    RUN_VECSCREEN (
-        GENERATE_GENOME.out.reference_tuple,
-        "/lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database"
-        //YAML_INPUT.out.vecscreen_database_path
-    )
-    ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
-
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
