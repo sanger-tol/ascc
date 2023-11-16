@@ -11,8 +11,8 @@ process FILTER_COMMENTS {
     tuple val(meta), path(blast_results)
 
     output:
-    tuple val(meta), path( "*txt" ) , emit: txt
-    path "versions.yml"             , emit: versions
+    tuple val(meta), path( "*txt" )     , emit: txt
+    path "versions.yml"                 , emit: versions
 
     script:
     def args    = task.ext.args ?: ''
@@ -21,7 +21,7 @@ process FILTER_COMMENTS {
 
     // EXPLAINER: AWK with space as delimiter, if first value of line is not '#' and column 4 (length of hit) >= 200 then print line and save to file
     """
-    awk -v OFS=" " '{ if (\$1 ~ /^[^#]/ && \$4 >= 200) {print \$0} }' ${blast_results} > ${prefix}_filtered_busco.txt
+    awk -v OFS=" " '{ if (\$1 ~ /^[^#]/ && \$4 >= 200) {print \$0} }' ${blast_results} > ${prefix}_filtered_blast_result.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -36,7 +36,7 @@ process FILTER_COMMENTS {
     """
     touch ${prefix}.fa
 
-    cat <<-END_VERSIONS > ${prefix}_filtered_busco.txt
+    cat <<-END_VERSIONS > ${prefix}_filtered_blast_result.txt
     "${task.process}":
         ubuntu: \$(ubuntu --version | sed 's/Ubuntu //g')
         coreutils: $VERSION
