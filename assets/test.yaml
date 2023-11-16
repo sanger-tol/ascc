@@ -1,8 +1,9 @@
-assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/ncbi_dataset/data/reheadered.fna
+assembly_path: /lustre/scratch124/tol/projects/tol/data/insects/Polyommatus_atlantica/assembly/draft/treeval/ilPolAtla1_merged/raw/ref.fa
 assembly_title: asccTinyTest
+reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
+reads_type: "hifi"
 pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
-pacbio_reads_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/pacbio/
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
 mito_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa

@@ -1,8 +1,9 @@
 assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 assembly_title: asccTinyTest
-pacbio_barcodes: /home/runner/work/ascc/ascc/assets/pacbio_adaptors.fa
+pacbio_barcodes: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
-pacbio_reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio/
+reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio
+reads_type: "hifi"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
 mito_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa

@@ -8,11 +8,9 @@ import os
 import re
 import BedTools
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 import gzip
-import sys
 import argparse
-from pathlib import Path
+import general_purpose_functions as gpf
 
 
 def main():
@@ -28,28 +26,13 @@ def main():
 
         if args.assembly_file == None:
             assembly_file = re.sub("\.contamination", ".fa.gz", contamination_file)
-
-        # 	assembly_name_match = re.search('([^/]*?)\.contamination', contamination_file)
-        # 	assembly_name = assembly_name_match.group(1)
         else:
             assembly_file = args.assembly_file
-        # 	assembly_name_match = re.search('([^/]*?)\.(fa|fasta|fna)', assembly_file)
-        # 	assembly_name = assembly_name_match.group(1)
         assembly_name = "assembly"
 
         # If at first you don't succeed, try again with a .fasta suffix:
         if not os.path.isfile(assembly_file):
             assembly_file = re.sub("\.contamination", ".fasta.gz", contamination_file)
-
-        # assembly_dir = '/lustre/scratch123/tol/teams/grit/jt8/contamination_screen/assemblies/'
-
-        # if not os.path.isfile(assembly_file):
-        # 	# Fall through to looking in the assemblies dir
-        # 	assembly_file = assembly_dir + assembly_name + '.fa'
-
-        # if not os.path.isfile(assembly_file):
-        # 	# ... and then try a .fasta extension
-        # 	assembly_file = assembly_dir + assembly_name + '.fasta'
 
         if not os.path.isfile(assembly_file):
             print(assembly_file + " does not exist")
@@ -83,11 +66,10 @@ def main():
                         coord_list_for_section_and_sequence[section_name][fields[0]].append(coords)
                         coord_list_for_section_and_sequence["ALL"][fields[0]].append(coords)
 
-            # 			margins = [0,10000]
+            # margins = [0,10000]
             margins = [0]
 
             # Write BED file
-            # extracts_dir = '/lustre/scratch123/tol/teams/grit/jt8/contamination_screen/contaminated_extracts/'
             for section_name in coord_list_for_section_and_sequence:
                 # Only print sections that have data- but always produce an "ALL" file
                 if len(coord_list_for_section_and_sequence[section_name]) > 0 or section_name == "ALL":
@@ -101,10 +83,9 @@ def main():
 
                     # Get lengths
                     length_file = args.extracts_dir + assembly_name + ".lengths"
-                    # if not os.path.isfile(length_file):
 
                     # Replaced the exonerate fastalength binary with a Python script (EA)
-                    os.system("fastalength.py " + assembly_file + " > " + length_file)
+                    fastalength(assembly_file, length_file)
                     length_for_sequence = parse_fastalength_file(length_file)
 
                     coverage_file_base_name = args.extracts_dir + assembly_name + "." + output_section_name
@@ -121,11 +102,8 @@ def main():
                         else:
                             handle = open(assembly_file, "rt")
 
-                        # 				with gzip.open(assembly_file, "rt") as handle:
                         for record in SeqIO.parse(handle, "fasta"):
-                            # print(record.id)
                             if record.id in merged_coord_list_for_sequence:
-                                # print('Extracting')
                                 for coord_pair in merged_coord_list_for_sequence[record.id]:
                                     extracted_sequence = extract_sequence(record, coord_pair[0], coord_pair[1], margin)
                                     SeqIO.write([extracted_sequence], output_handle, "fasta")
@@ -136,15 +114,20 @@ def write_coverage_file(coverage_file_base_name, merged_bed_file, length_for_seq
     # Record coverage
     merged_coord_list_for_sequence = bedtools.bed_to_coords(merged_bed_file)
     coverage_for_sequence = bedtools.coverage_for_bed_file_by_scaffold(merged_bed_file)
+
     percentage_coverage_for_sequence = {}
     for sequence in coverage_for_sequence:
-        percentage_coverage_for_sequence[sequence] = (
-            coverage_for_sequence[sequence] / length_for_sequence[sequence] * 100
-        )
+        if sequence in length_for_sequence:
+            percentage_coverage_for_sequence[sequence] = (
+                coverage_for_sequence[sequence] / length_for_sequence[sequence] * 100
+            )
+        else:
+            # Handle missing sequence length information
+            percentage_coverage_for_sequence[sequence] = 0
 
     coverage_threshold = 1
 
-    # Take the stem name for the file, and print to various files, with c coverage threshod, without, and per line
+    # Take the stem name for the file, and print to various files, with c coverage threshold, without, and per line
 
     filtered_coverage_scaffold_file = coverage_file_base_name + ".filtered_scaffold_coverage.bed"
     unfiltered_coverage_scaffold_file = coverage_file_base_name + ".unfiltered_scaffold_coverage.bed"
@@ -212,6 +195,18 @@ def write_coverage_file(coverage_file_base_name, merged_bed_file, length_for_seq
                 )
 
 
+def fastalength(input_path, length_file):
+    fasta_data = gpf.read_fasta_in_chunks(input_path)
+    with open(length_file, "w") as length_file_handle:
+        for header, seq in fasta_data:
+            if header is not None:  # Check if header is not None
+                if " " in header:
+                    header = header.replace(" ", "_")
+                result = f"{len(seq)} {header}"
+                print(result)
+                length_file_handle.write(result + "\n")
+
+
 # Parse fastalength file
 def parse_fastalength_file(length_file):
     length_for_sequence = {}
@@ -238,8 +233,6 @@ def extract_sequence(seq_record, start, end, margin):
         start -= margin
     else:
         start = 1
-
-    # print("Slicing: " + str(start) + '-' + str(end))
 
     extracted_slice = seq_record[start:end]
     extracted_slice.id = seq_record.id + ":" + str(start) + "-" + str(end)
