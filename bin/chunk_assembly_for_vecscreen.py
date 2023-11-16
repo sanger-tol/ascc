@@ -7,42 +7,44 @@ from Bio import SeqIO
 import argparse
 import os
 
+
 def main(fasta_input_file, fasta_output_file):
-	fasta_input_file = os.path.abspath(fasta_input_file)
-	fasta_output_file = os.path.abspath(fasta_output_file)
+    fasta_input_file = os.path.abspath(fasta_input_file)
+    fasta_output_file = os.path.abspath(fasta_output_file)
 
-	threshold_length = 500000
-	overlap_length = int( threshold_length / 10 )
-	minimum_record_size = 11
+    threshold_length = 500000
+    overlap_length = int(threshold_length / 10)
+    minimum_record_size = 11
 
-	fasta_output_handle = open(fasta_output_file, 'w')
+    fasta_output_handle = open(fasta_output_file, "w")
 
-	with open(fasta_input_file, 'r') as fasta_input_handle:
-		for record in SeqIO.parse(fasta_input_handle, "fasta"):
+    with open(fasta_input_file, "r") as fasta_input_handle:
+        for record in SeqIO.parse(fasta_input_handle, "fasta"):
+            if len(record) >= minimum_record_size:
+                records_to_write = []
 
-			if len(record) >= minimum_record_size:
-				records_to_write = []
+                slice_count = 0
+                while (slice_count * threshold_length) < len(record) - (threshold_length + overlap_length):
+                    record_slice = record[
+                        (slice_count * threshold_length) : ((slice_count + 1) * threshold_length + overlap_length)
+                    ]
+                    record_slice.id += ".chunk_" + str(slice_count + 1)
 
-				slice_count = 0
-				while (slice_count * threshold_length) < len(record) - (threshold_length+overlap_length):
-					record_slice = record[(slice_count*threshold_length):((slice_count+1)*threshold_length + overlap_length)]
-					record_slice.id += '.chunk_' + str(slice_count+1)
+                    record_slice.description = ""
+                    records_to_write.append(record_slice)
+                    slice_count += 1
 
-					record_slice.description = ''
-					records_to_write.append(record_slice)
-					slice_count += 1
+                final_record_slice = record[(slice_count * threshold_length) :]
 
-				final_record_slice = record[(slice_count*threshold_length):]
+                if slice_count > 0:
+                    final_record_slice.id += ".chunk_" + str(slice_count + 1)
+                final_record_slice.description = ""
 
-				if slice_count > 0:
-					final_record_slice.id += '.chunk_' + str(slice_count+1)
-				final_record_slice.description = ''
+                records_to_write.append(final_record_slice)
 
-				records_to_write.append(final_record_slice)
+                SeqIO.write(records_to_write, fasta_output_handle, "fasta")
 
-				SeqIO.write(records_to_write, fasta_output_handle, 'fasta')
-
-	fasta_output_handle.close()
+    fasta_output_handle.close()
 
 
 if __name__ == "__main__":

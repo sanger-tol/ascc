@@ -46,8 +46,17 @@ def main(vecscreen_file, chunk_size):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("vecscreen_file", type=str, help="Path to output file of VecScreen (run with -f3 flag), filtered with VSlistTo1HitPerLine.awk")
-    parser.add_argument("--chunk_size", type=int, help="Chunk size of the chunked FASTA file that VecScreen was run with, in bp. Default: 500000", default=50000)
+    parser.add_argument(
+        "vecscreen_file",
+        type=str,
+        help="Path to output file of VecScreen (run with -f3 flag), filtered with VSlistTo1HitPerLine.awk",
+    )
+    parser.add_argument(
+        "--chunk_size",
+        type=int,
+        help="Chunk size of the chunked FASTA file that VecScreen was run with, in bp. Default: 500000",
+        default=50000,
+    )
     parser.add_argument("-v", "--version", action="version", version="1.0")
     args = parser.parse_args()
     main(args.vecscreen_file, args.chunk_size)
