@@ -11,7 +11,7 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
     tuple val(meta), path(files)
 
     output:
-    tuple val(meta), path( "*contamination_recommendation" ) , emit: recomendations
+    tuple val(meta), path( "*contamination_recommendation" ) , emit: recommendations
     path "versions.yml"                                      , emit: versions
 
     script:

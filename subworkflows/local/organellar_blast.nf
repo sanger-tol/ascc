@@ -58,7 +58,7 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //
-    // LOGIC: FILTER BLAST RESULTS WITH ONLY COMMENT LINES THESE SHOULD BE THOSE UNDER 250bytes
+    // LOGIC: REORGANISE CHANNEL FOR DOWNSTREAM PROCESS
     //
     BLAST_BLASTN.out.txt
         .combine ( organellar_tuple )
@@ -109,7 +109,7 @@ workflow ORGANELLAR_BLAST {
                     blast_txt
             )
         }
-        .set { reformatted_recomendations }
+        .set { reformatted_recommendations }
 
     reformatted_recomendations.view()
 
@@ -122,7 +122,7 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.versions)
 
     emit:
-    organelle_report = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recomendations
+    organelle_report = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations
     versions        = ch_versions.ifEmpty(null)
 
 }

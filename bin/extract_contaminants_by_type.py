@@ -8,10 +8,8 @@ import os
 import re
 import BedTools
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 import gzip
 import argparse
-from pathlib import Path
 import general_purpose_functions as gpf
 
 
