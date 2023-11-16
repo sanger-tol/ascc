@@ -80,10 +80,12 @@ workflow ASCC {
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
+    /*
     GC_CONTENT (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
+    */
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
