@@ -1,4 +1,4 @@
-assembly_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20231114_pyoelii_vecscreen/ref/PlasmoDB-58_Pyoeliiyoelii17XNL_Genome_with_adapters2.fasta
+assembly_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20231114_pyoelii_vecscreen/ref/PlasmoDB-58_Pyoeliiyoelii17XNL_Genome_with_adapters2_fh.fasta
 assembly_title: asccTinyTest
 reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
 reads_type: "hifi"
