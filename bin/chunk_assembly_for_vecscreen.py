@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""
+Script for chunking an assembly before running NCBI VecScreen. Adapted from a script by James Torrance, edited by Eerik Aunin
+"""
+
+from Bio import SeqIO
+import argparse
+import os
+
+def main(fasta_input_file, fasta_output_file):
+	fasta_input_file = os.path.abspath(fasta_input_file)
+	fasta_output_file = os.path.abspath(fasta_output_file)
+
+	threshold_length = 500000
+	overlap_length = int( threshold_length / 10 )
+	minimum_record_size = 11
+
+	fasta_output_handle = open(fasta_output_file, 'w')
+
+	with open(fasta_input_file, 'r') as fasta_input_handle:
+		for record in SeqIO.parse(fasta_input_handle, "fasta"):
+
+			if len(record) >= minimum_record_size:
+				records_to_write = []
+
+				slice_count = 0
+				while (slice_count * threshold_length) < len(record) - (threshold_length+overlap_length):
+					record_slice = record[(slice_count*threshold_length):((slice_count+1)*threshold_length + overlap_length)]
+					record_slice.id += '.chunk_' + str(slice_count+1)
+
+					record_slice.description = ''
+					records_to_write.append(record_slice)
+					slice_count += 1
+
+				final_record_slice = record[(slice_count*threshold_length):]
+
+				if slice_count > 0:
+					final_record_slice.id += '.chunk_' + str(slice_count+1)
+				final_record_slice.description = ''
+
+				records_to_write.append(final_record_slice)
+
+				SeqIO.write(records_to_write, fasta_output_handle, 'fasta')
+
+	fasta_output_handle.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("fasta_input_file", type=str, help="Path to input FASTA file")
+    parser.add_argument("fasta_output_file", type=str, help="Path for FASTA output file")
+    parser.add_argument("-v", "--version", action="version", version="1.0")
+    args = parser.parse_args()
+    main(args.fasta_input_file, args.fasta_output_file)
