@@ -111,13 +111,11 @@ workflow ORGANELLAR_BLAST {
         }
         .set { reformatted_recommendations }
 
-    reformatted_recomendations.view()
-
     //
     // MODULE: GENERATE BED FILE OF ORGANELLAR SITES RECOMENDED TO BE REMOVED
     //
     ORGANELLE_CONTAMINATION_RECOMMENDATIONS (
-        reformatted_recomendations
+        reformatted_recommendations
     )
     ch_versions     = ch_versions.mix(ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.versions)
 
