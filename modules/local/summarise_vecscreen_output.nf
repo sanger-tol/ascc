@@ -21,6 +21,7 @@ process SUMMARISE_VECSCREEN_OUTPUT {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     summarise_vecscreen_output.py ${vecscreen_filtered_outfile} > ${prefix}.vecscreen_contamination
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
@@ -32,6 +33,7 @@ process SUMMARISE_VECSCREEN_OUTPUT {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.vecscreen_contamination
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')

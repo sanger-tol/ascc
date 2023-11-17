@@ -11,15 +11,16 @@ process CHUNK_ASSEMBLY_FOR_VECSCREEN {
     tuple val(meta), path(fasta_input_file)
 
     output:
-    tuple val(meta), path("chunked_assembly.fa"), emit: chunked_assembly
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*_chunked_assembly.fa")  , emit: chunked_assembly
+    path "versions.yml"                             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
+    def prefix  = args.ext.prefix   ?: "${meta.id}"
     """
-    chunk_assembly_for_vecscreen.py $fasta_input_file chunked_assembly.fa
+    chunk_assembly_for_vecscreen.py $fasta_input_file ${prefix}_chunked_assembly.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -29,8 +30,9 @@ process CHUNK_ASSEMBLY_FOR_VECSCREEN {
     """
 
     stub:
+    def prefix  = args.ext.prefix   ?: "${meta.id}"
     """
-    touch chunked_assembly.fa
+    touch ${prefix}_chunked_assembly.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

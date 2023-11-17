@@ -18,8 +18,10 @@ process FILTER_VECSCREEN_RESULTS {
     task.ext.when == null || task.ext.when
 
     script:
+    def prefix      = args.ext.prefix ?: "${meta.id}"
+    def args        = args.ext.args ?: ''
     """
-    VSlistTo1HitPerLine.py --skip_reporting_suspect_hits --skip_reporting_weak_hits --skip_reporting_no_hits ${vecscreen_outfile} > vecscreen.grepped.out
+    VSlistTo1HitPerLine.py ${args} ${vecscreen_outfile} > ${prefix}_vecscreen.grepped.out
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -29,8 +31,9 @@ process FILTER_VECSCREEN_RESULTS {
     """
 
     stub:
+    def prefix      = args.ext.prefix ?: "${meta.id}"
     """
-    touch vecscreen.grepped.out
+    touch ${prefix}_vecscreen.grepped.out
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
