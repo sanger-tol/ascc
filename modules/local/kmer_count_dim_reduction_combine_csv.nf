@@ -9,7 +9,7 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
         'quay.io/biocontainers/pandas:1.5.2' }"
 
     input:
-    tuple val(meta), val(input_files)
+    tuple val(meta), path(input_files)
 
     output:
     path '*_kmers_dim_reduction_embeddings_combined.csv', emit: csv
@@ -23,8 +23,9 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
     
     """
     kmer_count_dim_reduction_combine_csv.py \\
-        -i $input_files \\
-        -o ${prefix}_kmers_dim_reduction_embeddings_combined.csv
+        -o ${prefix}_kmers_dim_reduction_embeddings_combined.csv \\
+        -i $input_files
+        
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
