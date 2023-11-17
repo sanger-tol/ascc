@@ -1,20 +1,10 @@
-<<<<<<< HEAD
-assembly_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
-<<<<<<< HEAD
-assembly_title: asccTest
-pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc1008,bc1009"
-pacbio_reads_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/pacbio/
-=======
-=======
+
 assembly_path: /lustre/scratch124/tol/projects/tol/data/insects/Polyommatus_atlantica/assembly/draft/treeval/ilPolAtla1_merged/raw/ref.fa
->>>>>>> 4a92aaa (refine bedtools and other scripts)
 assembly_title: asccTinyTest
 reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
 reads_type: "hifi"
 pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc1008,bc1009"
->>>>>>> 3ce433c (done)
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
 mito_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
@@ -23,7 +13,8 @@ kmer_len: 7
 dimensionality_reduction_methods: "pca,random_trees"
 # all available methods 
 # "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
-nt_database: /data/blastdb/Supported/NT/current/
+nt_database: /data/blastdb/Supported/NT/202308/dbv4/
+nt_database_prefix: nt
 nt_kraken_db_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/nt/nt
 ncbi_accessionids_folder: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/ncbi_taxonomy/20230509_accession2taxid/
 ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/
