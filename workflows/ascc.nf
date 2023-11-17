@@ -33,10 +33,10 @@ include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsada
 include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
 include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
+include { GET_KMERS_PROFILE             } from '../subworkflows/local/get_kmers_profile'
 include { RUN_READ_COVERAGE             } from '../subworkflows/local/run_read_coverage'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
-
 
 //
 // MODULE: Local modules
@@ -83,6 +83,10 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
 
+    // //Channel
+    // //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
+    // //  .set { blast_db }
+
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
@@ -91,6 +95,18 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_barcodes
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+
+    //
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
+    //
+    GET_KMERS_PROFILE (
+        GENERATE_GENOME.out.reference_tuple,
+        Channel.from(params.kmer_size),
+        YAML_INPUT.out.dimensionality_reduction_methods,
+        Channel.from(params.n_neighbors_setting),
+        Channel.from(params.autoencoder_epochs_count)
+    )
+    ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
@@ -207,6 +223,7 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
+
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
@@ -215,6 +232,8 @@ workflow ASCC {
     )
 
     emit:
+
+
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }

@@ -33,6 +33,7 @@ workflow YAML_INPUT {
                 reference_proteomes:                            ( data.reference_proteomes              )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
                 kmer_len:                                       ( data.kmer_len                         )
+                dimensionality_reduction_methods:               ( data.dimensionality_reduction_methods )
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
@@ -103,6 +104,7 @@ workflow YAML_INPUT {
     reads_type                       = group.reads_type
     pacbio_barcodes                  = ch_barcodes
     pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
+    platform                         = group.platform
     assembly_title                   = group.assembly_title
     assembly_path                    = group.assembly_path
     taxid                            = group.taxid
@@ -118,6 +120,7 @@ workflow YAML_INPUT {
     vecscreen_database_path          = group.vecscreen_database_path
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
+    dimensionality_reduction_methods = group.dimensionality_reduction_methods
     mito_tuple                       = ch_mito
     mito_var                         = "mitochondrial_genome"
     plastid_tuple                    = ch_plastid
