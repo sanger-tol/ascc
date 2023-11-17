@@ -235,8 +235,7 @@ workflow ASCC {
 
     RUN_VECSCREEN (
         GENERATE_GENOME.out.reference_tuple,
-        "/lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database"
-        //YAML_INPUT.out.vecscreen_database_path
+        YAML_INPUT.out.vecscreen_database_path
     )
     ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
 

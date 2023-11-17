@@ -10,19 +10,35 @@ include { SUMMARISE_VECSCREEN_OUTPUT }      from '../../modules/local/summarise_
 workflow RUN_VECSCREEN {
     take:
     reference_tuple         // val(meta), path(fasta)
-    adapters_blastn_database_directory
+    vecscreen_database_path
 
     main:
     ch_versions = Channel.empty()
     // MODULE: CHUNKS THE ASSEMBLY INTO PIECES WITH FIXED LENGTH
     CHUNK_ASSEMBLY_FOR_VECSCREEN(reference_tuple)
     ch_versions = ch_versions.mix(CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions)
+
+    reference_tuple
+        .combine( vecscreen_database_path )
+        .map { meta, ref, vecscreen_database_path  ->
+            tuple(
+                [   id          : meta.id
+                ],
+                vecscreen_database_path
+            )
+        }
+        .set { vecscreen_database }
+
+
+
     // MODULE: RUNS NCBI VECSCREEN
-    NCBITOOLS_VECSCREEN(CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly, [ [id:'vecscreen_adapters_database'], adapters_blastn_database_directory ])
+    NCBITOOLS_VECSCREEN(CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly, vecscreen_database)
     ch_versions = ch_versions.mix(NCBITOOLS_VECSCREEN.out.versions)
+
     // MODULE: REFORMATS VECSCREEN OUTPUT AND FILTERS IT TO REMOVE NO-HIT RESULTS AND KEEP ONLY HITS
     FILTER_VECSCREEN_RESULTS(NCBITOOLS_VECSCREEN.out.vecscreen_output)
     ch_versions = ch_versions.mix(FILTER_VECSCREEN_RESULTS.out.versions)
+
     // MODULE: CONVERTS COORDINATES IN ASSEMBLY CHUNKS BACK TO COORDINATES IN THE WHOLE ASSEMBLY AND WRITES A REPORT FILE
     SUMMARISE_VECSCREEN_OUTPUT(FILTER_VECSCREEN_RESULTS.out.filtered_vecscreen_outfile)
     ch_versions = ch_versions.mix(SUMMARISE_VECSCREEN_OUTPUT.out.versions)
