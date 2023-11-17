@@ -11,7 +11,7 @@ process FILTER_VECSCREEN_RESULTS {
     tuple val(meta), path(vecscreen_outfile)
 
     output:
-    tuple val(meta), path("vecscreen.grepped.out"), emit: filtered_vecscreen_outfile
+    tuple val(meta), path("*vecscreen.grepped.out"), emit: filtered_vecscreen_outfile
     path "versions.yml"                           , emit: versions
 
     when:
