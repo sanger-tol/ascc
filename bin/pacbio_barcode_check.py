@@ -13,6 +13,8 @@ Based on a standard operating procedure developed by James Torrance
 Originally written by Eerik Aunin @eeaunin
 
 Adapted by Damon-Lee Pointon @DLBPointon
+
+Refactored by Yumi Sims
 """
 
 from pathlib import Path
@@ -45,19 +47,28 @@ def detect_barcodes_from_read_file_names(barcodes_fasta_path, pacbio_read_files)
 
 def check_if_barcodes_exist_in_barcodes_fasta(barcodes_list, barcodes_fasta_path):
     """
-    Checks if the specified barcodes exist in the barcode sequences FASTA file, exits with an error message if a barcode is not found
+    Checks if the specified barcodes exist in the barcode sequences FASTA file, prints a message for each missing barcode.
     """
     barcodes_fasta_data = gpf.l(barcodes_fasta_path)
-    barcode_names_in_fasta = [n.split(">")[1] for n in barcodes_fasta_data if n.startswith(">")]
-    for barcode in barcodes_list:
-        if barcode not in barcode_names_in_fasta:
-            sys.stderr.write(
-                f"The PacBio multiplexing barcode ({barcode}) was not found in the barcode sequences file ({barcodes_fasta_path})\n"
-            )
-            sys.exit(1)
+    barcode_names_in_fasta = [n.split(">")[1].strip() for n in barcodes_fasta_data if n.startswith(">")]
 
-    # If this print statement is reached, all user-supplied codes are present.
-    print("The query barcodes exist in the barcodes database file")
+    missing_barcodes = [barcode for barcode in barcodes_list if barcode not in barcode_names_in_fasta]
+
+    print(
+        "\n".join(
+            [
+                f"Warning: The PacBio multiplexing barcode ({barcode}) was not found in the barcode sequences file ({barcodes_fasta_path})"
+                for barcode in missing_barcodes
+            ]
+        )
+    )
+
+    if missing_barcodes:
+        print(
+            f"\nSummary: Some barcodes were not found in the barcode sequences file.\nMissing barcodes: {', '.join(missing_barcodes)}"
+        )
+    else:
+        print("\nAll query barcodes exist in the barcode sequences file.")
 
 
 def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_names):
