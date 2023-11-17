@@ -47,7 +47,7 @@ def main(fasta_input_file, fasta_output_file):
                     SeqIO.write(records_to_write, fasta_output_handle, "fasta")
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print("An error occurred: {}".format(e))
 
 
 if __name__ == "__main__":
