@@ -11,9 +11,7 @@ import os
 
 def process_record(record, chunk_num, threshold_length, overlap_length):
     return (
-        record[
-            chunk_num * threshold_length : ((chunk_num + 1) * threshold_length + overlap_length)
-        ]
+        record[chunk_num * threshold_length : ((chunk_num + 1) * threshold_length + overlap_length)]
         if chunk_num * threshold_length < len(record) - (threshold_length + overlap_length)
         else record[chunk_num * threshold_length :]
     )
@@ -59,4 +57,3 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", action="version", version="1.0")
     args = parser.parse_args()
     main(args.fasta_input_file, args.fasta_output_file)
-
