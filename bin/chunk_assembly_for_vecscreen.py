@@ -20,7 +20,7 @@ def process_record(record, chunk_num, threshold_length, overlap_length):
 def generate_records_to_write(record, threshold_length, overlap_length):
     return [
         (
-            record_slice.id + f".chunk_{chunk_num + 1}",
+            record_slice.id + ".chunk_{}".format(chunk_num + 1),
             "",
             record_slice,
         )
