@@ -77,12 +77,10 @@ workflow ASCC {
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
-    /*
     GC_CONTENT (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
-    */
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
@@ -96,13 +94,10 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-
-    /*
     EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-    */
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
