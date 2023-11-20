@@ -73,6 +73,11 @@
                         "git_sha": "8fc1d24c710ebe1d5de0f2447ec9439fd3d9d66a",
                         "installed_by": ["modules"]
                     },
+                    "ncbitools/vecscreen": {
+                        "branch": "master",
+                        "git_sha": "1e4ac4aa2c612f9547f79f02ef7c651ccc9f657b",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/depth": {
                         "branch": "master",
                         "git_sha": "8fc1d24c710ebe1d5de0f2447ec9439fd3d9d66a",

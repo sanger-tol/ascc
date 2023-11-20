@@ -1,9 +1,9 @@
-assembly_path: /lustre/scratch124/tol/projects/tol/data/insects/Polyommatus_atlantica/assembly/draft/treeval/ilPolAtla1_merged/raw/ref.fa
+assembly_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20231114_pyoelii_vecscreen/ref/PlasmoDB-58_Pyoeliiyoelii17XNL_Genome_with_adapters2_fh2.fasta
 assembly_title: asccTinyTest
 reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
 reads_type: "hifi"
 pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc1008,bc1009"
+pacbio_multiplexing_barcode_names: "bc2008,bc2009"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
 mito_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
@@ -17,7 +17,7 @@ ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdu
 ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
 busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-08-27/lineages
 fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb
-vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database/adaptors_for_screening_euks.fa
+vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database
 diamond_uniprot_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/uniprot/uniprot_reference_proteomes_with_taxonnames.dmnd
 diamond_nr_database_path: /lustre/scratch123/tol/resources/nr/latest/nr.dmnd
 seqkit:

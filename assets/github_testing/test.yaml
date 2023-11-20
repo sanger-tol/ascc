@@ -1,7 +1,7 @@
 assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 assembly_title: asccTinyTest
 pacbio_barcodes: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc1008,bc1009"
+pacbio_multiplexing_barcode_names: "bc2008,bc2009"
 reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio
 reads_type: "hifi"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
@@ -20,7 +20,7 @@ busco_lineages_folder: /home/runner/work/ascc/ascc/busco_database/lineages
 fcs_gx_database_path: /home/runner/work/ascc/ascc/FCS_gx/
 diamond_uniprot_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
 diamond_nr_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
-vecscreen_database_path: /home/runner/work/ascc/ascc/vecscreen/GCA_900155405.1_PRJEB18760_genomic.fna
+vecscreen_database_path: /home/runner/work/ascc/ascc/vecscreen
 seqkit:
   sliding: 6000
   window: 100000
