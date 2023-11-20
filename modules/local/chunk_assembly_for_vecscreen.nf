@@ -19,8 +19,9 @@ process CHUNK_ASSEMBLY_FOR_VECSCREEN {
 
     script:
     def prefix  = args.ext.prefix   ?: "${meta.id}"
+    def args    = args.ext.args     ?: ""
     """
-    chunk_assembly_for_vecscreen.py $fasta_input_file ${prefix}_chunked_assembly.fa
+    chunk_assembly_for_vecscreen.py $fasta_input_file ${prefix}_chunked_assembly.fa ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
