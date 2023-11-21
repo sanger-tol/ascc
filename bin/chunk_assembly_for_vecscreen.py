@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script for chunking an assembly before running NCBI VecScreen. Adapted from a script by James Torrance, edited by Eerik Aunin and Yumi Sims
+Script for chunking an assembly before running NCBI VecScreen. Adapted from a script by James Torrance, edited by Eerik Aunin, Yumi Sims and Damon-Lee Pointon
 """
 
 from Bio import SeqIO
