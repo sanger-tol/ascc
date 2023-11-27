@@ -18,12 +18,14 @@ workflow GET_KMERS_PROFILE {
     main:
     ch_versions     = Channel.empty()
 
+    //
+    // LOGIC: REFACTORING REFERENCE TUPLE
+    //
     assembly_fasta
-        .map{ it ->
-            tuple([id: it[0].id,
-                    single_end: true
-                ],
-                it[1]
+        .map{ meta, file ->
+            tuple([id: meta.id,
+                    single_end: true],
+                file
             )
         }
         .set { modified_input }
@@ -36,7 +38,6 @@ workflow GET_KMERS_PROFILE {
         kmer_size            // val kmer_size
     )
     ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
-
 
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
@@ -54,10 +55,6 @@ workflow GET_KMERS_PROFILE {
             autoencoder_epochs_count : ae_setting
         }
         .set{ ch_methods }
-
-
-
-
 
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS 
@@ -94,6 +91,6 @@ workflow GET_KMERS_PROFILE {
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
 
     emit:
-    KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-    versions        = ch_versions.ifEmpty(null)
+    combined_csv = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
+    versions     = ch_versions.ifEmpty(null)
 }
