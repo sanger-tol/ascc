@@ -98,6 +98,15 @@ workflow YAML_INPUT {
         }
         .set{ ch_plastid }
 
+    group.assembly_title
+        .combine ( group.vecscreen_database_path )
+        .map{ assembly_id, db_path ->
+            tuple(  [    id: assembly_id ],
+                    db_path
+            )
+        }
+        .set{ ch_vecscreen }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
@@ -116,7 +125,7 @@ workflow YAML_INPUT {
     fcs_gx_database_path             = group.fcs_gx_database_path
     diamond_uniprot_database_path    = group.diamond_uniprot_database_path
     diamond_nr_database_path         = group.diamond_nr_database_path
-    vecscreen_database_path          = group.vecscreen_database_path
+    vecscreen_database_path          = ch_vecscreen
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
     dimensionality_reduction_methods = group.dimensionality_reduction_methods
