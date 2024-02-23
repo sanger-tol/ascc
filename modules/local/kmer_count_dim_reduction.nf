@@ -36,7 +36,7 @@ process KMER_COUNT_DIM_REDUCTION {
         python: \$(python --version | sed 's/Python //g')
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
         tensorflow: \$(python3 -c 'import tensorflow; print(tensorflow.__version__)')
-        scikit-learn: \$(python3 -c 'import sklearn; sklearn.show_versions()')
+        scikit-learn: \$(python3 -c "import sklearn; print(sklearn.__version__)")
         umap-learn: \$(python3 -c 'import umap; print(umap.__version__)')
         matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
@@ -52,10 +52,10 @@ process KMER_COUNT_DIM_REDUCTION {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
-        tensorflow: \$(tensorflow --version | sed 's/tensorflow //g')
-        scikit-learn: \$(scikit-learn --version | sed 's/scikit-learn //g')
-        umap-learn: \$(umap-learn --version | sed 's/umap-learn //g')
-        matplotlib: \$(matplotlib --version | sed 's/matplotlib //g')
+        tensorflow: \$(python3 -c 'import tensorflow; print(tensorflow.__version__)')
+        scikit-learn: \$(python3 -c "import sklearn; print(sklearn.__version__)")
+        umap-learn: \$(python3 -c 'import umap; print(umap.__version__)')
+        matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """

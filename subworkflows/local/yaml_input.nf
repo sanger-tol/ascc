@@ -21,7 +21,7 @@ workflow YAML_INPUT {
         .multiMap { data ->
                 assembly_title:                                 ( data.assembly_title                   )
                 reads_path:                                     ( data.reads_path                       )
-                reads_type:                                     ( data.reads_type                         )
+                reads_type:                                     ( data.reads_type                       )
                 assembly_path:                                  ( file(data.assembly_path)              )
                 pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
@@ -37,13 +37,13 @@ workflow YAML_INPUT {
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
-                ncbi_accessionids:                              ( data.ncbi_accessionids_folder                 )
+                ncbi_accessionids:                              ( data.ncbi_accessionids_folder         )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
                 seqkit_values:                                  ( data.seqkit                           )
                 diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
                 diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
                 vecscreen_database_path:                        ( data.vecscreen_database_path          )
-
+                neighbours:                                     ( data.n_neighbours                     )
         }
         .set{ group }
 
@@ -104,7 +104,6 @@ workflow YAML_INPUT {
     reads_type                       = group.reads_type
     pacbio_barcodes                  = ch_barcodes
     pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
-    platform                         = group.platform
     assembly_title                   = group.assembly_title
     assembly_path                    = group.assembly_path
     taxid                            = group.taxid
@@ -125,6 +124,8 @@ workflow YAML_INPUT {
     mito_var                         = "mitochondrial_genome"
     plastid_tuple                    = ch_plastid
     plastid_var                      = "plastid_genome"
+    kmer_len                         = group.kmer_len
+    n_neighbours                     = group.neighbours
     versions                         = ch_versions.ifEmpty(null)
 }
 

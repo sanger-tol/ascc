@@ -57,7 +57,7 @@ workflow GET_KMERS_PROFILE {
         .set{ ch_methods }
 
     //
-    // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS 
+    // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS
     //
     KMER_COUNT_DIM_REDUCTION (
         ch_methods.kmer_csv,                         // val(meta), path(kmer_counts)
@@ -74,8 +74,8 @@ workflow GET_KMERS_PROFILE {
         .collect()
         .map { file ->
             tuple (
-                [ id    : file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
-                file
+                    [   id  :   file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
+                    file
             )
         }
         .set { collected_files_for_combine }

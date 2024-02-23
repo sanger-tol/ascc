@@ -225,7 +225,6 @@ def run_dim_reduction(df, selected_method, n_neighbors_setting=-1, autoencoder_e
         pca = decomposition.PCA(n_components=2, svd_solver="randomized")
         embedding = pca.fit_transform(df)
 
-
     elif selected_method == "autoencoder_sigmoid":
         print_timestamp("Autoencoder sigmoid")
         #https://ekamperi.github.io/machine%20learning/2021/01/21/encoder-decoder-model.html
@@ -268,11 +267,14 @@ def run_dim_reduction(df, selected_method, n_neighbors_setting=-1, autoencoder_e
 def main(kmer_counts_file, out_folder, selected_methods, n_neighbors_setting, autoencoder_epochs_count):
 
     reset_random_seeds()
-    
+
     df, seq_names = load_data(kmer_counts_file)
     df_row_count = df.shape[0]
     if df_row_count == 1:
         sys.stderr.write("Skipping the dimensionality reduction of kmer counts, as the kmer counts table has only one row")
+        # Generate an empty file to satisfy nextflow expecting a file from script finishing with no file with small output
+        with open ("EMPTY_kmers_dim_reduction_embeddings.csv") as empty_file:
+            empty_file.write("FILE TO SMALL FOR ANALYSIS")
         sys.exit(0)
 
     Path(out_folder).mkdir(parents=True, exist_ok=True)

@@ -99,12 +99,23 @@ workflow ASCC {
     //
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
     //
+
+    GENERATE_GENOME.out.reference_tuple
+        .map { meta, file ->
+            tuple (
+                meta,
+                file,
+                file.countFasta() * 3
+            )
+        }
+        .set {autoencoder_epochs_count}
+
     GET_KMERS_PROFILE (
         GENERATE_GENOME.out.reference_tuple,
-        Channel.from(params.kmer_size),
+        YAML_INPUT.out.kmer_len,
         YAML_INPUT.out.dimensionality_reduction_methods,
-        Channel.from(params.n_neighbors_setting),
-        Channel.from(params.autoencoder_epochs_count)
+        YAML_INPUT.out.n_neighbours,
+        autoencoder_epochs_count.map{it -> it[2]}
     )
     ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
