@@ -22,7 +22,7 @@ busco_lineages_folder: /home/runner/work/ascc/ascc/busco_database/lineages
 fcs_gx_database_path: /home/runner/work/ascc/ascc/FCS_gx/
 diamond_uniprot_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
 diamond_nr_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
-vecscreen_database_path: /home/runner/work/ascc/ascc/vecscreen/GCA_900155405.1_PRJEB18760_genomic.fna
+vecscreen_database_path: /home/runner/work/ascc/ascc/vecscreen
 seqkit:
   sliding: 6000
   window: 100000

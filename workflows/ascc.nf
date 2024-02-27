@@ -24,17 +24,17 @@ WorkflowAscc.initialise(params, log)
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-
-include { YAML_INPUT                    } from '../subworkflows/local/yaml_input'
-include { GENERATE_GENOME               } from '../subworkflows/local/generate_genome'
-include { EXTRACT_TIARA_HITS            } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST              } from '../subworkflows/local/extract_nt_blast'
-include { RUN_FCSADAPTOR                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_NT_KRAKEN                 } from '../subworkflows/local/run_nt_kraken'
-include { RUN_FCSGX                     } from '../subworkflows/local/run_fcsgx'
-include { PACBIO_BARCODE_CHECK          } from '../subworkflows/local/pacbio_barcode_check'
-include { GET_KMERS_PROFILE             } from '../subworkflows/local/get_kmers_profile'
-include { RUN_READ_COVERAGE             } from '../subworkflows/local/run_read_coverage'
+include { YAML_INPUT                                    } from '../subworkflows/local/yaml_input'
+include { GENERATE_GENOME                               } from '../subworkflows/local/generate_genome'
+include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'
+include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast'
+include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
+include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
+include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
+include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
+include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
+include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
+include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
 
@@ -163,6 +163,7 @@ workflow ASCC {
         }
         .set { mito_check }
 
+
     //
     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
     //
@@ -237,6 +238,15 @@ workflow ASCC {
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
+    //
+    RUN_VECSCREEN (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.vecscreen_database_path
+    )
+    ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
+
+    //
+    // SUBWORKFLOW: Collates version data from prior subworflows
     //
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script for parsing the result files of FCS-GX, originally written by Eerik Aunin (ea10)
-further minor modifications by Yumi Sims (yy5)
+further refactoring/modifications by Yumi Sims (yy5)
 """
 
 import general_purpose_functions as gpf
@@ -42,51 +42,50 @@ def load_taxids_data(taxonomy_file):
     """
     Parses the *.taxonomy.rpt to find taxids that correspond to species names. Returns this as a dictionary
     """
-    taxonomy_data = gpf.l(taxonomy_file)
-    assert len(taxonomy_data) > 2
-    taxonomy_data = taxonomy_data[2 : len(taxonomy_data)]
+    taxonomy_data = gpf.l(taxonomy_file)[2:]
+    assert taxonomy_data, "Taxonomy data is empty"
+
     collection_dict = OrderedDict()
 
     for line in taxonomy_data:
-        add_new_entry = False
-        multiple_divs_per_scaff = False
         split_line = line.split("\t")
         assert len(split_line) == 34
-        scaff = split_line[0]
-        if "~" in scaff:
-            scaff = scaff.split("~")[0]
-        tax_name_1 = split_line[5]
-        tax_id_1 = split_line[6]
-        div_1 = split_line[7]
-        cvg_by_div_1 = split_line[8]
-        if cvg_by_div_1 != "":
-            cvg_by_div_1 = int(cvg_by_div_1)
-        cvg_by_tax_1 = split_line[9]
-        if cvg_by_tax_1 != "":
-            cvg_by_tax_1 = int(cvg_by_tax_1)
-        score_1 = split_line[10]
-        if score_1 != "":
-            score_1 = int(score_1)
-        else:
-            score_1 = 0
-        if scaff in collection_dict:
-            old_score = collection_dict[scaff]["fcs_gx_score"]
-            if old_score < score_1:
-                add_new_entry = True
-                multiple_divs_per_scaff = True
-        else:
-            add_new_entry = True
-        if add_new_entry is True:
-            row_dict = dict()
-            row_dict["fcs_gx_top_tax_name"] = tax_name_1
-            row_dict["fcs_gx_top_taxid"] = tax_id_1
-            row_dict["fcs_gx_div"] = div_1
-            row_dict["fcs_gx_coverage_by_div"] = cvg_by_div_1
-            row_dict["fcs_gx_coverage_by_tax"] = cvg_by_tax_1
-            row_dict["fcs_gx_score"] = score_1
-            row_dict["fcs_gx_multiple_divs_per_scaff"] = multiple_divs_per_scaff
-            row_dict["fcs_gx_action"] = "NA"
+
+        scaff = split_line[0].split("~")[0]
+        tax_name_1, tax_id_1, div_1, cvg_by_div_1, cvg_by_tax_1, score_1 = (
+            split_line[5],
+            split_line[6],
+            split_line[7],
+            int(split_line[8]) if split_line[8] else None,
+            int(split_line[9]) if split_line[9] else None,
+            int(split_line[10]) if split_line[10] else 0,
+        )
+
+        if scaff in collection_dict and collection_dict[scaff]["fcs_gx_score"] < score_1:
+            row_dict = {
+                "fcs_gx_top_tax_name": tax_name_1,
+                "fcs_gx_top_taxid": tax_id_1,
+                "fcs_gx_div": div_1,
+                "fcs_gx_coverage_by_div": cvg_by_div_1,
+                "fcs_gx_coverage_by_tax": cvg_by_tax_1,
+                "fcs_gx_score": score_1,
+                "fcs_gx_multiple_divs_per_scaff": True,
+                "fcs_gx_action": "NA",
+            }
             collection_dict[scaff] = row_dict
+        elif scaff not in collection_dict:
+            row_dict = {
+                "fcs_gx_top_tax_name": tax_name_1,
+                "fcs_gx_top_taxid": tax_id_1,
+                "fcs_gx_div": div_1,
+                "fcs_gx_coverage_by_div": cvg_by_div_1,
+                "fcs_gx_coverage_by_tax": cvg_by_tax_1,
+                "fcs_gx_score": score_1,
+                "fcs_gx_multiple_divs_per_scaff": False,
+                "fcs_gx_action": "NA",
+            }
+            collection_dict[scaff] = row_dict
+
     return collection_dict
 
 
