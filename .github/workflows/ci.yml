@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         NXF_VER:
-          - "22.10.1"
+          - "23.04.0"
           - "latest-everything"
     steps:
       - name: Check out pipeline code
@@ -82,7 +82,7 @@ jobs:
       - name: Download the vecscreen test data
         run: |
           mkdir vecscreen
-          curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz | tar -C vecscreen -xzf -
+          wget -c https://tolit.cog.sanger.ac.uk/test-data/resources/vecscreen/GCA_900155405.1_PRJEB18760_genomic.fna -O vecscreen/GCA_900155405.1_PRJEB18760_genomic.fna
 
       - name: Run pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required

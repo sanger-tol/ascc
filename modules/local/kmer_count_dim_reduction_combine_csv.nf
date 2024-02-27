@@ -1,5 +1,4 @@
 process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
-
     tag "$meta.id"
     label 'process_low'
 
@@ -20,12 +19,10 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
 
     script:
     def prefix = args.ext.prefix ?: "${meta.id}"
-    
     """
     kmer_count_dim_reduction_combine_csv.py \\
         -o ${prefix}_kmers_dim_reduction_embeddings_combined.csv \\
         -i $input_files
-        
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
