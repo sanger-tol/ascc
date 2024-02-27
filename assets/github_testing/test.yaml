@@ -1,15 +1,17 @@
 assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 assembly_title: asccTinyTest
-pacbio_barcodes: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc1008,bc1009"
 reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio
 reads_type: "hifi"
+pacbio_barcodes: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
+pacbio_multiplexing_barcode_names: "bc1008,bc1009"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
 mito_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
 plastid_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
-## Below this point will need updating as more subworkflows are built
+dimensionality_reduction_methods: "pca,random_trees"
+# all available methods
+# "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
 nt_database: /home/runner/work/ascc/ascc/NT_database/
 nt_database_prefix: 18S_fungal_sequences
 nt_kraken_db_path: /home/runner/work/ascc/ascc/kraken2/kraken2
@@ -24,3 +26,4 @@ vecscreen_database_path: /home/runner/work/ascc/ascc/vecscreen/GCA_900155405.1_P
 seqkit:
   sliding: 6000
   window: 100000
+n_neighbours: 13

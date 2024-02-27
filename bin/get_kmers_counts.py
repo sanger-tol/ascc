@@ -29,7 +29,7 @@ def main(fasta_path, out_path, kmer_size):
     df = pd.DataFrame(nucleotides_collection)
     df = df.fillna(0)
     df.to_csv(out_path, index=False)
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
@@ -39,4 +39,3 @@ if __name__ == "__main__":
     parser.add_argument("--kmer_size", type=int, help="kmer size (bp). Default: 7", default=7)
     args = parser.parse_args()
     main(args.fasta_path, args.out_path, args.kmer_size)
-        

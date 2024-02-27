@@ -145,13 +145,13 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-/*     EXTRACT_NT_BLAST (
+    EXTRACT_NT_BLAST (
         modified_input,
         YAML_INPUT.out.nt_database,
         YAML_INPUT.out.ncbi_accessions,
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions) */
+    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
     //
     // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
@@ -215,13 +215,13 @@ workflow ASCC {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    /*PACBIO_BARCODE_CHECK (
+    PACBIO_BARCODE_CHECK (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.pacbio_tuple,
         YAML_INPUT.out.pacbio_barcodes,
         YAML_INPUT.out.pacbio_multiplex_codes
     )
-    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)*/
+    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE

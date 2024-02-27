@@ -9,8 +9,8 @@ import pandas as pd
 import argparse
 from functools import reduce
 
-def main(embedding_paths, output_name):
 
+def main(embedding_paths, output_name):
     # Load csv as dataframes.
     dataframe_list = list()
     for embedding_path in embedding_paths:
@@ -18,11 +18,7 @@ def main(embedding_paths, output_name):
         dataframe_list.append(df)
 
     # Merge DataFrames in list
-    out_df = reduce(lambda left, right:     
-                     pd.merge(left , right,
-                              on = ["scaff"],
-                              how = "outer"),
-                     dataframe_list)
+    out_df = reduce(lambda left, right: pd.merge(left, right, on=["scaff"], how="outer"), dataframe_list)
 
     # Output as csv.
     out_df.to_csv(output_name, index=False)
@@ -31,7 +27,9 @@ def main(embedding_paths, output_name):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-v", "--version", action="version", version="1.0")
-    parser.add_argument("-i", "--kmer_counts_file", nargs='+', type=str, help="List of paths to input CSV file with kmer counts")
-    parser.add_argument("-o",  "--output_name", type=str, help="Path to folder where output file will be written")
+    parser.add_argument(
+        "-i", "--kmer_counts_file", nargs="+", type=str, help="List of paths to input CSV file with kmer counts"
+    )
+    parser.add_argument("-o", "--output_name", type=str, help="Path to folder where output file will be written")
     args = parser.parse_args()
     main(args.kmer_counts_file, args.output_name)

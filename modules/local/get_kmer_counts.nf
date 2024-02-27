@@ -48,6 +48,3 @@ process GET_KMER_COUNTS {
     END_VERSIONS
     """
 }
-
-
-

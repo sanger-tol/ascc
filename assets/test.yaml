@@ -1,4 +1,3 @@
-
 assembly_path: /lustre/scratch124/tol/projects/tol/data/insects/Polyommatus_atlantica/assembly/draft/treeval/ilPolAtla1_merged/raw/ref.fa
 assembly_title: asccTinyTest
 reads_path: /lustre/scratch123/tol/resources/treeval/treeval-testdata/asccTinyTest/pacbio/
