@@ -2,12 +2,31 @@
 
 """
 Script for kmer count dimensionality reduction, using multiple methods.
+
 Developed by Eerik Aunin (ea10@sanger.ac.uk)
+
+Modified by Damon-Lee Pointon (dp24)
 """
 
 # https://machinelearningmastery.com/dimensionality-reduction-algorithms-with-python/
 # https://scikit-learn.org/stable/auto_examples/manifold/plot_compare_methods.html#sphx-glr-auto-examples-manifold-plot-compare-methods-py
 
+import os
+matplot_config_path = os.getcwd() + "/matplotconfig/"
+fonts_config_path = os.getcwd() + "/fontconfig/"
+numba_config_path = os.getcwd() + "/numbaconfig/"
+
+for i in [fonts_config_path, matplot_config_path, numba_config_path]:
+    if not os.path.exists(i):
+        os.makedirs(i)
+
+os.environ['OSFONTDIR'] = fonts_config_path
+os.environ['MPLCONFIGDIR'] = matplot_config_path
+os.environ['NUMBA_CACHE_DIR'] = numba_config_path
+
+os.chmod(fonts_config_path, 0o0755)
+os.chmod(matplot_config_path, 0o0755)
+os.chmod(numba_config_path, 0o0755)
 
 import matplotlib
 
@@ -24,7 +43,6 @@ from sklearn import manifold
 from sklearn import ensemble
 
 import tensorflow as tf
-import os
 import random
 
 import sys
@@ -32,6 +50,9 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 from functools import reduce
+
+
+
 
 
 # plt.style.use("ggplot")
@@ -153,7 +174,6 @@ def run_tsne(df):
 
     embedding = manifold.TSNE(n_components=2).fit_transform(df)
     return embedding
-
 
 def run_dim_reduction(df, selected_method, n_neighbors_setting=-1, autoencoder_epochs_count=-1, out_folder=None):
     embedding = None
