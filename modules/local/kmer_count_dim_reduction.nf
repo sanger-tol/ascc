@@ -3,9 +3,10 @@ process KMER_COUNT_DIM_REDUCTION {
     tag "$meta.id"
     label 'process_medium'
 
+    conda "conda-forge::python=3.9 conda-forge::pandas=2.2.1 conda-forge::tensorlflow=2.15.0 conda-forge::scikit-learn=1.4.1 conda-forge::umap=0.5.5 conda-forge::matplotlib=3.8.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:2dc02878e5657bb1f787431c323c9d261fc6d520-0' :
-        'biocontainers/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:2dc02878e5657bb1f787431c323c9d261fc6d520-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:34bd58763b84a3ea2f6c60b87b4858b2f80c070e-0' :
+        'biocontainers/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:34bd58763b84a3ea2f6c60b87b4858b2f80c070e-0' }"
 
     input:
     tuple val(meta), path(kmer_counts_file)
@@ -21,6 +22,7 @@ process KMER_COUNT_DIM_REDUCTION {
     task.ext.when == null || task.ext.when
 
     script:
+    def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
 
@@ -37,24 +39,25 @@ process KMER_COUNT_DIM_REDUCTION {
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
         tensorflow: \$(python3 -c 'import tensorflow; print(tensorflow.__version__)')
         scikit-learn: \$(python3 -c "import sklearn; print(sklearn.__version__)")
-        umap-learn: \$(python3 -c 'import umap; print(umap.__version__)')
+        umap-learn: $UMAP_VERSION
         matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
     stub:
+    def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}_kmers_dim_reduction_embeddings.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
+        python: \$(python3 --version | sed 's/Python //g')
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
         tensorflow: \$(python3 -c 'import tensorflow; print(tensorflow.__version__)')
         scikit-learn: \$(python3 -c "import sklearn; print(sklearn.__version__)")
-        umap-learn: \$(python3 -c 'import umap; print(umap.__version__)')
+        umap-learn: $UMAP_VERSION
         matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
         kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
