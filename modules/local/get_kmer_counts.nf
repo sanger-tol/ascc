@@ -2,6 +2,7 @@ process GET_KMER_COUNTS {
     tag "$meta.id"
     label 'process_low'
 
+    conda "conda-forge::python=3.9 conda-forge::kcounter=0.1.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-d9b9334c4a0777c7722cbcc301a10ddc8684a85f:796f1cea66b7720fa29583d1f6b90404f90dde2f-0' :
         'biocontainers/mulled-v2-d9b9334c4a0777c7722cbcc301a10ddc8684a85f:796f1cea66b7720fa29583d1f6b90404f90dde2f-0' }"
@@ -18,6 +19,7 @@ process GET_KMER_COUNTS {
     task.ext.when == null || task.ext.when
 
     script:
+    def KCOUNTER_VERSION = "0.1.1"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
     get_kmers_counts.py \\
@@ -28,13 +30,14 @@ process GET_KMER_COUNTS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        kcounter: \$( kcounter --version 2>&1 | sed 's/kcounter //g' )
+        kcounter: $KCOUNTER_VERSION
         general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
         get_kmers_counts.py: \$(get_kmers_counts.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
     stub:
+    def KCOUNTER_VERSION = "0.1.1"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}_kmer_counts.csv
@@ -42,7 +45,7 @@ process GET_KMER_COUNTS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        kcounter: \$( kcounter --version 2>&1 | sed 's/kcounter //g' )
+        kcounter: $KCOUNTER_VERSION
         general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
         get_kmers_counts.py: \$(get_kmers_counts.py --version | cut -d' ' -f2)
     END_VERSIONS
