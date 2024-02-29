@@ -83,10 +83,6 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
 
-    // //Channel
-    // //  .fromPath( YAML_INPUT.out.nt_database, checkIfExists=true )
-    // //  .set { blast_db }
-
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
@@ -167,12 +163,12 @@ workflow ASCC {
     //
     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
     //
-/*     MITO_ORGANELLAR_BLAST (
+    MITO_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.mito_var,
         mito_check.valid
     )
-    ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions) */
+    ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
 
     //
     // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
@@ -184,7 +180,7 @@ workflow ASCC {
         }
         .set { plastid_check }
 
-/*     //
+    //
     // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
     //
     PLASTID_ORGANELLAR_BLAST (
@@ -192,12 +188,12 @@ workflow ASCC {
         YAML_INPUT.out.plastid_var,
         plastid_check.valid
     )
-    ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions) */
+    ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
     //
     // SUBWORKFLOW:
     //
-/*     RUN_FCSADAPTOR (
+    RUN_FCSADAPTOR (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
@@ -211,7 +207,7 @@ workflow ASCC {
         YAML_INPUT.out.taxid,
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions) */
+    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
@@ -224,7 +220,7 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
-/*     //
+    //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
     RUN_READ_COVERAGE (
@@ -243,7 +239,7 @@ workflow ASCC {
         GENERATE_GENOME.out.reference_tuple,
         YAML_INPUT.out.vecscreen_database_path
     )
-    ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions) */
+    ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
