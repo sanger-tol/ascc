@@ -96,7 +96,7 @@ workflow ASCC {
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
     //
 
-    GENERATE_GENOME.out.reference_tuple
+/*     GENERATE_GENOME.out.reference_tuple
         .map { meta, file ->
             tuple (
                 meta,
@@ -229,7 +229,7 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_tuple,
         YAML_INPUT.out.reads_type
     )
-    ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions) */
 
 
     //

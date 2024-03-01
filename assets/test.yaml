@@ -20,7 +20,7 @@ ncbi_taxonomy_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdu
 ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
 busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-08-27/lineages
 fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb
-vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database
+vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database/
 diamond_uniprot_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/uniprot/uniprot_reference_proteomes_with_taxonnames.dmnd
 diamond_nr_database_path: /lustre/scratch123/tol/resources/nr/latest/nr.dmnd
 seqkit:
