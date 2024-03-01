@@ -32,6 +32,7 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
+include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
@@ -90,6 +91,29 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_barcodes
     )
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
+
+    //
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
+    //
+
+    GENERATE_GENOME.out.reference_tuple
+        .map { meta, file ->
+            tuple (
+                meta,
+                file,
+                file.countFasta() * 3
+            )
+        }
+        .set {autoencoder_epochs_count}
+
+    GET_KMERS_PROFILE (
+        GENERATE_GENOME.out.reference_tuple,
+        YAML_INPUT.out.kmer_len,
+        YAML_INPUT.out.dimensionality_reduction_methods,
+        YAML_INPUT.out.n_neighbours,
+        autoencoder_epochs_count.map{it -> it[2]}
+    )
+    ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
@@ -207,6 +231,7 @@ workflow ASCC {
     )
     ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
+
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
@@ -224,6 +249,8 @@ workflow ASCC {
     )
 
     emit:
+
+
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }

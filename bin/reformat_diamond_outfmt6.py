@@ -15,7 +15,7 @@ import sys
 import general_purpose_functions as gpf
 
 if sys.argv[1] == "-v":
-    print("1.0.0")
+    print("1.0")
     sys.exit()
 else:
     in_path = sys.argv[1]

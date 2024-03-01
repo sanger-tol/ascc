@@ -21,7 +21,7 @@ workflow YAML_INPUT {
         .multiMap { data ->
                 assembly_title:                                 ( data.assembly_title                   )
                 reads_path:                                     ( data.reads_path                       )
-                reads_type:                                     ( data.reads_type                         )
+                reads_type:                                     ( data.reads_type                       )
                 assembly_path:                                  ( file(data.assembly_path)              )
                 pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
@@ -33,16 +33,17 @@ workflow YAML_INPUT {
                 reference_proteomes:                            ( data.reference_proteomes              )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
                 kmer_len:                                       ( data.kmer_len                         )
+                dimensionality_reduction_methods:               ( data.dimensionality_reduction_methods )
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
                 ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
-                ncbi_accessionids:                              ( data.ncbi_accessionids_folder                 )
+                ncbi_accessionids:                              ( data.ncbi_accessionids_folder         )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
                 seqkit_values:                                  ( data.seqkit                           )
                 diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
                 diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
                 vecscreen_database_path:                        ( data.vecscreen_database_path          )
-
+                neighbours:                                     ( data.n_neighbours                     )
         }
         .set{ group }
 
@@ -127,10 +128,13 @@ workflow YAML_INPUT {
     vecscreen_database_path          = ch_vecscreen
     seqkit_sliding                   = seqkit.sliding_value
     seqkit_window                    = seqkit.window_value
+    dimensionality_reduction_methods = group.dimensionality_reduction_methods
     mito_tuple                       = ch_mito
     mito_var                         = "mitochondrial_genome"
     plastid_tuple                    = ch_plastid
     plastid_var                      = "plastid_genome"
+    kmer_len                         = group.kmer_len
+    n_neighbours                     = group.neighbours
     versions                         = ch_versions.ifEmpty(null)
 }
 

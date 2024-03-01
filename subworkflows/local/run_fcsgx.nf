@@ -25,7 +25,8 @@ workflow RUN_FCSGX {
     reference
         .combine( taxid )
         .map { it ->
-                tuple ([taxid: it[2]],
+                tuple ([    id:     it[0].id,
+                            taxid:  it[2]       ],
                         it[1])
             }
         .set { reference_with_taxid }

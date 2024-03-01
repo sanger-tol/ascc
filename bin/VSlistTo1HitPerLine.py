@@ -5,8 +5,8 @@ Converted to Python by Eerik Aunin.
 
 This script converts the VecScreen text list output to one line giving the coordinates for each vector segment in the format:
 VecScreen_Category   ID_string   start_position   end_position
-The default is to report Strong, Moderate, and Weak matches and also segments of Suspect Origin. Reporting of any category can be suppressed by including 
---skip_reporting_suspect_hits, --skip_reporting_weak_hits, --skip_reporting_moderate_hits or --skip_reporting_strong_hits on the command line. 
+The default is to report Strong, Moderate, and Weak matches and also segments of Suspect Origin. Reporting of any category can be suppressed by including
+--skip_reporting_suspect_hits, --skip_reporting_weak_hits, --skip_reporting_moderate_hits or --skip_reporting_strong_hits on the command line.
 "No hits" will be reported for any Query sequence that had no matches in any of the selected categories, unless --skip_reporting_no_hits is included on the command line.
 VecScreen errors will be reported unless --skip_reporting_errors is included on the command line.
 Usage:
