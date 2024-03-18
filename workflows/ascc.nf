@@ -36,6 +36,7 @@ include { RUN_READ_COVERAGE                             } from '../subworkflows/
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
+include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check'
 
 //
 // MODULE: Local modules
@@ -94,10 +95,13 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
+    
+    /*
     EXTRACT_TIARA_HITS (
         GENERATE_GENOME.out.reference_tuple
     )
     ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+    */
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
@@ -114,9 +118,14 @@ workflow ASCC {
             )}
         .set { modified_input }
 
+
+    
+
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
+
+    /*
     EXTRACT_NT_BLAST (
         modified_input,
         YAML_INPUT.out.nt_database,
@@ -124,6 +133,7 @@ workflow ASCC {
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
     ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    */
 
     //
     // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
@@ -139,12 +149,15 @@ workflow ASCC {
     //
     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
     //
+
+    /*
     MITO_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.mito_var,
         mito_check.valid
     )
     ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+    */
 
     //
     // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
@@ -159,24 +172,30 @@ workflow ASCC {
     //
     // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
     //
+
+    /*
     PLASTID_ORGANELLAR_BLAST (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.plastid_var,
         plastid_check.valid
     )
     ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    */
 
     //
     // SUBWORKFLOW:
     //
+    /*
     RUN_FCSADAPTOR (
         YAML_INPUT.out.reference_tuple
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    */
 
     //
     // SUBWORKFLOW:
     //
+    /*
     RUN_FCSGX (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.fcs_gx_database_path,
@@ -184,10 +203,13 @@ workflow ASCC {
         YAML_INPUT.out.ncbi_rankedlineage_path
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    */
 
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
+
+    /*
     PACBIO_BARCODE_CHECK (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.pacbio_tuple,
@@ -195,10 +217,13 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_multiplex_codes
     )
     ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    */
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
+
+    /*
     RUN_READ_COVERAGE (
         YAML_INPUT.out.reference_tuple,
         YAML_INPUT.out.assembly_path,
@@ -206,19 +231,30 @@ workflow ASCC {
         YAML_INPUT.out.reads_type
     )
     ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    */
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
+
+    /*
     RUN_VECSCREEN (
         GENERATE_GENOME.out.reference_tuple,
         YAML_INPUT.out.vecscreen_database_path
     )
     ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    */
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
     //
+
+    TRAILINGNS_CHECK (
+        YAML_INPUT.out.reference_tuple
+    )
+    ch_versions = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
+
+
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
