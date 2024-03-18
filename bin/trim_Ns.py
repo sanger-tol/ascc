@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Script for detecting trailing Ns that should be trimmed from an assembly, from James Torrance (jt8@sanger.ac.uk). Edited by Eerik Aunin (ea10@sanger.ac.uk)
 """
