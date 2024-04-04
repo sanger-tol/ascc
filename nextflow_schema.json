@@ -195,7 +195,7 @@
                 "tracedir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "results/pipeline_info",
+                    "default": "results/pipeline_info/",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
                 },
