@@ -12,17 +12,17 @@ workflow RUN_READ_COVERAGE {
     reference_tuple          // Channel [ val(meta), path(file) ]
     assembly_path            // Channel path(file)
     pacbio_tuple             // Channel [ val(meta), val( str ) ]
-    platform                // Channel val( str )
+    platform                 // Channel val( str )
 
     main:
     ch_versions     = Channel.empty()
     ch_align_bam    = Channel.empty()
 
-    
+
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM, THEN RUN MINIMAP
     //
-    if ( platform.filter { it == "hifi" } || platform.filter { it == "clr" } || platform.filter { it == "ont" } ) { 
+    if ( platform.filter { it == "hifi" } || platform.filter { it == "clr" } || platform.filter { it == "ont" } ) {
         SE_MAPPING (
             reference_tuple,
             assembly_path,
@@ -34,7 +34,7 @@ workflow RUN_READ_COVERAGE {
             .mix( SE_MAPPING.out.mapped_bam )
             .set { merged_bam }
     }
-    else if ( platform.filter { it == "illumina" } ) { 
+    else if ( platform.filter { it == "illumina" } ) {
 
         PE_MAPPING  (
             reference_tuple,
@@ -73,7 +73,7 @@ workflow RUN_READ_COVERAGE {
     )
     ch_versions = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
 
-    
+
     //
     // MODULE: COMPUTE THE AVERAGE COVERAGE
     //

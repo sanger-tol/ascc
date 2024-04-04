@@ -24,6 +24,8 @@ workflow RUN_VECSCREEN {
     //
     // MODULE: RUNS NCBI VECSCREEN
     //
+    vecscreen_database_tuple.view()
+
     NCBITOOLS_VECSCREEN(
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
         vecscreen_database_tuple

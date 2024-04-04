@@ -1,0 +1,3 @@
+kmer_size: 7
+n_neighbors_setting: 13
+autoencoder_epochs_count: -1

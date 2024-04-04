@@ -32,6 +32,7 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
 include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
+include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
@@ -63,6 +64,9 @@ workflow ASCC {
 
     main:
     ch_versions = Channel.empty()
+    ch_out_merge = Channel.empty()
+
+    workflow_steps = params.steps.split(",")
 
     input_ch = Channel.fromPath(params.input, checkIfExists: true)
 
@@ -80,6 +84,7 @@ workflow ASCC {
     GC_CONTENT (
         YAML_INPUT.out.reference_tuple
     )
+    ch_out_merge = ch_out_merge.mix(GC_CONTENT.out.txt)
     ch_versions = ch_versions.mix(GC_CONTENT.out.versions)
 
     //
@@ -92,12 +97,40 @@ workflow ASCC {
     ch_versions = ch_versions.mix(GENERATE_GENOME.out.versions)
 
     //
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
+    //
+
+    if ( workflow_steps.contains('kmers') || workflow_steps.contains('ALL')) {
+
+        GENERATE_GENOME.out.reference_tuple
+            .map { meta, file ->
+                tuple (
+                    meta,
+                    file,
+                    file.countFasta() * 3
+                )
+            }
+            .set {autoencoder_epochs_count}
+
+        GET_KMERS_PROFILE (
+            GENERATE_GENOME.out.reference_tuple,
+            YAML_INPUT.out.kmer_len,
+            YAML_INPUT.out.dimensionality_reduction_methods,
+            YAML_INPUT.out.n_neighbours,
+            autoencoder_epochs_count.map{it -> it[2]}
+        )
+        ch_versions = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+    }
+
+    //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    EXTRACT_TIARA_HITS (
-        GENERATE_GENOME.out.reference_tuple
-    )
-    ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+    if ( workflow_steps.contains('tiara') ) {
+        EXTRACT_TIARA_HITS (
+            GENERATE_GENOME.out.reference_tuple
+        )
+        ch_versions = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+    }
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
@@ -117,104 +150,136 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    EXTRACT_NT_BLAST (
-        modified_input,
-        YAML_INPUT.out.nt_database,
-        YAML_INPUT.out.ncbi_accessions,
-        YAML_INPUT.out.ncbi_rankedlineage_path
-    )
-    ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    if ( workflow_steps.contains('nt_blast') || workflow_steps.contains('ALL') ) {
+        EXTRACT_NT_BLAST (
+            modified_input,
+            YAML_INPUT.out.nt_database,
+            YAML_INPUT.out.ncbi_accessions,
+            YAML_INPUT.out.ncbi_rankedlineage_path
+        )
+        ch_versions = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    }
 
-    //
-    // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
-    //
-    YAML_INPUT.out.mito_tuple
-        .branch { meta, check ->
-            valid:      check != "NO MITO"
-            invalid:    check == "NO MITO"
-        }
-        .set { mito_check }
+    if ( workflow_steps.contains('mito') || workflow_steps.contains('ALL') ) {
+        //
+        // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
+        //
+        YAML_INPUT.out.mito_tuple
+            .branch { meta, check ->
+                valid:      check != "NO MITO"
+                invalid:    check == "NO MITO"
+            }
+            .set { mito_check }
 
 
-    //
-    // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
-    //
-    MITO_ORGANELLAR_BLAST (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.mito_var,
-        mito_check.valid
-    )
-    ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+        //
+        // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
+        //
+        MITO_ORGANELLAR_BLAST (
+            YAML_INPUT.out.reference_tuple,
+            YAML_INPUT.out.mito_var,
+            mito_check.valid
+        )
+        ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+    }
 
-    //
-    // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
-    //
-    YAML_INPUT.out.plastid_tuple
-        .branch { meta, check ->
-            valid:      check != "NO PLASTID"
-            invalid:    check == "NO PLASTID"
-        }
-        .set { plastid_check }
+    if ( workflow_steps.contains('chloro') || workflow_steps.contains('ALL') ) {
 
-    //
-    // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
-    //
-    PLASTID_ORGANELLAR_BLAST (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.plastid_var,
-        plastid_check.valid
-    )
-    ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+        //
+        // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
+        //
+        YAML_INPUT.out.plastid_tuple
+            .branch { meta, check ->
+                valid:      check != "NO PLASTID"
+                invalid:    check == "NO PLASTID"
+            }
+            .set { plastid_check }
+
+        //
+        // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
+        //
+        PLASTID_ORGANELLAR_BLAST (
+            YAML_INPUT.out.reference_tuple,
+            YAML_INPUT.out.plastid_var,
+            plastid_check.valid
+        )
+        ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    }
+
 
     //
     // SUBWORKFLOW:
     //
-    RUN_FCSADAPTOR (
-        YAML_INPUT.out.reference_tuple
-    )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
+    if ( workflow_steps.contains('fcs_adapt') || workflow_steps.contains('ALL') ) {
+        RUN_FCSADAPTOR (
+            YAML_INPUT.out.reference_tuple
+        )
+        ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    }
     //
     // SUBWORKFLOW:
     //
-    RUN_FCSGX (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.fcs_gx_database_path,
-        YAML_INPUT.out.taxid,
-        YAML_INPUT.out.ncbi_rankedlineage_path
-    )
-    ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    if ( workflow_steps.contains('fcsgx') || workflow_steps.contains('ALL') ) {
+        RUN_FCSGX (
+            YAML_INPUT.out.reference_tuple,
+            YAML_INPUT.out.fcs_gx_database_path,
+            YAML_INPUT.out.taxid,
+            YAML_INPUT.out.ncbi_rankedlineage_path
+        )
+        ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    }
 
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    PACBIO_BARCODE_CHECK (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.pacbio_tuple,
-        YAML_INPUT.out.pacbio_barcodes,
-        YAML_INPUT.out.pacbio_multiplex_codes
-    )
-    ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    if ( workflow_steps.contains('barcodes') || workflow_steps.contains('ALL') ) {
+        PACBIO_BARCODE_CHECK (
+            YAML_INPUT.out.reference_tuple,
+            YAML_INPUT.out.pacbio_tuple,
+            YAML_INPUT.out.pacbio_barcodes,
+            YAML_INPUT.out.pacbio_multiplex_codes
+        )
+        ch_versions = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    }
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    RUN_READ_COVERAGE (
-        YAML_INPUT.out.reference_tuple,
-        YAML_INPUT.out.assembly_path,
-        YAML_INPUT.out.pacbio_tuple,
-        YAML_INPUT.out.reads_type
-    )
-    ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    if ( workflow_steps.contains('coverage') || workflow_steps.contains('ALL') ) {
+        RUN_READ_COVERAGE (
+            YAML_INPUT.out.reference_tuple,
+            YAML_INPUT.out.assembly_path,
+            YAML_INPUT.out.pacbio_tuple,
+            YAML_INPUT.out.reads_type
+        )
+        ch_versions = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    }
 
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
-    RUN_VECSCREEN (
-        GENERATE_GENOME.out.reference_tuple,
-        YAML_INPUT.out.vecscreen_database_path
-    )
-    ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    if ( workflow_steps.contains('vecscreen') || workflow_steps.contains('ALL') ) {
+        RUN_VECSCREEN (
+            GENERATE_GENOME.out.reference_tuple,
+            YAML_INPUT.out.vecscreen_database_path
+        )
+        ch_versions = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: Run the kraken classifier
+    //
+    if ( workflow_steps.contains('kraken') || workflow_steps.contains('ALL') ) {
+        RUN_NT_KRAKEN(
+            GENERATE_GENOME.out.reference_tuple,
+            YAML_INPUT.out.nt_kraken_db_path,
+            YAML_INPUT.out.ncbi_rankedlineage_path
+        )
+    }
+
+    // mix the outputs of the outpuutting process so that we can
+    // insert them into the one process to create the btk and the merged report
+    // much like the versions channel
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
