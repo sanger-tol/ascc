@@ -12,6 +12,7 @@ Modified by Damon-Lee Pointon (dp24)
 # https://scikit-learn.org/stable/auto_examples/manifold/plot_compare_methods.html#sphx-glr-auto-examples-manifold-plot-compare-methods-py
 
 import os
+
 matplot_config_path = os.getcwd() + "/matplotconfig/"
 fonts_config_path = os.getcwd() + "/fontconfig/"
 numba_config_path = os.getcwd() + "/numbaconfig/"
