@@ -38,7 +38,7 @@ jobs:
       - name: Download test data
         # Download A fungal test data set that is full enough to show some real output.
         run: |
-          curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest.tar.gz | tar xzf -
+          curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
 
       - name: Download the NCBI taxdump database
         run: |
@@ -72,7 +72,12 @@ jobs:
       - name: Download the pacbio barcode
         run: |
           mkdir pacbio_barcode
-          wget -O pacbio_barcode/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip -c https://www.pacb.com/wp-content/uploads/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip && cd pacbio_barcode && unzip SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip && mv SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta pacbio_adaptors.fa && rm -rf SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip __MACOSX && cd ..
+          wget -O pacbio_barcode/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip -c https://www.pacb.com/wp-content/uploads/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
+          cd pacbio_barcode
+          unzip SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
+          mv SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta pacbio_adaptors.fa
+          rm -rf SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip __MACOSX
+          cd ../
 
       - name: Download the subset of Diamond database
         run: |
