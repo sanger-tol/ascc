@@ -72,7 +72,6 @@ workflow SE_MAPPING {
             se_input.bool_cigar_bam
     )
     ch_bams = MINIMAP2_ALIGN_SE.out.bam
-   
 
     ch_bams
         .map { meta, file ->
@@ -110,7 +109,7 @@ process GrabFiles {
     tuple val(meta), path("in")
 
     output:
-    tuple val(meta), path("in/*.{fa,fasta}.{gz}")
+    tuple val(meta), path("in/*.{fa,fasta,fna}.{gz}")
 
     "true"
 }

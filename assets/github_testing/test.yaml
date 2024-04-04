@@ -1,13 +1,13 @@
-assembly_path: /home/runner/work/ascc/ascc/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
-assembly_title: asccTinyTest
-reads_path: /home/runner/work/ascc/ascc/asccTinyTest/pacbio
+assembly_path: /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa
+assembly_title: asccTinyTest_V2
+reads_path: /home/runner/work/ascc/ascc/asccTinyTest_V2/pacbio/
 reads_type: "hifi"
 pacbio_barcodes: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
 pacbio_multiplexing_barcode_names: "bc2001,bc2009"
 sci_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
-mito_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
-plastid_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
+mito_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+plastid_fasta_path: /home/runner/work/ascc/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
 kmer_len: 7
 dimensionality_reduction_methods: "pca,random_trees"
 # all available methods
