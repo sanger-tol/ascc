@@ -48,6 +48,9 @@ jobs:
           mkdir -p $NXF_SINGULARITY_CACHEDIR
           mkdir -p $NXF_SINGULARITY_LIBRARYDIR
 
+      - name: Setup apptainer
+        uses: eWaterCycle/setup-apptainer@main
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
