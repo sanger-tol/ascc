@@ -44,9 +44,9 @@ jobs:
           version: "${{ matrix.NXF_VER }}"
 
       - name: Set up Singularity
-      run: |
-        mkdir -p $NXF_SINGULARITY_CACHEDIR
-        mkdir -p $NXF_SINGULARITY_LIBRARYDIR
+        run: |
+          mkdir -p $NXF_SINGULARITY_CACHEDIR
+          mkdir -p $NXF_SINGULARITY_LIBRARYDIR
 
       - name: Install Python
         uses: actions/setup-python@v5

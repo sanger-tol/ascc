@@ -20,9 +20,9 @@ for i in [fonts_config_path, matplot_config_path, numba_config_path]:
     if not os.path.exists(i):
         os.makedirs(i)
 
-os.environ['OSFONTDIR'] = fonts_config_path
-os.environ['MPLCONFIGDIR'] = matplot_config_path
-os.environ['NUMBA_CACHE_DIR'] = numba_config_path
+os.environ["OSFONTDIR"] = fonts_config_path
+os.environ["MPLCONFIGDIR"] = matplot_config_path
+os.environ["NUMBA_CACHE_DIR"] = numba_config_path
 
 os.chmod(fonts_config_path, 0o0755)
 os.chmod(matplot_config_path, 0o0755)
@@ -50,9 +50,6 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 from functools import reduce
-
-
-
 
 
 # plt.style.use("ggplot")
@@ -174,6 +171,7 @@ def run_tsne(df):
 
     embedding = manifold.TSNE(n_components=2).fit_transform(df)
     return embedding
+
 
 def run_dim_reduction(df, selected_method, n_neighbors_setting=-1, autoencoder_epochs_count=-1, out_folder=None):
     embedding = None
