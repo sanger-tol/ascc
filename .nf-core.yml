@@ -1,7 +1,6 @@
 repository_type: pipeline
 lint:
-  files_exist:
-    false
+  files_exist: false
   files_unchanged:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
