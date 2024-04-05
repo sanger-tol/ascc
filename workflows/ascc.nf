@@ -294,9 +294,11 @@ workflow ASCC {
             YAML_INPUT.out.reads_type
         )
         ch_coverage     = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
+        ch_bam          = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
         ch_versions     = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
     } else {
         ch_coverage     = []
+        ch_bam          = []
     }
 
     //
@@ -341,21 +343,18 @@ workflow ASCC {
 
     CREATE_BTK_DATASET (
         GENERATE_GENOME.out.reference_tuple,
-        GC_CONTENT.out.txt.map{it[1]},
         GENERATE_GENOME.out.dot_genome.map{it[1]},
         ch_kmers,
         ch_tiara,
         ch_nt_blast,
-        ch_mito,
-        ch_chloro,
-        ch_fcsadapt,
         ch_fcsgx,
-        ch_barcode,
+        ch_bam,
         ch_coverage,
-        ch_vecscreen,
         ch_kraken1,
         ch_kraken2,
-        ch_kraken3
+        ch_kraken3,
+        YAML_INPUT.out.ncbi_taxonomy_path,
+
     )
 
     //

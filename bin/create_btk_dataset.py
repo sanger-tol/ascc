@@ -9,10 +9,6 @@ from pathlib import Path
 import sys
 import os.path
 
-#installing BlobToolKit dependencies:
-#conda install -c tolkit tolkein
-#conda install -c bioconda pysa
-
 
 def create_assembly_yaml(assembly_yaml_path, assembly_alias, taxon_name):
     """
@@ -166,19 +162,19 @@ def main(assembly_fasta_path, dataset_folder, pipeline_run_folder, assembly_titl
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("assembly_fasta_path",          type=str, help="assembly_fasta_path")
-    parser.add_argument("dataset_folder",               type=str, help="Path for dataset folder")
-    parser.add_argument("pipeline_run_folder",          type=str, help="Folder where this pipeline is run pipeline")
-    parser.add_argument("assembly_title",               type=str, help="Assembly title")
-    parser.add_argument("taxon_name",                   type=str, help="Taxon name")
-    parser.add_argument("taxid",                        type=int, help="taxid")
-    parser.add_argument("blastn_hits_path",             type=str, help="Path to blastn hits file")
-    parser.add_argument("uniprot_diamond_hits_path",    type=str, help="Path to UNIPROT Diamond BLASTX hits file")
-    parser.add_argument("nr_diamond_hits_path",         type=str, help="Path to nr Diamond BLASTX hits file")
-    parser.add_argument("mapped_reads_path",            type=str, help="Path to the BAM file with mapped reads for coverage estimation")
-    parser.add_argument("taxdump_path",                 type=str, help="Path to the directory with NCBI taxdump files")
-    parser.add_argument("--threads",                    type=int, default=1,    help="Number of CPU threads (default: 1)")
-    parser.add_argument("--assembly_alias",             type=str, default="",   help="Assembly alias")
+    parser.add_argument("assembly_fasta_path", type=str, help="assembly_fasta_path")
+    parser.add_argument("dataset_folder", type=str, help="Path for dataset folder")
+    parser.add_argument("pipeline_run_folder", type=str, help="Folder where this pipeline is run pipeline")
+    parser.add_argument("assembly_title", type=str, help="Assembly title")
+    parser.add_argument("taxon_name", type=str, help="Taxon name")
+    parser.add_argument("taxid", type=int, help="taxid")
+    parser.add_argument("blastn_hits_path", type=str, help="Path to blastn hits file")
+    parser.add_argument("uniprot_diamond_hits_path", type=str, help="Path to UNIPROT Diamond BLASTX hits file")
+    parser.add_argument("nr_diamond_hits_path", type=str, help="Path to nr Diamond BLASTX hits file")
+    parser.add_argument("mapped_reads_path", type=str, help="Path to the BAM file with mapped reads for coverage estimation")
+    parser.add_argument("taxdump_path", type=str, help="Path to the directory with NCBI taxdump files")
+    parser.add_argument("--threads", type=int, default=1, help="Number of CPU threads (default: 1)")
+    parser.add_argument("--assembly_alias", type=str, default="", help="Assembly alias")
     parser.add_argument("--dry_run", dest="dry_run", action="store_true", help="Dry run (print commands without executing)")
     args = parser.parse_args()
     main(args.assembly_fasta_path, args.dataset_folder, args.pipeline_run_folder, args.assembly_title, args.taxon_name, args.taxid, args.blastn_hits_path, args.uniprot_diamond_hits_path, args.nr_diamond_hits_path, args.mapped_reads_path, args.taxdump_path, args.threads, args.assembly_alias,args.dry_run)
