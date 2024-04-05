@@ -143,6 +143,7 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
 
     emit:
+    ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
     versions                = ch_versions.ifEmpty(null)
 
 }

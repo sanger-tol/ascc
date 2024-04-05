@@ -120,7 +120,7 @@ workflow ORGANELLAR_BLAST {
     ch_versions     = ch_versions.mix(ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.versions)
 
     emit:
-    organelle_report = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations
+    organelle_report= ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations
     versions        = ch_versions.ifEmpty(null)
 
 }

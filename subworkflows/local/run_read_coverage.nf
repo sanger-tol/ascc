@@ -83,6 +83,6 @@ workflow RUN_READ_COVERAGE {
     ch_versions = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
 
     emit:
-    versions       = ch_versions.ifEmpty(null)
     tsv_ch         = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
+    versions       = ch_versions.ifEmpty(null)
 }

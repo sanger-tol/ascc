@@ -80,8 +80,6 @@ workflow GET_KMERS_PROFILE {
         }
         .set { collected_files_for_combine }
 
-    collected_files_for_combine.view()
-
     //
     // MODULE: COMBINE OUTPUTS OF MULTIPLE METHODS
     //

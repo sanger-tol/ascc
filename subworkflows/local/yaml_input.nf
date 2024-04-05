@@ -57,9 +57,20 @@ workflow YAML_INPUT {
         .set { seqkit }
 
     group.assembly_title
-        .combine( group.assembly_path )
-        .map { id, file ->
-            tuple(  [   id: id ],
+        .combine(
+            group.assembly_path,
+        )
+        .combine(
+            group.taxid,
+        )
+        .combine(
+            group.sci_name
+        )
+        .map { id, file, tax, sci ->
+            tuple(  [   id:         id,
+                        taxid:      tax,
+                        sci_name:   sci
+                    ],
                     file
             )
         }
