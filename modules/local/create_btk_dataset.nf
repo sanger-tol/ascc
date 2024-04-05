@@ -24,19 +24,25 @@ process CREATE_BTK_DATASET {
 
     """
     mkdir -p btk_datasets/
+    ls -lh
 
-        create_btk_dataset.py \\
-            ${reference} \\
-            btk_datasets/ \\
-            ./1/ \\
-            ${meta.id} \\
-            ${meta.sci_name} \\
-            ${meta.taxid} \\
-            ${nt_blast} \\
-            UNIPROT_HITS \\
-            DIAMOND_HITS \\
-            ${mapped_bam} \\
-            ${ncbi_taxdump}
+    create_btk_dataset.py \\
+        ${reference} \\
+        btk_datasets/ \\
+        ./1/ \\
+        ${meta.id} \\
+        ${meta.sci_name} \\
+        ${meta.taxid} \\
+        ${nt_blast} \\
+        UNIPROT_HITS \\
+        DIAMOND_HITS \\
+        ${mapped_bam} \\
+        ${ncbi_taxdump}
 
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+        create_btk_dataset: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+    END_VERSIONS
     """
 }
