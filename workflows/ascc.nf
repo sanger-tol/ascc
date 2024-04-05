@@ -37,6 +37,7 @@ include { RUN_READ_COVERAGE                             } from '../subworkflows/
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
+include { RUN_DIAMOND                                   } from '../subworkflows/local/run_diamond.nf'
 
 //
 // MODULE: Local modules
@@ -324,7 +325,7 @@ workflow ASCC {
             YAML_INPUT.out.nt_kraken_db_path,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
-        ch_kraken1      = RUN_NT_KRAKEN.out.classified.map{it[1]}
+        ch_kraken1      = RUN_NT_KRAKEN.out.classifiedreformed
         ch_kraken2      = RUN_NT_KRAKEN.out.report.map{it[1]}
         ch_kraken3      = RUN_NT_KRAKEN.out.lineage
 
@@ -335,11 +336,23 @@ workflow ASCC {
         ch_kraken3      = []
     }
 
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    if ( workflow_steps.contains('diamond') || workflow_steps.contains('ALL') ) {
+        RUN_DIAMOND (
+            modified_input,
+            YAML_INPUT.out.diamond_nr_database_path
+        )
+        reform_out6tsv  = RUN_DIAMOND.out.reformed.map{it[1]}
+        ch_versions     = ch_versions.mix(RUN_DIAMOND.out.versions)
+    } else {
+        reform_out6tsv   = []
+    }
+
     // mix the outputs of the outpuutting process so that we can
     // insert them into the one process to create the btk and the merged report
     // much like the versions channel
-
-    GENERATE_GENOME.out.reference_tuple.view()
 
     CREATE_BTK_DATASET (
         GENERATE_GENOME.out.reference_tuple,
@@ -353,6 +366,7 @@ workflow ASCC {
         ch_kraken1,
         ch_kraken2,
         ch_kraken3,
+        reform_out6tsv,
         YAML_INPUT.out.ncbi_taxonomy_path,
 
     )

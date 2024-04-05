@@ -13,6 +13,7 @@ process CREATE_BTK_DATASET {
     path kraken_class,      stageAs: "?/KRAKEN_CLASSIFIED.txt"
     path kraken_report,     stageAs: "?/KRAKEN_REPORT.txt"
     path kraken_lineage,    stageAs: "?/KRAKEN_LINEAGE.txt"
+    path diamond_outfmt6,   stageAs: "?/DIAMOND_OUTFMT6.tsv"
     path ncbi_taxdump
 
     when:
@@ -35,7 +36,7 @@ process CREATE_BTK_DATASET {
         ${meta.taxid} \\
         ${nt_blast} \\
         UNIPROT_HITS \\
-        DIAMOND_HITS \\
+        ${diamond_outfmt6} \\
         ${mapped_bam} \\
         ${ncbi_taxdump}
 
