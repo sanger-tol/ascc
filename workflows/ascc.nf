@@ -37,7 +37,8 @@ include { RUN_READ_COVERAGE                             } from '../subworkflows/
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
-include { RUN_DIAMOND                                   } from '../subworkflows/local/run_diamond.nf'
+include { RUN_DIAMOND as NUCLEOT_DIAMOND                } from '../subworkflows/local/run_diamond.nf'
+include { RUN_DIAMOND as UNIPROT_DIAMOND                } from '../subworkflows/local/run_diamond.nf'
 
 //
 // MODULE: Local modules
@@ -166,7 +167,7 @@ workflow ASCC {
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
         ch_versions     = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+        ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
     } else {
         ch_nt_blast     = []
     }
@@ -339,15 +340,29 @@ workflow ASCC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( workflow_steps.contains('diamond') || workflow_steps.contains('ALL') ) {
-        RUN_DIAMOND (
+    if ( workflow_steps.contains('nt_diamond') || workflow_steps.contains('ALL') ) {
+        NUCLEOT_DIAMOND (
             modified_input,
             YAML_INPUT.out.diamond_nr_database_path
         )
-        reform_out6tsv  = RUN_DIAMOND.out.reformed.map{it[1]}
+        nt_full         = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
         ch_versions     = ch_versions.mix(RUN_DIAMOND.out.versions)
     } else {
-        reform_out6tsv   = []
+        nt_full         = []
+    }
+
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    if ( workflow_steps.contains('uniprot_diamond') || workflow_steps.contains('ALL') ) {
+        UNIPROT_DIAMOND (
+            modified_input,
+            YAML_INPUT.out.diamond_uniprot_database_path
+        )
+        un_full         = UNIPROT_DIAMOND.out.reformed.map{it[1]}
+        ch_versions     = ch_versions.mix(RUN_DIAMOND.out.versions)
+    } else {
+        un_full         = []
     }
 
     // mix the outputs of the outpuutting process so that we can
@@ -366,7 +381,8 @@ workflow ASCC {
         ch_kraken1,
         ch_kraken2,
         ch_kraken3,
-        reform_out6tsv,
+        nt_full,
+        un_full,
         YAML_INPUT.out.ncbi_taxonomy_path,
 
     )

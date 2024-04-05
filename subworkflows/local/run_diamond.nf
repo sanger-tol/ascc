@@ -41,7 +41,7 @@ workflow RUN_DIAMOND {
     ch_versions     = ch_versions.mix(DIAMOND_BLAST_CHUNK_TO_FULL.out.versions)
 
     //
-    // MODULE:
+    // MODULE: REFORMAT THE DIAMOND OUTPUT
     //
     REFORMAT_DIAMOND_OUTFMT6 (
         DIAMOND_BLAST_CHUNK_TO_FULL.out.full
@@ -49,6 +49,7 @@ workflow RUN_DIAMOND {
     ch_versions     = ch_versions.mix(REFORMAT_DIAMOND_OUTFMT6.out.versions)
 
     emit:
+    full            = DIAMOND_BLAST_CHUNK_TO_FULL.out.full
     reformed        = REFORMAT_DIAMOND_OUTFMT6.out.full
     versions        = ch_versions.ifEmpty(null)
 }

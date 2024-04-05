@@ -12,7 +12,7 @@ process BLAST_CHUNK_TO_FULL {
 
     output:
     tuple val(meta), path( "*.tsv" ) , emit: full
-    path "versions.yml"                             , emit: versions
+    path "versions.yml"              , emit: versions
 
     script:
     def args = task.ext.args ?: ''
