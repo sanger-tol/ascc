@@ -326,7 +326,7 @@ workflow ASCC {
             YAML_INPUT.out.nt_kraken_db_path,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
-        ch_kraken1      = RUN_NT_KRAKEN.out.classifiedreformed
+        ch_kraken1      = RUN_NT_KRAKEN.out.classified
         ch_kraken2      = RUN_NT_KRAKEN.out.report.map{it[1]}
         ch_kraken3      = RUN_NT_KRAKEN.out.lineage
 
