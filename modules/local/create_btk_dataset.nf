@@ -22,7 +22,7 @@ process CREATE_BTK_DATASET {
     path ncbi_taxdump
 
     output:
-    tuple val(meta), path("btk_datasets")
+    tuple val(meta), path("btk_datasets"), emit: btk_datasets
 
     when:
     task.ext.when == null || task.ext.when
