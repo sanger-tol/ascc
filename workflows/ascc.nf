@@ -45,6 +45,7 @@ include { RUN_DIAMOND as UNIPROT_DIAMOND                } from '../subworkflows/
 //
 include { GC_CONTENT                                    } from '../modules/local/gc_content'
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
+include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 
 
 /*
@@ -389,9 +390,29 @@ workflow ASCC {
 
     )
 
-    MERGE_BTK_DATASET (
-        CREATE_BTK_DATASET.out.btk_datasets
+    //SANGER_TOL_BTK.out.btk_datasets = []
+    //SANGER_TOL_BTK.out.summary = []
+
+    ASCC_MERGE_TABLES (
+        
     )
+
+    //
+    // NOT TESTED AS WE NEED BTK INTEGRATED FIRST!!!
+    //
+
+    if ( workflow_steps.contains('busco_btk') || workflow_steps.contains('ALL') ) {
+        //SANGER_TOL_BTK (
+        //    yaml_input.out.reference_tuple
+        //)
+
+        MERGE_BTK_DATASETS (
+            CREATE_BTK_DATASET.out.btk_datasets,
+            [[],[]],     //SANGER_TOL_BTK.out.btk_datasets = []
+            [[],[]]         //SANGER_TOL_BTK.out.summary = []
+        )
+    }
+
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
