@@ -43,7 +43,6 @@ process CREATE_BTK_DATASET {
 
     """
     mkdir -p btk_datasets/
-    ls -lh
 
     create_btk_dataset_V2.py \\
         -f ${reference} \\
