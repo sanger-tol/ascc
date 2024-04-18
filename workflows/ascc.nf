@@ -220,6 +220,7 @@ workflow ASCC {
         )
         ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
         ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+        ch_chloro.view()
     } else {
         ch_chloro       = []
     }
@@ -238,7 +239,7 @@ workflow ASCC {
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
             .set{ ch_fcsadapt }
-        ch_fcsadapt
+        ch_fcsadapt.view()
         ch_versions     = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     } else {
         ch_fcsadapt     = []
@@ -326,7 +327,7 @@ workflow ASCC {
             YAML_INPUT.out.nt_kraken_db_path,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
-        ch_kraken1      = RUN_NT_KRAKEN.out.classified
+        ch_kraken1      = RUN_NT_KRAKEN.out.classified.map{it[1]}
         ch_kraken2      = RUN_NT_KRAKEN.out.report.map{it[1]}
         ch_kraken3      = RUN_NT_KRAKEN.out.lineage
 
@@ -360,6 +361,7 @@ workflow ASCC {
             YAML_INPUT.out.diamond_uniprot_database_path
         )
         un_full         = UNIPROT_DIAMOND.out.reformed.map{it[1]}
+        un_full.view()
         ch_versions     = ch_versions.mix(UNIPROT_DIAMOND.out.versions)
     } else {
         un_full         = []
@@ -385,6 +387,10 @@ workflow ASCC {
         un_full,
         YAML_INPUT.out.ncbi_taxonomy_path,
 
+    )
+
+    MERGE_BTK_DATASET (
+        CREATE_BTK_DATASET.out.btk_datasets
     )
 
     //
