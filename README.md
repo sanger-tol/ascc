@@ -16,7 +16,6 @@ ONCE THE PIPELINE REACHES A USABLE STATE A TAGGED RELEASE/PRE-RELEASE WILL BE MA
 
 ---
 
-
 ## Introduction
 
 **sanger-tol/ascc** is a bioinformatics pipeline that ...
