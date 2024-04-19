@@ -18,8 +18,8 @@ process FILTER_VECSCREEN_RESULTS {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix      = args.ext.prefix ?: "${meta.id}"
-    def args        = args.ext.args ?: ''
+    def prefix      = task.ext.prefix ?: "${meta.id}"
+    def args        = task.ext.args ?: ''
     """
     VSlistTo1HitPerLine.py ${args} ${vecscreen_outfile} > ${prefix}_vecscreen.grepped.out
 

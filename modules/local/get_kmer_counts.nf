@@ -20,7 +20,7 @@ process GET_KMER_COUNTS {
 
     script:
     def KCOUNTER_VERSION = "0.1.1"
-    def prefix = args.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     get_kmers_counts.py \\
         $input_fasta \\

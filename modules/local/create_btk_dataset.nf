@@ -22,14 +22,15 @@ process CREATE_BTK_DATASET {
     path ncbi_taxdump
 
     output:
-    tuple val(meta), path("btk_datasets"), emit: btk_datasets
+    tuple val(meta), path("btk_datasets"),                  emit: btk_datasets
+    tuple val(meta), path("btk_summary_table_full.tsv"),    emit: create_summary
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix          = args.ext.prefix   ?: "${meta.id}"
-    def args            = args.ext.args     ?: ""
+    def prefix          = task.ext.prefix   ?: "${meta.id}"
+    def args            = task.ext.args     ?: ""
     def blastn_arg      = nt_blast          ? "-bh ${nt_blast}"     : ""
     def nt_diamond_arg  = nt_diamond        ? "-nr ${nt_diamond}"   : ""
     def un_diamond_arg  = un_diamond        ? "-ud ${un_diamond}"   : ""
@@ -60,8 +61,6 @@ process CREATE_BTK_DATASET {
         $pca_arg \\
         $fcs_arg \\
         $args
-
-    echo "merge_btk_dataset.py btk_datasets/ BTK_FOLDER_PATH BTK_WITH_BUSCO"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

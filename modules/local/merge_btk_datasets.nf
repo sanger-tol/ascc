@@ -17,8 +17,8 @@ process MERGE_BTK_DATASETS {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix              = args.ext.prefix       ?: "${meta.id}"
-    def args                = args.ext.args         ?: ""
+    def prefix              = task.ext.prefix       ?: "${meta.id}"
+    def args                = task.ext.args         ?: ""
 
     """
     mkdir -p merged_datasets/
@@ -29,8 +29,6 @@ process MERGE_BTK_DATASETS {
         -b $busco_btk_datasets \\
         -s $busco_summary_file \\
         $args
-
-    echo "merge_btk_dataset.py btk_datasets/ BTK_FOLDER_PATH BTK_WITH_BUSCO"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

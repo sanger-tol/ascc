@@ -15,8 +15,8 @@ process AUTOFILTER_ASSEMBLY {
     tuple val(meta), path("assembly_filtering_removed_sequences.txt")   emit: removed_seqs
 
     script:
-    def prefix  = args.ext.prefix   ?: "${meta.id}"
-    def args    = args.ext.args     ?: ""
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+    def args    = task.ext.args     ?: ""
     """
     remove_fcs_gx_and_tiara.py \\
         $reference \\
