@@ -39,6 +39,7 @@ include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
 include { RUN_DIAMOND as NUCLEOT_DIAMOND                } from '../subworkflows/local/run_diamond.nf'
 include { RUN_DIAMOND as UNIPROT_DIAMOND                } from '../subworkflows/local/run_diamond.nf'
+include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check'
 
 //
 // MODULE: Local modules
@@ -46,6 +47,7 @@ include { RUN_DIAMOND as UNIPROT_DIAMOND                } from '../subworkflows/
 include { GC_CONTENT                                    } from '../modules/local/gc_content'
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
 
 
 /*
@@ -99,6 +101,14 @@ workflow ASCC {
         YAML_INPUT.out.pacbio_barcodes
     )
     ch_versions     = ch_versions.mix(GENERATE_GENOME.out.versions)
+
+    //
+    // SUBWORKFLOW: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOMe
+    //
+    TRAILINGNS_CHECK (
+        YAML_INPUT.out.reference_tuple
+    )
+    ch_versions = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
 
     //
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
@@ -221,7 +231,6 @@ workflow ASCC {
         )
         ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
         ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
-        ch_chloro.view()
     } else {
         ch_chloro       = []
     }
@@ -240,7 +249,6 @@ workflow ASCC {
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
             .set{ ch_fcsadapt }
-        ch_fcsadapt.view()
         ch_versions     = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     } else {
         ch_fcsadapt     = []
@@ -348,23 +356,27 @@ workflow ASCC {
             YAML_INPUT.out.diamond_nr_database_path
         )
         nt_full         = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
+        nt_hits         = UNIPROT_DIAMOND.out.hits_file.map{it[1]}
         ch_versions     = ch_versions.mix(NUCLEOT_DIAMOND.out.versions)
     } else {
+        nt_hits         = []
         nt_full         = []
     }
 
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
+    //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     if ( workflow_steps.contains('uniprot_diamond') || workflow_steps.contains('ALL') ) {
         UNIPROT_DIAMOND (
             modified_input,
             YAML_INPUT.out.diamond_uniprot_database_path
         )
         un_full         = UNIPROT_DIAMOND.out.reformed.map{it[1]}
-        un_full.view()
+        un_hits         = UNIPROT_DIAMOND.out.hits_file.map{it[1]}
         ch_versions     = ch_versions.mix(UNIPROT_DIAMOND.out.versions)
     } else {
+        un_hits         = []
         un_full         = []
     }
 
@@ -384,18 +396,14 @@ workflow ASCC {
         ch_kraken1,
         ch_kraken2,
         ch_kraken3,
-        nt_full,
-        un_full,
+        nt_hits,
+        un_hits,
         YAML_INPUT.out.ncbi_taxonomy_path,
 
     )
 
     //SANGER_TOL_BTK.out.btk_datasets = []
     //SANGER_TOL_BTK.out.summary = []
-
-    ASCC_MERGE_TABLES (
-        
-    )
 
     //
     // NOT TESTED AS WE NEED BTK INTEGRATED FIRST!!!
@@ -409,10 +417,29 @@ workflow ASCC {
         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
             [[],[]],     //SANGER_TOL_BTK.out.btk_datasets = []
-            [[],[]]         //SANGER_TOL_BTK.out.summary = []
+            [[],[]]      //SANGER_TOL_BTK.out.summary = []
         )
     }
 
+    //
+    // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
+    //
+    ASCC_MERGE_TABLES (
+        GC_CONTENT.out.txt,                                 // FROM -- GC_COVERAGE.out.tsv
+        ch_coverage,                                        // FROM -- RUN_COVERAGE.out.tsv.map{it[1]}
+        ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
+        [],                                                 // <-- BACTERIAL KRAKEN -- NOT IN PIPELINE YET
+        ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
+        ch_nt_blast,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_kmers,                                           // FROM -- GET_KMERS_PROFILE.out.combined_csv
+        nt_hits,                                            // FROM -- NUCLEOT_DIAMOND.out.reformed.map{it[1]}
+        un_hits,                                            // FROM -- UNIPROT_DIAMOND.out.reformed.map{it[1]}
+        [],                                                 // <-- MARKER SCAN -- NOT IN PIPELINE YET
+        [],                                                 // <-- CONTIGVIZ -- NOT IN PIPELINE YET
+        CREATE_BTK_DATASET.out.create_summary.map{it[1]},
+        [],                                                 // <-- BUSCO_BTK -- NOT IN PIPELINE YET
+        ch_fcsgx                                            // FROM -- PARSE_FCSGX_RESULT.out.fcsgxresult.map{it[1]}
+    )
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
