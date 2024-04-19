@@ -10,6 +10,7 @@ import argparse
 from pathlib import Path
 import csv
 
+
 def get_domain_from_taxid(query_taxid, rankedlineage_path):
     """
     Input: 1) a taxID, 2) path to the NCBI rankedlineage.dmp file
@@ -31,7 +32,11 @@ def get_domain_from_taxid(query_taxid, rankedlineage_path):
                 sys.exit(1)
             break
     if domain is None:
-        sys.stderr.write("The domain for taxid ({}) was not found in the NCBI rankedlineage.dmp file ({})\n".format(query_taxid, rankedlineage_path))
+        sys.stderr.write(
+            "The domain for taxid ({}) was not found in the NCBI rankedlineage.dmp file ({})\n".format(
+                query_taxid, rankedlineage_path
+            )
+        )
         sys.exit(1)
     return domain
 
@@ -108,32 +113,41 @@ def filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path):
             split_seq = gpf.split_with_fixed_row_length(seq, 80)
             out_list.extend(split_seq)
         else:
-            sys.stderr.write(f"Excluding the sequence {header} from the filtered assembly ({filtered_assembly_path}), as it appears to be a contaminant based on FCS-GX and/or Tiara results\n")
+            sys.stderr.write(
+                f"Excluding the sequence {header} from the filtered assembly ({filtered_assembly_path}), as it appears to be a contaminant based on FCS-GX and/or Tiara results\n"
+            )
     gpf.export_list_as_line_break_separated_file(out_list, filtered_assembly_path)
-
 
 
 def main(pipeline_run_folder, taxid, rankedlineage_path):
     if taxid == -1:
-        sys.stderr.write("The filtering of assembly based on FCS-GX and Tiara results requires a taxID but a valid taxID has not been provided (the provided taxID is -1, which is a placeholder value)\n")
+        sys.stderr.write(
+            "The filtering of assembly based on FCS-GX and Tiara results requires a taxID but a valid taxID has not been provided (the provided taxID is -1, which is a placeholder value)\n"
+        )
 
     assembly_path = f"{pipeline_run_folder}/fasta/assembly.fasta"
     tiara_results_path = f"{pipeline_run_folder}/collected_tables/tiara_out.txt"
     fcs_gx_summary_path = f"{pipeline_run_folder}/collected_tables/fcs-gx_summary.csv"
     filtered_assembly_path = f"{pipeline_run_folder}/fasta/filtered/assembly_autofiltered.fasta"
-    assembly_filtering_summary_table_path = f"{pipeline_run_folder}/collected_tables/fcs-gx_and_tiara_combined_summary.csv"
+    assembly_filtering_summary_table_path = (
+        f"{pipeline_run_folder}/collected_tables/fcs-gx_and_tiara_combined_summary.csv"
+    )
     excluded_seq_list_path = f"{pipeline_run_folder}/collected_tables/assembly_filtering_removed_sequences.txt"
 
     Path(f"{pipeline_run_folder}/fasta/filtered").mkdir(parents=True, exist_ok=True)
 
     if os.path.isfile(rankedlineage_path) is False:
-        sys.stderr.write(f"The NCBI rankedlineage.dmp file was not found at the expected location ({rankedlineage_path})\n")
+        sys.stderr.write(
+            f"The NCBI rankedlineage.dmp file was not found at the expected location ({rankedlineage_path})\n"
+        )
         sys.exit(1)
     if os.path.isfile(tiara_results_path) is False:
         sys.stderr.write(f"The Tiara output file was not found at the expected location ({tiara_results_path})\n")
         sys.exit(1)
     if os.path.isfile(fcs_gx_summary_path) is False:
-        sys.stderr.write(f"The FCS-GX results summary file was not found at the expected location ({fcs_gx_summary_path})\n")
+        sys.stderr.write(
+            f"The FCS-GX results summary file was not found at the expected location ({fcs_gx_summary_path})\n"
+        )
         sys.exit(1)
     if os.path.isfile(assembly_path) is False:
         sys.stderr.write(f"The assembly FASTA file was not found at the expected location ({assembly_path})\n")
@@ -159,12 +173,16 @@ def main(pipeline_run_folder, taxid, rankedlineage_path):
             combined_action = "EXCLUDE"
         if combined_action == "EXCLUDE":
             scaffs_to_exclude.append(scaff)
-        combined_action_dict[scaff] = {"fcs_gx_action": fcs_gx_action, "tiara_action": tiara_action, "combined_action": combined_action}
+        combined_action_dict[scaff] = {
+            "fcs_gx_action": fcs_gx_action,
+            "tiara_action": tiara_action,
+            "combined_action": combined_action,
+        }
     filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path)
     gpf.export_list_as_line_break_separated_file(scaffs_to_exclude, excluded_seq_list_path)
 
-    #csv_writer = csv.writer(open(assembly_filtering_summary_table_path, "w"))
-    #for key, value in combined_action_dict.items():
+    # csv_writer = csv.writer(open(assembly_filtering_summary_table_path, "w"))
+    # for key, value in combined_action_dict.items():
     #    line = [key]
     #    for ik, iv in value.items():
     #        line.append(ik)
@@ -176,6 +194,7 @@ def main(pipeline_run_folder, taxid, rankedlineage_path):
         out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']}"
         out_csv_list.append(out_line)
     gpf.export_list_as_line_break_separated_file(out_csv_list, assembly_filtering_summary_table_path)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
