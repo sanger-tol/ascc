@@ -9,7 +9,6 @@ import argparse
 
 
 def main(fasta_file, output_file):
-
     minleftover = 200  # after trimming start/end, at least this many bp should be left
     winsize = 5000  # for sliding window analysis
     minslidingBase = 0.4  # maximum fraction of Ns in sliding window before alarm sets off
@@ -74,7 +73,6 @@ def main(fasta_file, output_file):
                     and (seq_string_for_window[:winsize].count("N") + seq_string_for_window[:winsize].count("n"))
                     > winsize * minslidingBase
                 ):
-
                     non_n_regions = []
                     non_n_iterator = re.finditer("[^Nn]+", seq_string_for_window)
                     for non_n_instance in non_n_iterator:

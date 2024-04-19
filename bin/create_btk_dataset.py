@@ -146,7 +146,6 @@ def main(
     assembly_alias,
     dry_run_flag,
 ):
-
     # out_folder = pipeline_run_folder + "/collected_tables"
 
     if assembly_alias == "":
