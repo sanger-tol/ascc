@@ -38,7 +38,8 @@ process SANGER_TOL_BTK {
         --blastp $blastp \\
         --blastn $blastn \\
         --blastx $blastx \\
-        -c $btk_config'
+        -c $btk_config \\
+        $args'
 
 
     cat <<-END_VERSIONS > versions.yml
