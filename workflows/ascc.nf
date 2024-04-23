@@ -356,7 +356,7 @@ workflow ASCC {
             YAML_INPUT.out.diamond_nr_database_path
         )
         nt_full         = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
-        nt_hits         = UNIPROT_DIAMOND.out.hits_file.map{it[1]}
+        nt_hits         = NUCLEOT_DIAMOND.out.hits_file.map{it[1]}
         ch_versions     = ch_versions.mix(NUCLEOT_DIAMOND.out.versions)
     } else {
         nt_hits         = []
