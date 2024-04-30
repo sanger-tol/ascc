@@ -15,17 +15,23 @@ process AUTOFILTER_ASSEMBLY {
     output:
     tuple val(meta), path("*autofiltered.fasta"),                       emit: decontaminated_assembly
     tuple val(meta), path("fcs-gx_and_tiara_combined_summary.csv"),     emit: fcs_tiara_summary
-    tuple val(meta), path("assembly_filtering_removed_sequences.txt")   emit: removed_seqs
+    tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
+    path("fcs-gx_alarm_indicator_file.txt"),                            emit: alarm_file
 
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     def args    = task.ext.args     ?: ""
     """
-    remove_fcs_gx_and_tiara.py \\
+    autofilter.py \\
         $reference \\
         $meta.taxid \\
         $tiara_txt \\
         $fcs_csv
+
+    abnormal_contamination_check.py \\
+        $reference \\
+        fcs-gx_and_tiara_combined_summary.csv
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
