@@ -48,6 +48,7 @@ include { GC_CONTENT                                    } from '../modules/local
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
+include { AUTOFILTER_ASSEMBLY                           } from '../modules/local/autofiltering'
 
 
 /*
@@ -265,7 +266,7 @@ workflow ASCC {
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
         ch_fcsgx        = RUN_FCSGX.out.fcsgxresult.map{it[1]}
-        ch_versions     = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+        ch_versions     = ch_versions.mix(RUN_FCSGX.out.versions)
     } else {
         ch_fcsgx        = []
     }
@@ -379,6 +380,20 @@ workflow ASCC {
         un_hits         = []
         un_full         = []
     }
+
+    //
+    // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
+    //   
+    if ( ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') ) || workflow_steps.contains('ALL') ) {
+        AUTOFILTER_ASSEMBLY (
+            YAML_INPUT.out.reference_tuple,
+            EXTRACT_TIARA_HITS.out.ch_tiara,
+            RUN_FCSGX.out.fcsgxresult
+        )
+        ch_autofiltered_assembly = AUTOFILTER_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_versions              = ch_versions.mix(AUTOFILTER_ASSEMBLY.out.versions)
+    }
+
 
     // mix the outputs of the outpuutting process so that we can
     // insert them into the one process to create the btk and the merged report
