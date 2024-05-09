@@ -437,6 +437,11 @@ workflow ASCC {
         .set { abnormal_flag }
 
 
+    //
+    // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
+    //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
+    //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
+    //
     if ( ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && abnormal_flag ) || workflow_steps.contains('ALL') || workflow_steps.contains("force_btk") ) {
 
         GENERATE_SAMPLESHEET (
