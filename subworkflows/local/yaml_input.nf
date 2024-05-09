@@ -78,8 +78,10 @@ workflow YAML_INPUT {
 
     group.assembly_title
         .combine( group.reads_path )
+        .combine( group.reads_type )
         .map { id, file ->
-            tuple(  [   id: id ],
+            tuple(  [   id:     id,
+                        type:   type ],
                     file
             )
         }
