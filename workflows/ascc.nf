@@ -413,7 +413,7 @@ workflow ASCC {
     //
     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
     //
-    if ( ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') ) && || workflow_steps.contains('ALL') ) {
+    if ( ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') && workflow_steps.contains("autofilter") ) || workflow_steps.contains('ALL') ) {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
             YAML_INPUT.out.reference_tuple,
             EXTRACT_TIARA_HITS.out.ch_tiara,
@@ -425,9 +425,13 @@ workflow ASCC {
         ch_autofiltered_assembly = []
     }
 
+    //
+    // LOGIC: SCAN FILE FOR PRESENCE OF ABNORMAL CONTAMINATION
+    //          IF FOUND THEN WE WANT TO RUN BTK
+    //
     ch_autofiltered_assembly
         .branch{
-            btk_run: ch_autofiltered_assembly.getText().contains("YES_ABNORMAL_CONTAMINATION")
+            btk_run: { if ch_autofiltered_assembly.getText().contains("YES_ABNORMAL_CONTAMINATION") ? "PASS" : [] }
             skip: []
         }
         .set { abnormal_flag }
