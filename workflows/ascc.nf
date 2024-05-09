@@ -49,6 +49,7 @@ include { GC_CONTENT                                    } from '../modules/local
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -380,7 +381,6 @@ workflow ASCC {
         un_hits         = []
         un_full         = []
     }
-`
 
     // mix the outputs of the outpuutting process so that we can
     // insert them into the one process to create the btk and the merged report
@@ -403,21 +403,44 @@ workflow ASCC {
         YAML_INPUT.out.ncbi_taxonomy_path,
 
     )
+    ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+
 
     //SANGER_TOL_BTK.out.btk_datasets = []
     //SANGER_TOL_BTK.out.summary = []
 
+
     //
-    // NOT TESTED AS WE NEED BTK INTEGRATED FIRST!!!
+    // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
     //
+    if ( ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') ) && || workflow_steps.contains('ALL') ) {
+        AUTOFILTER_AND_CHECK_ASSEMBLY (
+            YAML_INPUT.out.reference_tuple,
+            EXTRACT_TIARA_HITS.out.ch_tiara,
+            RUN_FCSGX.out.fcsgxresult
+        )
+        ch_autofiltered_assembly = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_versions              = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+    } else {
+        ch_autofiltered_assembly = []
+    }
+
+    ch_autofiltered_assembly
+        .branch{
+            btk_run: ch_autofiltered_assembly.getText().contains("YES_ABNORMAL_CONTAMINATION")
+            skip: []
+        }
+        .set { abnormal_flag }
 
 
-    if ( workflow_steps.contains('busco_btk') || workflow_steps.contains('ALL') ) {
+    if ( ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && abnormal_flag ) || workflow_steps.contains('ALL') || workflow_steps.contains("force_btk") ) {
 
         GENERATE_SAMPLESHEET (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.pacbio_tuple
         )
+        ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+
 
         SANGER_TOL_BTK (
             YAML_INPUT.out.reference_tuple,
@@ -430,13 +453,18 @@ workflow ASCC {
             YAML_INPUT.out.taxon,
             'GCA_0001'
         )
+        //ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+
 
         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
             [[],[]],     //SANGER_TOL_BTK.out.btk_datasets = []
             [[],[]]      //SANGER_TOL_BTK.out.summary = []
         )
+        ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+
     }
+
 
     //
     // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER

@@ -61,7 +61,6 @@ def load_fcs_gx_results(seq_dict, fcs_gx_and_tiara_summary_path):
     fcs_gx_and_tiara_summary_data = gpf.l(fcs_gx_and_tiara_summary_path)
     fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[1 : len(fcs_gx_and_tiara_summary_data)]
     for line in fcs_gx_and_tiara_summary_data:
-        # print(line)
         split_line = line.split(",")
         assert len(split_line) == 5
         seq_name = split_line[0]
@@ -74,12 +73,12 @@ def main():
     args = parse_args()
     if os.path.isfile(args.summary_path) is False:
         sys.stderr.write(
-            f"The FCS-GX and Tiara results file was not found at the expected location ({fcs_gx_and_tiara_summary_path})\n"
+            f"The FCS-GX and Tiara results file was not found at the expected location ({args.summary_path})\n"
         )
         sys.exit(1)
 
     if os.path.isfile(args.assembly) is False:
-        sys.stderr.write(f"The assembly FASTA file was not found at the expected location ({assembly_fasta_path})\n")
+        sys.stderr.write(f"The assembly FASTA file was not found at the expected location ({args.assembly})\n")
         sys.exit(1)
 
     seq_dict = get_sequence_lengths(args.assembly)
@@ -127,7 +126,7 @@ def main():
         if param_value > alarm_threshold_for_parameter[param]:
             stage1_decon_pass_flag = False
             alarm_list.append(
-                f"ABNORMAL_CONTAMINATION: Stage 1 decon alarm triggered for {param}: the value for this parameter in this assembly is {param_value} | alarm threshold is {alarm_threshold}\n"
+                f"YES_ABNORMAL_CONTAMINATION: Stage 1 decon alarm triggered for {param}: the value for this parameter in this assembly is {param_value} | alarm threshold is {alarm_threshold}\n"
             )
 
     # Seperated out to ensure that the file is written in one go and doesn't confuse Nextflow

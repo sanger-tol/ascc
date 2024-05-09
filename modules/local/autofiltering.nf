@@ -1,4 +1,4 @@
-process AUTOFILTER_ASSEMBLY {
+process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tag "$meta.id"
     label "process_medium"
 
@@ -17,6 +17,7 @@ process AUTOFILTER_ASSEMBLY {
     tuple val(meta), path("fcs-gx_and_tiara_combined_summary.csv"),     emit: fcs_tiara_summary
     tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
     path("fcs-gx_alarm_indicator_file.txt"),                            emit: alarm_file
+    path "versions.yml",                                                emit: versions
 
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"

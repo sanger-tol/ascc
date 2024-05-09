@@ -9,13 +9,7 @@ process ABNORMAL_CONTAM_CHECK {
 
     input:
     tuple val(meta), path(fasta)
-    tuple val(meta1), path(tiara)
-    tuple val(meta2), path(fcsgx_sum)
-    tuple val(meta3), path(auto_filtered)
-    tuple val(meta4), path(combined_sum)
-    tuple val(meta5), path(rejected_seq)
-    tuple val(meta6), path(taxid)
-    tuple val(meta7), path(ncbi_rankedlineage_path)
+    tuple val(meta1), path(fcsgx_tiara_sum)
 
     output:
     tuple val(meta), path("ABNORMAL_CHECK.csv"),   emit: abnormal
@@ -27,15 +21,11 @@ process ABNORMAL_CONTAM_CHECK {
     def prefix              = task.ext.prefix       ?: "${meta.id}"
 
     """
-    abnormal_contam_check.py \\
+    abnormal_contamination_check.py \\
         $fasta \\
-        $tiara \\
-        $fcsgx_sum \\
-        $auto_filtered \\
-        $combined_sum \\
-        $rejected_seq \\
-        $taxid \\
-        $ncbi_rankedlineage_path
+        $fcsgx_tiara_sum
+
+    
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
