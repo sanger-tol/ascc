@@ -45,10 +45,10 @@ include { TRAILINGNS_CHECK                              } from '../subworkflows/
 // MODULE: Local modules
 //
 include { GC_CONTENT                                    } from '../modules/local/gc_content'
+
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -264,6 +264,7 @@ workflow ASCC {
             YAML_INPUT.out.taxid,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
+
         ch_fcsgx        = RUN_FCSGX.out.fcsgxresult.map{it[1]}
         ch_versions     = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     } else {
@@ -379,6 +380,7 @@ workflow ASCC {
         un_hits         = []
         un_full         = []
     }
+`
 
     // mix the outputs of the outpuutting process so that we can
     // insert them into the one process to create the btk and the merged report
@@ -409,10 +411,25 @@ workflow ASCC {
     // NOT TESTED AS WE NEED BTK INTEGRATED FIRST!!!
     //
 
+
     if ( workflow_steps.contains('busco_btk') || workflow_steps.contains('ALL') ) {
-        //SANGER_TOL_BTK (
-        //    yaml_input.out.reference_tuple
-        //)
+
+        GENERATE_SAMPLESHEET (
+            YAML_INPUT.out.reference_tuple,
+            YAML_INPUT.out.pacbio_tuple
+        )
+
+        SANGER_TOL_BTK (
+            YAML_INPUT.out.reference_tuple,
+            GENERATE_SAMPLESHEET.out.csv,
+            YAML_INPUT.out.blastp,
+            YAML_INPUT.out.blastn,
+            YAML_INPUT.out.blastx,
+            [],
+            YAML_INPUT.out.tax_dump,
+            YAML_INPUT.out.taxon,
+            'GCA_0001'
+        )
 
         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
@@ -451,6 +468,21 @@ workflow ASCC {
     emit:
     software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
     versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
+}
+
+process GrabFiles {
+    label 'process_tiny'
+
+    tag "${meta.id}"
+    executor 'local'
+
+    input:
+    tuple val(meta), path("in")
+
+    output:
+    tuple val(meta), path("in/*.{fa,fasta}.{gz}")
+
+    "true"
 }
 
 /*
