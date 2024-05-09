@@ -8,7 +8,7 @@ process SANGER_TOL_BTK {
     path blastp
     path blastn
     path blastx
-    path btk_config
+    path btk_config_file
     path tax_dump
     val taxon
     val gca_accession
@@ -26,6 +26,7 @@ process SANGER_TOL_BTK {
     def executor    =   task.ext.executor       ?:  ""
     def profiles    =   task.ext.profiles       ?:  ""
     def get_version =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
+    def btk_config  =   ( if btk_config_file ? "-c $btk_config_file" : "")
     """
     $executor 'nextflow run sanger-tol/blobtoolkit \\
         -profile  $profiles \\
@@ -38,7 +39,7 @@ process SANGER_TOL_BTK {
         --blastp $blastp \\
         --blastn $blastn \\
         --blastx $blastx \\
-        -c $btk_config \\
+        $btk_config \\
         $args'
 
 
