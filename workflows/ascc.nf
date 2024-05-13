@@ -50,6 +50,8 @@ include { CREATE_BTK_DATASET                            } from '../modules/local
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
+include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
+include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -267,7 +269,7 @@ workflow ASCC {
         )
 
         ch_fcsgx        = RUN_FCSGX.out.fcsgxresult.map{it[1]}
-        ch_versions     = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+        ch_versions     = ch_versions.mix(RUN_FCSGX.out.versions)
     } else {
         ch_fcsgx        = []
     }
@@ -386,7 +388,7 @@ workflow ASCC {
     // insert them into the one process to create the btk and the merged report
     // much like the versions channel
 
-    CREATE_BTK_DATASET (
+/*     CREATE_BTK_DATASET (
         GENERATE_GENOME.out.reference_tuple,
         GENERATE_GENOME.out.dot_genome.map{it[1]},
         ch_kmers,
@@ -402,8 +404,8 @@ workflow ASCC {
         un_hits,
         YAML_INPUT.out.ncbi_taxonomy_path,
 
-    )
-    ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    )*/
+    //ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
 
     //SANGER_TOL_BTK.out.btk_datasets = []
@@ -413,64 +415,70 @@ workflow ASCC {
     //
     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
     //
-    if ( ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') && workflow_steps.contains("autofilter") ) || workflow_steps.contains('ALL') ) {
+    run_btk = false
+    if ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
             YAML_INPUT.out.reference_tuple,
             EXTRACT_TIARA_HITS.out.ch_tiara,
             RUN_FCSGX.out.fcsgxresult
         )
         ch_autofiltered_assembly = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+
+/*         ch_autofiltered_assembly
+            .view()
+
+        ch_autofiltered_assembly
+            .splitText( by: 10 )
+            .view()
+
+        for (i in ch_autofiltered_assembly) {
+            if (i.contains("YES_ABNORMAL")) {
+                run_btk = true
+                break
+            }
+        } */
+
         ch_versions              = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
         ch_autofiltered_assembly = []
     }
 
     //
-    // LOGIC: SCAN FILE FOR PRESENCE OF ABNORMAL CONTAMINATION
-    //          IF FOUND THEN WE WANT TO RUN BTK
-    //
-    ch_autofiltered_assembly
-        .branch{
-            btk_run: { if ch_autofiltered_assembly.getText().contains("YES_ABNORMAL_CONTAMINATION") ? "PASS" : [] }
-            skip: []
-        }
-        .set { abnormal_flag }
-
-
-    //
     // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //
-    if ( ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && abnormal_flag ) || workflow_steps.contains('ALL') || workflow_steps.contains("force_btk") ) {
+    if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
 
         GENERATE_SAMPLESHEET (
-            YAML_INPUT.out.reference_tuple,
-            YAML_INPUT.out.pacbio_tuple
+            YAML_INPUT.out.pacbio_tuple.collect()
         )
-        ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+        //ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
 
+        YAML_INPUT.out.reference_tuple.view()
+        GENERATE_SAMPLESHEET.out.csv.view()
         SANGER_TOL_BTK (
             YAML_INPUT.out.reference_tuple,
             GENERATE_SAMPLESHEET.out.csv,
-            YAML_INPUT.out.blastp,
-            YAML_INPUT.out.blastn,
-            YAML_INPUT.out.blastx,
+            YAML_INPUT.out.diamond_uniprot_database_path,
+            YAML_INPUT.out.nt_database,
+            YAML_INPUT.out.diamond_uniprot_database_path,
             [],
-            YAML_INPUT.out.tax_dump,
-            YAML_INPUT.out.taxon,
+            YAML_INPUT.out.ncbi_taxonomy_path,
+            YAML_INPUT.out.btk_yaml,
+            YAML_INPUT.out.taxid,
             'GCA_0001'
         )
         //ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
-        MERGE_BTK_DATASETS (
+/*         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
             [[],[]],     //SANGER_TOL_BTK.out.btk_datasets = []
             [[],[]]      //SANGER_TOL_BTK.out.summary = []
         )
-        ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions) */
 
     }
 
@@ -478,7 +486,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
     //
-    ASCC_MERGE_TABLES (
+/*     ASCC_MERGE_TABLES (
         GC_CONTENT.out.txt,                                 // FROM -- GC_COVERAGE.out.tsv
         ch_coverage,                                        // FROM -- RUN_COVERAGE.out.tsv.map{it[1]}
         ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
@@ -493,7 +501,7 @@ workflow ASCC {
         CREATE_BTK_DATASET.out.create_summary.map{it[1]},
         [],                                                 // <-- BUSCO_BTK -- NOT IN PIPELINE YET
         ch_fcsgx                                            // FROM -- PARSE_FCSGX_RESULT.out.fcsgxresult.map{it[1]}
-    )
+    ) */
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows

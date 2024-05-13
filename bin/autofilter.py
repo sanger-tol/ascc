@@ -28,18 +28,22 @@ import textwrap
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        prog="Abnormal Contamination Check",
+        prog="Autofilter",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(DESCRIPTION),
     )
     parser.add_argument("fasta", type=str, help="Path to the fasta assembly file")
-    parser.add_argument("tiara", type=str, help="Path to the tiara summary file")
-    parser.add_argument("fcsgx_sum", type=str, help="Path to the fcs-gx_summary.csv file")
-    parser.add_argument("auto_filtered", type=str, help="Path to the assembly_autofiltered.fasta file")
-    parser.add_argument("combined_sum", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file")
-    parser.add_argument("rejected_seq", type=str, help="Path to the assembly_filtering_removed_sequences.txt file")
-    parser.add_argument("taxid", type=int, help="NCBI taxonomy ID of the species")
-    parser.add_argument("ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy")
+    parser.add_argument("-t", "--tiara", type=str, help="Path to the tiara summary file")
+    parser.add_argument("-s", "--fcsgx_sum", type=str, help="Path to the fcs-gx_summary.csv file")
+    parser.add_argument("-a", "--auto_filtered", type=str, help="Path to the assembly_autofiltered.fasta file")
+    parser.add_argument("-c", "--combined_sum", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file")
+    parser.add_argument(
+        "-r", "--rejected_seq", type=str, help="Path to the assembly_filtering_removed_sequences.txt file"
+    )
+    parser.add_argument("-i", "--taxid", type=int, help="NCBI taxonomy ID of the species")
+    parser.add_argument(
+        "-n", "--ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy"
+    )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
 
@@ -167,7 +171,7 @@ def main():
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
 
-    Path(f"{args.data_folder}/fasta/filtered").mkdir(parents=True, exist_ok=True)
+    Path(f"./fasta/filtered").mkdir(parents=True, exist_ok=True)
 
     for i in [ncbi_rankedlist, tiara_results_path, fcs_gx_summary_path, assembly_path]:
         if os.path.isfile(i) is False:

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import argparse
 
@@ -26,7 +28,7 @@ def main():
         if file.endswith(".fasta.gz"):
             data_list.append(f"{args.sample_name},pacbio,{args.pacbio_path}/{file}\n")
 
-    with open("samplesheet.csv") as file:
+    with open("samplesheet.csv", "w") as file:
         file.write("".join(data_list))
 
 

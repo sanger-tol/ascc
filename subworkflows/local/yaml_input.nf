@@ -44,6 +44,7 @@ workflow YAML_INPUT {
                 diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
                 vecscreen_database_path:                        ( data.vecscreen_database_path          )
                 neighbours:                                     ( data.n_neighbours                     )
+                btk_yaml:                                       ( file(data.btk_yaml)                   )
         }
         .set{ group }
 
@@ -79,7 +80,7 @@ workflow YAML_INPUT {
     group.assembly_title
         .combine( group.reads_path )
         .combine( group.reads_type )
-        .map { id, file ->
+        .map { id, file, type ->
             tuple(  [   id:     id,
                         type:   type ],
                     file
@@ -148,6 +149,7 @@ workflow YAML_INPUT {
     plastid_var                      = "plastid_genome"
     kmer_len                         = group.kmer_len
     n_neighbours                     = group.neighbours
+    btk_yaml                         = group.btk_yaml
     versions                         = ch_versions.ifEmpty(null)
 }
 

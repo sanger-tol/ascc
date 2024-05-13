@@ -25,9 +25,9 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     """
     autofilter.py \\
         $reference \\
-        $meta.taxid \\
-        $tiara_txt \\
-        $fcs_csv
+        --taxid $meta.taxid \\
+        --tiara $tiara_txt \\
+        --fcsgx_sum $fcs_csv
 
     abnormal_contamination_check.py \\
         $reference \\
