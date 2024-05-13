@@ -447,7 +447,7 @@ workflow ASCC {
     // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
-    //
+    //              This will also eventually check for the above run_btk boolean from autofilter
     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
 
         GENERATE_SAMPLESHEET (
