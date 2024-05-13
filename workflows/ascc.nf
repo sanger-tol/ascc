@@ -428,7 +428,7 @@ workflow ASCC {
             .view()
 
         ch_autofiltered_assembly
-            .splitText( by: 10 )
+            .text()
             .view()
 
         for (i in ch_autofiltered_assembly) {
