@@ -35,10 +35,20 @@ def parse_args():
     parser.add_argument("fasta", type=str, help="Path to the fasta assembly file")
     parser.add_argument("-t", "--tiara", type=str, help="Path to the tiara summary file")
     parser.add_argument("-s", "--fcsgx_sum", type=str, help="Path to the fcs-gx_summary.csv file")
-    parser.add_argument("-a", "--auto_filtered", type=str, help="Path to the assembly_autofiltered.fasta file")
+    parser.add_argument(
+        "-o",
+        "--output_auto_filtered",
+        type=str,
+        help="Path to the assembly_autofiltered.fasta file",
+        default="autofiltered.fasta",
+    )
     parser.add_argument("-c", "--combined_sum", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file")
     parser.add_argument(
-        "-r", "--rejected_seq", type=str, help="Path to the assembly_filtering_removed_sequences.txt file"
+        "-r",
+        "--rejected_seq",
+        type=str,
+        help="Path to the assembly_filtering_removed_sequences.txt file",
+        default="assembly_filtering_removed_sequences.txt",
     )
     parser.add_argument("-i", "--taxid", type=int, help="NCBI taxonomy ID of the species")
     parser.add_argument(
@@ -166,7 +176,7 @@ def main():
     assembly_path = args.fasta
     tiara_results_path = args.tiara
     fcs_gx_summary_path = args.fcsgx_sum
-    filtered_assembly_path = args.auto_filtered
+    filtered_assembly_path = args.output_auto_filtered
     combined_summary = args.combined_sum
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
@@ -174,7 +184,7 @@ def main():
     Path(f"./fasta/filtered").mkdir(parents=True, exist_ok=True)
 
     for i in [ncbi_rankedlist, tiara_results_path, fcs_gx_summary_path, assembly_path]:
-        if os.path.isfile(i) is False:
+        if not os.path.isfile(i):
             sys.stderr.write(f"{i} WAS NOT AT THE EXPECTED LOCATION\n")
             sys.exit(1)
 

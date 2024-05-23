@@ -27,4 +27,4 @@ seqkit:
   sliding: 100000
   window: 6000
 n_neighbours: 13
-btk_yaml: "/nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/btk_draft.yaml"
+btk_yaml: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/btk_draft.yaml

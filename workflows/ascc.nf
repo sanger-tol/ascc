@@ -420,18 +420,16 @@ workflow ASCC {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
             YAML_INPUT.out.reference_tuple,
             EXTRACT_TIARA_HITS.out.ch_tiara,
-            RUN_FCSGX.out.fcsgxresult
+            RUN_FCSGX.out.fcsgxresult,
+            YAML_INPUT.out.ncbi_rankedlineage_path
         )
         ch_autofiltered_assembly = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
 
-/*         ch_autofiltered_assembly
+        AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+            .map { id, file -> file.text.trim() }
             .view()
 
-        ch_autofiltered_assembly
-            .text()
-            .view()
-
-        for (i in ch_autofiltered_assembly) {
+/*         for (i in ch_autofiltered_assembly) {
             if (i.contains("YES_ABNORMAL")) {
                 run_btk = true
                 break
@@ -448,7 +446,7 @@ workflow ASCC {
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
-    if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
+/*     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
 
         GENERATE_SAMPLESHEET (
             YAML_INPUT.out.pacbio_tuple.collect()
@@ -469,7 +467,7 @@ workflow ASCC {
             YAML_INPUT.out.btk_yaml,
             YAML_INPUT.out.taxid,
             'GCA_0001'
-        )
+        ) */
         //ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
@@ -480,7 +478,7 @@ workflow ASCC {
         )
         ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions) */
 
-    }
+    //}
 
 
     //

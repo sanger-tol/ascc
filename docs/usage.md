@@ -6,49 +6,42 @@
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
-## Samplesheet input
+## Yaml input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
-```bash
---input '[path to samplesheet file]'
+### Full yaml
+
+```yaml
+assembly_path: PATH TO INPUT FASTA
+assembly_title: NAME OF INPUT ORGANISM
+sci_name: "{SCIENTIFIC NAME OF ORGANISM}"
+taxid: 352914
+mito_fasta_path: PATH TO MITO FASTA
+plastid_fasta_path: PATH TO PLASTID FASTA
+reads_path: /path/to/pacbio/fasta/
+reads_type: "hifi"
+pacbio_barcodes: FULL PATH TO /ascc/assets/pacbio_adaptors.fa
+pacbio_multiplexing_barcode_names: "bc2008,bc2009" {BARCODES EXPECTED IN DATA}
+kmer_len: 7
+dimensionality_reduction_methods: "pca,random_trees" A CSV OF THE BELOW METHODS
+# "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
+nt_database: PATH TO UPTO DATE BLASTDB NT DATABASE
+nt_database_prefix: PREFIX FOR THE BLASTDB DATABASE
+nt_kraken_db_path: PATH+PREFIX TO THE NT KRAKEN DATABASE
+ncbi_accessionids_folder: PATH TO /accession2taxid/
+ncbi_taxonomy_path: PATH TO /taxdump/
+ncbi_rankedlineage_path: PATH TO /taxdump/rankedlineage.dmp
+busco_lineages_folder: PATH TO THE BUSCO LINEAGES FOLDER
+fcs_gx_database_path: PATH TO FOLDER CONTAINING THE FCS_GX DB
+vecscreen_database_path: PATH TO VECSCREEN DB
+diamond_uniprot_database_path: PATH TO uniprot_reference_proteomes_with_taxonnames.dmnd
+diamond_nr_database_path: PATH TO /nr.dmnd
+seqkit:
+  sliding: 100000
+  window: 6000
+n_neighbours: 13
+btk_yaml: PATH TO /ascc/assets/btk_draft.yaml <- THIS IS DEFAULT AND ONLY SERVES TO BYPASS GCA REQUIREMENTS OF SANGER-TOL/BLOBTOOLKIT
 ```
-
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
-```
-
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
 ## Running the pipeline
 
@@ -68,29 +61,6 @@ work                # Directory containing the nextflow working files
 .nextflow_log       # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
-
-If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
-
-Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
-
-> ⚠️ Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
-
-The above pipeline run specified with a params file in yaml format:
-
-```bash
-nextflow run sanger-tol/ascc -profile docker -params-file params.yaml
-```
-
-with `params.yaml` containing:
-
-```yaml
-input: './samplesheet.csv'
-outdir: './results/'
-genome: 'GRCh37'
-<...>
-```
-
-You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
 ### Updating the pipeline
 
