@@ -33,8 +33,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
 
     abnormal_contamination_check.py \\
         $reference \\
-        assembly_filtering_removed_sequences.txt
-
+        ABNORMAL_CHECK.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

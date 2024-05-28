@@ -198,25 +198,24 @@ def main():
     for scaff in scaffs:
         fcs_gx_action = "NA"
         tiara_action = "NA"
-
         if scaff in fcs_gx_action_dict:
             fcs_gx_action = fcs_gx_action_dict[scaff]
-
+            combined_action_source = "FCS-GX"
         if scaff in tiara_action_dict:
             tiara_action = tiara_action_dict[scaff]
-
         combined_action = fcs_gx_action
-
         if fcs_gx_action == "NA" and tiara_action == "EXCLUDE":
             combined_action = "EXCLUDE"
-
+            combined_action_source = "Tiara"
+        if fcs_gx_action == "EXCLUDE" and tiara_action == "EXCLUDE":
+            combined_action_source = "FCS-GX_and_Tiara"
         if combined_action == "EXCLUDE":
             scaffs_to_exclude.append(scaff)
-
         combined_action_dict[scaff] = {
             "fcs_gx_action": fcs_gx_action,
             "tiara_action": tiara_action,
             "combined_action": combined_action,
+            "combined_action_source": combined_action_source,
         }
     filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path)
     gpf.export_list_as_line_break_separated_file(scaffs_to_exclude, excluded_seq_list_path)
@@ -224,7 +223,7 @@ def main():
     out_csv_list = list()
     out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action")
     for scaff, scaff_properties in combined_action_dict.items():
-        out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']}"
+        out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)
     gpf.export_list_as_line_break_separated_file(out_csv_list, "ABNORMAL_CHECK.csv")
 

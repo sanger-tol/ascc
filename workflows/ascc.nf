@@ -415,7 +415,6 @@ workflow ASCC {
     //
     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
     //
-    run_btk = false
     if ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
             YAML_INPUT.out.reference_tuple,
@@ -425,16 +424,18 @@ workflow ASCC {
         )
         ch_autofiltered_assembly = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
 
-        AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
-            .map { id, file -> file.text.trim() }
-            .view()
-
-/*         for (i in ch_autofiltered_assembly) {
-            if (i.contains("YES_ABNORMAL")) {
-                run_btk = true
-                break
+        AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map { file -> file.text.trim() }
+            .branch { it ->
+                run_btk: "ABNORMAL" ? it.contains("YES_ABNORMAL"): false
+                dont_run: []
             }
-        } */
+            .set { btk_bool }
+
+        btk_bool.run_btk.view{ it -> "ABNORMALS == $it" }
+
+        btk_bool.dont_run.view{ it -> "NORMALS == $it" }
+
 
         ch_versions              = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
@@ -446,7 +447,7 @@ workflow ASCC {
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
-/*     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
+    if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || workflow_steps.contains('ALL') ) {
 
         GENERATE_SAMPLESHEET (
             YAML_INPUT.out.pacbio_tuple.collect()
@@ -467,7 +468,7 @@ workflow ASCC {
             YAML_INPUT.out.btk_yaml,
             YAML_INPUT.out.taxid,
             'GCA_0001'
-        ) */
+        )
         //ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
@@ -478,7 +479,7 @@ workflow ASCC {
         )
         ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions) */
 
-    //}
+    }
 
 
     //

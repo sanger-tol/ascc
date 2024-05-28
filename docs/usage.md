@@ -48,10 +48,10 @@ btk_yaml: PATH TO /ascc/assets/btk_draft.yaml <- THIS IS DEFAULT AND ONLY SERVES
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run sanger-tol/ascc --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run sanger-tol/ascc --input {INPUT YAML} --outdir {OUTDIR} --steps {CSV LIST OF STEPS TO RUN} -profile singularity
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 

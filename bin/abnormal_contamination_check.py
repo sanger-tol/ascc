@@ -62,7 +62,7 @@ def load_fcs_gx_results(seq_dict, fcs_gx_and_tiara_summary_path):
     fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[1 : len(fcs_gx_and_tiara_summary_data)]
     for line in fcs_gx_and_tiara_summary_data:
         split_line = line.split(",")
-        assert len(split_line) == 4  # THIS WAS 5
+        assert len(split_line) == 5
         seq_name = split_line[0]
         fcs_gx_action = split_line[1]
         seq_dict[seq_name]["fcs_gx_action"] = fcs_gx_action
