@@ -2,10 +2,10 @@ process CREATE_BTK_DATASET {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "conda-forge::python=3.9"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.9' :
-        'biocontainers/python:3.9' }"
+    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
+        exit 1, "BLOBTOOLKIT_CHUNK module does not support Conda. Please use Docker / Singularity / Podman instead."
+    }
+    container "genomehubs/blobtoolkit:4.3.9"
 
     input:
     tuple val(meta),        path(reference)

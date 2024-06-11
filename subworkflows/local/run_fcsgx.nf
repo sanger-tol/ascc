@@ -1,5 +1,5 @@
-include { FCS_FCSGX }          from '../../modules/nf-core/fcs/fcsgx/main'
-include { PARSE_FCSGX_RESULT } from '../../modules/local/parse_fcsgx_result'
+include { FCS_FCSGX             } from '../../modules/nf-core/fcs/fcsgx/main'
+include { PARSE_FCSGX_RESULT    } from '../../modules/local/parse_fcsgx_result'
 
 workflow RUN_FCSGX {
 

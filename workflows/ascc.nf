@@ -89,6 +89,21 @@ workflow ASCC {
     ch_versions     = ch_versions.mix(YAML_INPUT.out.versions)
 
     //
+    // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
+    //
+    YAML_INPUT.out.reference_tuple
+        .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
+        .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
+        .map { meta, ref, sliding, window ->
+            tuple([ id      : meta.id,
+                    sliding : sliding,
+                    window  : window
+                ],
+                file(ref)
+            )}
+        .set { modified_input }
+
+    //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
     GC_CONTENT (
@@ -156,24 +171,14 @@ workflow ASCC {
     }
 
     //
-    // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
-    //
-    YAML_INPUT.out.reference_tuple
-        .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
-        .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
-        .map { meta, ref, sliding, window ->
-            tuple([ id      : meta.id,
-                    sliding : sliding,
-                    window  : window
-                ],
-                file(ref)
-            )}
-        .set { modified_input }
-
-    //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
     if ( workflow_steps.contains('nt_blast') || workflow_steps.contains('ALL') ) {
+        //
+        // NOTE: ch_nt_blast needs to be set in two places incase it
+        //          fails during the run
+        //
+        ch_nt_blast     = []
         EXTRACT_NT_BLAST (
             modified_input,
             YAML_INPUT.out.nt_database,
@@ -182,6 +187,7 @@ workflow ASCC {
         )
         ch_versions     = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+
     } else {
         ch_nt_blast     = []
     }
@@ -237,7 +243,6 @@ workflow ASCC {
     } else {
         ch_chloro       = []
     }
-
 
     //
     // SUBWORKFLOW:
@@ -384,11 +389,11 @@ workflow ASCC {
         un_full         = []
     }
 
-    // mix the outputs of the outpuutting process so that we can
+    // mix the outputs of the outputting process so that we can
     // insert them into the one process to create the btk and the merged report
     // much like the versions channel
 
-/*     CREATE_BTK_DATASET (
+    CREATE_BTK_DATASET (
         GENERATE_GENOME.out.reference_tuple,
         GENERATE_GENOME.out.dot_genome.map{it[1]},
         ch_kmers,
@@ -403,13 +408,8 @@ workflow ASCC {
         nt_hits,
         un_hits,
         YAML_INPUT.out.ncbi_taxonomy_path,
-
-    )*/
+    )
     //ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
-
-
-    //SANGER_TOL_BTK.out.btk_datasets = []
-    //SANGER_TOL_BTK.out.summary = []
 
 
     //
@@ -454,9 +454,6 @@ workflow ASCC {
         )
         //ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
-
-        YAML_INPUT.out.reference_tuple.view()
-        GENERATE_SAMPLESHEET.out.csv.view()
         SANGER_TOL_BTK (
             YAML_INPUT.out.reference_tuple,
             GENERATE_SAMPLESHEET.out.csv,
@@ -476,8 +473,8 @@ workflow ASCC {
             CREATE_BTK_DATASET.out.btk_datasets,
             [[],[]],     //SANGER_TOL_BTK.out.btk_datasets = []
             [[],[]]      //SANGER_TOL_BTK.out.summary = []
-        )
-        ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions) */
+        ) */
+        //ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
 
     }
 
