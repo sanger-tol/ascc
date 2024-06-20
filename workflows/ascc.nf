@@ -103,6 +103,8 @@ workflow ASCC {
             )}
         .set { modified_input }
 
+    modified_input.view{it -> "MODINPUT: $it"}
+
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
@@ -178,6 +180,10 @@ workflow ASCC {
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
         //
+        YAML_INPUT.out.nt_database.view{it -> "NT_DB: $it"}
+        YAML_INPUT.out.ncbi_accessions.view{it -> "ACCESS: $it"}
+        YAML_INPUT.out.ncbi_rankedlineage_path.view{it -> "LINEAGE: $it"}
+
         ch_nt_blast     = []
         EXTRACT_NT_BLAST (
             modified_input,
@@ -187,6 +193,7 @@ workflow ASCC {
         )
         ch_versions     = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_nt_blast.view{ $it -> "SUPPOSED TO BE: $it"}
 
     } else {
         ch_nt_blast     = []
@@ -393,21 +400,39 @@ workflow ASCC {
     // insert them into the one process to create the btk and the merged report
     // much like the versions channel
 
+/*     GENERATE_GENOME.out.reference_tuple.view{it -> "INPUT GENOME $it"}
+    GENERATE_GENOME.out.dot_genome.map{it[1]}.view{it -> "GENOME $it"}
+    ch_kmers.view{it -> "KMER $it"}
+    ch_tiara.view{it -> "TIARA $it"}
+    ch_nt_blast.view{it -> "NT $it"}
+    ch_fcsgx.view{it -> "FSCSCCSCS $it"}
+    ch_bam.view{it -> "BAM $it"}
+    ch_coverage.view{it -> "COVERAGE $it"}
+    ch_kraken1.view{it -> "KRAKEN1 $it"}
+    ch_kraken2.view{it -> "KRAKEN2 $it"}
+    ch_kraken3.view{it -> "KRAKEN3 $it"}
+    nt_hits.view{it -> "HITS $it"}
+    un_hits.view{it -> "UNHITS $it"}
+    YAML_INPUT.out.ncbi_taxonomy_path.view{it -> "TAXDUMP $it"} */
+
+
+    ch_got_genome = GENERATE_GENOME.out.dot_genome.map{it[1]}
+
     CREATE_BTK_DATASET (
-        GENERATE_GENOME.out.reference_tuple,
-        GENERATE_GENOME.out.dot_genome.map{it[1]},
+        GENERATE_GENOME.out.reference_tuple.first(),
+        ch_got_genome,
         ch_kmers,
-        ch_tiara,
+        ch_tiara.first(),
         ch_nt_blast,
-        ch_fcsgx,
-        ch_bam,
-        ch_coverage,
-        ch_kraken1,
-        ch_kraken2,
-        ch_kraken3,
-        nt_hits,
-        un_hits,
-        YAML_INPUT.out.ncbi_taxonomy_path,
+        ch_fcsgx.first(),
+        ch_bam.first(),
+        ch_coverage.first(),
+        ch_kraken1.first(),
+        ch_kraken2.first(),
+        ch_kraken3.first(),
+        nt_hits.first(),
+        un_hits.first(),
+        YAML_INPUT.out.ncbi_taxonomy_path.first()
     )
     //ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
@@ -432,10 +457,6 @@ workflow ASCC {
             }
             .set { btk_bool }
 
-        btk_bool.run_btk.view{ it -> "ABNORMALS == $it" }
-
-        btk_bool.dont_run.view{ it -> "NORMALS == $it" }
-
 
         ch_versions              = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
@@ -458,7 +479,7 @@ workflow ASCC {
             YAML_INPUT.out.reference_tuple,
             GENERATE_SAMPLESHEET.out.csv,
             YAML_INPUT.out.diamond_uniprot_database_path,
-            YAML_INPUT.out.nt_database,
+            YAML_INPUT.out.nt_database.map{it -> it[1]},
             YAML_INPUT.out.diamond_uniprot_database_path,
             [],
             YAML_INPUT.out.ncbi_taxonomy_path,

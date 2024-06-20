@@ -7,9 +7,8 @@
                 "nf-core": {
                     "blast/blastn": {
                         "branch": "master",
-                        "git_sha": "acacb4075ef46fa74630aa3f4b0684f1021d5930",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/blast/blastn/blast-blastn.diff"
+                        "git_sha": "4262a04142431275e54e1f4b413628a2201ed6e6",
+                        "installed_by": ["modules"]
                     },
                     "blast/makeblastdb": {
                         "branch": "master",

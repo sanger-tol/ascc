@@ -29,6 +29,7 @@ workflow YAML_INPUT {
                 taxid:                                          ( data.taxid                            )
                 mito_fasta_path:                                ( data.mito_fasta_path                  )
                 plastid_fasta_path:                             ( data.plastid_fasta_path               )
+                nt_db_prefix:                                   ( data.nt_database_prefix               )
                 nt_database:                                    ( data.nt_database                      )
                 reference_proteomes:                            ( data.reference_proteomes              )
                 nt_kraken_db_path:                              ( data.nt_kraken_db_path                )
@@ -36,7 +37,7 @@ workflow YAML_INPUT {
                 dimensionality_reduction_methods:               ( data.dimensionality_reduction_methods )
                 fcs_gx_database_path:                           ( data.fcs_gx_database_path             )
                 ncbi_taxonomy_path:                             ( data.ncbi_taxonomy_path               )
-                ncbi_rankedlineage_path:                        ( data.ncbi_rankedlineage_path          )
+                ncbi_rankedlineage_path:                        ( file(data.ncbi_rankedlineage_path)    )
                 ncbi_accessionids:                              ( data.ncbi_accessionids_folder         )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
                 seqkit_values:                                  ( data.seqkit                           )
@@ -121,6 +122,15 @@ workflow YAML_INPUT {
         }
         .set{ ch_vecscreen }
 
+    group.nt_database
+        .combine( group.assembly_title )
+        .map{ db, meta ->
+            tuple(  [    id: meta ],
+                    db
+            )
+        }
+        .set{ ch_nt_db }
+
     emit:
     reference_tuple                  = ch_reference
     pacbio_tuple                     = ch_pacbio
@@ -130,7 +140,8 @@ workflow YAML_INPUT {
     assembly_title                   = group.assembly_title
     assembly_path                    = group.assembly_path
     taxid                            = group.taxid
-    nt_database                      = group.nt_database
+    nt_database                      = ch_nt_db
+    nt_db_prefix                     = group.nt_db_prefix
     nt_kraken_db_path                = group.nt_kraken_db_path
     ncbi_accessions                  = group.ncbi_accessionids
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
