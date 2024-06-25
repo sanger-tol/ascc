@@ -58,7 +58,7 @@ workflow EXTRACT_NT_BLAST {
     BLAST_CHUNK_TO_FULL ( blast_results )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
-    BLAST_CHUNK_TO_FULL.out.full.view{ $it -> "SUPPOSED TO BE-1: $it"}
+    BLAST_CHUNK_TO_FULL.out.full.view{ it -> "SUPPOSED TO BE-1: it"}
 
     //
     // MODULE: RE_ORDER THE DATA IN THE FULL_COORDINATE FILE

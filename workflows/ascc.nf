@@ -193,7 +193,7 @@ workflow ASCC {
         )
         ch_versions     = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_nt_blast.view{ $it -> "SUPPOSED TO BE: $it"}
+        ch_nt_blast.view{ it -> "SUPPOSED TO BE: it"}
 
     } else {
         ch_nt_blast     = []

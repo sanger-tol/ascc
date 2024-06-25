@@ -51,7 +51,7 @@ process CREATE_BTK_DATASET {
     script:
     def prefix          = task.ext.prefix   ?: "${meta.id}"
     def args            = task.ext.args     ?: ""
-/*     def blastn_arg      = nt_blast          ? "-bh ${nt_blast}"     : ""
+    def blastn_arg      = nt_blast          ? "-bh ${nt_blast}"     : ""
     def nt_diamond_arg  = nt_diamond        ? "-nr ${nt_diamond}"   : ""
     def un_diamond_arg  = un_diamond        ? "-ud ${un_diamond}"   : ""
     def kraken_arg      = kraken_lineage    ? "-k ${kraken_lineage}": ""
@@ -60,12 +60,27 @@ process CREATE_BTK_DATASET {
     def pca_arg         = kmers             ? "-p ${kmers}"         : ""
     def fcs_arg         = fcsgx             ? "-fc ${fcsgx}"        : ""
     def marker_arg      = ""
-    def contigviz_arg   = "" */
+    def contigviz_arg   = ""
 
     """
     mkdir -p btk_datasets/
 
-    create_btk_dataset_V2.py -h\\
+    create_btk_dataset_V2.py \\
+        -f ${reference} \\
+        -d ./1/ \\
+        -n "${prefix}" \\
+        -tn "${meta.sci_name}" \\
+        -id ${meta.taxid} \\
+        -td ${ncbi_taxdump}/ \\
+        $blastn_arg \\
+        $nt_diamond_arg \\
+        $un_diamond_arg \\
+        $kraken_arg \\
+        $mapped_arg \\
+        $tiara_arg \\
+        $pca_arg \\
+        $fcs_arg \\
+        $args\\
 
 
     cat <<-END_VERSIONS > versions.yml
