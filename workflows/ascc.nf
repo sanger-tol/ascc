@@ -471,7 +471,7 @@ workflow ASCC {
     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || workflow_steps.contains('ALL') ) {
 
         GENERATE_SAMPLESHEET (
-            YAML_INPUT.out.pacbio_tuple.collect()
+            bam_ch
         )
         //ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 

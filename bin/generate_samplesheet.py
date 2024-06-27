@@ -25,7 +25,7 @@ def main():
 
     data_list.append("sample,datatype,datafile\n")
     for file in os.listdir(args.pacbio_path):
-        if file.endswith(".fasta.gz"):
+        if file.endswith(".bam"):
             data_list.append(f"{args.sample_name},pacbio,{args.pacbio_path}/{file}\n")
 
     with open("samplesheet.csv", "w") as file:
