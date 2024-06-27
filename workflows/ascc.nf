@@ -314,7 +314,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( workflow_steps.contains('coverage') || workflow_steps.contains('ALL') ) {
+    if ( workflow_steps.contains('coverage') || workflow_steps.contains('busco_btk') || workflow_steps.contains('ALL') ) {
         RUN_READ_COVERAGE (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.assembly_path,
