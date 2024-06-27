@@ -470,8 +470,17 @@ workflow ASCC {
     //              This will also eventually check for the above run_btk boolean from autofilter
     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || workflow_steps.contains('ALL') ) {
 
+        ch_bam
+            .combine(YAML_INPUT.out.reference_tuple)
+            .map{ bam, meta, ref ->
+                tuple(  [   id: meta.id ]
+                        bam
+                )
+            }
+            .set { new_bam }
+
         GENERATE_SAMPLESHEET (
-            ch_bam
+            new_bam
         )
         //ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
