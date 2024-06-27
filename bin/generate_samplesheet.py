@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import argparse
 
 """
@@ -24,9 +25,10 @@ def main():
     data_list = []
 
     data_list.append("sample,datatype,datafile\n")
-    for file in os.listdir(args.pacbio_path):
-        if file.endswith(".bam"):
-            data_list.append(f"{args.sample_name},pacbio,{args.pacbio_path}/{file}\n")
+    if args.pacbio_path.endswith(".bam"):
+        data_list.append(f"{args.sample_name},pacbio,{args.pacbio_path}\n")
+    else:
+        sys.exit("I was expecting a mapped BAM file")
 
     with open("samplesheet.csv", "w") as file:
         file.write("".join(data_list))

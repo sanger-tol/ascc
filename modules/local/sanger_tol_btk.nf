@@ -4,7 +4,8 @@ process SANGER_TOL_BTK {
 
     input:
     tuple val(meta), path(reference, stageAs: "REFERENCE.fa")
-    tuple val(meta1), path(samplesheet_csv, stageAs: "SAMPLESHEET.csv")
+    tuple val(meta1), path(bam)
+    tuple val(meta2), path(samplesheet_csv, stageAs: "SAMPLESHEET.csv")
     path blastp, stageAs: "blastp.dmnd"
     path blastn
     path blastx

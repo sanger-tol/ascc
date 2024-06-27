@@ -103,8 +103,6 @@ workflow ASCC {
             )}
         .set { modified_input }
 
-    modified_input.view{it -> "MODINPUT: $it"}
-
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
@@ -180,9 +178,6 @@ workflow ASCC {
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
         //
-        YAML_INPUT.out.nt_database.view{it -> "NT_DB: $it"}
-        YAML_INPUT.out.ncbi_accessions.view{it -> "ACCESS: $it"}
-        YAML_INPUT.out.ncbi_rankedlineage_path.view{it -> "LINEAGE: $it"}
 
         ch_nt_blast     = []
         EXTRACT_NT_BLAST (
@@ -193,7 +188,6 @@ workflow ASCC {
         )
         ch_versions     = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_nt_blast.view{ it -> "SUPPOSED TO BE: it"}
 
     } else {
         ch_nt_blast     = []
@@ -470,10 +464,13 @@ workflow ASCC {
     //              This will also eventually check for the above run_btk boolean from autofilter
     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || workflow_steps.contains('ALL') ) {
 
-        ch_bam
-            .combine(YAML_INPUT.out.reference_tuple)
-            .map{ bam, meta, ref ->
-                tuple(  [   id: meta.id ]
+        YAML_INPUT.out.reference_tuple.view()
+        ch_bam.view()
+
+        YAML_INPUT.out.reference_tuple
+            .combine(ch_bam)
+            .map{ meta, ref, bam ->
+                tuple(  [   id: meta.id ],
                         bam
                 )
             }
@@ -486,6 +483,7 @@ workflow ASCC {
 
         SANGER_TOL_BTK (
             YAML_INPUT.out.reference_tuple,
+            new_bam,
             GENERATE_SAMPLESHEET.out.csv,
             YAML_INPUT.out.diamond_uniprot_database_path,
             YAML_INPUT.out.nt_database.map{it -> it[1]},
