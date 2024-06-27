@@ -17,6 +17,7 @@ process SANGER_TOL_BTK {
     output:
     // path("${meta.id}_btk_out/plots"),                       emit: btk_plots
     path("${meta.id}_btk_out/busco"),                       emit: btk_busco
+    path("${meta.id}_btk_out/blobtoolkit"),                 emit: btk_dataset
     path("${meta.id}_btk_out/multiqc"),                     emit: btk_multiqc
     path("blobtoolkit_pipeline_info"),                      emit: btk_pipeline
 
