@@ -23,24 +23,6 @@ process CREATE_BTK_DATASET {
     path un_diamond,        stageAs: "UNIPROT_DIAMOND_FULL.tsv"
     path ncbi_taxdump,      stageAs: "TAXDUMP"
 
-
-    /*
-            -f ${reference} \\
-        -d ./1/ \\
-        -n "${prefix}" \\
-        -tn "${meta.sci_name}" \\
-        -id ${meta.taxid} \\
-        -td ${ncbi_taxdump}/ \\
-        $blastn_arg \\
-        $nt_diamond_arg \\
-        $un_diamond_arg \\
-        $kraken_arg \\
-        $mapped_arg \\
-        $tiara_arg \\
-        $pca_arg \\
-        $fcs_arg \\
-        $args */
-
     output:
     tuple val(meta), path("btk_datasets"),                  emit: btk_datasets
     tuple val(meta), path("btk_summary_table_full.tsv"),    emit: create_summary
@@ -59,8 +41,6 @@ process CREATE_BTK_DATASET {
     def tiara_arg       = tiara             ? "-t ${tiara}"         : ""
     def pca_arg         = kmers             ? "-p ${kmers}"         : ""
     def fcs_arg         = fcsgx             ? "-fc ${fcsgx}"        : ""
-    def marker_arg      = ""
-    def contigviz_arg   = ""
 
     """
     mkdir -p btk_datasets/
@@ -80,7 +60,7 @@ process CREATE_BTK_DATASET {
         $tiara_arg \\
         $pca_arg \\
         $fcs_arg \\
-        $args\\
+        $args
 
 
     cat <<-END_VERSIONS > versions.yml

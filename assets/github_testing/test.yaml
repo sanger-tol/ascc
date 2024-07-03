@@ -24,6 +24,7 @@ diamond_uniprot_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1
 diamond_nr_database_path: /home/runner/work/ascc/ascc/diamond/UP000000212_1234679_tax.dmnd
 vecscreen_database_path: /home/runner/work/ascc/ascc/vecscreen/
 seqkit:
-  sliding: 6000
-  window: 100000
+  sliding: 100000
+  window: 6000
 n_neighbours: 13
+btk_yaml: /home/runner/work/ascc/ascc/assets/btk_draft.yaml
