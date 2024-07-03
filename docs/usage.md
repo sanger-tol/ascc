@@ -8,7 +8,6 @@
 
 ## Yaml input
 
-
 ### Full yaml
 
 ```yaml

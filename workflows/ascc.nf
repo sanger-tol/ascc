@@ -497,11 +497,10 @@ workflow ASCC {
         //ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
-/*         MERGE_BTK_DATASETS (
+        MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
-            [[],[]],     //SANGER_TOL_BTK.out.btk_datasets = []
-            [[],[]]      //SANGER_TOL_BTK.out.summary = []
-        ) */
+            SANGER_TOL_BTK.out.btk_dataset
+        )
         //ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
 
     }
