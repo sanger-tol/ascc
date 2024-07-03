@@ -4,7 +4,7 @@ process SANGER_TOL_BTK {
 
     input:
     tuple val(meta), path(reference, stageAs: "REFERENCE.fa")
-    tuple val(meta1), path(bam)
+    tuple val(meta1), path(bam) // Name needs to remain the same as previous process as they are referenced in the samplesheet
     tuple val(meta2), path(samplesheet_csv, stageAs: "SAMPLESHEET.csv")
     path blastp, stageAs: "blastp.dmnd"
     path blastn
@@ -16,11 +16,12 @@ process SANGER_TOL_BTK {
     val gca_accession
 
     output:
-    // path("${meta.id}_btk_out/plots"),                       emit: btk_plots
-    path("${meta.id}_btk_out/busco"),                       emit: btk_busco
-    path("${meta.id}_btk_out/blobtoolkit"),                 emit: btk_dataset
-    path("${meta.id}_btk_out/multiqc"),                     emit: btk_multiqc
-    path("blobtoolkit_pipeline_info"),                      emit: btk_pipeline
+    path("${meta.id}_btk_out/blobtoolkit/plots"),               emit: btk_plots
+    path("${meta.id}_btk_out/blobtoolkit/*"),                   emit: btk_dataset
+    path("${meta.id}_btk_out/blobtoolkit/*/summary.json.gz"),   emit: btk_summary
+    path("${meta.id}_btk_out/busco"),                           emit: btk_busco
+    path("${meta.id}_btk_out/multiqc"),                         emit: btk_multiqc
+    path("blobtoolkit_pipeline_info"),                          emit: btk_pipeline
 
     script:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"
@@ -71,11 +72,11 @@ process SANGER_TOL_BTK {
     def pipeline_version    =   task.ext.version        ?: "main"
 
     """
-    mkdir -p blobtoolkit/$gca_accession
-    touch blobtoolkit/$gca_accession/test.json.gz
+    mkdir -p ${prefix}_btk_out/blobtoolkit/$gca_accession
+    touch ${prefix}_btk_out/blobtoolkit/$gca_accession/test.json.gz
 
-    mkdir ${prefix}_btk_out/plots
-    touch ${prefix}_btk_out/plots/test.png
+    mkdir ${prefix}_btk_out/blobtoolkit/plots
+    touch ${prefix}_btk_out/blobtoolkit/plots/test.png
 
     mkdir ${prefix}_btk_out/busco
     touch ${prefix}_btk_out/busco/test.batch_summary.txt
