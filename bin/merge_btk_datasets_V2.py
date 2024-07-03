@@ -21,6 +21,7 @@ import sys
 import argparse
 import textwrap
 import general_purpose_functions as gpf
+import gzip
 
 
 def parse_args(argv=None):
@@ -60,13 +61,19 @@ def load_json(filename):
     """
     Loads a JSON file and returns it as a dictionary
     """
-    with open(filename) as f:
-        return json.load(f)
+    json_contents = None
+    if filename.endswith(".gz"):
+        with gzip.open(filename, "rt", encoding="UTF-8") as zipfile:
+            json_contents = json.load(zipfile)
+    else:
+        with open(filename) as f:
+            json_contents = json.load(f)
+    return json_contents
 
 
-def create_meta_json(main_btk_dataset_folder, btk_busco_dataset_folder, combined_dataset_folder):
+def create_meta_json_contents(main_btk_dataset_folder, btk_busco_dataset_folder):
     """
-    Creates a meta.json file for the new BTK dataset by combining the two meta.json files from the input directories
+    Creates the contents for the meta.json file for the new BTK dataset by combining the two meta.json files from the input directories
     """
     for folder in (main_btk_dataset_folder, btk_busco_dataset_folder):
         if os.path.isdir(folder) is False:
@@ -76,7 +83,7 @@ def create_meta_json(main_btk_dataset_folder, btk_busco_dataset_folder, combined
             sys.exit(0)
 
     main_btk_json_path = f"{main_btk_dataset_folder}/meta.json"
-    btk_busco_json_path = f"{btk_busco_dataset_folder}/meta.json"
+    btk_busco_json_path = f"{btk_busco_dataset_folder}/meta.json.gz"
     for json_path in (main_btk_json_path, btk_busco_json_path):
         if os.path.isfile(json_path) is False:
             sys.stderr.write(f"File {json_path} not found)\n")
@@ -100,10 +107,24 @@ def create_meta_json(main_btk_dataset_folder, btk_busco_dataset_folder, combined
         else:
             if field_id not in keys_to_skip:
                 merged_dict["fields"].append(field)
+    return merged_dict
 
-    meta_json_outpath = f"{combined_dataset_folder}/meta.json"
-    with open(meta_json_outpath, "w") as json_outfile:
-        json.dump(merged_dict, json_outfile, indent=1, sort_keys=True)
+
+def detect_buscogenes_variables(merged_jsons_dict):
+    """
+    Goes through the content of merged meta.json file (derived from both BTK datasets) and detects if buscogenes
+        variables are present
+    """
+    buscogenes_present_flag = False
+    fields = merged_jsons_dict["fields"]
+    for field in fields:
+        field_id = field["id"]
+        if field_id == "taxonomy":
+            for item in field["children"]:
+                if item["id"] == "buscogenes":
+                    buscogenes_present_flag = True
+                    break
+    return buscogenes_present_flag
 
 
 def main(args):
@@ -117,7 +138,13 @@ def main(args):
         )
         sys.exit(0)
 
-    not_copying_list = ["identifiers.json", "gc_data.json", "length_data.json", "ncount_data.json", "meta.json"]
+    not_copying_list = [
+        "identifiers.json.gz",
+        "gc_data.json.gz",
+        "length_data.json.gz",
+        "ncount_data.json.gz",
+        "meta.json.gz",
+    ]
 
     Path(args.new_output_directory).mkdir(parents=True, exist_ok=True)
 
@@ -127,7 +154,7 @@ def main(args):
     main_btk_dataset_files = [f for f in main_btk_dataset_files if f not in not_copying_list]
     for main_btk_dataset_file in main_btk_dataset_files:
         main_btk_dataset_file_full_path = f"{args.main_btk_datasets}/{main_btk_dataset_file}"
-        copied_file_full_path = f"{args.new_output_directory}/{main_btk_dataset_file}"
+        copied_file_full_path = os.path.abspath(f"{args.new_output_directory}/{main_btk_dataset_file}")
         shutil.copy(main_btk_dataset_file_full_path, copied_file_full_path)
 
     btk_busco_files = [
@@ -135,13 +162,24 @@ def main(args):
     ]
     for btk_busco_file in btk_busco_files:
         btk_busco_file_full_path = f"{args.btk_busco_datasets}/{btk_busco_file}"
-        copied_file_full_path = f"{args.new_output_directory}/{btk_busco_file}"
+        copied_file_full_path = os.path.abspath(f"{args.new_output_directory}/{btk_busco_file}")
         shutil.copy(btk_busco_file_full_path, copied_file_full_path)
 
-    create_meta_json(args.main_btk_datasets, args.btk_busco_datasets, args.new_output_directory)
+    merged_jsons_dict = create_meta_json_contents(args.main_btk_datasets, args.btk_busco_datasets)
+    meta_json_outpath = f"{args.new_output_directory}/meta.json"
+
+    with open(meta_json_outpath, "w") as json_outfile:
+        json.dump(merged_jsons_dict, json_outfile, indent=1, sort_keys=True)
+
+    buscogenes_present_flag = detect_buscogenes_variables(merged_jsons_dict)
 
     btk_busco_table_outpath = f"{args.new_output_directory}/btk_busco_summary_table_full.tsv"
-    btk_busco_table_exporting_command = f"blobtools filter --table {btk_busco_table_outpath} --table-fields identifiers,buscogenes_superkingdom,buscogenes_kingdom,buscogenes_phylum,buscogenes_class,buscogenes_order,buscogenes_family,buscogenes_genus,buscogenes_species,buscoregions_superkingdom,buscoregions_kingdom,buscoregions_phylum,buscoregions_class,buscoregions_order,buscoregions_family,buscoregions_genus,buscoregions_species {args.main_btk_datasets}"
+
+    btk_busco_table_exporting_command = f"blobtools filter --table {btk_busco_table_outpath} --table-fields identifiers,buscoregions_superkingdom,buscoregions_kingdom,buscoregions_phylum,buscoregions_class,buscoregions_order,buscoregions_family,buscoregions_genus,buscoregions_species"
+    if buscogenes_present_flag == True:
+        btk_busco_table_exporting_command += ",buscogenes_superkingdom,buscogenes_kingdom,buscogenes_phylum,buscogenes_class,buscogenes_order,buscogenes_family,buscogenes_genus,buscogenes_species"
+    btk_busco_table_exporting_command += f" {args.new_output_directory}"
+
     gpf.run_system_command(btk_busco_table_exporting_command)
 
 
