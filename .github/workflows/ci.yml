@@ -74,7 +74,7 @@ jobs:
 
       - name: Temporary ASCC Diamond Data
         run: |
-          curl http://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd
+          curl http://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
 
       - name: Temporary BLASTN Data
         run: |
