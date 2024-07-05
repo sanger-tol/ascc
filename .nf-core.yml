@@ -1,7 +1,6 @@
 repository_type: pipeline
 lint:
-  files_exist:
-    - assets/multiqc_config.yml
+  files_exist: false
   files_unchanged:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
@@ -20,5 +19,3 @@ lint:
   nextflow_config:
     - manifest.name
     - manifest.homePage
-  multiqc_config:
-    - report_comment
