@@ -1,6 +1,7 @@
 repository_type: pipeline
 lint:
-  files_exist: false
+  files_exist:
+    - assets/multiqc_config.yml
   files_unchanged:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
