@@ -4,7 +4,7 @@ include { SAMTOOLS_MERGE                                } from '../../modules/nf
 include { SAMTOOLS_INDEX                                } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_SORT                                 } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_DEPTH                                } from '../../modules/nf-core/samtools/depth/main'
-include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE                } from '../../modules/local/samtools_depth_average_coverage'
+include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE               } from '../../modules/local/samtools_depth_average_coverage'
 
 workflow RUN_READ_COVERAGE {
 
@@ -30,6 +30,7 @@ workflow RUN_READ_COVERAGE {
             platform
         )
         ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
+
         ch_align_bam
             .mix( SE_MAPPING.out.mapped_bam )
             .set { merged_bam }
@@ -43,6 +44,7 @@ workflow RUN_READ_COVERAGE {
             platform
         )
         ch_versions = ch_versions.mix(PE_MAPPING.out.versions)
+
         ch_align_bam
             .mix( PE_MAPPING.out.mapped_bam )
             .set { merged_bam }

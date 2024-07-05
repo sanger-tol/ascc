@@ -390,26 +390,6 @@ workflow ASCC {
         un_full         = []
     }
 
-    // mix the outputs of the outputting process so that we can
-    // insert them into the one process to create the btk and the merged report
-    // much like the versions channel
-
-/*     GENERATE_GENOME.out.reference_tuple.view{it -> "INPUT GENOME $it"}
-    GENERATE_GENOME.out.dot_genome.map{it[1]}.view{it -> "GENOME $it"}
-    ch_kmers.view{it -> "KMER $it"}
-    ch_tiara.view{it -> "TIARA $it"}
-    ch_nt_blast.view{it -> "NT $it"}
-    ch_fcsgx.view{it -> "FSCSCCSCS $it"}
-    ch_bam.view{it -> "BAM $it"}
-    ch_coverage.view{it -> "COVERAGE $it"}
-    ch_kraken1.view{it -> "KRAKEN1 $it"}
-    ch_kraken2.view{it -> "KRAKEN2 $it"}
-    ch_kraken3.view{it -> "KRAKEN3 $it"}
-    nt_hits.view{it -> "HITS $it"}
-    un_hits.view{it -> "UNHITS $it"}
-    YAML_INPUT.out.ncbi_taxonomy_path.view{it -> "TAXDUMP $it"} */
-
-
     ch_got_genome = GENERATE_GENOME.out.dot_genome.map{it[1]}
 
     CREATE_BTK_DATASET (
@@ -463,9 +443,6 @@ workflow ASCC {
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
     if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || workflow_steps.contains('ALL') ) {
-
-        YAML_INPUT.out.reference_tuple.view()
-        ch_bam.view()
 
         YAML_INPUT.out.reference_tuple
             .combine(ch_bam)

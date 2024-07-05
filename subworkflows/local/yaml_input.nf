@@ -53,8 +53,8 @@ workflow YAML_INPUT {
         .seqkit_values
         .flatten()
         .multiMap { data ->
-            sliding_value                           :           ( data.sliding                                  )
-            window_value                            :           ( data.window                                   )
+            sliding_value                           :           ( data.sliding                          )
+            window_value                            :           ( data.window                           )
         }
         .set { seqkit }
 
