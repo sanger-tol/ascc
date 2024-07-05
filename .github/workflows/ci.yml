@@ -74,11 +74,11 @@ jobs:
 
       - name: Temporary ASCC Diamond Data
         run: |
-          curl http://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
+          curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
 
       - name: Temporary BLASTN Data
         run: |
-          curl http://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
+          curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
 
       - name: Download the NCBI taxdump database
         run: |
