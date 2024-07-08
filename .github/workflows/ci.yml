@@ -135,4 +135,4 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ./sanger-treeval/${{ steps.branch-names.outputs.current_branch }}/main.nf -profile test,singularity --outdir ./results --steps ALL
+          nextflow run ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/main.nf -profile test,singularity --outdir ./results --steps ALL
