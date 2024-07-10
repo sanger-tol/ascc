@@ -80,9 +80,9 @@ jobs:
         run: |
           curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
 
-      - name: Temporary ASCC Diamond Data
+      - name: Temporary Accession2TaxID Data
         run: |
-          curl https://dp24.cog.sanger.ac.uk/ascc/accession2taxid.tar.gz | tar -C accession2taxid -xzf -
+          curl https://dp24.cog.sanger.ac.uk/ascc/accession2taxid.tar.gz | tar -xzf -
 
       - name: Download the NCBI taxdump database
         run: |
