@@ -76,7 +76,8 @@ workflow ASCC {
     ch_versions     = Channel.empty()
     ch_out_merge    = Channel.empty()
 
-    workflow_steps  = params.steps.split(",")
+    include_workflow_steps  = params.include ? params.include.split(",") : ""
+    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : ""
 
     input_ch        = Channel.fromPath(params.input, checkIfExists: true)
 
@@ -132,7 +133,7 @@ workflow ASCC {
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
     //
 
-    if ( workflow_steps.contains('kmers') || workflow_steps.contains('ALL')) {
+    if ( include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) {
 
         GENERATE_GENOME.out.reference_tuple
             .map { meta, file ->
@@ -160,7 +161,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( workflow_steps.contains('tiara') || workflow_steps.contains('ALL')) {
+    if ( include_workflow_steps.contains('tiara') || include_workflow_steps.contains('ALL')) {
         EXTRACT_TIARA_HITS (
             GENERATE_GENOME.out.reference_tuple
         )
@@ -173,7 +174,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( workflow_steps.contains('nt_blast') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL') ) {
         //
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
@@ -193,7 +194,7 @@ workflow ASCC {
         ch_nt_blast     = []
     }
 
-    if ( workflow_steps.contains('mito') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('mito') || include_workflow_steps.contains('ALL') ) {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
         //
@@ -219,7 +220,7 @@ workflow ASCC {
         ch_mito         = []
     }
 
-    if ( workflow_steps.contains('chloro') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('chloro') || include_workflow_steps.contains('ALL') ) {
 
         //
         // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
@@ -248,7 +249,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW:
     //
-    if ( workflow_steps.contains('fcs_adapt') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('fcs_adapt') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSADAPTOR (
             YAML_INPUT.out.reference_tuple
         )
@@ -266,7 +267,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW:
     //
-    if ( workflow_steps.contains('fcsgx') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('fcsgx') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSGX (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.fcs_gx_database_path,
@@ -283,7 +284,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( workflow_steps.contains('barcodes') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('barcodes') || include_workflow_steps.contains('ALL') ) {
         PACBIO_BARCODE_CHECK (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.pacbio_tuple,
@@ -308,7 +309,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( workflow_steps.contains('coverage') || workflow_steps.contains('busco_btk') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('busco_btk') || include_workflow_steps.contains('ALL') ) {
         RUN_READ_COVERAGE (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.assembly_path,
@@ -326,7 +327,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
-    if ( workflow_steps.contains('vecscreen') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
         RUN_VECSCREEN (
             GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.vecscreen_database_path
@@ -340,7 +341,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: Run the kraken classifier
     //
-    if ( workflow_steps.contains('kraken') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL') ) {
         RUN_NT_KRAKEN(
             GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.nt_kraken_db_path,
@@ -360,7 +361,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( workflow_steps.contains('nt_diamond') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('nt_diamond') || include_workflow_steps.contains('ALL') ) {
         NUCLEOT_DIAMOND (
             modified_input,
             YAML_INPUT.out.diamond_nr_database_path
@@ -377,7 +378,7 @@ workflow ASCC {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( workflow_steps.contains('uniprot_diamond') || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL') ) {
         UNIPROT_DIAMOND (
             modified_input,
             YAML_INPUT.out.diamond_uniprot_database_path
@@ -414,7 +415,7 @@ workflow ASCC {
     //
     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
     //
-    if ( workflow_steps.contains('tiara') && workflow_steps.contains('fcsgx') && workflow_steps.contains("autofilter") || workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcsgx') && include_workflow_steps.contains("autofilter") || include_workflow_steps.contains('ALL') ) {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
             YAML_INPUT.out.reference_tuple,
             EXTRACT_TIARA_HITS.out.ch_tiara,
@@ -442,7 +443,7 @@ workflow ASCC {
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
-    if ( workflow_steps.contains('busco_btk') && workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || workflow_steps.contains('ALL') ) {
+    if ( !exclude_workflow_steps.contains("btk") && include_workflow_steps.contains('busco_btk') && include_workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk") && include_workflow_steps.contains('ALL') ) {
 
         YAML_INPUT.out.reference_tuple
             .combine(ch_bam)
@@ -482,26 +483,6 @@ workflow ASCC {
 
     }
 
-
-    //
-    // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
-    //
-/*     ASCC_MERGE_TABLES (
-        GC_CONTENT.out.txt,                                 // FROM -- GC_COVERAGE.out.tsv
-        ch_coverage,                                        // FROM -- RUN_COVERAGE.out.tsv.map{it[1]}
-        ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
-        [],                                                 // <-- BACTERIAL KRAKEN -- NOT IN PIPELINE YET
-        ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
-        ch_nt_blast,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_kmers,                                           // FROM -- GET_KMERS_PROFILE.out.combined_csv
-        nt_hits,                                            // FROM -- NUCLEOT_DIAMOND.out.reformed.map{it[1]}
-        un_hits,                                            // FROM -- UNIPROT_DIAMOND.out.reformed.map{it[1]}
-        [],                                                 // <-- MARKER SCAN -- NOT IN PIPELINE YET
-        [],                                                 // <-- CONTIGVIZ -- NOT IN PIPELINE YET
-        CREATE_BTK_DATASET.out.create_summary.map{it[1]},
-        [],                                                 // <-- BUSCO_BTK -- NOT IN PIPELINE YET
-        ch_fcsgx                                            // FROM -- PARSE_FCSGX_RESULT.out.fcsgxresult.map{it[1]}
-    ) */
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
