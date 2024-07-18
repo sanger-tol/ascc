@@ -13,7 +13,7 @@ Modified by Damon-Lee Pointon
 
 Script for filtering the assembly to
 remove putative contaminants based on
-FGCS-GX and Tiara results.
+FCS-GX and Tiara results.
 -------------------------------------
 
 """
@@ -32,9 +32,9 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(DESCRIPTION),
     )
-    parser.add_argument("fasta", type=str, help="Path to the fasta assembly file")
-    parser.add_argument("-t", "--tiara", type=str, help="Path to the tiara summary file")
-    parser.add_argument("-s", "--fcsgx_sum", type=str, help="Path to the fcs-gx_summary.csv file")
+    parser.add_argument("fasta", type=str, help="Path to the assembly FASTA file")
+    parser.add_argument("-t", "--tiara", type=str, help="Path to the Tiara summary file")
+    parser.add_argument("-s", "--fcsgx_summary", type=str, help="Path to the fcs-gx_summary.csv file")
     parser.add_argument(
         "-o",
         "--output_auto_filtered",
@@ -42,7 +42,9 @@ def parse_args():
         help="Path to the assembly_autofiltered.fasta file",
         default="autofiltered.fasta",
     )
-    parser.add_argument("-c", "--combined_sum", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file")
+    parser.add_argument(
+        "-c", "--fcs_gx_and_tiara_summary", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file"
+    )
     parser.add_argument(
         "-r",
         "--rejected_seq",
@@ -175,9 +177,9 @@ def main():
 
     assembly_path = args.fasta
     tiara_results_path = args.tiara
-    fcs_gx_summary_path = args.fcsgx_sum
+    fcs_gx_summary_path = args.fcsgx_summary
     filtered_assembly_path = args.output_auto_filtered
-    combined_summary = args.combined_sum
+    combined_summary = args.fcs_gx_and_tiara_summary
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
 

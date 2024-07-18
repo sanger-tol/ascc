@@ -16,12 +16,12 @@ process SANGER_TOL_BTK {
     val gca_accession
 
     output:
-    path("${meta.id}_btk_out/blobtoolkit/plots"),                   emit: btk_plots
-    path("${meta.id}_btk_out/blobtoolkit/draft"),                   emit: btk_dataset
-    path("${meta.id}_btk_out/blobtoolkit/draft/summary.json.gz"),   emit: btk_summary
-    path("${meta.id}_btk_out/busco"),                               emit: btk_busco
-    path("${meta.id}_btk_out/multiqc"),                             emit: btk_multiqc
-    path("blobtoolkit_pipeline_info"),                              emit: btk_pipeline
+    path("${meta.id}_btk_out/blobtoolkit/plots"),                   emit: plots
+    path("${meta.id}_btk_out/blobtoolkit/draft"),                   emit: dataset
+    path("${meta.id}_btk_out/blobtoolkit/draft/summary.json.gz"),   emit: summary_json
+    path("${meta.id}_btk_out/busco"),                               emit: busco_data
+    path("${meta.id}_btk_out/multiqc"),                             emit: multiqc_report
+    path("blobtoolkit_pipeline_info"),                              emit: pipeline_info
 
     script:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"

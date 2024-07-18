@@ -391,22 +391,22 @@ workflow ASCC {
         un_full         = []
     }
 
-    ch_got_genome = GENERATE_GENOME.out.dot_genome.map{it[1]}
+    ch_dot_genome = GENERATE_GENOME.out.dot_genome.map{it[1]}
 
     CREATE_BTK_DATASET (
-        GENERATE_GENOME.out.reference_tuple.first(),
-        ch_got_genome,
+        GENERATE_GENOME.out.reference_tuple,
+        ch_dot_genome,
         ch_kmers,
-        ch_tiara.first(),
+        ch_tiara,
         ch_nt_blast,
-        ch_fcsgx.first(),
-        ch_bam.first(),
-        ch_coverage.first(),
-        ch_kraken1.first(),
-        ch_kraken2.first(),
-        ch_kraken3.first(),
-        nt_hits.first(),
-        un_hits.first(),
+        ch_fcsgx,
+        ch_bam,
+        ch_coverage,
+        ch_kraken1,
+        ch_kraken2,
+        ch_kraken3,
+        nt_hits,
+        un_hits,
         YAML_INPUT.out.ncbi_taxonomy_path.first()
     )
     //ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
@@ -443,7 +443,7 @@ workflow ASCC {
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
-    if ( !exclude_workflow_steps.contains("btk") && include_workflow_steps.contains('busco_btk') && include_workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk") && include_workflow_steps.contains('ALL') ) {
+    if ( !exclude_workflow_steps.contains("busbo_btk") && include_workflow_steps.contains('busco_btk') && include_workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("busco_btk") && include_workflow_steps.contains('ALL') ) {
 
         YAML_INPUT.out.reference_tuple
             .combine(ch_bam)
@@ -477,7 +477,7 @@ workflow ASCC {
 
         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
-            SANGER_TOL_BTK.out.btk_dataset
+            SANGER_TOL_BTK.out.dataset
         )
         //ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
 

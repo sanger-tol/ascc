@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Script processing the cobiont check result tables to add a combined classification ('merged_classif') column that is based
     on the output of multiple tools. Also generates a table for estimated coverages per 'merged_classif' column
