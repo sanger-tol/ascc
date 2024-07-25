@@ -11,8 +11,8 @@ process SAMTOOLS_DEPTH_AVERAGE_COVERAGE {
     tuple val(meta), path(depth)
 
     output:
-    tuple val(meta), path( "*.txt" ), emit: average_coverage
-    path "versions.yml", emit: versions
+    tuple val(meta), path( "*.txt" ),   emit: average_coverage
+    path "versions.yml",                emit: versions
 
     script:
     def args = task.ext.args ?: ''

@@ -13,6 +13,7 @@ process MERGE_BTK_DATASETS {
 
     output:
     tuple val(meta), path("merged_datasets"),   emit: merged_datasets
+    path "versions.yaml",                       emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,7 +34,19 @@ process MERGE_BTK_DATASETS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        create_btk_dataset: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+        merge_btk_datasets_V2: \$(merge_btk_datasets_V2.py --version | cut -d' ' -f2)
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+
+    """
+    mkdir -p merged_datasets/
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        merge_btk_datasets_V2: \$(merge_btk_datasets_V2.py -v)
     END_VERSIONS
     """
 }

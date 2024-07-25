@@ -25,4 +25,16 @@ process CONVERT_TO_HITS_FILE {
         convert_to_hits: \$(convert_to_hits.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
+
+    stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+
+    """
+    touch ${prefix}.csv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        convert_to_hits: \$(convert_to_hits.py -v)
+    END_VERSIONS
+    """
 }

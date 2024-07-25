@@ -26,6 +26,8 @@ process CREATE_BTK_DATASET {
     output:
     tuple val(meta), path("btk_datasets"),                  emit: btk_datasets
     tuple val(meta), path("btk_summary_table_full.tsv"),    emit: create_summary
+    path "versions.yaml",                                   emit: versions
+
 
     when:
     task.ext.when == null || task.ext.when
@@ -67,6 +69,20 @@ process CREATE_BTK_DATASET {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         create_btk_dataset: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+
+    """
+    mkdir btk_datasets
+    touch btk_datasets/${prefix}.txt
+    touch btk_summary_table_full.tsv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        create_btk_dataset: \$(create_btk_dataset_V2.py -v)
     END_VERSIONS
     """
 }

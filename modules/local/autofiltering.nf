@@ -41,4 +41,17 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     END_VERSIONS
     """
 
+    stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+    """
+    touch autofiltered.fasta
+    touch ABNORMAL_CHECK.csv
+    touch assembly_filtering_removed_sequences.txt
+    touch fcs-gx_alarm_indicator_file.txt
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
+    """
 }

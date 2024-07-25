@@ -22,6 +22,7 @@ process SANGER_TOL_BTK {
     path("${meta.id}_btk_out/busco"),                               emit: busco_data
     path("${meta.id}_btk_out/multiqc"),                             emit: multiqc_report
     path("blobtoolkit_pipeline_info"),                              emit: pipeline_info
+    path "versions.yml",                                            emit: versions
 
     script:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"

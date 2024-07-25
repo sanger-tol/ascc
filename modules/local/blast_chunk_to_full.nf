@@ -28,8 +28,10 @@ process BLAST_CHUNK_TO_FULL {
     """
 
     stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+
     """
-    touch full_coords.tsv
+    touch ${prefix}.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

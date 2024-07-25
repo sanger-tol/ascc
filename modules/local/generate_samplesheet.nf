@@ -12,6 +12,7 @@ process GENERATE_SAMPLESHEET {
 
     output:
     tuple val(meta),    path("*csv"),       emit: csv
+    path "versions.yml",                   emit: versions
 
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
@@ -28,4 +29,15 @@ process GENERATE_SAMPLESHEET {
     END_VERSIONS
     """
 
+    stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+
+    """
+    touch ${prefix}.csv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        generate_samplesheet: \$(generate_samplesheet.py -v)
+    END_VERSIONS
+    """
 }
