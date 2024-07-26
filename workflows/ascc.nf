@@ -409,7 +409,7 @@ workflow ASCC {
         un_hits,
         YAML_INPUT.out.ncbi_taxonomy_path.first()
     )
-    //ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
 
     //
@@ -472,16 +472,42 @@ workflow ASCC {
             YAML_INPUT.out.taxid,
             'GCA_0001'
         )
-        //ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+        ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
             SANGER_TOL_BTK.out.dataset
         )
-        //ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        busco_merge_btk = MERGE_BTK_DATASETS.out.busco_summary_tsv
 
+    } else {
+        busco_merge_btk = []
     }
+
+
+    //
+    // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
+    //
+    ASCC_MERGE_TABLES (
+        GC_CONTENT.out.txt,                                 // FROM -- GC_COVERAGE.out.tsv
+        ch_coverage,                                        // FROM -- RUN_COVERAGE.out.tsv.map{it[1]}
+        ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
+        [],                                                 // <-- BACTERIAL KRAKEN -- NOT IN PIPELINE YET
+        ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
+        ch_nt_blast,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_kmers,                                           // FROM -- GET_KMERS_PROFILE.out.combined_csv
+        nt_hits,                                            // FROM -- NUCLEOT_DIAMOND.out.reformed.map{it[1]}
+        un_hits,                                            // FROM -- UNIPROT_DIAMOND.out.reformed.map{it[1]}
+        [],                                                 // <-- MARKER SCAN -- NOT IN PIPELINE YET
+        [],                                                 // <-- CONTIGVIZ -- NOT IN PIPELINE YET
+        CREATE_BTK_DATASET.out.create_summary.map{it[1]},   // FROM -- CREATE_BTK_DATASET
+        busco_merge_btk,                                    // FROM -- MERGE_BTK_DATASETS.out.busco_summary_tsv
+        ch_fcsgx                                            // FROM -- PARSE_FCSGX_RESULT.out.fcsgxresult.map{it[1]}
+    )
+    ch_versions              = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+
 
 
     //

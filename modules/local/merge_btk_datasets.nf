@@ -12,8 +12,9 @@ process MERGE_BTK_DATASETS {
     tuple val(meta2), path(busco_btk_datasets)
 
     output:
-    tuple val(meta), path("merged_datasets"),   emit: merged_datasets
-    path "versions.yaml",                       emit: versions
+    tuple val(meta), path("merged_datasets"),                                   emit: merged_datasets
+    tuple val(meta), path("merged_datasets/btk_busco_summary_table_full.tsv"),  emit: busco_summary_tsv
+    path "versions.yaml",                                                       emit: versions
 
     when:
     task.ext.when == null || task.ext.when
