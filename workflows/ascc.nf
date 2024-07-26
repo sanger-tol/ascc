@@ -443,7 +443,7 @@ workflow ASCC {
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
-    if ( !exclude_workflow_steps.contains("busbo_btk") && include_workflow_steps.contains('busco_btk') && include_workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("busco_btk") && include_workflow_steps.contains('ALL') ) {
+    if ( !exclude_workflow_steps.contains("busco_btk") && include_workflow_steps.contains('busco_btk') && include_workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("busco_btk") && include_workflow_steps.contains('ALL') ) {
 
         YAML_INPUT.out.reference_tuple
             .combine(ch_bam)
@@ -480,7 +480,7 @@ workflow ASCC {
             SANGER_TOL_BTK.out.dataset
         )
         ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-        busco_merge_btk = MERGE_BTK_DATASETS.out.busco_summary_tsv
+        busco_merge_btk = MERGE_BTK_DATASETS.out.busco_summary_tsv.map{it[1]}
 
     } else {
         busco_merge_btk = []

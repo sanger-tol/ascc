@@ -2,10 +2,10 @@ process MERGE_BTK_DATASETS {
     tag "$meta.id"
     label 'process_low'
 
-    conda "conda-forge::python=3.9"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.9' :
-        'biocontainers/python:3.9' }"
+    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
+        exit 1, "ASCC_MERGE_TABLES module does not support Conda. Please use Docker / Singularity / Podman instead."
+    }
+    container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
     tuple val(meta), path(create_btk_datasets)
@@ -14,7 +14,7 @@ process MERGE_BTK_DATASETS {
     output:
     tuple val(meta), path("merged_datasets"),                                   emit: merged_datasets
     tuple val(meta), path("merged_datasets/btk_busco_summary_table_full.tsv"),  emit: busco_summary_tsv
-    path "versions.yaml",                                                       emit: versions
+    path "versions.yml",                                                        emit: versions
 
     when:
     task.ext.when == null || task.ext.when
