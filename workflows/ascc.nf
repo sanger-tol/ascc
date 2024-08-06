@@ -81,7 +81,7 @@ workflow ASCC {
 
     full_list = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", ""]
 
-    if (!full_list.containsAll(include_workflow_steps) || !full_list.containsAll(exclude_workflow_steps)) {
+    if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
@@ -253,7 +253,7 @@ workflow ASCC {
     }
 
     //
-    // SUBWORKFLOW:
+    // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
     if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSADAPTOR (
@@ -271,9 +271,9 @@ workflow ASCC {
     }
 
     //
-    // SUBWORKFLOW:
+    // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( include_workflow_steps.contains('fcsgx') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSGX (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.fcs_gx_database_path,
