@@ -47,7 +47,7 @@ process CREATE_BTK_DATASET {
     """
     mkdir -p btk_datasets/
 
-    create_btk_dataset_V2.py \\
+    create_btk_dataset.py \\
         -f ${reference} \\
         -d ./1/ \\
         -n "${prefix}" \\
@@ -68,7 +68,7 @@ process CREATE_BTK_DATASET {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        create_btk_dataset: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+        create_btk_dataset: \$(create_btk_dataset.py -v)
     END_VERSIONS
     """
 
@@ -82,7 +82,8 @@ process CREATE_BTK_DATASET {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        create_btk_dataset: \$(create_btk_dataset_V2.py -v)
+        python: \$(python --version | sed 's/Python //g')
+        create_btk_dataset: \$(create_btk_dataset.py -v)
     END_VERSIONS
     """
 }
