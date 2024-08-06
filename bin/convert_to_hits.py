@@ -10,7 +10,7 @@ Argument1: path to Diamond BLASTX results, with the following columns:
 
 Version: {VERSION}
 ---
-Written by Eerik Anuin
+Written by Eerik Aunin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """

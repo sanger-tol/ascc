@@ -1,5 +1,5 @@
-include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_ILLUMINA         } from '../../modules/nf-core/minimap2/align/main'
-include { SAMTOOLS_MERGE                                } from '../../modules/nf-core/samtools/merge/main'
+include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_ILLUMINA } from '../../modules/nf-core/minimap2/align/main'
+include { SAMTOOLS_MERGE                            } from '../../modules/nf-core/samtools/merge/main'
 
 workflow PE_MAPPING {
 

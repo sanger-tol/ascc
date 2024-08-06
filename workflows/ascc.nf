@@ -194,7 +194,7 @@ workflow ASCC {
         ch_nt_blast     = []
     }
 
-    if ( include_workflow_steps.contains('mito') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL') ) {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
         //
@@ -220,7 +220,7 @@ workflow ASCC {
         ch_mito         = []
     }
 
-    if ( include_workflow_steps.contains('chloro') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL') ) {
 
         //
         // LOGIC: CHECK WHETHER THERE IS A PLASTID AND BRANCH
@@ -249,7 +249,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW:
     //
-    if ( include_workflow_steps.contains('fcs_adapt') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSADAPTOR (
             YAML_INPUT.out.reference_tuple
         )
@@ -361,7 +361,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( include_workflow_steps.contains('nt_diamond') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL') ) {
         NUCLEOT_DIAMOND (
             modified_input,
             YAML_INPUT.out.diamond_nr_database_path
@@ -405,8 +405,8 @@ workflow ASCC {
         ch_kraken1,
         ch_kraken2,
         ch_kraken3,
-        nt_hits,
-        un_hits,
+        nt_full,
+        un_full,
         YAML_INPUT.out.ncbi_taxonomy_path.first()
     )
     ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
@@ -415,7 +415,7 @@ workflow ASCC {
     //
     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
     //
-    if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcsgx') && include_workflow_steps.contains("autofilter") || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") || include_workflow_steps.contains('ALL') ) {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
             YAML_INPUT.out.reference_tuple,
             EXTRACT_TIARA_HITS.out.ch_tiara,
@@ -469,6 +469,7 @@ workflow ASCC {
             [],
             YAML_INPUT.out.ncbi_taxonomy_path,
             YAML_INPUT.out.btk_yaml,
+            YAML_INPUT.out.busco_lineages,
             YAML_INPUT.out.taxid,
             'GCA_0001'
         )

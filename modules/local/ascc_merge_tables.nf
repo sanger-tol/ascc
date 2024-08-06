@@ -2,10 +2,10 @@ process ASCC_MERGE_TABLES {
     tag "$meta.id"
     label 'process_low'
 
-    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        exit 1, "ASCC_MERGE_TABLES module does not support Conda. Please use Docker / Singularity / Podman instead."
-    }
-    container "docker.io/genomehubs/blobtoolkit:4.3.9"
+    conda "conda-forge::python=3.9"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/python:3.9' :
+        'biocontainers/python:3.9' }"
 
     input:
     tuple val(meta), path(gc_content,   stageAs: "GC.txt")
@@ -50,7 +50,7 @@ process ASCC_MERGE_TABLES {
     def cobiontid_markerscan        = ""
 
     """
-    ascc_m_tables.py \\
+    ascc_merge_tables.py \\
         --gc_cov $gc_content \\
         --sample_name $meta.id \\
         $coverage \\

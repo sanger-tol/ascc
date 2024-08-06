@@ -40,6 +40,7 @@ workflow YAML_INPUT {
                 ncbi_rankedlineage_path:                        ( file(data.ncbi_rankedlineage_path)    )
                 ncbi_accessionids:                              ( data.ncbi_accessionids_folder         )
                 busco_lineages_folder:                          ( data.busco_lineages_folder            )
+                busco_lineages:                                 ( data.busco_lineages                   )
                 seqkit_values:                                  ( data.seqkit                           )
                 diamond_uniprot_database_path:                  ( data.diamond_uniprot_database_path    )
                 diamond_nr_database_path:                       ( data.diamond_nr_database_path         )
@@ -147,6 +148,7 @@ workflow YAML_INPUT {
     ncbi_taxonomy_path               = group.ncbi_taxonomy_path
     ncbi_rankedlineage_path          = group.ncbi_rankedlineage_path
     busco_lineages_folder            = group.busco_lineages_folder
+    busco_lineages                   = group.busco_lineages
     fcs_gx_database_path             = group.fcs_gx_database_path
     diamond_uniprot_database_path    = group.diamond_uniprot_database_path
     diamond_nr_database_path         = group.diamond_nr_database_path

@@ -26,7 +26,7 @@ process MERGE_BTK_DATASETS {
     """
     mkdir -p merged_datasets/
 
-    merge_btk_datasets_V2.py \\
+    merge_btk_datasets.py \\
         -m $create_btk_datasets \\
         -o ./merged_datasets \\
         -b $busco_btk_datasets \\
@@ -35,7 +35,7 @@ process MERGE_BTK_DATASETS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        merge_btk_datasets_V2: \$(merge_btk_datasets_V2.py --version | cut -d' ' -f2)
+        merge_btk_datasets: \$(merge_btk_datasets.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
@@ -47,7 +47,7 @@ process MERGE_BTK_DATASETS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        merge_btk_datasets_V2: \$(merge_btk_datasets_V2.py -v)
+        merge_btk_datasets: \$(merge_btk_datasets.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 }

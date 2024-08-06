@@ -19,6 +19,7 @@ ncbi_accessionids_folder: /home/runner/work/ascc/ascc/20240709_tiny_accession2ta
 ncbi_taxonomy_path: /home/runner/work/ascc/ascc/ncbi_taxdump/
 ncbi_rankedlineage_path: /home/runner/work/ascc/ascc/ncbi_taxdump/rankedlineage.dmp
 busco_lineages_folder: /home/runner/work/ascc/ascc/busco_database/lineages
+busco_lineages: "diptera_odb10,insecta_odb10"
 fcs_gx_database_path: /home/runner/work/ascc/ascc/FCS_gx/
 diamond_uniprot_database_path: /home/runner/work/ascc/ascc/diamond.dmnd
 diamond_nr_database_path: /home/runner/work/ascc/ascc/diamond.dmnd

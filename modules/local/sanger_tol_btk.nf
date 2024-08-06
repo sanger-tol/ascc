@@ -12,6 +12,7 @@ process SANGER_TOL_BTK {
     path btk_config_file
     path tax_dump
     path btk_yaml, stageAs: "BTK.yaml"
+    val busco_lineages
     val taxon
     val gca_accession
 
@@ -49,6 +50,7 @@ process SANGER_TOL_BTK {
         --outdir ${prefix}_btk_out \\
         --fasta "\$(realpath REFERENCE.fa)" \\
         --yaml "\$(realpath BTK.yaml)" \\
+        --busco_lineages $busco_lineages \\
         --accession draft \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
