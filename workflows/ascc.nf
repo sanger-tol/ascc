@@ -79,6 +79,12 @@ workflow ASCC {
     include_workflow_steps  = params.include ? params.include.split(",") : ""
     exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : ""
 
+    full_list = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", ""]
+
+    if (!full_list.containsAll(include_workflow_steps) || !full_list.containsAll(exclude_workflow_steps)) {
+        exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
+    }
+
     input_ch        = Channel.fromPath(params.input, checkIfExists: true)
 
     //
