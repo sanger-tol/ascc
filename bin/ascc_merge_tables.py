@@ -5,7 +5,7 @@ DESCRIPTION = """
 Script for merging contaminant check results into one table
 Version: {VERSION}
 ---
-Written by Eerik Aunin
+Written by Eerik Anuin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument("-ud", "--uniprot_diamond", type=str, help="Uniprot Diamond file")
     parser.add_argument("-cv", "--contigviz", type=str, help="Contigviz file")
     parser.add_argument("-btk", "--blobtoolkit", type=str, help="Blobtoolkit file")
-    parser.add_argument("-bb", "--busco_btk", type=str, help="Busco Blobtoolkit file")
+    parser.add_argument("-bb", "--btk_busco", type=str, help="Busco Blobtoolkit file")
     parser.add_argument("-fg", "--fcs_gx", type=str, help="FCS_GX file")
     parser.add_argument("-n", "--sample_name", type=str, help="Name for the sample")
     parser.add_argument("-m", "--markerscan", type=str, help="MarkerScan file")
@@ -284,7 +284,7 @@ def main(args):
     paths_dict["cobiontid_markerscan"] = args.markerscan
     paths_dict["contigviz"] = args.contigviz
     paths_dict["blobtoolkit"] = args.blobtoolkit
-    paths_dict["btk_busco"] = args.busco_btk
+    paths_dict["btk_busco"] = args.btk_busco
     paths_dict["fcs_gx"] = args.fcs_gx
 
     required_files = ["gc_content"]

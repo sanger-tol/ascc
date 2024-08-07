@@ -79,6 +79,8 @@ workflow ASCC {
     include_workflow_steps  = params.include ? params.include.split(",") : ""
     exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : ""
 
+    btk_busco_run_mode  = params.btk_busco_run_mode ? params.btk_busco_run_mode : "conditional"
+
     full_list = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", ""]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
@@ -290,7 +292,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( include_workflow_steps.contains('barcodes') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
         PACBIO_BARCODE_CHECK (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.pacbio_tuple,
@@ -315,7 +317,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('busco_btk') || include_workflow_steps.contains('ALL') ) {
+    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
         RUN_READ_COVERAGE (
             YAML_INPUT.out.reference_tuple,
             YAML_INPUT.out.assembly_path,
@@ -372,12 +374,12 @@ workflow ASCC {
             modified_input,
             YAML_INPUT.out.diamond_nr_database_path
         )
-        nt_full         = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
-        nt_hits         = NUCLEOT_DIAMOND.out.hits_file.map{it[1]}
+        nr_full         = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
+        nr_hits         = NUCLEOT_DIAMOND.out.hits_file.map{it[1]}
         ch_versions     = ch_versions.mix(NUCLEOT_DIAMOND.out.versions)
     } else {
-        nt_hits         = []
-        nt_full         = []
+        nr_hits         = []
+        nr_full         = []
     }
 
     //
@@ -411,7 +413,7 @@ workflow ASCC {
         ch_kraken1,
         ch_kraken2,
         ch_kraken3,
-        nt_full,
+        nr_full,
         un_full,
         YAML_INPUT.out.ncbi_taxonomy_path.first()
     )
@@ -449,8 +451,7 @@ workflow ASCC {
     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
-    if ( !exclude_workflow_steps.contains("busco_btk") && include_workflow_steps.contains('busco_btk') && include_workflow_steps.contains("autofilter") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("busco_btk") && include_workflow_steps.contains('ALL') ) {
-
+    if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
         YAML_INPUT.out.reference_tuple
             .combine(ch_bam)
             .map{ meta, ref, bam ->
@@ -505,7 +506,7 @@ workflow ASCC {
         ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
         ch_nt_blast,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
         ch_kmers,                                           // FROM -- GET_KMERS_PROFILE.out.combined_csv
-        nt_hits,                                            // FROM -- NUCLEOT_DIAMOND.out.reformed.map{it[1]}
+        nr_hits,                                            // FROM -- NUCLEOT_DIAMOND.out.reformed.map{it[1]}
         un_hits,                                            // FROM -- UNIPROT_DIAMOND.out.reformed.map{it[1]}
         [],                                                 // <-- MARKER SCAN -- NOT IN PIPELINE YET
         [],                                                 // <-- CONTIGVIZ -- NOT IN PIPELINE YET

@@ -32,7 +32,7 @@ process SANGER_TOL_BTK {
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
     def btk_config          =   btk_config_file         ? "-c $btk_config_file"         : ""
-    def pipeline_version    =   task.ext.version        ?: "main"
+    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
     // YAML used to avoid the use of GCA accession number
     //    https://github.com/sanger-tol/blobtoolkit/issues/77
 
@@ -41,8 +41,6 @@ process SANGER_TOL_BTK {
     // now just wasted space.
 
     // outdir should be an arg
-
-    //        --accession draft \\
 
     // blastx and blastp use the same database hence the StageAs
 
@@ -76,7 +74,7 @@ process SANGER_TOL_BTK {
 
     stub:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"
-    def pipeline_version    =   task.ext.version        ?: "main"
+    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
 
     """
     mkdir -p ${prefix}_btk_out/blobtoolkit/$gca_accession
