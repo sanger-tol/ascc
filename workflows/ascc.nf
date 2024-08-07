@@ -464,7 +464,7 @@ workflow ASCC {
         GENERATE_SAMPLESHEET (
             new_bam
         )
-        //ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+        ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
         SANGER_TOL_BTK (
             YAML_INPUT.out.reference_tuple,

@@ -42,6 +42,9 @@ process SANGER_TOL_BTK {
 
     // outdir should be an arg
 
+    // blastx and blastp use the same database hence the StageAs
+
+
     """
     $executor 'nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
@@ -49,7 +52,8 @@ process SANGER_TOL_BTK {
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta "\$(realpath REFERENCE.fa)" \\
-        --busco_lineages eukaryota_odb10 \\
+        --yaml "\$(realpath BTK.yaml)" \\
+        --busco_lineages $busco_lineages \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\
