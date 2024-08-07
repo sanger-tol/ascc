@@ -42,9 +42,9 @@ def parse_args():
         help="Path to the assembly_autofiltered.fasta file",
         default="autofiltered.fasta",
     )
-    parser.add_argument(
-        "-c", "--fcs_gx_and_tiara_summary", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file"
-    )
+    #parser.add_argument(
+    #    "-c", "--fcs_gx_and_tiara_summary", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file"
+    #)
     parser.add_argument(
         "-r",
         "--rejected_seq",
@@ -55,6 +55,9 @@ def parse_args():
     parser.add_argument("-i", "--taxid", type=int, help="NCBI taxonomy ID of the species")
     parser.add_argument(
         "-n", "--ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy"
+    )
+    parser.add_argument(
+        "--tiara_action_mode", type=str, choices=["warn", "remove"], default="warn", help="Action when Tiara detects a putative contaminant that is not reported as a contaminant by FCS-GX. The choices are 'warn' (print a warning) or 'remove' (remove this sequence from the assembly). Default: warn"
     )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
@@ -179,7 +182,7 @@ def main():
     tiara_results_path = args.tiara
     fcs_gx_summary_path = args.fcsgx_summary
     filtered_assembly_path = args.output_auto_filtered
-    combined_summary = args.fcs_gx_and_tiara_summary
+    #combined_summary = args.fcs_gx_and_tiara_summary
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
 
@@ -187,7 +190,7 @@ def main():
 
     for i in [ncbi_rankedlist, tiara_results_path, fcs_gx_summary_path, assembly_path]:
         if not os.path.isfile(i):
-            sys.stderr.write(f"{i} WAS NOT AT THE EXPECTED LOCATION\n")
+            sys.stderr.write(f"{i} was not at the expected location\n")
             sys.exit(1)
 
     target_domain = get_domain_from_taxid(args.taxid, ncbi_rankedlist)
@@ -207,8 +210,12 @@ def main():
             tiara_action = tiara_action_dict[scaff]
         combined_action = fcs_gx_action
         if fcs_gx_action == "NA" and tiara_action == "EXCLUDE":
-            combined_action = "EXCLUDE"
-            combined_action_source = "Tiara"
+            if args.tiara_action_mode == "remove":
+                combined_action = "EXCLUDE"
+                combined_action_source = "Tiara"
+            elif args.tiara_action_mode == "warn":
+                combined_action = "WARN"
+                combined_action_source = "Tiara"
         if fcs_gx_action == "EXCLUDE" and tiara_action == "EXCLUDE":
             combined_action_source = "FCS-GX_and_Tiara"
         if combined_action == "EXCLUDE":
