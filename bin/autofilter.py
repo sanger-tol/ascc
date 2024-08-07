@@ -42,9 +42,9 @@ def parse_args():
         help="Path to the assembly_autofiltered.fasta file",
         default="autofiltered.fasta",
     )
-    #parser.add_argument(
+    # parser.add_argument(
     #    "-c", "--fcs_gx_and_tiara_summary", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file"
-    #)
+    # )
     parser.add_argument(
         "-r",
         "--rejected_seq",
@@ -57,7 +57,11 @@ def parse_args():
         "-n", "--ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy"
     )
     parser.add_argument(
-        "--tiara_action_mode", type=str, choices=["warn", "remove"], default="warn", help="Action when Tiara detects a putative contaminant that is not reported as a contaminant by FCS-GX. The choices are 'warn' (print a warning) or 'remove' (remove this sequence from the assembly). Default: warn"
+        "--tiara_action_mode",
+        type=str,
+        choices=["warn", "remove"],
+        default="warn",
+        help="Action when Tiara detects a putative contaminant that is not reported as a contaminant by FCS-GX. The choices are 'warn' (print a warning) or 'remove' (remove this sequence from the assembly). Default: warn",
     )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
@@ -182,7 +186,7 @@ def main():
     tiara_results_path = args.tiara
     fcs_gx_summary_path = args.fcsgx_summary
     filtered_assembly_path = args.output_auto_filtered
-    #combined_summary = args.fcs_gx_and_tiara_summary
+    # combined_summary = args.fcs_gx_and_tiara_summary
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
 
