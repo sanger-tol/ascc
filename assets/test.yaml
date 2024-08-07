@@ -19,6 +19,7 @@ ncbi_accessionids_folder: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/20240709
 ncbi_taxonomy_path: /lustre/scratch123/tol/resources/taxonomy/latest/new_taxdump
 ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
 busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-08-27/lineages
+busco_lineages: "diptera_odb10,insecta_odb10"
 fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb/
 vecscreen_database_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/vecscreen/
 diamond_uniprot_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240704_diamond_tiny_testdb/ascc_tinytest_diamond_db.dmnd

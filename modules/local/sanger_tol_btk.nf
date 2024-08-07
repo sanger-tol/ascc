@@ -42,6 +42,11 @@ process SANGER_TOL_BTK {
 
     // outdir should be an arg
 
+    //        --accession draft \\
+
+    // blastx and blastp use the same database hence the StageAs
+
+
     """
     $executor 'nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
@@ -51,7 +56,6 @@ process SANGER_TOL_BTK {
         --fasta "\$(realpath REFERENCE.fa)" \\
         --yaml "\$(realpath BTK.yaml)" \\
         --busco_lineages $busco_lineages \\
-        --accession draft \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\
