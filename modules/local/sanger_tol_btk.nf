@@ -32,7 +32,7 @@ process SANGER_TOL_BTK {
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
     def btk_config          =   btk_config_file         ? "-c $btk_config_file"         : ""
-    def pipeline_version    =   task.ext.version        ?: "main"
+    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
     // YAML used to avoid the use of GCA accession number
     //    https://github.com/sanger-tol/blobtoolkit/issues/77
 
@@ -49,9 +49,7 @@ process SANGER_TOL_BTK {
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta "\$(realpath REFERENCE.fa)" \\
-        --yaml "\$(realpath BTK.yaml)" \\
-        --busco_lineages $busco_lineages \\
-        --accession draft \\
+        --busco_lineages eukaryota_odb10 \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\
@@ -72,7 +70,7 @@ process SANGER_TOL_BTK {
 
     stub:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"
-    def pipeline_version    =   task.ext.version        ?: "main"
+    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
 
     """
     mkdir -p ${prefix}_btk_out/blobtoolkit/$gca_accession

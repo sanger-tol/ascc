@@ -9,7 +9,7 @@ process MERGE_BTK_DATASETS {
 
     input:
     tuple val(meta), path(create_btk_datasets)
-    tuple val(meta2), path(busco_btk_datasets)
+    tuple val(meta2), path(btk_busco_datasets)
 
     output:
     tuple val(meta), path("merged_datasets"),                                   emit: merged_datasets
@@ -29,7 +29,7 @@ process MERGE_BTK_DATASETS {
     merge_btk_datasets.py \\
         -m $create_btk_datasets \\
         -o ./merged_datasets \\
-        -b $busco_btk_datasets \\
+        -b $btk_busco_datasets \\
         $args
 
     cat <<-END_VERSIONS > versions.yml
