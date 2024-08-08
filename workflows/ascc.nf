@@ -45,7 +45,8 @@ include { TRAILINGNS_CHECK                              } from '../subworkflows/
 // MODULE: Local modules
 //
 include { GC_CONTENT                                    } from '../modules/local/gc_content'
-
+include { VALIDATE_TAXID                                } from '../modules/local/validate_taxid'
+include { FILTER_FASTA                                  } from '../modules/local/filter_fasta'
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
@@ -73,21 +74,21 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                   } from '../modules/nf-co
 workflow ASCC {
 
     main:
-    ch_versions     = Channel.empty()
-    ch_out_merge    = Channel.empty()
+    ch_versions             = Channel.empty()
+    ch_out_merge            = Channel.empty()
 
     include_workflow_steps  = params.include ? params.include.split(",") : ""
     exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : ""
 
-    btk_busco_run_mode  = params.btk_busco_run_mode ? params.btk_busco_run_mode : "conditional"
+    btk_busco_run_mode      = params.btk_busco_run_mode ? params.btk_busco_run_mode : "conditional"
 
-    full_list = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", ""]
+    full_list               = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", ""]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
-    input_ch        = Channel.fromPath(params.input, checkIfExists: true)
+    input_ch                = Channel.fromPath(params.input, checkIfExists: true)
 
     //
     // SUBWORKFLOW: DECODE YAML INTO PARAMETERS FOR PIPELINE
@@ -95,12 +96,31 @@ workflow ASCC {
     YAML_INPUT (
         input_ch
     )
-    ch_versions     = ch_versions.mix(YAML_INPUT.out.versions)
+    ch_versions             = ch_versions.mix(YAML_INPUT.out.versions)
+
+    //
+    // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
+    //
+    VALIDATE_TAXID(
+        YAML_INPUT.out.taxid,
+        YAML_INPUT.out.ncbi_taxonomy_path
+    )
+    ch_versions             = ch_versions.mix(VALIDATE_TAXID.out.versions)
+
+
+    //
+    // MODULE:
+    //
+    FILTER_FASTA(
+        YAML_INPUT.out.reference_tuple,
+    )
+    ch_versions             = ch_versions.mix(FILTER_FASTA.out.versions)
+
 
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    YAML_INPUT.out.reference_tuple
+    FILTER_FASTA.out.fasta
         .combine ( YAML_INPUT.out.seqkit_sliding.toInteger() )
         .combine ( YAML_INPUT.out.seqkit_window.toInteger() )
         .map { meta, ref, sliding, window ->
@@ -116,26 +136,26 @@ workflow ASCC {
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
     GC_CONTENT (
-        YAML_INPUT.out.reference_tuple
+        FILTER_FASTA.out.fasta
     )
-    ch_versions     = ch_versions.mix(GC_CONTENT.out.versions)
+    ch_versions             = ch_versions.mix(GC_CONTENT.out.versions)
 
     //
     // SUBWORKFLOW: GENERATE GENOME FILE
     //
     GENERATE_GENOME (
-        YAML_INPUT.out.reference_tuple,
+        FILTER_FASTA.out.fasta,
         YAML_INPUT.out.pacbio_barcodes
     )
-    ch_versions     = ch_versions.mix(GENERATE_GENOME.out.versions)
+    ch_versions             = ch_versions.mix(GENERATE_GENOME.out.versions)
 
     //
     // SUBWORKFLOW: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOMe
     //
     TRAILINGNS_CHECK (
-        YAML_INPUT.out.reference_tuple
+        FILTER_FASTA.out.fasta
     )
-    ch_versions = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
+    ch_versions             = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
 
     //
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
@@ -160,10 +180,10 @@ workflow ASCC {
             YAML_INPUT.out.n_neighbours,
             autoencoder_epochs_count.map{it -> it[2]}
         )
-        ch_versions     = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
-        ch_kmers        = GET_KMERS_PROFILE.out.combined_csv
+        ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+        ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
     } else {
-        ch_kmers        = []
+        ch_kmers            = []
     }
 
     //
@@ -173,10 +193,10 @@ workflow ASCC {
         EXTRACT_TIARA_HITS (
             GENERATE_GENOME.out.reference_tuple
         )
-        ch_versions     = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-        ch_tiara        = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
+        ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
     } else {
-        ch_tiara        = []
+        ch_tiara            = []
     }
 
     //
@@ -188,18 +208,18 @@ workflow ASCC {
         //          fails during the run
         //
 
-        ch_nt_blast     = []
+        ch_nt_blast         = []
         EXTRACT_NT_BLAST (
             modified_input,
             YAML_INPUT.out.nt_database,
             YAML_INPUT.out.ncbi_accessions,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
-        ch_versions     = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast     = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
 
     } else {
-        ch_nt_blast     = []
+        ch_nt_blast         = []
     }
 
     if ( include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL') ) {
@@ -218,14 +238,14 @@ workflow ASCC {
         // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
         //
         MITO_ORGANELLAR_BLAST (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.mito_var,
             mito_check.valid
         )
-        ch_mito         = MITO_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
-        ch_versions     = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+        ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
+        ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
     } else {
-        ch_mito         = []
+        ch_mito             = []
     }
 
     if ( include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL') ) {
@@ -244,14 +264,14 @@ workflow ASCC {
         // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
         //
         PLASTID_ORGANELLAR_BLAST (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.plastid_var,
             plastid_check.valid
         )
-        ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
-        ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+        ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
+        ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
     } else {
-        ch_chloro       = []
+        ch_chloro           = []
     }
 
     //
@@ -259,7 +279,7 @@ workflow ASCC {
     //
     if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSADAPTOR (
-            YAML_INPUT.out.reference_tuple
+            GENERATE_GENOME.out.reference_tuple
         )
         RUN_FCSADAPTOR.out.ch_euk
             .map{it[1]}
@@ -267,9 +287,9 @@ workflow ASCC {
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
             .set{ ch_fcsadapt }
-        ch_versions     = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     } else {
-        ch_fcsadapt     = []
+        ch_fcsadapt         = []
     }
 
     //
@@ -277,16 +297,16 @@ workflow ASCC {
     //
     if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSGX (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.fcs_gx_database_path,
             YAML_INPUT.out.taxid,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
 
-        ch_fcsgx        = RUN_FCSGX.out.fcsgxresult.map{it[1]}
-        ch_versions     = ch_versions.mix(RUN_FCSGX.out.versions)
+        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
     } else {
-        ch_fcsgx        = []
+        ch_fcsgx            = []
     }
 
     //
@@ -294,7 +314,7 @@ workflow ASCC {
     //
     if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
         PACBIO_BARCODE_CHECK (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.pacbio_tuple,
             YAML_INPUT.out.pacbio_barcodes,
             YAML_INPUT.out.pacbio_multiplex_codes
@@ -309,9 +329,9 @@ workflow ASCC {
                 ch_barcode
             }
 
-        ch_versions     = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
     } else {
-        ch_barcode      = []
+        ch_barcode          = []
     }
 
     //
@@ -319,17 +339,17 @@ workflow ASCC {
     //
     if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
         RUN_READ_COVERAGE (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.assembly_path,
             YAML_INPUT.out.pacbio_tuple,
             YAML_INPUT.out.reads_type
         )
-        ch_coverage     = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-        ch_bam          = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
-        ch_versions     = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
     } else {
-        ch_coverage     = []
-        ch_bam          = []
+        ch_coverage         = []
+        ch_bam              = []
     }
 
     //
@@ -340,10 +360,10 @@ workflow ASCC {
             GENERATE_GENOME.out.reference_tuple,
             YAML_INPUT.out.vecscreen_database_path
         )
-        ch_vecscreen    = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
-        ch_versions     = ch_versions.mix(RUN_VECSCREEN.out.versions)
+        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
     } else {
-        ch_vecscreen    = []
+        ch_vecscreen        = []
     }
 
     //
@@ -355,15 +375,15 @@ workflow ASCC {
             YAML_INPUT.out.nt_kraken_db_path,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
-        ch_kraken1      = RUN_NT_KRAKEN.out.classified.map{it[1]}
-        ch_kraken2      = RUN_NT_KRAKEN.out.report.map{it[1]}
-        ch_kraken3      = RUN_NT_KRAKEN.out.lineage
+        ch_kraken1          = RUN_NT_KRAKEN.out.classified.map{it[1]}
+        ch_kraken2          = RUN_NT_KRAKEN.out.report.map{it[1]}
+        ch_kraken3          = RUN_NT_KRAKEN.out.lineage
 
-        ch_versions     = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+        ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
     } else {
-        ch_kraken1      = []
-        ch_kraken2      = []
-        ch_kraken3      = []
+        ch_kraken1          = []
+        ch_kraken2          = []
+        ch_kraken3          = []
     }
 
     //
@@ -374,12 +394,12 @@ workflow ASCC {
             modified_input,
             YAML_INPUT.out.diamond_nr_database_path
         )
-        nr_full         = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
-        nr_hits         = NUCLEOT_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions     = ch_versions.mix(NUCLEOT_DIAMOND.out.versions)
+        nr_full             = NUCLEOT_DIAMOND.out.reformed.map{it[1]}
+        nr_hits             = NUCLEOT_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(NUCLEOT_DIAMOND.out.versions)
     } else {
-        nr_hits         = []
-        nr_full         = []
+        nr_hits             = []
+        nr_full             = []
     }
 
     //
@@ -391,15 +411,15 @@ workflow ASCC {
             modified_input,
             YAML_INPUT.out.diamond_uniprot_database_path
         )
-        un_full         = UNIPROT_DIAMOND.out.reformed.map{it[1]}
-        un_hits         = UNIPROT_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions     = ch_versions.mix(UNIPROT_DIAMOND.out.versions)
+        un_full             = UNIPROT_DIAMOND.out.reformed.map{it[1]}
+        un_hits             = UNIPROT_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(UNIPROT_DIAMOND.out.versions)
     } else {
-        un_hits         = []
-        un_full         = []
+        un_hits             = []
+        un_full             = []
     }
 
-    ch_dot_genome = GENERATE_GENOME.out.dot_genome.map{it[1]}
+    ch_dot_genome           = GENERATE_GENOME.out.dot_genome.map{it[1]}
 
     CREATE_BTK_DATASET (
         GENERATE_GENOME.out.reference_tuple,
@@ -417,7 +437,7 @@ workflow ASCC {
         un_full,
         YAML_INPUT.out.ncbi_taxonomy_path.first()
     )
-    ch_versions                 = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
 
     //
@@ -425,12 +445,12 @@ workflow ASCC {
     //
     if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") || include_workflow_steps.contains('ALL') ) {
         AUTOFILTER_AND_CHECK_ASSEMBLY (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             EXTRACT_TIARA_HITS.out.ch_tiara,
             RUN_FCSGX.out.fcsgxresult,
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
-        ch_autofiltered_assembly = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_assem   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
 
         AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { file -> file.text.trim() }
@@ -441,9 +461,9 @@ workflow ASCC {
             .set { btk_bool }
 
 
-        ch_versions              = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+        ch_versions         = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofiltered_assembly = []
+        ch_autofilt_assem   = []
     }
 
     //
@@ -452,7 +472,7 @@ workflow ASCC {
     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
     //              This will also eventually check for the above run_btk boolean from autofilter
     if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
-        YAML_INPUT.out.reference_tuple
+        GENERATE_GENOME.out.reference_tuple
             .combine(ch_bam)
             .map{ meta, ref, bam ->
                 tuple(  [   id: meta.id ],
@@ -464,10 +484,10 @@ workflow ASCC {
         GENERATE_SAMPLESHEET (
             new_bam
         )
-        ch_versions              = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+        ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
         SANGER_TOL_BTK (
-            YAML_INPUT.out.reference_tuple,
+            GENERATE_GENOME.out.reference_tuple,
             new_bam,
             GENERATE_SAMPLESHEET.out.csv,
             YAML_INPUT.out.diamond_uniprot_database_path,
@@ -480,18 +500,18 @@ workflow ASCC {
             YAML_INPUT.out.taxid,
             'GCA_0001'
         )
-        ch_versions              = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+        ch_versions         = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
         MERGE_BTK_DATASETS (
             CREATE_BTK_DATASET.out.btk_datasets,
             SANGER_TOL_BTK.out.dataset
         )
-        ch_versions              = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-        busco_merge_btk = MERGE_BTK_DATASETS.out.busco_summary_tsv.map{it[1]}
+        ch_versions         = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        busco_merge_btk     = MERGE_BTK_DATASETS.out.busco_summary_tsv.map{it[1]}
 
     } else {
-        busco_merge_btk = []
+        busco_merge_btk     = []
     }
 
 
@@ -514,7 +534,7 @@ workflow ASCC {
         busco_merge_btk,                                    // FROM -- MERGE_BTK_DATASETS.out.busco_summary_tsv
         ch_fcsgx                                            // FROM -- PARSE_FCSGX_RESULT.out.fcsgxresult.map{it[1]}
     )
-    ch_versions              = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
 
 
@@ -526,8 +546,8 @@ workflow ASCC {
     )
 
     emit:
-    software_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
-    versions_ch = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
+    software_ch             = CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
+    versions_ch             = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }
 
 process GrabFiles {
