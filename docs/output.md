@@ -49,7 +49,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 YamlInput parses the input yaml into channels for later use in the pipeline.
 
-
 ### Validate TaxID
 
 <details markdown="1">
@@ -60,7 +59,6 @@ YamlInput parses the input yaml into channels for later use in the pipeline.
 </details>
 
 Validate TaxID scans through the taxdump to ensure that the input taxid is present in the nxbi taxdump.
-
 
 ### Filter Fasta
 
@@ -74,7 +72,6 @@ Validate TaxID scans through the taxdump to ensure that the input taxid is prese
 
 By default scaffolds above 1.9Gb are removed from the assembly, as scaffolds of this size are unlikely to truely have contamination. There is also the issue that scaffolds larger than this use a significant amount of resources which hinders production environments.
 
-
 ### GC Content
 
 <details markdown="1">
@@ -86,7 +83,6 @@ By default scaffolds above 1.9Gb are removed from the assembly, as scaffolds of 
 </details>
 
 Calculating the GC content of the input genome.
-
 
 ### Generate Genome
 
@@ -100,7 +96,6 @@ Calculating the GC content of the input genome.
 
 An index-like file containing the scaffold and scaffold length of the input genome.
 
-
 ### Trailing Ns Check
 
 <details markdown="1">
@@ -113,7 +108,6 @@ An index-like file containing the scaffold and scaffold length of the input geno
 
 A text file containing a report of the Ns found in the genome.
 
-
 ### Get KMERS profile
 
 <details markdown="1">
@@ -125,7 +119,6 @@ A text file containing a report of the Ns found in the genome.
 </details>
 
 A csv file containing kmers and their counts.
-
 
 ### Extract Tiara Hits
 
@@ -141,7 +134,6 @@ A csv file containing kmers and their counts.
 
 Tiara ...
 
-
 ### Mito Organellar Blast
 
 <details markdown="1">
@@ -154,7 +146,6 @@ Tiara ...
 
 A BlastN based subworkflow used on the input genome to filter potential contaminants from the genome.
 
-
 ### Chloro Organellar Blast
 
 <details markdown="1">
@@ -166,7 +157,6 @@ A BlastN based subworkflow used on the input genome to filter potential contamin
 </details>
 
 A BlastN based subworkflow used on the input genome to filter potential contaminants from the genome.
-
 
 ### Run FCS Adaptor
 
@@ -184,7 +174,6 @@ A BlastN based subworkflow used on the input genome to filter potential contamin
 
 FCS Adaptor Identified potential locations of retained adaptor sequences from the sequencing run.
 
-
 ### Run FCS-GX
 
 <details markdown="1">
@@ -198,7 +187,6 @@ FCS Adaptor Identified potential locations of retained adaptor sequences from th
 
 FCS-GX Identified potential locations of contaminant sequences.
 
-
 ### Pacbio Barcode Check
 
 <details markdown="1">
@@ -210,7 +198,6 @@ FCS-GX Identified potential locations of contaminant sequences.
 </details>
 
 Uses BlastN to identify where given barcode sequences may be in the genome.
-
 
 ### Run Read Coverage
 
@@ -225,7 +212,6 @@ Uses BlastN to identify where given barcode sequences may be in the genome.
 
 Mapping the read data to the input genome and calculating the average coverage across it.
 
-
 ### Run Vecscreen
 
 <details markdown="1">
@@ -237,7 +223,6 @@ Mapping the read data to the input genome and calculating the average coverage a
 </details>
 
 Vecscreen identifies vector contamination in the input sequence.
-
 
 ### Run NT Kraken
 
@@ -256,7 +241,6 @@ Vecscreen identifies vector contamination in the input sequence.
 
 Kraken assigns taxonomic labels to metagenomic DNA sequences and optionally outputs the fastq of these data.
 
-
 ### Nucleotide Diamond Blast
 
 <details markdown="1">
@@ -272,7 +256,6 @@ Kraken assigns taxonomic labels to metagenomic DNA sequences and optionally outp
 </details>
 
 Diamond Blast is a sequence aligner for translated and protein sequences, here it is used do identify contamination usin the NCBI db
-
 
 ### Uniprot Diamond Blast
 
@@ -290,7 +273,6 @@ Diamond Blast is a sequence aligner for translated and protein sequences, here i
 
 Diamond Blast is a sequence aligner for translated and protein sequences, here it is used do identify contamination usin the Uniprot db
 
-
 ### Create BTK dataset
 
 <details markdown="1">
@@ -303,7 +285,6 @@ Diamond Blast is a sequence aligner for translated and protein sequences, here i
 </details>
 
 Create BTK, creates a BTK_dataset folder compatible with BTK viewer.
-
 
 ### Autofilter and check assembly
 
@@ -320,7 +301,6 @@ Create BTK, creates a BTK_dataset folder compatible with BTK viewer.
 
 Autofilter and check assembly returns a decontaminated genome file as well as summaries of the contamination found.
 
-
 ### Generate samplesheet
 
 <details markdown="1">
@@ -332,7 +312,6 @@ Autofilter and check assembly returns a decontaminated genome file as well as su
 </details>
 
 This produces a CSV containing information on the read data for use in BlobToolKit.
-
 
 ### Sanger-TOL BTK
 
@@ -351,7 +330,6 @@ This produces a CSV containing information on the read data for use in BlobToolK
 
 Sanger-Tol/BlobToolKit is a Nextflow re-implementation of the snakemake based BlobToolKit pipeline and produces interactive plots used to identify true contamination and seperate sequence from the main assembly.
 
-
 ### Merge BTK datasets
 
 <details markdown="1">
@@ -364,7 +342,6 @@ Sanger-Tol/BlobToolKit is a Nextflow re-implementation of the snakemake based Bl
 </details>
 
 This module merged the Create_btk_dataset folder with the Sanger-tol BTK dataset to create one unified dataset for use with btk viewer.
-
 
 ### ASCC Merge Tables
 
@@ -379,7 +356,6 @@ This module merged the Create_btk_dataset folder with the Sanger-tol BTK dataset
 </details>
 
 Merge Tables merged the summary reports from a number of modules inorder to create a single set of reports.
-
 
 ### Pipeline information
 
