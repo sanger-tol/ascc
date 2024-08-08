@@ -26,7 +26,7 @@ process CREATE_BTK_DATASET {
     output:
     tuple val(meta), path("btk_datasets"),                  emit: btk_datasets
     tuple val(meta), path("btk_summary_table_full.tsv"),    emit: create_summary
-    path "versions.yml",                                   emit: versions
+    path "versions.yml",                                    emit: versions
 
 
     when:

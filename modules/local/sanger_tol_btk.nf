@@ -17,13 +17,13 @@ process SANGER_TOL_BTK {
     val gca_accession
 
     output:
-    tuple val(meta), path("${meta.id}_btk_out/blobtoolkit/draft"),  emit: dataset
-    path("${meta.id}_btk_out/blobtoolkit/plots"),                   emit: plots
-    path("${meta.id}_btk_out/blobtoolkit/draft/summary.json.gz"),   emit: summary_json
-    path("${meta.id}_btk_out/busco"),                               emit: busco_data
-    path("${meta.id}_btk_out/multiqc"),                             emit: multiqc_report
-    path("blobtoolkit_pipeline_info"),                              emit: pipeline_info
-    path "versions.yml",                                            emit: versions
+    tuple val(meta), path("${meta.id}_btk_out/blobtoolkit/${meta.id}*"),    emit: dataset
+    path("${meta.id}_btk_out/blobtoolkit/plots"),                           emit: plots
+    path("${meta.id}_btk_out/blobtoolkit/${meta.id}*/summary.json.gz"),           emit: summary_json
+    path("${meta.id}_btk_out/busco"),                                       emit: busco_data
+    path("${meta.id}_btk_out/multiqc"),                                     emit: multiqc_report
+    path("blobtoolkit_pipeline_info"),                                      emit: pipeline_info
+    path "versions.yml",                                                    emit: versions
 
     script:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"
@@ -38,7 +38,8 @@ process SANGER_TOL_BTK {
 
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
-    // now just wasted space.
+    // now just wasted space. Should be fixed with using Mahesh's method of nesting but
+    // this is proving a bit complicated with BTK
 
     // outdir should be an arg
 

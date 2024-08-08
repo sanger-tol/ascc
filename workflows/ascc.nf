@@ -326,7 +326,7 @@ workflow ASCC {
             }
             .collect()
             .set {
-                ch_barcode
+                ch_barcode // Not in use
             }
 
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
