@@ -581,6 +581,18 @@ workflow.onComplete {
     }
     // TreeValProject.summary(workflow, reference_tuple, summary_params, projectDir)
 
+    if (workflow.success) {
+        // Generate a pipeline completion indicator file, for use in
+        // Sanger-ToL automation
+        def newFile = new File("${params.outdir}/pipeline_run_done_indicator_file.txt")
+        newFile.createNewFile()
+    }
+
+}
+
+workflow.onError = {
+    def newFile = new File("${params.outdir}/pipeline_run_ERROR_indicator_file.txt")
+    newFile.createNewFile()
 }
 
 /*

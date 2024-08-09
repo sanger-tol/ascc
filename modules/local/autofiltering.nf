@@ -18,6 +18,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tuple val(meta), path("ABNORMAL_CHECK.csv"),                        emit: fcs_tiara_summary
     tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
     path("fcs-gx_alarm_indicator_file.txt"),                            emit: alarm_file
+    path("autofiltering_done_indicator_file.txt"),                      emit: indicator_file
     path "versions.yml",                                                emit: versions
 
     script:
@@ -35,6 +36,11 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         $reference \\
         ABNORMAL_CHECK.csv
 
+    # The below indicator file is used in Sanger-Tol to allow for other processes
+    # to begin once generated. This allows us to speed up the overall flow of the
+    # Tol-engine
+    touch autofiltering_done_indicator_file.txt
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
@@ -48,6 +54,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     touch ABNORMAL_CHECK.csv
     touch assembly_filtering_removed_sequences.txt
     touch fcs-gx_alarm_indicator_file.txt
+    touch autofiltering_done_indicator_file.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
