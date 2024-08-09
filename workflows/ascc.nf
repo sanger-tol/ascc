@@ -451,6 +451,7 @@ workflow ASCC {
             YAML_INPUT.out.ncbi_rankedlineage_path
         )
         ch_autofilt_assem   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_indicator = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
         AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { file -> file.text.trim() }
@@ -464,6 +465,7 @@ workflow ASCC {
         ch_versions         = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
         ch_autofilt_assem   = []
+        ch_autofilt_indicator = []
     }
 
     //
@@ -537,6 +539,15 @@ workflow ASCC {
     ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
 
+    GenIndicator (
+        ch_autofilt_indicator,
+        ch_fcsgx,
+        ch_fcsadapt,
+        ch_tiara,
+        ch_vecscreen,
+        ch_barcode,
+    )
+
 
     //
     // SUBWORKFLOW: Collates version data from prior subworflows
@@ -563,6 +574,27 @@ process GrabFiles {
     tuple val(meta), path("in/*.{fa,fasta}.{gz}")
 
     "true"
+}
+
+process GenIndicator {
+    label 'process_tiny'
+
+    tag "Generating Phase 1 Indicator"
+    executor 'local'
+
+    input:
+    val(a)
+    val(b)
+    val(c)
+    val(d)
+    val(e)
+    val(f)
+
+    output:
+    path("decon_first_stage_done_indicator_file.txt")
+
+    script:
+    "touch decon_first_stage_done_indicator_file.txt"
 }
 
 /*
