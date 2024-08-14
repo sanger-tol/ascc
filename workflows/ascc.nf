@@ -109,7 +109,7 @@ workflow ASCC {
 
 
     //
-    // MODULE:
+    // MODULE: FILTER THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A CONFIG VARIABLE
     //
     FILTER_FASTA(
         YAML_INPUT.out.reference_tuple,
@@ -539,6 +539,9 @@ workflow ASCC {
     ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
 
+    //
+    // MODULE: GENERATE AN INDICATOR FILE REQUIRED FOR SANGER INTERNAL PIPELINE TRACKING
+    //
     GenIndicator (
         ch_autofilt_indicator,
         ch_fcsgx,
@@ -561,6 +564,9 @@ workflow ASCC {
     versions_ch             = CUSTOM_DUMPSOFTWAREVERSIONS.out.versions
 }
 
+//
+// MODULE: GRAB FASTQ FILES IN DIRECTORY
+//
 process GrabFiles {
     label 'process_tiny'
 
@@ -576,6 +582,9 @@ process GrabFiles {
     "true"
 }
 
+//
+// MODULE: GENERATE AN INDICATOR FILE REQUIRED FOR SANGER INTERNAL PIPELINE TRACKING
+//
 process GenIndicator {
     label 'process_tiny'
 
