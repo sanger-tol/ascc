@@ -5,6 +5,7 @@ import org.yaml.snakeyaml.Yaml
 workflow YAML_INPUT {
     take:
     input_file  // input_yaml_from_commandline
+    input_fasta_path
 
     main:
     ch_versions = Channel.empty()
@@ -22,7 +23,7 @@ workflow YAML_INPUT {
                 assembly_title:                                 ( data.assembly_title                   )
                 reads_path:                                     ( data.reads_path                       )
                 reads_type:                                     ( data.reads_type                       )
-                assembly_path:                                  ( file(data.assembly_path)              )
+                assembly_path:                                  ( file(input_fasta_path)                )
                 pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
                 sci_name:                                       ( data.sci_name                         )

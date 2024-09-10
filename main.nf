@@ -24,13 +24,15 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ASCC } from './workflows/ascc'
+include { ASCC as ASCC_HAP1 } from './workflows/ascc'
+include { ASCC as ASCC_HAP2 } from './workflows/ascc'
 
 //
 // WORKFLOW: Run main sanger-tol/ascc analysis pipeline
 //
 workflow SANGERTOL_ASCC {
-    ASCC ()
+    ASCC_HAP1 (params.input, params.hap1_path)
+    ASCC_HAP2 (params.input, params.hap2_path)
 }
 
 /*

@@ -72,6 +72,9 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                   } from '../modules/nf-co
 */
 
 workflow ASCC {
+    take:
+    workflow_input
+    input_fasta_path
 
     main:
     ch_versions             = Channel.empty()
@@ -88,13 +91,14 @@ workflow ASCC {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
-    input_ch                = Channel.fromPath(params.input, checkIfExists: true)
+    input_ch                = Channel.fromPath(workflow_input, checkIfExists: true)
 
     //
     // SUBWORKFLOW: DECODE YAML INTO PARAMETERS FOR PIPELINE
     //
     YAML_INPUT (
-        input_ch
+        input_ch,
+        input_fasta_path
     )
     ch_versions             = ch_versions.mix(YAML_INPUT.out.versions)
 
