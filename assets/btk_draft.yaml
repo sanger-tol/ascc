@@ -1,0 +1,17 @@
+assembly:
+  level: bar
+settings:
+  foo: 0
+similarity:
+  diamond_blastx:
+    foo: 0
+taxon:
+  class: class_name
+  family: family_name
+  genus: genus_name
+  kingdom: kingdom_name
+  name: species_name
+  order: order_name
+  phylum: phylum_name
+  superkingdom: superkingdom_name
+  taxid: 0

@@ -24,8 +24,6 @@ workflow RUN_VECSCREEN {
     //
     // MODULE: RUNS NCBI VECSCREEN
     //
-    vecscreen_database_tuple.view()
-
     NCBITOOLS_VECSCREEN(
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
         vecscreen_database_tuple
@@ -45,7 +43,7 @@ workflow RUN_VECSCREEN {
     ch_versions                 = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
 
     emit:
-    vecscreen_contamination     = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
+    vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
     versions                    = ch_versions.ifEmpty( null ) // channel: [ versions.yml ]
 }
 

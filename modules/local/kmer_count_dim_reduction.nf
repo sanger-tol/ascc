@@ -15,8 +15,8 @@ process KMER_COUNT_DIM_REDUCTION {
     val autoencoder_epochs_count
 
     output:
-    path '*_kmers_dim_reduction_embeddings.csv', emit: csv
-    path "versions.yml", emit: versions
+    path '*_kmers_dim_reduction_embeddings.csv',    emit: csv
+    path "versions.yml",                            emit: versions
 
     when:
     task.ext.when == null || task.ext.when

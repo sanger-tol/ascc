@@ -1,5 +1,5 @@
-include { FCS_FCSGX }          from '../../modules/nf-core/fcs/fcsgx/main'
-include { PARSE_FCSGX_RESULT } from '../../modules/local/parse_fcsgx_result'
+include { FCS_FCSGX             } from '../../modules/nf-core/fcs/fcsgx/main'
+include { PARSE_FCSGX_RESULT    } from '../../modules/local/parse_fcsgx_result'
 
 workflow RUN_FCSGX {
 
@@ -13,11 +13,17 @@ workflow RUN_FCSGX {
     ch_versions     = Channel.empty()
 
     Channel
-        .of('all.gxi', 'all.gxs',  'all.taxa.tsv', 'all.meta.jsonl', 'all.blast_div.tsv.gz')
-        .combine(fcsgxpath)
-        .map {suxfix, dbpath -> [file(dbpath + '/' + suxfix)]}
+        .of(
+            'all.gxi', 'all.gxs',  'all.taxa.tsv', 'all.meta.jsonl', 'all.blast_div.tsv.gz'
+        )
+        .combine(
+            fcsgxpath
+        )
+        .map {suxfix, dbpath ->
+            [file(dbpath + '/' + suxfix)]
+        }
         .collect()
-        .set {fcsgxdb}
+        .set { fcsgxdb }
 
     //
     // Create input channel for FCS_FCSGX, taxid is required to be the meta id.

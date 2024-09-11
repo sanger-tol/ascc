@@ -1,4 +1,4 @@
-process REFORMAT_FULL_OUTFMT6 {
+process REFORMAT_DIAMOND_OUTFMT6 {
     tag "${meta.id}"
     label 'process_low'
 
@@ -11,8 +11,8 @@ process REFORMAT_FULL_OUTFMT6 {
     tuple val(meta), path(diamond_blast)
 
     output:
-    tuple val(meta), path( "*_diamond_outfmt6.tsv" ) , emit: full
-    path "versions.yml"                     , emit: versions
+    tuple val(meta), path( "*_diamond_outfmt6.tsv" )    , emit: full
+    path "versions.yml"                                 , emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"

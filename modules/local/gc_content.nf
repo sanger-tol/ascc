@@ -11,13 +11,13 @@ process GC_CONTENT {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path( "*-gc.txt" ) , emit: txt
-    path "versions.yml"                 , emit: versions
+    tuple val(meta), path( "*-GC_CONTENT.txt" ) , emit: txt
+    path "versions.yml"                         , emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    gc_content.py ${fasta} > ${prefix}-gc.txt
+    gc_content.py ${fasta} > ${prefix}-GC_CONTENT.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

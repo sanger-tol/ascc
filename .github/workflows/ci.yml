@@ -72,6 +72,18 @@ jobs:
         run: |
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
 
+      - name: Temporary ASCC Diamond Data
+        run: |
+          curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
+
+      - name: Temporary BLASTN Data
+        run: |
+          curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
+
+      - name: Temporary Accession2TaxID Data
+        run: |
+          curl https://dp24.cog.sanger.ac.uk/ascc/accession2taxid.tar.gz | tar -xzf -
+
       - name: Download the NCBI taxdump database
         run: |
           mkdir ncbi_taxdump
@@ -120,10 +132,11 @@ jobs:
         run: |
           mkdir vecscreen
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz | tar -C vecscreen -xzf -
+          ls -lh
 
       - name: Singularity - Run FULL pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,singularity --outdir ./results --steps ALL
+          nextflow run ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/main.nf -profile test,singularity --outdir ./results --include ALL --exclude btk_busco

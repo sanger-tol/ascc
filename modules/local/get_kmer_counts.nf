@@ -12,7 +12,7 @@ process GET_KMER_COUNTS {
     val kmer_size
 
     output:
-    tuple val(meta), path( "*_kmer_counts.csv" ) , emit: csv
+    tuple val(meta), path( "*_KMER_COUNTS.csv" ) , emit: csv
     path "versions.yml"                          , emit: versions
 
     when:
@@ -20,11 +20,11 @@ process GET_KMER_COUNTS {
 
     script:
     def KCOUNTER_VERSION = "0.1.1"
-    def prefix = args.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     get_kmers_counts.py \\
         $input_fasta \\
-        ${prefix}_kmer_counts.csv \\
+        ${prefix}_KMER_COUNTS.csv \\
         --kmer_size $kmer_size
 
     cat <<-END_VERSIONS > versions.yml
@@ -40,7 +40,7 @@ process GET_KMER_COUNTS {
     def KCOUNTER_VERSION = "0.1.1"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}_kmer_counts.csv
+    touch ${prefix}_KMER_COUNTS.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

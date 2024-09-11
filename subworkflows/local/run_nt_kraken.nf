@@ -45,8 +45,8 @@ workflow RUN_NT_KRAKEN {
     ch_versions = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
 
     emit:
-    KRAKEN2_KRAKEN2.out.classified_reads_assignment
-    KRAKEN2_KRAKEN2.out.report
-    GET_LINEAGE_FOR_KRAKEN.out.txt
+    classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
+    report          = KRAKEN2_KRAKEN2.out.report
+    lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
     versions        = ch_versions.ifEmpty(null)
 }

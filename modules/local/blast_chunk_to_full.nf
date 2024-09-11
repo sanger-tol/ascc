@@ -12,11 +12,11 @@ process BLAST_CHUNK_TO_FULL {
 
     output:
     tuple val(meta), path( "*.tsv" ) , emit: full
-    path "versions.yml"                             , emit: versions
+    path "versions.yml"              , emit: versions
 
     script:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def args    = task.ext.args     ?: ""
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
     blast_hit_chunk_coords_to_full_coords.py ${chunked} ${args} > full_coords.tsv
 
@@ -28,8 +28,10 @@ process BLAST_CHUNK_TO_FULL {
     """
 
     stub:
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+
     """
-    touch full_coords.tsv
+    touch ${prefix}.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
