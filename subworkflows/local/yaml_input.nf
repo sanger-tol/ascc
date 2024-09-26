@@ -22,7 +22,8 @@ workflow YAML_INPUT {
                 assembly_title:                                 ( data.assembly_title                   )
                 reads_path:                                     ( data.reads_path                       )
                 reads_type:                                     ( data.reads_type                       )
-                assembly_path:                                  ( file(data.assembly_path)              )
+                assembly_paths:                                 ( data.assembly_paths                   )
+                organellar_paths:                               ( data.organellar_paths                 )
                 pacbio_barcodes:                                ( file(data.pacbio_barcodes)            )
                 pacbio_multiplexing_barcode_names:              ( data.pacbio_multiplexing_barcode_names)
                 sci_name:                                       ( data.sci_name                         )
@@ -59,9 +60,12 @@ workflow YAML_INPUT {
         }
         .set { seqkit }
 
-    group.assembly_title
+    // flatten the list input from yaml, this converts the value channel into a queue channel
+    // without messing with multiple wub-wub-workflows.
+    group.assembly_paths
+        .flatten()
         .combine(
-            group.assembly_path,
+            group.assembly_title,
         )
         .combine(
             group.taxid,
@@ -69,8 +73,8 @@ workflow YAML_INPUT {
         .combine(
             group.sci_name
         )
-        .map { id, file, tax, sci ->
-            tuple(  [   id:         id,
+        .map { file, id, tax, sci ->
+            tuple(  [   id:         file.toString().contains("HAPLO") ? id + "_HAP" : id, // TODO: CHANGE TO THE ACTUAL USED VALUE IN THIS CASE
                         taxid:      tax,
                         sci_name:   sci
                     ],
@@ -139,7 +143,8 @@ workflow YAML_INPUT {
     pacbio_barcodes                  = ch_barcodes
     pacbio_multiplex_codes           = group.pacbio_multiplexing_barcode_names
     assembly_title                   = group.assembly_title
-    assembly_path                    = group.assembly_path
+    assembly_path                    = group.assembly_paths
+    organellar_paths                 = group.organellar_paths
     taxid                            = group.taxid
     nt_database                      = ch_nt_db
     nt_db_prefix                     = group.nt_db_prefix

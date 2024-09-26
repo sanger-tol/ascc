@@ -6,7 +6,6 @@
 // MODULE IMPORT BLOCK
 //
 include { CHECK_BARCODE          } from '../../modules/local/check_barcode'
-include { BLAST_MAKEBLASTDB      } from '../../modules/nf-core/blast/makeblastdb'
 include { BLAST_BLASTN           } from '../../modules/nf-core/blast/blastn'
 include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 
@@ -14,8 +13,9 @@ workflow PACBIO_BARCODE_CHECK {
     take:
     reference_tuple             // tuple    [[meta.id], reference ]
     pacbio_tuple                // tuple    [[meta.id], pacbio-files]
-    barcodes                    // tuple    [[meta.id], barcode-file]
     barcode_multiplex           // val      (csv-list-string)
+    blast_db                    // tuple    [[meta.id], blast_db]
+    barcode_file
 
     main:
     ch_versions             = Channel.empty()
@@ -23,9 +23,10 @@ workflow PACBIO_BARCODE_CHECK {
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
+
     CHECK_BARCODE (
         pacbio_tuple,
-        barcodes.map{it[1]},
+        barcode_file,
         barcode_multiplex
     )
     ch_versions     = ch_versions.mix(CHECK_BARCODE.out.versions)
@@ -46,65 +47,59 @@ workflow PACBIO_BARCODE_CHECK {
     //          ACTS AS A GATEKEEPER FOR THE FLOW
     //
     gatekeeping.valid
-        .combine( barcodes )
+        .combine( barcode_file )
         .map {str, meta, file ->
                 file
         }
         .set {ch_new_barcodes}
 
     //
-    // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
-    //
-    BLAST_MAKEBLASTDB (
-        ch_new_barcodes
-    )
-    ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
-
-    BLAST_MAKEBLASTDB.out.db
-        .map { it ->
-            tuple ( [   id: "pacbio_check"  ],
-                    it
-            )
-        }
-        .set { pacbio_check_db }
-
-    //
     // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
     //
+
+    reference_tuple
+        .groupTuple(by: [1])
+        .map{ it -> tuple( it[0][0], it[-1])} // get meta_1 and last item which will be the fasta
+        .combine(blast_db)
+        .multiMap{ meta, ref, meta_2, blast_db ->
+            ref: tuple(meta, ref)
+            blast: tuple(meta_2, blast_db)
+        }
+        .set{ done }
+    
+    // NOTE: WE ONLY NEED THIS TO RUN 1 PER INPUT GENOME
     BLAST_BLASTN (
-        reference_tuple,
-        pacbio_check_db
+        done.ref,
+        done.blast
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
-    //
-    // LOGIC: FOR I (MAPPED TO OTHER CHANNELS) IN CSV LIST RUN FILTER BLAST
-    //
-    barcode_multiplex
-        .map { it ->
-            tuple( it.split(',') )
-        }
-        .flatten()
-        .combine( reference_tuple )
-        .combine( BLAST_BLASTN.out.txt )
-        .multiMap { code, ref_meta, ref, blast_meta, blast ->
-            barcodes: code
-            reference: tuple( ref_meta, ref )
-            blastdata: tuple( blast_meta, blast )
-        }
-        .set {testing}
+    done.ref.view{"REFIES: $it"}
 
     //
     // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE
+    //          MODULE RUNS ONCE PER REFERENCE AND INTERATES OVER BARCODE INTERNALLY
     //
+
+    //NOTE: THE BELOW MULTIPLIED THE BARCODES BY BLAST_OUTPUT
+    BLAST_BLASTN.out.txt
+        .combine(barcode_multiplex)
+        .multiMap{ meta, blast, codes ->
+            blast: tuple(meta, blast)
+            barcods: codes
+        }
+        .set {things}
+
     FILTER_BARCODE (
-        testing.reference,
-        testing.blastdata,
-        testing.barcodes
+        done.ref,
+        things.blast,
+        things.barcods
     )
     ch_versions     = ch_versions.mix(FILTER_BARCODE.out.versions)
 
+    FILTER_BARCODE.out.debarcoded.view{"OUTPUT: $it"}
+
     emit:
-    filtered        = FILTER_BARCODE.out.debarcoded
+    // filtered        = FILTER_BARCODE.out.debarcoded
     versions        = ch_versions.ifEmpty(null)
 }

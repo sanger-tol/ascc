@@ -8,8 +8,8 @@ process CHECK_BARCODE {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta) , path(pacbio_dir)
-    path barcodes
+    tuple val(meta) ,path(pacbio_dir)
+    tuple val(meta_1), path(barcodes)
     val multiplex_csv
 
     output:

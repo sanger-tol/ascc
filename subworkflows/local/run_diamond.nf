@@ -23,13 +23,28 @@ workflow RUN_DIAMOND {
     ch_versions     = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
     //
+    // LOGIC: 
+    //
+    SEQKIT_SLIDING.out.fastx
+        .combine(diamond_db)
+        .combine(ch_ext)
+        .combine(ch_columns)
+        .multiMap{meta_slide, files_slide, diamond, file_ext, blast_columns ->
+            seqkit_out: tuple(meta_slide, files_slide)
+            diamond_db: diamond
+            extension: file_ext
+            columns: blast_columns
+        }
+        .set{blast_input}
+
+    //
     // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB
     //
     DIAMOND_BLASTX (
-        SEQKIT_SLIDING.out.fastx,
-        diamond_db,
-        ch_ext,
-        ch_columns
+        blast_input.seqkit_out,
+        blast_input.diamond_db,
+        blast_input.extension,
+        blast_input.columns
     )
     ch_versions     = ch_versions.mix(DIAMOND_BLASTX.out.versions)
 

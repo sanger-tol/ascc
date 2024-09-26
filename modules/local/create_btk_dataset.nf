@@ -24,8 +24,8 @@ process CREATE_BTK_DATASET {
     path ncbi_taxdump,      stageAs: "TAXDUMP"
 
     output:
-    tuple val(meta), path("btk_datasets"),                  emit: btk_datasets
-    tuple val(meta), path("btk_summary_table_full.tsv"),    emit: create_summary
+    tuple val(meta), path("*_btk_datasets"),                  emit: btk_datasets
+    tuple val(meta), path("*_btk_summary_table_full.tsv"),    emit: create_summary
     path "versions.yml",                                    emit: versions
 
 
@@ -45,7 +45,7 @@ process CREATE_BTK_DATASET {
     def fcs_arg         = fcsgx             ? "-fc ${fcsgx}"        : ""
 
     """
-    mkdir -p btk_datasets/
+    mkdir -p ${prefix}_btk_datasets/
 
     create_btk_dataset.py \\
         -f ${reference} \\
@@ -54,6 +54,7 @@ process CREATE_BTK_DATASET {
         -tn "${meta.sci_name}" \\
         -id ${meta.taxid} \\
         -td ${ncbi_taxdump}/ \\
+        -o ${prefix}_btk_datasets \\
         $blastn_arg \\
         $nt_diamond_arg \\
         $un_diamond_arg \\
@@ -63,6 +64,8 @@ process CREATE_BTK_DATASET {
         $pca_arg \\
         $fcs_arg \\
         $args
+
+    mv btk_summary_table_full.tsv ${prefix}_btk_summary_table_full.tsv
 
 
     cat <<-END_VERSIONS > versions.yml

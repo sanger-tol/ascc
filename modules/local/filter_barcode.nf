@@ -8,9 +8,9 @@ process FILTER_BARCODE {
         'biocontainers/biopython:1.78' }"
 
     input:
-    tuple val(meta) , path(fasta)
-    tuple val(meta2), path(blast_data)
-    val barcodes
+    tuple val(meta), path(fasta)
+    tuple val(meta_2), path(blast_data)
+    val(barcodes)
 
     output:
     tuple val(meta), path( "*filtered.txt" )    , emit: debarcoded
@@ -20,11 +20,15 @@ process FILTER_BARCODE {
     def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
-    filter_barcode_blast_results.py \\
-        --input ${fasta} \\
-        --barcode ${barcodes} \\
-        --blast ${blast_data} \\
-        --output ${prefix}_${barcodes}_filtered.txt
+    IFS=',' read -r -a array <<< "$barcodes"
+    for i in \${array[@]}; do
+        echo "Running for: \$i"
+        filter_barcode_blast_results.py \\
+            --input ${fasta} \\
+            --barcode \$i \\
+            --blast ${blast_data} \\
+            --output ${prefix}_\${i}_filtered.txt;
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

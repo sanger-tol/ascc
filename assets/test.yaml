@@ -1,4 +1,5 @@
-assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa
+assembly_paths: [/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa, /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters_HAPLO.fa]
+organellar_paths: []
 assembly_title: asccTinyTest_V2
 reads_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/
 reads_type: "hifi"

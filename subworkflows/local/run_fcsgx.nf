@@ -50,19 +50,35 @@ workflow RUN_FCSGX {
     // Create input channel for parsing result module.
     //
     FCS_FCSGX.out.fcs_gx_report
-        .map{ it ->
-                tuple(  it[0],
-                        it[1].getParent()
-                )
+        .flatMap { meta, files ->
+            files
         }
-        .set { report_path }
+        .flatten()
+        .map {file_loc ->
+            tuple(
+                [id: file_loc.toString().split("/")[-1].split("\\.")[0]],
+                file(file_loc).getParent()
+            )
+        }
+        .combine(
+            ncbi_rankedlineage_path
+        )
+        .multiMap{ meta, folder, ncbi ->
+            report: tuple(meta, folder)
+            ncbi_path: ncbi
+        }
+        .set { parsed_report }
+
+    parsed_report.report.view()
+    parsed_report.ncbi_path.view()
+
 
     //
     // MODULE: PARSE_FCSGX_RESULT to parse the FCS_FCSGX result output in csv format.
     //
     PARSE_FCSGX_RESULT (
-        report_path,
-        ncbi_rankedlineage_path
+        parsed_report.report,
+        parsed_report.ncbi_path
     )
     ch_versions     = ch_versions.mix( PARSE_FCSGX_RESULT.out.versions )
 

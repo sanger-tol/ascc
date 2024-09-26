@@ -7,13 +7,13 @@ process FCS_FCSGX {
         'docker.io/ncbi/fcs-gx:0.4.0' }"
 
     input:
-    tuple val(meta), path(assembly)
+    tuple val(meta), path(assembly, stageAs: "input_fa/*")
     path gxdb
 
     output:
-    tuple val(meta), path("out/*.fcs_gx_report.txt"), emit: fcs_gx_report
-    tuple val(meta), path("out/*.taxonomy.rpt")     , emit: taxonomy_report
-    path "versions.yml"                         , emit: versions
+    tuple val(meta), path("input_fa/*_out/*.fcs_gx_report.txt"), emit: fcs_gx_report
+    tuple val(meta), path("input_fa/*_out/*.taxonomy.rpt")     , emit: taxonomy_report
+    path "versions.yml"                             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,12 +28,16 @@ process FCS_FCSGX {
     def FCSGX_VERSION = '0.4.0'
 
     """
-    python3 /app/bin/run_gx \\
-        --fasta $assembly \\
-        --out-dir ./out \\
-        --gx-db ./${gxdb[0].baseName} \\
-        --tax-id ${meta.taxid} \\
-        $args
+
+    for i in input_fa/*; do
+        echo "Running \$i"
+        python3 /app/bin/run_gx \\
+            --fasta \$i \\
+            --out-dir ./\${i}_out \\
+            --gx-db ./${gxdb[0].baseName} \\
+            --tax-id ${meta.taxid} \\
+            $args;
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -47,6 +47,7 @@ include { TRAILINGNS_CHECK                              } from '../subworkflows/
 include { GC_CONTENT                                    } from '../modules/local/gc_content'
 include { VALIDATE_TAXID                                } from '../modules/local/validate_taxid'
 include { FILTER_FASTA                                  } from '../modules/local/filter_fasta'
+include { BLAST_MAKEBLASTDB                             } from '../modules/nf-core/blast/makeblastdb'
 include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
@@ -97,6 +98,9 @@ workflow ASCC {
         input_ch
     )
     ch_versions             = ch_versions.mix(YAML_INPUT.out.versions)
+
+    //YAML_INPUT.out.assembly_path.view()
+    //YAML_INPUT.out.organellar_paths.view()
 
     //
     // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
@@ -296,8 +300,19 @@ workflow ASCC {
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
     if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
+
+        YAML_INPUT.out.reference_tuple
+            .collect()
+            .map{ meta_1, primary, meta_2, haplo -> 
+                tuple( [id: meta_1.id],
+                       [ primary,
+                        haplo ]
+                )
+            }
+            .set{ new_channel }
+
         RUN_FCSGX (
-            GENERATE_GENOME.out.reference_tuple,
+            new_channel,
             YAML_INPUT.out.fcs_gx_database_path,
             YAML_INPUT.out.taxid,
             YAML_INPUT.out.ncbi_rankedlineage_path
@@ -313,11 +328,37 @@ workflow ASCC {
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
     if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
+
+        YAML_INPUT.out.pacbio_multiplex_codes
+            .map{ it -> it.split(",") }
+            .flatten()
+            .combine(GENERATE_GENOME.out.reference_tuple)
+            .map{ barcode, meta, files ->
+                tuple([id: meta.id, barcodes: barcode, taxid: meta.taxid, sci_name: meta.sci_name], files)}
+            .set{ reference_and_barcodes }
+
+        //
+        // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
+        //
+        BLAST_MAKEBLASTDB (
+            YAML_INPUT.out.pacbio_barcodes.map{ it -> it[1]}
+        )
+        ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+
+        BLAST_MAKEBLASTDB.out.db
+            .map { it ->
+                tuple ( [   id: "pacbio_check"  ],
+                        it
+                )
+            }
+            .set { pacbio_check_db }
+        
         PACBIO_BARCODE_CHECK (
-            GENERATE_GENOME.out.reference_tuple,
+            reference_and_barcodes,
             YAML_INPUT.out.pacbio_tuple,
-            YAML_INPUT.out.pacbio_barcodes,
-            YAML_INPUT.out.pacbio_multiplex_codes
+            YAML_INPUT.out.pacbio_multiplex_codes,
+            pacbio_check_db,
+            YAML_INPUT.out.pacbio_barcodes
         )
 
         PACBIO_BARCODE_CHECK.out.filtered
@@ -326,9 +367,10 @@ workflow ASCC {
             }
             .collect()
             .set {
-                ch_barcode // Not in use
+                ch_barcode
             }
 
+        ch_barcode = []
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
     } else {
         ch_barcode          = []

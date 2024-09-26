@@ -3,9 +3,9 @@
 //
 // MODULE IMPORT BLOCK
 //
-include { GET_KMER_COUNTS } from '../../modules/local/get_kmer_counts'
-include { KMER_COUNT_DIM_REDUCTION } from '../../modules/local/kmer_count_dim_reduction'
-include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV } from '../../modules/local/kmer_count_dim_reduction_combine_csv'
+include { GET_KMER_COUNTS                       } from '../../modules/local/get_kmer_counts'
+include { KMER_COUNT_DIM_REDUCTION              } from '../../modules/local/kmer_count_dim_reduction'
+include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../modules/local/kmer_count_dim_reduction_combine_csv'
 
 workflow GET_KMERS_PROFILE {
     take:
@@ -28,42 +28,50 @@ workflow GET_KMERS_PROFILE {
                 file
             )
         }
+        // Needs to be combined here otherwise only a single channel will move forwards.
+        .combine(kmer_size)
+        .multiMap{ meta, file ,kmer ->
+            assembly: tuple(meta, file)
+            kmer_size: kmer
+        }
         .set { modified_input }
 
     //
     // MODULE: PRODUCE KMER COUNTS (USING KCOUNTER)
     //
     GET_KMER_COUNTS (
-        modified_input,      // val(meta), path(reads)
-        kmer_size            // val kmer_size
+        modified_input.assembly,      // val(meta), path(reads)
+        modified_input.kmer_size      // val kmer_size
     )
     ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
 
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
     //
-    dimensionality_reduction_methods
-        .splitCsv(sep: ',')
-        .flatten()
-        .combine( GET_KMER_COUNTS.out.csv )
-        .combine( n_neighbors_setting )
-        .combine( autoencoder_epochs_count )
-        .multiMap { dim_red_method, csv_meta, csv_val, nn_setting, ae_setting ->
-            kmer_csv :   tuple ([ id: csv_meta.id, single_end: true], csv_val)
-            dimensionality_reduction_method : dim_red_method
-            n_neighbors_setting : nn_setting
-            autoencoder_epochs_count : ae_setting
+    dimensionality_reduction_methods.splitCsv().flatten().set{ methods }
+    autoencoder_epochs_count.flatten().unique().set{ epoch } // Why does this value end up as a queue channel? Check Yaml input!!!
+    epoch.view{ " epochs: $it"}
+
+    methods
+        .combine(GET_KMER_COUNTS.out.csv)
+        .combine(n_neighbors_setting)
+        .combine(epoch)
+        .multiMap { method, meta, files, neighbours, autoencoder ->
+            csv: tuple([id: meta.id, single_end: true], files)
+            methods: method
+            n_neighbours: neighbours
+            autoencoder_val: autoencoder
         }
-        .set{ ch_methods }
+        .set{dim_reduction}
 
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS
     //
     KMER_COUNT_DIM_REDUCTION (
-        ch_methods.kmer_csv,                         // val(meta), path(kmer_counts)
-        ch_methods.dimensionality_reduction_method,  // val dimensionality_reduction_method
-        ch_methods.n_neighbors_setting,              // val n_neighbors_setting
-        ch_methods.autoencoder_epochs_count          // val autoencoder_epochs_count
+        dim_reduction.csv,                // val(meta), path(kmer_counts)
+        dim_reduction.methods,            // val dimensionality_reduction_method
+        dim_reduction.n_neighbours,       // val n_neighbors_setting
+        dim_reduction.autoencoder_val     // val autoencoder_epochs_count
     )
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION.out.versions)
 
@@ -71,13 +79,7 @@ workflow GET_KMERS_PROFILE {
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
     //
     KMER_COUNT_DIM_REDUCTION.out.csv
-        .collect()
-        .map { file ->
-            tuple (
-                    [   id  :   file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
-                    file
-            )
-        }
+        .groupTuple()
         .set { collected_files_for_combine }
 
     //

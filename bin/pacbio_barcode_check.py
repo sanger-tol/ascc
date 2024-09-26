@@ -57,7 +57,7 @@ def check_if_barcodes_exist_in_barcodes_fasta(barcodes_list, barcodes_fasta_path
             sys.exit(1)
 
     # If this print statement is reached, all user-supplied codes are present.
-    print("The query barcodes exist in the barcodes database file")
+    print(f"The query barcode -{barcode}- exist in the barcodes database file")
 
 
 def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_names):
