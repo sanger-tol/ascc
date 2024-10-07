@@ -8,30 +8,38 @@
 
 ---
 
-# THIS IS AN IN-DEVELOPMENT PIPELINE THAT IS CURRENTLY NOT READY FOR ANY USE
-
-AS SUCH YOU MAY FIND THAT THE DOCUMENTATION DOES NOT MATCH THE CODE AND IT MAY NOT WORK
-
-ONCE THE PIPELINE REACHES A USABLE STATE A TAGGED RELEASE/PRE-RELEASE WILL BE MADE
-
----
-
 ## Introduction
 
-**sanger-tol/ascc** is a bioinformatics pipeline that ...
+**sanger-tol/ascc** is a bioinformatics pipeline that is meant for detecting cobionts and contaminants in genome assemblies. ASCC stands for Assembly Screen for Cobionts and Contaminants. The pipeline aggregates tools such as BLAST, GC and coverage calculation, FCS-adaptor, FCS-GX, VecScreen, BlobToolKit, the BlobToolKit pipeline, Tiara, Kraken, Diamond BLASTX, and kmer counting and with kcounter+scipy. The main outputs are:
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+- A CSV table with taxonomic classifications of the sequences from the consitutent tools.
+- A BlobToolKit dataset that can contain variables that are not present in BlobToolKit datasets produced by the BlobToolKit pipeline (https://github.com/sanger-tol/blobtoolkit) on its own. For example, ASCC can incorporate FCS-GX results into a BlobToolKit dataset.
+- Individual report files for adapter, PacBio barcode and organellar contaminants.
+  The only required input file for ASCC is the assembly FASTA file. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species and comprehensive runs with assemblies with complex composition.
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+![sanger-tol/ascc overview diagram](docs/images/ascc_overview_diagram.png)
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Run a selection of processes from the list below (pick any that you think will be useful).
+
+- FCS-GX
+- FCS-adaptor
+- VecScreen
+- Tiara
+- BlobToolKit Pipeline
+- nt BLAST
+- nr and Uniprot Diamond BLASTX
+- GC and coverage calculation
+- PacBio barcodes screen
+- Organellar BLAST
+- nt Kraken2
+- kmer counting + dimensionality reduction
+
+2. Postprocess the results of the previous step to produce summary files. What processes were run in the previous step determines what summary files can be generated. The possible outputs are:
+
+- CSV table of sequence classification results
+- BlobToolKit dataset
+- CSV table of average coverage per phylum
+- Adapter and organellar contamination report files
 
 ## Usage
 
@@ -63,8 +71,8 @@ Now, you can run the pipeline using:
 ```bash
 nextflow run sanger-tol/ascc \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --input YAML \
+   --outdir <OUTDIR> -entry SANGERTOL_ASCC --include ALL
 ```
 
 > **Warning:**
@@ -74,11 +82,9 @@ nextflow run sanger-tol/ascc \
 
 ## Credits
 
-sanger-tol/ascc was originally written by eeaunin.
+sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims) and [Will Eagles](https://github.com/weaglesBio). Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato).
 
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+We thank [Michael Paulini](https://github.com/epaule), Camilla Santos, [Noah Gettle](https://github.com/gettl008) and [Ksenia Krasheninnikova](https://github.com/ksenia-krasheninnikova) for testing the pipeline.
 
 ## Contributions and Support
 
