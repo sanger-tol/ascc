@@ -79,9 +79,9 @@ nextflow run sanger-tol/ascc \
 
 ## Credits
 
-sanger-tol/ascc was written by Eerik Aunin, Damon Lee Pointon, James Torrance, Ying Sims and Will Eagles. Pipeline development was supervised by Shane A. McCarthy and Matthieu Muffato. 
+sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims) and [Will Eagles](https://github.com/weaglesBio). Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato). 
 
-We thank Michael Paulini, Camilla Santos, Noah Gettle and Ksenia Krasheninnikova for testing the pipeline.
+We thank [Michael Paulini](https://github.com/epaule), Camilla Santos, [Noah Gettle](https://github.com/gettl008) and [Ksenia Krasheninnikova](https://github.com/ksenia-krasheninnikova) for testing the pipeline.
 
 ## Contributions and Support
 
