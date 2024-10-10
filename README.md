@@ -44,6 +44,7 @@ The pipeline is in a raw state of development and has not yet been thorougly tes
 - Adapter and organellar contamination report files
 
 ## Installation of the databases
+
 Instructions for installing the databases can be found [here](./docs/databases.md).
 
 ## Usage
@@ -85,10 +86,9 @@ nextflow run sanger-tol/ascc \
 > provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-
 ## Output
-A description of the output files of the pipeline can be found [here](./docs/output.md).
 
+A description of the output files of the pipeline can be found [here](./docs/output.md).
 
 ## Credits
 
