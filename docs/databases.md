@@ -7,8 +7,9 @@ It can be installed using [conda](https://anaconda.org/bioconda/kraken2) with th
 `conda install bioconda::kraken2`<br>
 Commands for building the Kraken database:<br>
 ```
-kraken2-build --download-library nt --db nt --threads 16<br>
-kraken2-build --download-taxonomy --db /nt
+kraken2-build --threads 16 --download-taxonomy --db nt
+kraken2-build --threads 16 --download-library nt --db nt
+kraken2-build --build --threads 16 --db nt
 ```
 Warning: building this database requires hundreds of gigabytes of memory.
 
