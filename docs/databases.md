@@ -4,7 +4,9 @@ This document describes the databases used by the pipeline.
 ## nt Kraken
 For building the database, install Kraken2 if it is not already installed.
 It can be installed using [conda](https://anaconda.org/bioconda/kraken2) with this command:
-`conda install bioconda::kraken2`<br>
+```
+conda install bioconda::kraken2
+```
 Commands for building the Kraken database:<br>
 ```
 kraken2-build --threads 16 --download-taxonomy --db nt
