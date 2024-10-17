@@ -19,6 +19,8 @@
 
 ![sanger-tol/ascc overview diagram](docs/images/ascc_overview_diagram.png)
 
+The pipeline is in a raw state of development and has not yet been thorougly tested. Its components are functional, though, so it possible to run it.
+
 1. Run a selection of processes from the list below (pick any that you think will be useful).
 
 - FCS-GX
@@ -41,7 +43,13 @@
 - CSV table of average coverage per phylum
 - Adapter and organellar contamination report files
 
+## Installation of the databases
+
+Instructions for installing the databases can be found [here](./docs/databases.md).
+
 ## Usage
+
+The pipeline uses a YAML file to specify the input file paths and parameters. A description of the YAML file contents is [here](./docs/usage.md).
 
 > **Note**
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
@@ -79,6 +87,10 @@ nextflow run sanger-tol/ascc \
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 > provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+
+## Output
+
+A description of the output files of the pipeline can be found [here](./docs/output.md).
 
 ## Credits
 
