@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
     "title": "sanger-tol/ascc pipeline parameters",
     "description": "Pipeline for detecting cobionts and contaminants in genome assemblies",
