@@ -10,7 +10,7 @@
 
 ## Introduction
 
-**sanger-tol/ascc** is a bioinformatics pipeline that is meant for detecting cobionts and contaminants in genome assemblies. ASCC stands for Assembly Screen for Cobionts and Contaminants. The pipeline aggregates tools such as BLAST, GC and coverage calculation, FCS-adaptor, FCS-GX, VecScreen, BlobToolKit, the BlobToolKit pipeline, Tiara, Kraken, Diamond BLASTX, and kmer counting and with kcounter+scipy. The main outputs are:
+**sanger-tol/ascc** is a bioinformatics pipeline that is meant for detecting cobionts and contaminants in genome assemblies. ASCC stands for Assembly Screen for Cobionts and Contaminants. The pipeline was initially made for the Aquatic Symbiosis Genomics project but is now used for more than just that. The pipeline aggregates tools such as BLAST, GC and coverage calculation, FCS-adaptor, FCS-GX, VecScreen, BlobToolKit, the BlobToolKit pipeline, Tiara, Kraken, Diamond BLASTX, and kmer counting and with kcounter+scipy. The main outputs are:
 
 - A CSV table with taxonomic classifications of the sequences from the consitutent tools.
 - A BlobToolKit dataset that can contain variables that are not present in BlobToolKit datasets produced by the BlobToolKit pipeline (https://github.com/sanger-tol/blobtoolkit) on its own. For example, ASCC can incorporate FCS-GX results into a BlobToolKit dataset.
@@ -43,9 +43,14 @@ The pipeline is in a raw state of development and has not yet been thorougly tes
 - CSV table of average coverage per phylum
 - Adapter and organellar contamination report files
 
+There is a Biodiversity Genomics Academy video that introduces the ASCC pipeline on Youtube: https://www.youtube.com/watch?v=jrqjbwrg9-c.
+
 ## Installation of the databases
 
 Instructions for installing the databases can be found [here](./docs/databases.md).
+
+For testing the pipeline with tiny files, there is a script that downloads a small assembly FASTA file (a fragment of a Plasmodium genome) and small database files. The script can be found [here](./bin/download_tiny_database_test_files.sh). This is just for testing if running the pipeline works without a crash. These database files a database files are just small fragments of real databases, so they are not meant for production runs.
+A run with these databases can be done using this test YAML file that specifies the paths to the database files: [tinytest.yaml](./assets/tinytest.yaml). Before use, you may need to edit the paths in the YAML file to replace relative paths with absolute paths.
 
 ## Usage
 

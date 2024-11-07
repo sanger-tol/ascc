@@ -20,7 +20,7 @@ plastid_fasta_path: path to mitochondrion FASTA file (if it exists)
 reads_path: path to a directory that contains gzipped reads
 reads_type: type of reads (only "hifi" is currently supported)
 pacbio_barcodes: full path to the PacBio multiplexing barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
-pacbio_multiplexing_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example, "bc2008,bc2009". The barcode names exist in the barcode sequences database file (/ascc/assets/pacbio_adaptors.fa) 
+pacbio_multiplexing_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example, "bc2008,bc2009". The barcode names exist in the barcode sequences database file (/ascc/assets/pacbio_adaptors.fa)
 kmer_len: kmer length for kmer counting (which is done using kcounter). The default kmer length is 7
 dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following. "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf". The default method is "pca"
 nt_database: path to the directory that contains the NCBI nt BLAST database. The database should have built-in taxonomy

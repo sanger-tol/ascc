@@ -1,0 +1,28 @@
+assembly_path: ascc_tiny_test_databases/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa
+assembly_title: asccTinyTest_V2
+reads_path: ascc_tiny_test_databases/asccTinyTest_V2/pacbio/
+reads_type: "hifi"
+pacbio_barcodes: ascc_tiny_test_databases/pacbio_barcode/pacbio_adaptors.fa
+pacbio_multiplexing_barcode_names: "bc2008,bc2009"
+sci_name: "Plasmodium yoelii yoelii 17XNL"
+taxid: 352914
+mito_fasta_path: ascc_tiny_test_databases/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+plastid_fasta_path: ascc_tiny_test_databases/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
+kmer_len: 7
+dimensionality_reduction_methods: "pca"
+nt_database: ascc_tiny_test_databases/NT_database/
+nt_database_prefix: 18S_fungal_sequences
+nt_kraken_db_path: ascc_tiny_test_databases/kraken2/kraken2/
+ncbi_accessionids_folder: ascc_tiny_test_databases/20240709_tiny_accession2taxid/
+ncbi_taxonomy_path: ascc_tiny_test_databases/ncbi_taxdump/
+ncbi_rankedlineage_path: ascc_tiny_test_databases/ncbi_taxdump/rankedlineage.dmp
+busco_lineages_folder: ascc_tiny_test_databases/busco_database/lineages/
+fcs_gx_database_path: ascc_tiny_test_databases/FCS_gx/
+vecscreen_database_path: ascc_tiny_test_databases/vecscreen/
+diamond_uniprot_database_path: ascc_tiny_test_databases/diamond/UP000000212_1234679_tax.dmnd
+diamond_nr_database_path: ascc_tiny_test_databases/diamond/UP000000212_1234679_tax.dmnd
+seqkit:
+  sliding: 100000
+  window: 6000
+n_neighbours: 13
+btk_yaml: NA
