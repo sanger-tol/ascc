@@ -3,15 +3,14 @@ process SANGER_TOL_BTK {
     label 'process_low'
 
     input:
-    tuple val(meta), path(reference, stageAs: "REFERENCE.fa")
-    tuple val(meta1), path(bam) // Name needs to remain the same as previous process as they are referenced in the samplesheet
-    tuple val(meta2), path(samplesheet_csv, stageAs: "SAMPLESHEET.csv")
-    path blastp, stageAs: "blastp.dmnd"
+    tuple val(meta),    path(reference)
+    tuple val(meta3),   path(samplesheet_csv), path(bam_data) // this is a merged channel to ensure that both come from the right place.
+    path blastp,        stageAs: "blastp.dmnd"
     path blastn
     path blastx
     path btk_config_file
     path tax_dump
-    path btk_yaml, stageAs: "BTK.yaml"
+    path btk_yaml,      stageAs: "BTK.yaml"
     val busco_lineages
     val taxon
     val gca_accession
@@ -32,7 +31,7 @@ process SANGER_TOL_BTK {
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
     def btk_config          =   btk_config_file         ? "-c $btk_config_file"         : ""
-    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
+    def pipeline_version    =   task.ext.version        ?: "0.6.0"
     // YAML used to avoid the use of GCA accession number
     //    https://github.com/sanger-tol/blobtoolkit/issues/77
 
@@ -52,7 +51,7 @@ process SANGER_TOL_BTK {
         -profile  $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
-        --fasta "\$(realpath REFERENCE.fa)" \\
+        --fasta "\$(realpath $reference)" \\
         --busco_lineages $busco_lineages \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
@@ -60,6 +59,7 @@ process SANGER_TOL_BTK {
         --blastn "\$(realpath $blastn)" \\
         --blastx "\$(realpath $blastx)" \\
         $btk_config \\
+        --blastx_outext "txt" \\
         $args'
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info

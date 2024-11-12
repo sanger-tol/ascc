@@ -36,7 +36,7 @@ def main():
     else:
         sys.exit("I was expecting a mapped BAM file")
 
-    with open("samplesheet.csv", "w") as file:
+    with open(f"{args.sample_name}_samplesheet.csv", "w") as file:
         file.write("".join(data_list))
 
 

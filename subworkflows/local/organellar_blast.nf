@@ -11,11 +11,11 @@ include { ORGANELLE_CONTAMINATION_RECOMMENDATIONS    }   from '../../modules/loc
 workflow ORGANELLAR_BLAST {
     take:
     reference_tuple     // tuple([sample_id], reference_fasta)
-    organellar_var      // str
     organellar_tuple    // tuple([organelle], organellar_fasta)
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions     = Channel.empty()
+
 
     //
     // MODULE: STRIP SPACES OUT OF GENOMIC FASTA
@@ -25,37 +25,33 @@ workflow ORGANELLAR_BLAST {
     )
     ch_versions     = ch_versions.mix(SED_SED.out.versions)
 
+
     //
     // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
     //
-    organellar_tuple
-        .map{it ->
-            it[1]
-        }
-        .set { organelle_file }
-
     BLAST_MAKEBLASTDB (
-        organelle_file
+        organellar_tuple
     )
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
-    BLAST_MAKEBLASTDB.out.db
-        .combine( organellar_tuple )
-        .map { db_path, meta, organelle ->
-            tuple ( meta,
-                    db_path
-            )
-        }
-        .set { organellar_check_db }
 
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
     //
+    SED_SED.out.sed
+        .combine(BLAST_MAKEBLASTDB.out.db)
+        .multiMap{ meta, ref, meta2, blast_db ->
+            reference_tuple: tuple(meta, ref)
+            blastdb_tuple: tuple(meta, blast_db)
+        }
+        .set { ref_and_db }
+
     BLAST_BLASTN (
-        SED_SED.out.sed,
-        organellar_check_db
+        ref_and_db.reference_tuple,
+        ref_and_db.blastdb_tuple
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
+
 
     //
     // LOGIC: REORGANISE CHANNEL FOR DOWNSTREAM PROCESS
@@ -71,6 +67,7 @@ workflow ORGANELLAR_BLAST {
         }
         .set { blast_check }
 
+
     //
     // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT, ALSO BLAST result
     //
@@ -78,6 +75,7 @@ workflow ORGANELLAR_BLAST {
         blast_check
     )
     ch_versions     = ch_versions.mix(FILTER_COMMENTS.out.versions)
+
 
     //
     // LOGIC: IF FILTER_COMMENTS RETURNS FILE WITH NO LINES THEN SUBWORKFLOWS STOPS
@@ -89,6 +87,7 @@ workflow ORGANELLAR_BLAST {
         }
         .set {no_comments}
 
+
     //
     // MODULE: EXTRACT CONTAMINANTS FROM THE BLAST REPORT
     //
@@ -98,6 +97,7 @@ workflow ORGANELLAR_BLAST {
     )
     ch_versions     = ch_versions.mix(EXTRACT_CONTAMINANTS.out.versions)
 
+
     //
     // LOGIC: COMBINE CHANNELS INTO FORMAT OF ID, ORGANELLE ID AND FILES
     //
@@ -106,10 +106,12 @@ workflow ORGANELLAR_BLAST {
         .map { blast_meta, blast_txt, organelle_meta, organelle_fasta ->
             tuple( [    id          :   blast_meta.id,
                         organelle   :   organelle_meta.id   ],
-                    blast_txt
+                    // Previous step outputs two files in a [list], an ALL and NONE. We only want the ALL file
+                    blast_txt.findAll { it.toString().contains("ALL") }
             )
         }
         .set { reformatted_recommendations }
+
 
     //
     // MODULE: GENERATE BED FILE OF ORGANELLAR SITES RECOMENDED TO BE REMOVED
@@ -118,6 +120,7 @@ workflow ORGANELLAR_BLAST {
         reformatted_recommendations
     )
     ch_versions     = ch_versions.mix(ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.versions)
+
 
     emit:
     organelle_report= ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations

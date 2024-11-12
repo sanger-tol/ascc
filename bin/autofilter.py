@@ -35,13 +35,7 @@ def parse_args():
     parser.add_argument("fasta", type=str, help="Path to the assembly FASTA file")
     parser.add_argument("-t", "--tiara", type=str, help="Path to the Tiara summary file")
     parser.add_argument("-s", "--fcsgx_summary", type=str, help="Path to the fcs-gx_summary.csv file")
-    parser.add_argument(
-        "-o",
-        "--output_auto_filtered",
-        type=str,
-        help="Path to the assembly_autofiltered.fasta file",
-        default="autofiltered.fasta",
-    )
+    parser.add_argument("--out_prefix", type=str, help="Prefix for output files", default="assembly")
     # parser.add_argument(
     #    "-c", "--fcs_gx_and_tiara_summary", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file"
     # )
@@ -185,7 +179,7 @@ def main():
     assembly_path = args.fasta
     tiara_results_path = args.tiara
     fcs_gx_summary_path = args.fcsgx_summary
-    filtered_assembly_path = args.output_auto_filtered
+    filtered_assembly_path = f"{args.out_prefix}_autofiltered.fasta"
     # combined_summary = args.fcs_gx_and_tiara_summary
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
@@ -238,7 +232,7 @@ def main():
     for scaff, scaff_properties in combined_action_dict.items():
         out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)
-    gpf.export_list_as_line_break_separated_file(out_csv_list, "ABNORMAL_CHECK.csv")
+    gpf.export_list_as_line_break_separated_file(out_csv_list, f"{args.out_prefix}_ABNORMAL_CHECK.csv")
 
 
 if __name__ == "__main__":

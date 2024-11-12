@@ -5,7 +5,6 @@ workflow PE_MAPPING {
 
     take:
     reference_tuple          // Channel [ val(meta), path(file) ]
-    assembly_path            // Channel path(file)
     pacbio_tuple             // Channel [ val(meta), val( str ) ]
     reads_type               // Channel val( str )
 
@@ -53,7 +52,8 @@ workflow PE_MAPPING {
     pe_input
         .multiMap { meta, reads_path, ref, bam_output, cigar_paf, cigar_bam, reads_type ->
             read_tuple          : tuple( meta, read_path)
-            ref                 : ref
+            ref                 : tuple( meta, ref)
+            bam_index_extension : "bai"
             bool_bam_ouput      : bam_output
             bool_cigar_paf      : cigar_paf
             bool_cigar_bam      : cigar_bam
@@ -67,23 +67,16 @@ workflow PE_MAPPING {
         illumina_input.read_tuple,
         illumina_input.ref,
         illumina_input.bool_bam_ouput,
+        illumina_input.bam_index_extension,
         illumina_input.bool_cigar_paf,
         illumina_input.bool_cigar_bam
     )
     ch_versions = ch_versions.mix(MINIMAP2_ALIGN_ILLUMINA.out.versions)
 
-    ch_bams = MINIMAP2_ALIGN_ILLUMINA.out.bam
-
-    ch_bams
-        .map { meta, file ->
-            tuple( file )
-        }
-        .collect()
-        .map { file ->
-            tuple (
-                [ id    : file[0].toString().split('/')[-1].split('_')[0] ], // Change sample ID
-                file
-            )
+    MINIMAP2_ALIGN_ILLUMINA.out.bam
+        .groupTuple(by: 0)
+        .map{ meta, files ->
+            tuple( meta, files.flatten())
         }
         .set { collected_files_for_merge }
 

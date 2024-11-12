@@ -12,15 +12,17 @@ process EXTRACT_CONTAMINANTS {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path( "assembly.ALL.unfiltered_scaffold_coverage.bed" ), emit: contamination_bed
-    path "versions.yml"                                                     , emit: versions
+    tuple val(meta), path( "*.unfiltered_scaffold_coverage.bed" ), emit: contamination_bed
+    path "versions.yml"                                          , emit: versions
 
     script:
-    def args    = task.ext.args ?: ''
+    def args    = task.ext.args     ?: ''
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
     extract_contaminants_by_type.py \\
         ${blast_data} \\
-        --assembly_file ${fasta}
+        --assembly_file ${fasta} \\
+        --out_prefix ${prefix}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -30,7 +32,7 @@ process EXTRACT_CONTAMINANTS {
     """
 
     stub:
-    def args    = task.ext.args ?: ''
+    def args    = task.ext.args     ?: ''
     """
     touch test.bed
 

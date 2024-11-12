@@ -12,14 +12,16 @@ process PARSE_FCSGX_RESULT {
     path ncbi_rankedlineage_path
 
     output:
-    tuple val(meta), path( "*.csv" ), emit: fcsgxresult
-    path "versions.yml", emit: versions
+    tuple val(meta), path( "*.csv" ),   emit: fcsgxresult
+    path "versions.yml",                emit: versions
 
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    parse_fcsgx_result.py ${fcs_gx_reports_folder} ${ncbi_rankedlineage_path} > parsed_fcsgx.csv
+    ls ${fcs_gx_reports_folder}
+    echo ${prefix}
+    parse_fcsgx_result.py ${fcs_gx_reports_folder} ${ncbi_rankedlineage_path} > ${prefix}_parsed_fcsgx.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -13,7 +13,7 @@ process FILTER_FASTA {
     output:
     tuple val(meta), path("*_filtered.fasta"),  emit: fasta
     path "*_filtering_stderr.txt",              emit: error_log
-    path "versions.yml",                                emit: versions
+    path "versions.yml",                        emit: versions
 
 
     script:

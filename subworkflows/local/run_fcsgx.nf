@@ -17,10 +17,10 @@ workflow RUN_FCSGX {
             'all.gxi', 'all.gxs',  'all.taxa.tsv', 'all.meta.jsonl', 'all.blast_div.tsv.gz'
         )
         .combine(
-            fcsgxpath
+            Channel.of(fcsgxpath)
         )
-        .map {suxfix, dbpath ->
-            [file(dbpath + '/' + suxfix)]
+        .map {suxfix, fcs_db ->
+            [file(fcs_db + '/' + suxfix)]
         }
         .collect()
         .set { fcsgxdb }
@@ -29,7 +29,9 @@ workflow RUN_FCSGX {
     // Create input channel for FCS_FCSGX, taxid is required to be the meta id.
     //
     reference
-        .combine( taxid )
+        .combine( 
+            Channel.of(taxid)
+        )
         .map { it ->
                 tuple ([    id:     it[0].id,
                             taxid:  it[2]       ],

@@ -10,51 +10,74 @@ workflow RUN_READ_COVERAGE {
 
     take:
     reference_tuple          // Channel [ val(meta), path(file) ]
-    assembly_path            // Channel path(file)
-    pacbio_tuple             // Channel [ val(meta), val( str ) ]
+    pacbio_data              // Channel val( str )
     platform                 // Channel val( str )
 
     main:
     ch_versions     = Channel.empty()
     ch_align_bam    = Channel.empty()
+    ch_refer_bam    = Channel.empty()
 
+
+    //
+    // PROCESS: GETS PACBIO READ PATHS FROM READS_PATH
+    //
+    ch_grabbed_reads_path       = GrabFiles( pacbio_data )
+
+    ch_grabbed_reads_path
+        .flatten()
+        .set{ collection_of_reads }
+
+    reference_tuple 
+        .combine(collection_of_reads)
+        .set { ref_and_data }
 
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM, THEN RUN MINIMAP
+    //          Removed the mix function from this as it is not needed, there shouldn't be multiple read types
     //
-    if ( platform.filter { it == "hifi" } || platform.filter { it == "clr" } || platform.filter { it == "ont" } ) {
+    reference_tuple 
+        .map{meta, file ->
+            tuple(meta, pacbio_data)
+        }
+        .set { pacbio_tuple }
+
+    Channel
+        .of(platform)
+        .set {platform_type}
+
+    reference_tuple.view{"INPUT TO MAPPING: $it"}
+
+    if ( platform == "hifi" || platform == "clr" || platform == "ont" ) {
         SE_MAPPING (
-            reference_tuple,
-            assembly_path,
-            pacbio_tuple,
-            platform
+            ref_and_data
         )
         ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
 
-        ch_align_bam
-            .mix( SE_MAPPING.out.mapped_bam )
-            .set { merged_bam }
+        SE_MAPPING.out.mapped_bam
+            .set { ch_align_bam }
+
     }
-    else if ( platform.filter { it == "illumina" } ) {
+    else if ( platform == "illumina" ) {
 
         PE_MAPPING  (
             reference_tuple,
-            assembly_path,
             pacbio_tuple,
-            platform
+            platform_type
         )
         ch_versions = ch_versions.mix(PE_MAPPING.out.versions)
 
-        ch_align_bam
-            .mix( PE_MAPPING.out.mapped_bam )
-            .set { merged_bam }
+        PE_MAPPING.out.mapped_bam
+            .set { ch_align_bam }
+
     }
 
     //
     // MODULE: SORT MAPPED BAM
     //
     SAMTOOLS_SORT (
-        merged_bam
+        ch_align_bam,
+        [[],[]]
     )
     ch_versions = ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
@@ -65,6 +88,7 @@ workflow RUN_READ_COVERAGE {
         SAMTOOLS_SORT.out.bam
     )
     ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+
 
     //
     // MODULE: GET READ DEPTH
@@ -84,8 +108,22 @@ workflow RUN_READ_COVERAGE {
     )
     ch_versions = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
 
+
     emit:
     tsv_ch          = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
     bam_ch          = SAMTOOLS_SORT.out.bam
     versions        = ch_versions.ifEmpty(null)
+}
+
+process GrabFiles {
+    tag "Grab PacBio Data"
+    executor 'local'
+
+    input:
+    path("in")
+
+    output:
+    path("in/*.{fa,fasta,fna}.{gz}")
+
+    "true"
 }

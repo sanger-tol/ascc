@@ -6,6 +6,7 @@ include {   REFORMAT_DIAMOND_OUTFMT6                            } from '../../mo
 
 workflow RUN_DIAMOND {
     take:
+    // TODO: isnt this already seqkitted?
     reference_tuple     // tuple [[meta.id, meta.sliding, meta.window], reference]
     diamond_db          // val (path)
 
@@ -25,11 +26,35 @@ workflow RUN_DIAMOND {
     //
     // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB
     //
+
+    // TODO: COMBINE THEM
+    Channel
+        .of(diamond_db)
+        .map{ it -> 
+            tuple(
+                [id: "db"], 
+                it
+            )
+        }
+        .set{diamond_db_path}
+
+    SEQKIT_SLIDING.out.fastx
+        .combine(ch_ext)
+        .combine(ch_columns)
+        .combine(diamond_db_path)
+        .multiMap{ meta, reference, extensions, columns, meta2, db_path ->
+            reference: tuple(meta, reference)
+            db_path: tuple(meta2, db_path)
+            ext_ch: extensions
+            col_ch: columns
+        }
+        .set {blast_input}
+
     DIAMOND_BLASTX (
-        SEQKIT_SLIDING.out.fastx,
-        diamond_db,
-        ch_ext,
-        ch_columns
+        blast_input.reference,
+        blast_input.db_path,
+        blast_input.ext_ch,
+        blast_input.col_ch
     )
     ch_versions     = ch_versions.mix(DIAMOND_BLASTX.out.versions)
 

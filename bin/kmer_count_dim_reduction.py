@@ -19,15 +19,15 @@ numba_config_path = os.getcwd() + "/numbaconfig/"
 
 for i in [fonts_config_path, matplot_config_path, numba_config_path]:
     if not os.path.exists(i):
-        os.makedirs(i)
+        os.makedirs(i, exist_ok=True)
 
 os.environ["OSFONTDIR"] = fonts_config_path
 os.environ["MPLCONFIGDIR"] = matplot_config_path
 os.environ["NUMBA_CACHE_DIR"] = numba_config_path
 
-os.chmod(fonts_config_path, 0o0755)
-os.chmod(matplot_config_path, 0o0755)
-os.chmod(numba_config_path, 0o0755)
+os.chmod(fonts_config_path, 0o0775)
+os.chmod(matplot_config_path, 0o0775)
+os.chmod(numba_config_path, 0o0775)
 
 import matplotlib
 
@@ -302,7 +302,7 @@ def main(kmer_counts_file, out_folder, selected_methods, n_neighbors_setting, au
             "Skipping the dimensionality reduction of kmer counts, as the kmer counts table has only one row"
         )
         # Generate an empty file to satisfy nextflow expecting a file from script finishing with no file with small output
-        with open("EMPTY_kmers_dim_reduction_embeddings.csv") as empty_file:
+        with open(f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv", 'w') as empty_file:
             empty_file.write("FILE TO SMALL FOR ANALYSIS")
         sys.exit(0)
 

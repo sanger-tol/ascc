@@ -10,7 +10,7 @@ include { SUMMARISE_VECSCREEN_OUTPUT    }   from '../../modules/local/summarise_
 workflow RUN_VECSCREEN {
     take:
     reference_tuple             // val(meta), path(fasta)
-    vecscreen_database_tuple    // val(meta), val(db_path)
+    vecscreen_database_tuple    // val(db_path)
 
     main:
     ch_versions                 = Channel.empty()
@@ -26,7 +26,7 @@ workflow RUN_VECSCREEN {
     //
     NCBITOOLS_VECSCREEN(
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
-        vecscreen_database_tuple
+        [[id: "db"], vecscreen_database_tuple]
     )
     ch_versions                 = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
 

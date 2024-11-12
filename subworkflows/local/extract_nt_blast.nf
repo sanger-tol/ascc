@@ -29,7 +29,7 @@ workflow EXTRACT_NT_BLAST {
     //
     BLAST_BLASTN_MOD (
         SEQKIT_SLIDING.out.fastx,
-        blastn_db_path
+        [[id: "db"], blastn_db_path]
     )
     ch_versions             = ch_versions.mix(BLAST_BLASTN_MOD.out.versions)
 
