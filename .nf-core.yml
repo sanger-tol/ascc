@@ -1,18 +1,18 @@
 lint:
   files_exist:
   - CODE_OF_CONDUCT.md
-  - assets/nf-core-asccthesecond_logo_light.png
-  - docs/images/nf-core-asccthesecond_logo_light.png
-  - docs/images/nf-core-asccthesecond_logo_dark.png
+  - assets/nf-core-ascc_logo_light.png
+  - docs/images/nf-core-ascc_logo_light.png
+  - docs/images/nf-core-ascc_logo_dark.png
   - .github/ISSUE_TEMPLATE/config.yml
   - .github/workflows/awstest.yml
   - .github/workflows/awsfulltest.yml
   - conf/igenomes.config
   files_unchanged:
   - CODE_OF_CONDUCT.md
-  - assets/nf-core-asccthesecond_logo_light.png
-  - docs/images/nf-core-asccthesecond_logo_light.png
-  - docs/images/nf-core-asccthesecond_logo_dark.png
+  - assets/nf-core-ascc_logo_light.png
+  - docs/images/nf-core-ascc_logo_light.png
+  - docs/images/nf-core-ascc_logo_dark.png
   - .github/ISSUE_TEMPLATE/bug_report.yml
   multiqc_config:
   - report_comment

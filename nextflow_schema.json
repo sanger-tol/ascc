@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/sanger-tol/asccthesecond/master/nextflow_schema.json",
-    "title": "sanger-tol/asccthesecond pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
+    "title": "sanger-tol/ascc pipeline parameters",
     "description": "testing multirun assemblies",
     "type": "object",
     "definitions": {
