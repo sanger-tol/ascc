@@ -17,6 +17,7 @@ lint:
     - .github/workflows/linting.yml
     - .github/ISSUE_TEMPLATE/bug_report.yml
     - CODE_OF_CONDUCT.md
+    - gitignore
     - assets/nf-core-ascc_logo_light.png
     - assets/email_template.html
     - docs/images/nf-core-ascc_logo_light.png
