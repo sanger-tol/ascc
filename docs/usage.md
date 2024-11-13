@@ -6,40 +6,35 @@
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
-## Yaml input
+## YAML input
 
-### Full yaml
+### Full YAML
 
 ```yaml
-assembly_path: PATH TO INPUT FASTA
-assembly_title: NAME OF INPUT ORGANISM
-sci_name: "{SCIENTIFIC NAME OF ORGANISM}"
-taxid: 352914
-mito_fasta_path: PATH TO MITO FASTA
-plastid_fasta_path: PATH TO PLASTID FASTA
-reads_path: /path/to/pacbio/fasta/
-reads_type: "hifi"
-pacbio_barcodes: FULL PATH TO /ascc/assets/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc2008,bc2009" {BARCODES EXPECTED IN DATA}
-kmer_len: 7
-dimensionality_reduction_methods: "pca,random_trees" A CSV OF THE BELOW METHODS
-# "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
-nt_database: PATH TO UPTO DATE BLASTDB NT DATABASE
-nt_database_prefix: PREFIX FOR THE BLASTDB DATABASE
-nt_kraken_db_path: PATH+PREFIX TO THE NT KRAKEN DATABASE
-ncbi_accessionids_folder: PATH TO /accession2taxid/
-ncbi_taxonomy_path: PATH TO /taxdump/
-ncbi_rankedlineage_path: PATH TO /taxdump/rankedlineage.dmp
-busco_lineages_folder: PATH TO THE BUSCO LINEAGES FOLDER
-fcs_gx_database_path: PATH TO FOLDER CONTAINING THE FCS_GX DB
-vecscreen_database_path: PATH TO VECSCREEN DB
-diamond_uniprot_database_path: PATH TO uniprot_reference_proteomes_with_taxonnames.dmnd
-diamond_nr_database_path: PATH TO /nr.dmnd
-seqkit:
-  sliding: 100000
-  window: 6000
-n_neighbours: 13
-btk_yaml: PATH TO /ascc/assets/btk_draft.yaml <- THIS IS DEFAULT AND ONLY SERVES TO BYPASS GCA REQUIREMENTS OF SANGER-TOL/BLOBTOOLKIT
+scientific_name: scientific name of the assembled organism
+taxid: NCBI taxonomy ID of the assembled species (or genus)
+reads_path: path to a directory that contains gzipped reads
+reads_type: type of reads (only "hifi" is currently supported)
+pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
+pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example, "bc2008,bc2009". The barcode names exist in the barcode sequences database file (/ascc/assets/pacbio_adaptors.fa)
+kmer_length: kmer length for kmer counting (which is done using kcounter). The default kmer length is 7
+dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following. "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf". The default method is "pca". This field should be formatted as ["pca","random_trees"]
+nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database should have built-in taxonomy
+nt_database_prefix: prefix for the NCBI nt database. The default is "nt"
+nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
+ncbi_accession_ids_folder: path to the directory with NCBI accession2taxid files ("/accession2taxid")
+ncbi_taxonomy_path: path to NCBI taxdump directory ("/taxdump/")
+ncbi_ranked_lineage_path: path to NCBI ranked lineage file ("/taxdump/rankedlineage.dmp")
+busco_lineages_folder: path to BUSCO 5 lineages directory
+busco_lineages: a comma separated list of lineages for use in busco
+fcs_gx_database_path: path to the directory containing the FCS-GX database
+vecscreen_database_path: path to the FASTA file with adapter sequences for VecScreen ("/ascc/assets/vecscreen_adaptors_for_screening_euks.fa")
+diamond_uniprot_database_path: path to a Diamond database made from Uniprot protein sequences ("uniprot_reference_proteomes_with_taxonnames.dmnd"). The database needs to have built-in taxonomy
+diamond_nr_database_path: path to a Diamond database made from NCBI nr protein sequences ("nr.dmnd"). The database needs to have built-in taxonomy
+seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. The default value is 100000
+seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. The default value is 6000
+n_neighbours: The n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. The default value is 13
+btk_yaml: path to /ascc/assets/btk_draft.yaml. This is default and only servers to bypass GCA requirements of sanger-tol/blobtoolkit
 ```
 
 ## Running the pipeline
@@ -47,7 +42,7 @@ btk_yaml: PATH TO /ascc/assets/btk_draft.yaml <- THIS IS DEFAULT AND ONLY SERVES
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run sanger-tol/ascc --input {INPUT YAML} --outdir {OUTDIR} --steps {CSV LIST OF STEPS TO RUN} -profile singularity
+nextflow run sanger-tol/ascc --input {INPUT YAML} --outdir {OUTDIR} --steps {COMMA SEPARATED LIST OF STEPS TO RUN} -profile singularity
 ```
 
 This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
