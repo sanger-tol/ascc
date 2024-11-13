@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
     "title": "sanger-tol/ascc pipeline parameters",
     "description": "testing multirun assemblies",
@@ -176,6 +176,31 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                },
+                "include": {
+                    "type": "string",
+                    "description": "Select steps to run.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "exclude": {
+                    "type": "string",
+                    "description": "Deselect steps to run.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "organellar_include": {
+                    "type": "string",
+                    "description": "Select steps to run - specific to the organallar workflow.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "organellar_exclude": {
+                    "type": "string",
+                    "description": "Deselect steps to run - specific to the organallar workflow.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "btk_busco_run_mode": {
+                    "type": "string",
+                    "description": "Should btk be run as mandatory or conditional on levels of contamination.",
+                    "fa_icon": "fas fa-file-lines"
                 }
             }
         },

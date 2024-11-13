@@ -9,11 +9,18 @@ lint:
     - .github/workflows/awsfulltest.yml
     - conf/igenomes.config
   files_unchanged:
+    - LICENCE
+    - .github/CONTRIBUTING.md
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/branch.yml
+    - .github/workflows/linting_comment.yml
+    - .github/workflows/linting.yml
+    - .github/ISSUE_TEMPLATE/bug_report.yml
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
+    - assets/email_template.html
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
-    - .github/ISSUE_TEMPLATE/bug_report.yml
   multiqc_config:
     - report_comment
   nextflow_config:
