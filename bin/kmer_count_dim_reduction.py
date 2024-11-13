@@ -302,7 +302,7 @@ def main(kmer_counts_file, out_folder, selected_methods, n_neighbors_setting, au
             "Skipping the dimensionality reduction of kmer counts, as the kmer counts table has only one row"
         )
         # Generate an empty file to satisfy nextflow expecting a file from script finishing with no file with small output
-        with open(f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv", 'w') as empty_file:
+        with open(f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv", "w") as empty_file:
             empty_file.write("FILE TO SMALL FOR ANALYSIS")
         sys.exit(0)
 

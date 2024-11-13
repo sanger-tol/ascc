@@ -74,7 +74,6 @@ Each row represents a an assembled haplotype or organelle of the sample.
 
 The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md)
 
-
 Now, you can run the pipeline using:
 
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->

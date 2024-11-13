@@ -10,10 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "input",
-                "outdir"
-            ],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -26,27 +23,27 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
                 },
-                "scientific_name":{
+                "scientific_name": {
                     "type": "string",
                     "description": "Scientific name of sample according to NCBI",
                     "fa_icon": "fas fa-input-text"
                 },
-                "taxid":{
+                "taxid": {
                     "type": "integer",
                     "description": "TaxID according to NCBI",
                     "fa_icon": "fas fa-hastag"
                 },
-                "reads_path":{
+                "reads_path": {
                     "type": "string",
                     "description": "folder containing long read data files in FASTA.GZ format",
                     "fa_icon": "fas fa-file-lines"
                 },
-                "reads_type":{
+                "reads_type": {
                     "type": "string",
                     "description": "Type of read (hifi)",
                     "fa_icon": "fas fa-input-text"
                 },
-                "pacbio_barcode_file":{
+                "pacbio_barcode_file": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
@@ -55,47 +52,47 @@
                     "description": "Fasta format file containing barcode data",
                     "fa_icon": "fas fa-file-lines"
                 },
-                "pacbio_barcode_names":{
+                "pacbio_barcode_names": {
                     "type": "string",
                     "description": "barcodes to use in run",
                     "fa_icon": "fas fa-input-text"
                 },
-                "kmer_length":{
+                "kmer_length": {
                     "type": "number",
                     "description": "Length of kmer to use in run",
                     "fa_icon": "fas fa-hashtag"
                 },
-                "dimensionality_reduction_methods":{
+                "dimensionality_reduction_methods": {
                     "type": "array",
                     "description": "dimensionality_reduction_methods to use in runs",
                     "fa_icon": "fas fa-input-text"
                 },
-                "nt_database_path":{
+                "nt_database_path": {
                     "type": "string",
                     "description": "folder containing nt database",
                     "fa_icon": "fas fa-folder"
                 },
-                "nt_database_prefix":{
+                "nt_database_prefix": {
                     "type": "string",
                     "description": "Prefix of the NT database",
                     "fa_icon": "fas fa-input-text"
                 },
-                "nt_kraken_database_path":{
+                "nt_kraken_database_path": {
                     "type": "string",
                     "description": "folder containing Kraken2 database",
                     "fa_icon": "fas fa-folder"
                 },
-                "ncbi_accession_ids_folder":{
+                "ncbi_accession_ids_folder": {
                     "type": "string",
                     "description": "folder containing accession2taxid file",
                     "fa_icon": "fas fa-folder"
                 },
-                "ncbi_taxonomy_path":{
+                "ncbi_taxonomy_path": {
                     "type": "string",
                     "description": "folder containing dmp files",
                     "fa_icon": "fas fa-folder"
                 },
-                "ncbi_ranked_lineage_path":{
+                "ncbi_ranked_lineage_path": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
@@ -103,27 +100,27 @@
                     "description": "Path to rankedlineage.dmp",
                     "fa_icon": "fas fa-file-lines"
                 },
-                "busco_lineages_folder":{
+                "busco_lineages_folder": {
                     "type": "string",
                     "description": "BUSCO folder containing busco Lineages folder",
                     "fa_icon": "fas fa-folder"
                 },
-                "busco_lineages":{
+                "busco_lineages": {
                     "type": "string",
                     "description": "CSV list of lineages to use in run",
                     "fa_icon": "fas fa-input-text"
                 },
-                "fcs_gx_database_path":{
+                "fcs_gx_database_path": {
                     "type": "string",
                     "description": "FCS_GX folder containing database",
                     "fa_icon": "fas fa-folder"
                 },
-                "vecscreen_database_path":{
+                "vecscreen_database_path": {
                     "type": "string",
                     "description": "Vecscreen folder containing database",
                     "fa_icon": "fas fa-folder"
                 },
-                "diamond_uniprot_database_path":{
+                "diamond_uniprot_database_path": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
@@ -131,7 +128,7 @@
                     "description": "Path to Uniprot Diamond DB",
                     "fa_icon": "fas fa-file-lines"
                 },
-                "diamond_nr_database_path":{
+                "diamond_nr_database_path": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
@@ -139,22 +136,22 @@
                     "description": "Path to NR Diamond DB",
                     "fa_icon": "fas fa-file-lines"
                 },
-                "seqkit_sliding":{
+                "seqkit_sliding": {
                     "type": "number",
                     "description": "Length of slide for Seqkit",
                     "fa_icon": "fas fa-hashtag"
                 },
-                "seqkit_window":{
+                "seqkit_window": {
                     "type": "number",
                     "description": "Length of the window for Seqkit",
                     "fa_icon": "fas fa-hashtag"
                 },
-                "n_neighbours":{
+                "n_neighbours": {
                     "type": "number",
                     "description": "Nearest Neighbour value",
                     "fa_icon": "fas fa-hashtag"
                 },
-                "btk_yaml":{
+                "btk_yaml": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
@@ -290,14 +287,7 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
