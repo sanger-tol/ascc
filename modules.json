@@ -1,6 +1,6 @@
 {
-    "name": "sanger-tol/asccthesecond",
-    "homePage": "https://github.com/sanger-tol/asccthesecond",
+    "name": "sanger-tol/ascc",
+    "homePage": "https://github.com/sanger-tol/ascc",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {
