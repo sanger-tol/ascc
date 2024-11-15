@@ -46,8 +46,6 @@ workflow RUN_READ_COVERAGE {
         .of(platform)
         .set {platform_type}
 
-    reference_tuple.view{"INPUT TO MAPPING: $it"}
-
     if ( platform == "hifi" || platform == "clr" || platform == "ont" ) {
         SE_MAPPING (
             ref_and_data

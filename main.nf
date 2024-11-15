@@ -119,9 +119,9 @@ workflow {
         }
         .set { branched_assemblies }
 
-    branched_assemblies.organellar_genome.view {"ORGANELLAR: $it"}
-    branched_assemblies.sample_genome.view {"GENOMIC: $it"}
-    branched_assemblies.error.view {"ERROR CHANNELS: $it"}
+    // branched_assemblies.organellar_genome.view {"ORGANELLAR: $it"}
+    // branched_assemblies.sample_genome.view {"GENOMIC: $it"}
+    // branched_assemblies.error.view {"ERROR CHANNELS: $it"}
 
 
     //

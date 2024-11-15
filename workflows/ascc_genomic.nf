@@ -142,9 +142,11 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
 
     } else {
         ch_nt_blast         = []
+        ch_blast_lineage    = []
     }
 
 
@@ -489,7 +491,7 @@ workflow ASCC_GENOMIC {
         ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
         [],                                                 // <-- BACTERIAL KRAKEN -- NOT IN PIPELINE YET
         ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
-        ch_nt_blast,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
         ch_kmers,                                           // FROM -- GET_KMERS_PROFILE.out.combined_csv
         nr_hits,                                            // FROM -- NR_DIAMOND.out.reformed.map{it[1]}
         un_hits,                                            // FROM -- UP_DIAMOND.out.reformed.map{it[1]}

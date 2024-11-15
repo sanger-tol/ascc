@@ -39,7 +39,6 @@ process KRAKEN2_KRAKEN2 {
         --db $db \\
         --threads $task.cpus \\
         --report ${prefix}.kraken2.report.txt \\
-        --gzip-compressed \\
         $unclassified_option \\
         $classified_option \\
         $readclassification_option \\
