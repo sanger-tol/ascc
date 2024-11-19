@@ -32,7 +32,15 @@ Download and set up according to the instructions at https://blobtoolkit.genomeh
 
 ## NCBI nr Diamond database
 
-Download the nr database protein FASTA files from the NCBI ftp server (`wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz`) and build the database similarly to the Uniprot Diamond database, following the instructions at https://blobtoolkit.genomehubs.org/install/.
+Download the nr database protein FASTA files from the NCBI ftp server (`wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz`). The database building is similar to the Uniprot Diamond database building (as described at https://blobtoolkit.genomehubs.org/install/).
+An example command for building the nr Diamond database looks like this:
+```
+diamond makedb --threads 16 --in ./nr/nr.gz -d 
+./ncbi_taxonomy/proteins/nr --taxonmap ./ncbi_taxonomy/proteins/prot.accession2taxid.FULL --taxonnodes ./ncbi_taxonomy/proteins/taxdump/nodes.dmp --taxonnames ./ncbi_taxonomy/proteins/taxdump/names.dmp
+```
+The `prot.accession2taxid.FULL` file comes from https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/.
+The taxdump files come from ftp://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz.
+
 
 ## NCBI accession2taxid
 
