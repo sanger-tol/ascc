@@ -87,27 +87,37 @@ workflow ORGANELLAR_BLAST {
         }
         .set {no_comments}
 
+    no_comments
+        .valid
+        .combine(reference_tuple, by: 0)
+        .multiMap { meta, no_comment_file, meta2, reference ->
+            filtered: tuple(meta, no_comment_file)
+            reference: tuple(meta, reference)
+
+        }
+        .set { mapped }
+
+    mapped.filtered.view{"Mapped Filtered: $it"}
+    mapped.reference.view{"MAPPED REF: $it"}
 
     //
     // MODULE: EXTRACT CONTAMINANTS FROM THE BLAST REPORT
     //
     EXTRACT_CONTAMINANTS (
-        FILTER_COMMENTS.out.txt,
-        reference_tuple
+        mapped.filtered,
+        mapped.reference
     )
     ch_versions     = ch_versions.mix(EXTRACT_CONTAMINANTS.out.versions)
-
 
     //
     // LOGIC: COMBINE CHANNELS INTO FORMAT OF ID, ORGANELLE ID AND FILES
     //
     EXTRACT_CONTAMINANTS.out.contamination_bed
-        .combine ( organellar_tuple )
+        .combine ( organellar_tuple)
         .map { blast_meta, blast_txt, organelle_meta, organelle_fasta ->
             tuple( [    id          :   blast_meta.id,
                         organelle   :   organelle_meta.id   ],
-                    // Previous step outputs two files in a [list], an ALL and NONE. We only want the ALL file
-                    blast_txt.findAll { it.toString().contains("ALL") }
+                    file(blast_txt)
             )
         }
         .set { reformatted_recommendations }

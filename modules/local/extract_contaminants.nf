@@ -12,8 +12,8 @@ process EXTRACT_CONTAMINANTS {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path( "*.unfiltered_scaffold_coverage.bed" ), emit: contamination_bed
-    path "versions.yml"                                          , emit: versions
+    tuple val(meta), path( "*.ALL*unfiltered_scaffold_coverage.bed" ),  emit: contamination_bed
+    path "versions.yml",                                                emit: versions
 
     script:
     def args    = task.ext.args     ?: ''
