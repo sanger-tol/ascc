@@ -43,7 +43,7 @@ workflow ASCC_ORGANELLAR {
     ch_samplesheet // channel: samplesheet read in from --input
     validate_taxid_versions // Versions channel from main.nf
     include_steps
-    exclude_steps 
+    exclude_steps
 
     main:
     ch_versions = Channel.empty()
@@ -99,14 +99,14 @@ workflow ASCC_ORGANELLAR {
     // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
     //
     ESSENTIAL_JOBS.out.reference_with_seqkit
-        .map{ meta, file -> 
+        .map{ meta, file ->
             tuple(
                 [
                     id: meta.id,
                     sliding: meta.sliding,
                     window: meta.window,
                     seq_count: CountFastaLength(file)
-                ], 
+                ],
                 file
             )
         }
@@ -126,6 +126,7 @@ workflow ASCC_ORGANELLAR {
         //          fails during the run
         //
         ch_nt_blast         = []
+        ch_blast_lineage    = []
 
         EXTRACT_NT_BLAST (
             valid_length_fasta.valid,
@@ -135,9 +136,11 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
 
     } else {
         ch_nt_blast         = []
+        ch_blast_lineage    = []
     }
 
 
@@ -310,10 +313,10 @@ workflow ASCC_ORGANELLAR {
     //     //
     //     // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
     //     //          - We can't just combine on meta.id as some of the Channels have other data in there too
-    //     //              so we just sanitise, and _then_ combine on 0, and _then_ add back in the taxid as we 
+    //     //              so we just sanitise, and _then_ combine on 0, and _then_ add back in the taxid as we
     //     //              need that for this process. Thankfully taxid is a param so easy enough to add back in.
     //     //
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG 
+    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG
     //         .map{meta, file ->
     //             tuple([id: meta.id], file)
     //         }
@@ -405,8 +408,8 @@ workflow ASCC_ORGANELLAR {
                 )
             }
             .set{ btk_input_genome }
-    
-        GENERATE_SAMPLESHEET.out.csv            
+
+        GENERATE_SAMPLESHEET.out.csv
             .map{ meta, csv, bam ->
                 tuple(
                     [ id: meta.id ],
@@ -423,7 +426,7 @@ workflow ASCC_ORGANELLAR {
                 samplesheet: tuple(meta, csv, bam)
             }
             .set { btk_input }
-        
+
         SANGER_TOL_BTK (
             btk_input.fasta,
             btk_input.samplesheet,
@@ -462,7 +465,7 @@ workflow ASCC_ORGANELLAR {
         ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
         [],                                                 // <-- BACTERIAL KRAKEN -- NOT IN PIPELINE YET
         ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
-        ch_nt_blast,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
         [],                                                 // FROM -- GET_KMERS_PROFILE.out.combined_csv
         nr_hits,                                            // FROM -- NR_DIAMOND.out.reformed.map{it[1]}
         un_hits,                                            // FROM -- UP_DIAMOND.out.reformed.map{it[1]}

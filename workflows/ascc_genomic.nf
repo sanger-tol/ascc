@@ -45,7 +45,7 @@ workflow ASCC_GENOMIC {
     organellar_genomes
     validate_taxid_versions // Versions channel from main.nf
     include_steps
-    exclude_steps 
+    exclude_steps
 
     main:
     ch_versions = Channel.empty()
@@ -133,6 +133,7 @@ workflow ASCC_GENOMIC {
         //          fails during the run
         //
         ch_nt_blast         = []
+        ch_blast_lineage    = []
 
         EXTRACT_NT_BLAST (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
@@ -318,7 +319,7 @@ workflow ASCC_GENOMIC {
     }
 
 
-    // 
+    //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     if ( include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL') ) {
@@ -335,7 +336,7 @@ workflow ASCC_GENOMIC {
     }
 
     ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
-    
+
 
     //
     // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
@@ -366,10 +367,10 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
         //          - We can't just combine on meta.id as some of the Channels have other data in there too
-        //              so we just sanitise, and _then_ combine on 0, and _then_ add back in the taxid as we 
+        //              so we just sanitise, and _then_ combine on 0, and _then_ add back in the taxid as we
         //              need that for this process. Thankfully taxid is a param so easy enough to add back in.
         //
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG 
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
             .map{meta, file ->
                 tuple([id: meta.id], file)
             }

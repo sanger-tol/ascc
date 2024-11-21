@@ -4,8 +4,8 @@ process CUSTOM_GETCHROMSIZES {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/samtools:1.16.1--h6899075_1' :
-        'biocontainers/samtools:1.16.1--h6899075_1' }"
+        'https://depot.galaxyproject.org/singularity/samtools:1.21--h50ea8bc_0' :
+        'biocontainers/samtools:1.21--h50ea8bc_0' }"
 
     input:
     tuple   val(meta), path(fasta, stageAs: 'input/*')
@@ -25,7 +25,6 @@ process CUSTOM_GETCHROMSIZES {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
     """
-
     ln -s ${fasta} ${prefix}.fa
     samtools faidx ${prefix}.fa -o ${prefix}.fa.fai
     cut -f 1,2 ${prefix}.fa.fai > ${prefix}.${suffix}
@@ -39,7 +38,7 @@ process CUSTOM_GETCHROMSIZES {
     stub:
     """
     touch ${prefix}.fa
-    touch ${prefix}.fa.fai
+    touch ${fasta}.fai
     touch ${prefix}.${suffix}
 
     cat <<-END_VERSIONS > versions.yml
