@@ -70,6 +70,7 @@ jobs:
       - name: Download test data
         # Download A fungal test data set that is full enough to show some real output.
         run: |
+          pwd
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
 
           cp asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly.fa asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
