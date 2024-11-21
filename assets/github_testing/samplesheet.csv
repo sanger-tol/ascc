@@ -1,0 +1,4 @@
+sample,assembly_type,assembly_file
+asccTinyTest_V2,PRIMARY,/home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly.fa
+asccTinyTest_V2,HAPLO,/home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
+asccTinyTest_V2,MITO,/home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/mito.fa
