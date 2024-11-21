@@ -72,6 +72,10 @@ jobs:
         run: |
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
 
+          cp asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly.fa cp asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
+
+          cp ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/github_testing/data/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa asccTinyTest_V2/assembly/mito.fa
+
       - name: Temporary ASCC Diamond Data
         run: |
           curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
