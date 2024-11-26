@@ -74,7 +74,7 @@ jobs:
           pwd
           ls
 
-          cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
+          cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
 
       - name: Temporary ASCC Diamond Data
         run: |
