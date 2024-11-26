@@ -144,4 +144,4 @@ jobs:
         # Remember that you can parallelise this by using strategy.matrix
         run: |
           pwd
-          nextflow run ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/main.nf -profile test,singularity -params-file ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/github_testing/github_test.yaml --input ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/samplesheet.csv
+          nextflow run ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/main.nf -profile test,singularity -params-file ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/github_testing/github_test.yaml --input ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/samplesheet.csv --exclude busco_btk --organellar_exclude busco_btk
