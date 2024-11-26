@@ -56,16 +56,16 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install nf-core
-        run: |
-          pip install nf-core
+      # - name: Install nf-core
+      #   run: |
+      #     pip install nf-core
 
-      - name: NF-Core Download - download singularity containers
-        # Forcibly download repo on active branch and download SINGULARITY containers into the CACHE dir if not found
-        # Must occur after singularity install or will crash trying to dl containers
-        # Zip up this fresh download and run the checked out version
-        run: |
-          nf-core download sanger-tol/ascc --revision ${{ steps.branch-names.outputs.current_branch }} --compress none -d --force --outdir sanger-ascc --container-cache-utilisation amend --container-system singularity
+      # - name: NF-Core Download - download singularity containers
+      #   # Forcibly download repo on active branch and download SINGULARITY containers into the CACHE dir if not found
+      #   # Must occur after singularity install or will crash trying to dl containers
+      #   # Zip up this fresh download and run the checked out version
+      #   run: |
+      #     nf-core download sanger-tol/ascc --revision ${{ steps.branch-names.outputs.current_branch }} --compress none -d --force --outdir sanger-ascc --container-cache-utilisation amend --container-system singularity
 
       - name: Download test data
         # Download A fungal test data set that is full enough to show some real output.
@@ -73,6 +73,8 @@ jobs:
           ls
           pwd
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
+          pwd
+          ls
 
           cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
 
