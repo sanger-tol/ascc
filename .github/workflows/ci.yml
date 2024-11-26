@@ -70,15 +70,11 @@ jobs:
       - name: Download test data
         # Download A fungal test data set that is full enough to show some real output.
         run: |
-          ls
-          pwd
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
           pwd
           ls
 
-          cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
-
-          cp /home/runner/work/ascc/ascc/sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/github_testing/data/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/mito.fa
+          cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
 
       - name: Temporary ASCC Diamond Data
         run: |
