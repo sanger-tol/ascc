@@ -1,5 +1,5 @@
 channels:
-    - conda-forge
-    - bioconda
+  - conda-forge
+  - bioconda
 dependencies:
-    - bioconda::samtools=1.16.1
+  - bioconda::samtools=1.16.1
