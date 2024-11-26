@@ -58,17 +58,17 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             GITHUB_PR_COMMIT: ${{ github.event.pull_request.head.sha }}
           run: nf-core -l lint_log.txt lint --dir ${GITHUB_WORKSPACE} --markdown lint_results.md
-  
-        - name: Save PR number
-          if: ${{ always() }}
-          run: echo ${{ github.event.pull_request.number }} > PR_number.txt
-  
-        - name: Upload linting log file artifact
-          if: ${{ always() }}
-          uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
-          with:
-            name: linting-logs
-            path: |
-              lint_log.txt
-              lint_results.md
-              PR_number.txt {%- endraw %}
+
+      - name: Save PR number
+        if: ${{ always() }}
+        run: echo ${{ github.event.pull_request.number }} > PR_number.txt
+
+      - name: Upload linting log file artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        with:
+          name: linting-logs
+          path: |
+            lint_log.txt
+            lint_results.md
+            PR_number.txt {%- endraw %}
