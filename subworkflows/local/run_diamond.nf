@@ -15,6 +15,7 @@ workflow RUN_DIAMOND {
     ch_ext          = Channel.of("txt")
     ch_columns      = Channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
 
+
     //
     // MODULE: CREATE SLIDING WINDOW OF THE INPUT ASSEMBLY
     //
@@ -23,16 +24,15 @@ workflow RUN_DIAMOND {
     )
     ch_versions     = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
-    //
-    // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB
-    //
 
-    // TODO: COMBINE THEM
+    //
+    // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
+    //
     Channel
         .of(diamond_db)
-        .map{ it -> 
+        .map{ it ->
             tuple(
-                [id: "db"], 
+                [id: "db"],
                 it
             )
         }
@@ -50,6 +50,10 @@ workflow RUN_DIAMOND {
         }
         .set {blast_input}
 
+
+    //
+    // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB.
+    //
     DIAMOND_BLASTX (
         blast_input.reference,
         blast_input.db_path,
@@ -57,6 +61,7 @@ workflow RUN_DIAMOND {
         blast_input.col_ch
     )
     ch_versions     = ch_versions.mix(DIAMOND_BLASTX.out.versions)
+
 
     //
     // MODULE: COMBINE THE CHUNKS INTO THE FULL GENOME
@@ -66,6 +71,7 @@ workflow RUN_DIAMOND {
     )
     ch_versions     = ch_versions.mix(DIAMOND_BLAST_CHUNK_TO_FULL.out.versions)
 
+
     //
     // MODULE: CONVERT THE FULL GENOME FILE INTO A HITS FILE
     //
@@ -73,6 +79,7 @@ workflow RUN_DIAMOND {
         DIAMOND_BLAST_CHUNK_TO_FULL.out.full
     )
     ch_versions     = ch_versions.mix(CONVERT_TO_HITS_FILE.out.versions)
+
 
     //
     // MODULE: REFORMAT THE DIAMOND OUTPUT

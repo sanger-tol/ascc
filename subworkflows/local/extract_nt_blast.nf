@@ -39,11 +39,14 @@ workflow EXTRACT_NT_BLAST {
         }
         .set { id }
 
+    //
+    // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
+    //
     BLAST_BLASTN_MOD.out.txt
         .map { meta, files ->
             files
         }
-        .collectFile( name: 'FULL_blast_results.txt', newLine: false) // concats all input files into one file!
+        .collectFile( name: 'FULL_blast_results.txt', newLine: false)
         .combine( id )
         .map { file, identity ->
             tuple(  [   id: identity    ],
@@ -81,7 +84,7 @@ workflow EXTRACT_NT_BLAST {
         .set { gatekeeper }
 
     //
-    // MODULE:
+    // MODULE: RETURN ONLY THE TOP HITS PER SEQUENCE
     //
     BLAST_GET_TOP_HITS (
         gatekeeper.valid
@@ -89,7 +92,7 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(BLAST_GET_TOP_HITS.out.versions)
 
     //
-    // MODULE:
+    // MODULE: USING THE accession2taxid DATABASE WE RETREIVE LINEAGE INFORMATION PER TOP RESULT
     //
     GET_LINEAGE_FOR_TOP (
         BLAST_GET_TOP_HITS.out.tophits,

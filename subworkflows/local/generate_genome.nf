@@ -26,6 +26,7 @@ workflow GENERATE_GENOME {
     )
     ch_versions     = ch_versions.mix(  CUSTOM_GETCHROMSIZES.out.versions )
 
+
     //
     // MODULE: SORT CHROM SIZES BY CHOM SIZE NOT NAME
     //
@@ -34,9 +35,10 @@ workflow GENERATE_GENOME {
     )
     ch_versions     = ch_versions.mix(  GNU_SORT.out.versions )
 
+
     //
-    // MODULE: Cut out the largest scaffold size and use as comparator against 512MB
-    //          This is the cut off for TABIX using tbi indexes
+    // MODULE: CUT OUT THE LARGEST SCAFFOLD SIZE AND USE AS A COMPARATOR AGAINST 512MB
+    //          THIS IS THE CUT OFF FOR TABIX USING TBI INDEXES
     //
     GET_LARGEST_SCAFF (
         CUSTOM_GETCHROMSIZES.out.sizes

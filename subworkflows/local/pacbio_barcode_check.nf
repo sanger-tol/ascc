@@ -37,6 +37,7 @@ workflow PACBIO_BARCODE_CHECK {
     )
     ch_versions     = ch_versions.mix(CHECK_BARCODE.out.versions)
 
+
     //
     // LOGIC: ENSURE THE VALID CHANNEL IS MIXED WITH THE BARCODES CHANNEL
     //          ACTS AS A GATEKEEPER FOR THE FLOW
@@ -55,6 +56,7 @@ workflow PACBIO_BARCODE_CHECK {
         }
         .set {ch_new_barcodes}
 
+
     //
     // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
@@ -62,6 +64,7 @@ workflow PACBIO_BARCODE_CHECK {
         ch_new_barcodes
     )
     ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+
 
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
@@ -71,6 +74,7 @@ workflow PACBIO_BARCODE_CHECK {
         BLAST_MAKEBLASTDB.out.db
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
+
 
     //
     // LOGIC: FOR I (MAPPED TO OTHER CHANNELS) IN CSV LIST RUN FILTER BLAST
@@ -84,6 +88,7 @@ workflow PACBIO_BARCODE_CHECK {
         }
         .flatten()
         .set {barcode_list}
+
 
     //
     // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE

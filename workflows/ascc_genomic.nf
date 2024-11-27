@@ -463,6 +463,7 @@ workflow ASCC_GENOMIC {
             [],
             params.ncbi_taxonomy_path,
             params.btk_yaml,
+            params.busco_lineages_folder,
             params.busco_lineages,
             params.taxid,
             'GCA_0001'

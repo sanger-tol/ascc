@@ -97,8 +97,6 @@ workflow ORGANELLAR_BLAST {
         }
         .set { mapped }
 
-    mapped.filtered.view{"Mapped Filtered: $it"}
-    mapped.reference.view{"MAPPED REF: $it"}
 
     //
     // MODULE: EXTRACT CONTAMINANTS FROM THE BLAST REPORT
@@ -108,6 +106,7 @@ workflow ORGANELLAR_BLAST {
         mapped.reference
     )
     ch_versions     = ch_versions.mix(EXTRACT_CONTAMINANTS.out.versions)
+
 
     //
     // LOGIC: COMBINE CHANNELS INTO FORMAT OF ID, ORGANELLE ID AND FILES

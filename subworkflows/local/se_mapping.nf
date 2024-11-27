@@ -11,7 +11,7 @@ workflow SE_MAPPING {
     ch_align_bams   = Channel.empty()
 
     //
-    // PROCESS: MAKE MINIMAP INPUT CHANNEL AND MAKE BRANCHES BASED ON INPUT READ TYPE
+    // LOGIC: MAKE MINIMAP INPUT CHANNEL AND MAKE BRANCHES BASED ON INPUT READ TYPE
     //
     reference_data_tuple
         .map { meta, ref, reads_path ->
@@ -29,7 +29,8 @@ workflow SE_MAPPING {
                 params.reads_type
             )
         }
-        .multiMap{ meta, reference, reads, index_format, bam_output, cigar_paf, cigar_bam, read_type ->
+        .multiMap{
+            meta, reference, reads, index_format, bam_output, cigar_paf, cigar_bam, read_type ->
             reads_ch: tuple(meta, reads)
             refer_ch: tuple(meta, reference)
             inx_frmt: index_format
@@ -40,6 +41,9 @@ workflow SE_MAPPING {
         .set { minimap_se_input }
 
 
+    //
+    // MODULE: SINGLE END MAPPING THE READS WITH MINIMAP2
+    //
     MINIMAP2_ALIGN_SE (
             minimap_se_input.reads_ch,
             minimap_se_input.refer_ch,
@@ -49,6 +53,10 @@ workflow SE_MAPPING {
             minimap_se_input.cigar_bm
     )
 
+
+    //
+    // LOGIC: COLLECT THE OUTPUT FROM MINIMAP2
+    //
     MINIMAP2_ALIGN_SE.out.bam
         .groupTuple(by: 0)
         .map{ meta, files ->

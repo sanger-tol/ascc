@@ -25,11 +25,12 @@ workflow RUN_FCSGX {
         .collect()
         .set { fcsgxdb }
 
+
     //
-    // Create input channel for FCS_FCSGX, taxid is required to be the meta id.
+    // LOGIC: Create input channel for FCS_FCSGX, taxid is required to be the meta id.
     //
     reference
-        .combine( 
+        .combine(
             Channel.of(taxid)
         )
         .map { it ->
@@ -39,8 +40,9 @@ workflow RUN_FCSGX {
             }
         .set { reference_with_taxid }
 
+
     //
-    // MODULE: FCS_FCSGX run on assembly fasta tuple with taxid againist fcsgxdb.
+    // MODULE: FCS_FCSGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
     //
     FCS_FCSGX (
         reference_with_taxid,
@@ -48,8 +50,9 @@ workflow RUN_FCSGX {
     )
     ch_versions     = ch_versions.mix( FCS_FCSGX.out.versions )
 
+
     //
-    // Create input channel for parsing result module.
+    // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
     FCS_FCSGX.out.fcs_gx_report
         .map{ it ->
@@ -58,6 +61,7 @@ workflow RUN_FCSGX {
                 )
         }
         .set { report_path }
+
 
     //
     // MODULE: PARSE_FCSGX_RESULT to parse the FCS_FCSGX result output in csv format.

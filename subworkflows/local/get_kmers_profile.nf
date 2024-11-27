@@ -41,7 +41,7 @@ workflow GET_KMERS_PROFILE {
     //
     Channel.fromList(params.dimensionality_reduction_methods)
         .set{dim_methods}
-    
+
     Channel.from(params.n_neighbours)
         .set{hey_neighbour}
 
@@ -63,7 +63,7 @@ workflow GET_KMERS_PROFILE {
     //
     KMER_COUNT_DIM_REDUCTION (
         dim_reduction.kmer_csv,             // val(meta), path(kmer_counts)
-        dim_reduction.method_name,               // val dimensionality_reduction_method
+        dim_reduction.method_name,          // val dimensionality_reduction_method
         dim_reduction.n_neighbors_setting,  // val n_neighbors_setting
         dim_reduction.epoch_count           // val autoencoder_epochs_count
     )

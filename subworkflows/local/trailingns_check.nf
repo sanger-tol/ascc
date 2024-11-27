@@ -6,13 +6,15 @@ workflow TRAILINGNS_CHECK {
     reference_tuple             // tuple [ val(meta), path(fasta) ]
 
     main:
-
     ch_versions         = Channel.empty()
 
     //
-    // MODULE: TRIM LENGTHS OF N'S FROM THE INPUT GENOME AND GENERATE A REPORT ON LENGTH AND LOCATION
+    // MODULE: TRIM LENGTHS OF N'S FROM THE INPUT GENOME AND GENERATE A REPORT ON LENGTH
+    //          AND LOCATION
     //
-    TRAILINGNS( reference_tuple )
+    TRAILINGNS(
+        reference_tuple
+    )
     ch_versions         = ch_versions.mix( TRAILINGNS.out.versions )
 
     emit:
