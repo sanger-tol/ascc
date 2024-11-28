@@ -20,7 +20,7 @@ process GENERATE_SAMPLESHEET {
     """
     generate_samplesheet.py \\
         $prefix \\
-        $pacbio_path
+        "\$(realpath $pacbio_path)"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
