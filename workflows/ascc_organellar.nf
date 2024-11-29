@@ -402,33 +402,6 @@ workflow ASCC_ORGANELLAR {
         //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
         //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
         //              This will also eventually check for the above run_btk boolean from autofilter
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
-            .map{ meta, file ->
-                tuple(
-                    [ id: meta.id ],
-                    file
-                )
-            }
-            .set{ btk_input_genome }
-
-        GENERATE_SAMPLESHEET.out.csv
-            .map{ meta, csv, bam ->
-                tuple(
-                    [ id: meta.id ],
-                    csv,
-                    bam
-                )
-            }
-            .set{ btk_input_samplesheet }
-
-        btk_input_genome
-            .combine(btk_input_samplesheet, by: 0)
-            .multiMap{meta, fasta, csv, bam ->
-                fasta: tuple(meta, fasta)
-                samplesheet: tuple(meta, csv, bam)
-            }
-            .set { btk_input }
-
         SANGER_TOL_BTK (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
             GENERATE_SAMPLESHEET.out.csv,

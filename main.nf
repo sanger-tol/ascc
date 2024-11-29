@@ -139,15 +139,22 @@ workflow {
     // LOGIC: IT NOW MAKES SENSE TO BE USING SPECIFIC FLAGS FOR THE ORGANELLAR WORKFLOW
     //          IF THEY ARE NOT SPECIFIED THEN THE USE OF THE GENOMIC ONES WILL SUFFICE.
     //
-    if ( !params.organellar_include && !params.organellar_exclude && params.include && !params.exclude ) {
+    if ( !params.organellar_include && params.include ) {
         println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
         organellar_include = params.include
-        organellar_exclude = params.exclude
     } else {
         println "Using ORGANELLE specific include/exclude flags"
         organellar_include = params.organellar_include
+    }
+
+    if ( !params.organellar_exclude && params.exclude ) {
+        println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
+        organellar_exclude = params.exclude
+    } else {
+        println "Using ORGANELLE specific include/exclude flags"
         organellar_exclude = params.organellar_exclude
     }
+
 
 
     //
@@ -157,7 +164,7 @@ workflow {
         branched_assemblies.organellar_genome,
         VALIDATE_TAXID.out.versions,
         organellar_include,
-        organellar_exclude
+        organellar_exclude,
     )
 
     //
