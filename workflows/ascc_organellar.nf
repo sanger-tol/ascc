@@ -430,18 +430,16 @@ workflow ASCC_ORGANELLAR {
             .set { btk_input }
 
         SANGER_TOL_BTK (
-            btk_input.fasta,
-            btk_input.samplesheet,
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            GENERATE_SAMPLESHEET.out.csv,
             params.diamond_uniprot_database_path,
             params.nt_database_path,
             params.diamond_uniprot_database_path,
-            [],
             params.ncbi_taxonomy_path,
             params.btk_yaml,
             params.busco_lineages_folder,
             params.busco_lineages,
             params.taxid,
-            'GCA_0001'
         )
         ch_versions         = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
