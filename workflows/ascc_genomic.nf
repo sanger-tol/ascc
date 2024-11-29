@@ -10,6 +10,8 @@ include { ASCC_MERGE_TABLES                             } from '../modules/local
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
+include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
+
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
@@ -366,9 +368,11 @@ workflow ASCC_GENOMIC {
     if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") || include_workflow_steps.contains('ALL') ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
-        //          - We can't just combine on meta.id as some of the Channels have other data in there too
-        //              so we just sanitise, and _then_ combine on 0, and _then_ add back in the taxid as we
-        //              need that for this process. Thankfully taxid is a param so easy enough to add back in.
+        //          - We can't just combine on meta.id as some of the Channels have other data
+        //              in there too so we just sanitise, and _then_ combine on 0, and
+        //              _then_ add back in the taxid as we need that for this process.
+        //              Thankfully taxid is a param so easy enough to add back in.
+        //                  Actually, it just makes more sense to passs in as its own channel.
         //
         ESSENTIAL_JOBS.out.reference_tuple_from_GG
             .map{meta, file ->
@@ -421,7 +425,8 @@ workflow ASCC_GENOMIC {
         ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
         //
-        // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE OUTPUT FILE.
+        // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE
+        //          OUTPUT FILE.
         //
         AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { file -> file.text.trim() }
@@ -453,22 +458,78 @@ workflow ASCC_GENOMIC {
         // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
         //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
         //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
-        //              This will also eventually check for the above run_btk boolean from autofilter
+        //              This will also eventually check for the above run_btk boolean from
+        //              autofilter
         SANGER_TOL_BTK (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
             GENERATE_SAMPLESHEET.out.csv,
             params.diamond_uniprot_database_path,
             params.nt_database_path,
             params.diamond_uniprot_database_path,
-            [],
             params.ncbi_taxonomy_path,
             params.btk_yaml,
             params.busco_lineages_folder,
             params.busco_lineages,
             params.taxid,
-            'GCA_0001'
         )
         ch_versions         = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+
+        //
+        // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
+        //
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map{ meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ new_gg }
+
+        GENERATE_SAMPLESHEET.out.csv
+            .map{ meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ new_csv }
+
+
+        //
+        // LOGIC: COMBINE ALL THE REQUIRED CHANNELS TOGETHER INTO A MAP FOR NF-CASCADE VERSION
+        //          OF SANGER_TOL_BTK TO PARSE INTO THE INPUT PARAMS
+        //
+        new_gg
+            .combine(new_csv, by: 0)
+            .combine(Channel.of(params.diamond_uniprot_database_path))
+            .combine(Channel.of(params.nt_database_path))
+            .combine(Channel.of(params.diamond_uniprot_database_path))
+            .combine(Channel.of(params.ncbi_taxonomy_path))
+            .combine(Channel.of(params.busco_lineages_folder))
+            .combine(Channel.of(params.busco_lineages))
+            .combine(Channel.of(params.taxid))
+            .map{
+                meta, reference, samplesheet, prot_db, nt_db, x_db, ncbi_taxdump, busco_folder, busco_lineage_vals, taxid ->
+                [
+                    input: samplesheet,
+                    fasta: reference,
+                    blastp: prot_db,
+                    blastn: nt_db,
+                    blastx: x_db,
+                    taxdump: ncbi_taxdump,
+                    busco: busco_folder,
+                    busco_lineages: busco_lineage_vals,
+                    taxon: taxid,
+                    blastx_outext: "txt"
+                ]
+            }
+            .set{ pipeline_input }
+
+        //
+        // PIPELINE: SANGER_TOL_BTK_CASCADE USES NF-CASCADE WRITTEN BY MAHESH
+        //
+        SANGER_TOL_BTK_CASCADE(
+            "sanger-tol/blobtoolkit",
+            "-r 0.6.0 -profile sanger,singularity",
+            [],
+            pipeline_input,
+            []
+        )
 
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
@@ -488,20 +549,20 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
     //
     ASCC_MERGE_TABLES (
-        ESSENTIAL_JOBS.out.gc_content_txt,                  // FROM -- GC_COVERAGE.out.tsv
-        ch_coverage,                                        // FROM -- RUN_COVERAGE.out.tsv.map{it[1]}
-        ch_tiara,                                           // FROM -- TIARA_TIARA.out.classifications.map{it[1]}
-        [],                                                 // <-- BACTERIAL KRAKEN -- NOT IN PIPELINE YET
-        ch_kraken3,                                         // FROM -- RUN_NT_KRAKEN.out.lineage.map{it[1]}
-        ch_blast_lineage,                                        // FROM -- EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_kmers,                                           // FROM -- GET_KMERS_PROFILE.out.combined_csv
-        nr_hits,                                            // FROM -- NR_DIAMOND.out.reformed.map{it[1]}
-        un_hits,                                            // FROM -- UP_DIAMOND.out.reformed.map{it[1]}
-        [],                                                 // <-- MARKER SCAN -- NOT IN PIPELINE YET
-        [],                                                 // <-- CONTIGVIZ -- NOT IN PIPELINE YET
-        CREATE_BTK_DATASET.out.create_summary.map{it[1]},   // FROM -- CREATE_BTK_DATASET
-        busco_merge_btk,                                    // FROM -- MERGE_BTK_DATASETS.out.busco_summary_tsv
-        ch_fcsgx                                            // FROM -- PARSE_FCSGX_RESULT.out.fcsgxresult.map{it[1]}
+        ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
+        ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
+        ch_tiara,                                         // FROM -- TIARA.classifications[0]
+        [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
+        ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
+        ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
+        ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
+        nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
+        un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
+        [],                                               // MARKER SCAN -- NOT IN PIPELINE
+        [],                                               // CONTIGVIZ -- NOT IN PIPELINE
+        CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
+        busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
+        ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
     )
     ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 

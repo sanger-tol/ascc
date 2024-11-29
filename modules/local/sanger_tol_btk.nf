@@ -4,17 +4,15 @@ process SANGER_TOL_BTK {
 
     input:
     tuple val(meta),    path(reference)
-    tuple val(meta3),   path(samplesheet_csv), path(bam_data) // this is a merged channel to ensure that both come from the right place.
+    tuple val(meta3),   path(samplesheet_csv) // this is a merged channel to ensure that both come from the right place.
     path blastp,        stageAs: "blastp.dmnd"
     path blastn
     path blastx
-    path btk_config_file
     path tax_dump
     path btk_yaml,      stageAs: "BTK.yaml"
     val busco_lineages_folder
     val busco_lineages
     val taxon
-    val gca_accession
 
     output:
     tuple val(meta), path("${meta.id}_btk_out/blobtoolkit/${meta.id}*"),    emit: dataset
@@ -28,13 +26,9 @@ process SANGER_TOL_BTK {
     script:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"
     def args                =   task.ext.args           ?:  ""
-    def executor            =   task.ext.executor       ?:  ""
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
-    def btk_config          =   btk_config_file         ? "-c $btk_config_file"         : ""
     def pipeline_version    =   task.ext.version        ?: "0.6.0"
-    // YAML used to avoid the use of GCA accession number
-    //    https://github.com/sanger-tol/blobtoolkit/issues/77
 
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
@@ -47,7 +41,7 @@ process SANGER_TOL_BTK {
 
 
     """
-    $executor 'nextflow run sanger-tol/blobtoolkit \\
+    nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
         -profile  $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
@@ -60,9 +54,7 @@ process SANGER_TOL_BTK {
         --blastp "\$(realpath blastp.dmnd)" \\
         --blastn "\$(realpath $blastn)" \\
         --blastx "\$(realpath $blastx)" \\
-        $btk_config \\
-        --blastx_outext "txt" \\
-        $args'
+        $args
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
 

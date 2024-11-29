@@ -10,6 +10,8 @@ include { ASCC_MERGE_TABLES                             } from '../modules/local
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
+include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
+
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'

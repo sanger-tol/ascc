@@ -11,8 +11,8 @@ process GENERATE_SAMPLESHEET {
     tuple val(meta),    path(pacbio_path)
 
     output:
-    tuple val(meta), path("*csv"), path(pacbio_path),   emit: csv
-    path "versions.yml",                                emit: versions
+    tuple val(meta), path("*csv"),  emit: csv
+    path "versions.yml",            emit: versions
 
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"

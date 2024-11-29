@@ -119,10 +119,6 @@ workflow {
         }
         .set { branched_assemblies }
 
-    // branched_assemblies.organellar_genome.view {"ORGANELLAR: $it"}
-    // branched_assemblies.sample_genome.view {"GENOMIC: $it"}
-    // branched_assemblies.error.view {"ERROR CHANNELS: $it"}
-
 
     //
     // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
@@ -163,12 +159,12 @@ workflow {
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
-    SANGERTOL_ASCC_ORGANELLAR (
-        branched_assemblies.organellar_genome,
-        VALIDATE_TAXID.out.versions,
-        organellar_include,
-        organellar_exclude
-    )
+    //SANGERTOL_ASCC_ORGANELLAR (
+    //    branched_assemblies.organellar_genome,
+    //    VALIDATE_TAXID.out.versions,
+    //    organellar_include,
+    //    organellar_exclude
+    //)
 
 
     //
