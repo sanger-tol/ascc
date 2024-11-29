@@ -53,9 +53,6 @@ workflow SANGERTOL_ASCC_GENOMIC {
         include_steps,
         exclude_steps
     )
-
-    //emit:
-
 }
 
 //
@@ -80,9 +77,6 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
         include_steps,
         exclude_steps
     )
-
-    //emit:
-
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -159,13 +153,12 @@ workflow {
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
-    //SANGERTOL_ASCC_ORGANELLAR (
-    //    branched_assemblies.organellar_genome,
-    //    VALIDATE_TAXID.out.versions,
-    //    organellar_include,
-    //    organellar_exclude
-    //)
-
+    SANGERTOL_ASCC_ORGANELLAR (
+        branched_assemblies.organellar_genome,
+        VALIDATE_TAXID.out.versions,
+        organellar_include,
+        organellar_exclude
+    )
 
     //
     // SUBWORKFLOW: Run completion tasks
