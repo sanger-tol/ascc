@@ -468,7 +468,7 @@ workflow ASCC_GENOMIC {
             params.diamond_uniprot_database_path,
             params.ncbi_taxonomy_path,
             params.btk_yaml,
-            params.busco_lineages_folder,
+            [], //params.busco_lineages_folder,
             params.busco_lineages,
             params.taxid,
         )

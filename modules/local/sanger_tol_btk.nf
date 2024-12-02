@@ -29,7 +29,7 @@ process SANGER_TOL_BTK {
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
     def pipeline_version    =   task.ext.version        ?: "0.6.0"
-
+    def busco_path          =   busco_lineages_folder ? "--busco ${busco_lineages_folder}" : ""
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -47,7 +47,7 @@ process SANGER_TOL_BTK {
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta "\$(realpath $reference)" \\
-        --busco $busco_lineages_folder \\
+        busco \\
         --busco_lineages $busco_lineages \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
