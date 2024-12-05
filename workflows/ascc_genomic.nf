@@ -43,11 +43,12 @@ include { methodsDescriptionText                        } from '../subworkflows/
 workflow ASCC_GENOMIC {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
-    organellar_genomes
+    ch_samplesheet          // channel: samplesheet read in from --input
+    organellar_genomes      // channel: tuple(meta, reference)
     validate_taxid_versions // Versions channel from main.nf
-    include_steps
-    exclude_steps
+    include_steps           // params.include_steps
+    exclude_steps           // params.exclude_steps
+    fcs_db                  // path(path)
 
     main:
     ch_versions = Channel.empty()
@@ -236,7 +237,7 @@ workflow ASCC_GENOMIC {
     if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSGX (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-            params.fcs_gx_database_path,
+            fcs_db,
             params.taxid,
             params.ncbi_ranked_lineage_path
         )

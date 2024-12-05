@@ -17,10 +17,10 @@ workflow RUN_FCSGX {
             'all.gxi', 'all.gxs',  'all.taxa.tsv', 'all.meta.jsonl', 'all.blast_div.tsv.gz'
         )
         .combine(
-            Channel.of(fcsgxpath)
+            fcsgxpath
         )
         .map {suxfix, fcs_db ->
-            [file(fcs_db + '/' + suxfix)]
+            [file(fcs_db.toString() + '/' + suxfix)]
         }
         .collect()
         .set { fcsgxdb }
