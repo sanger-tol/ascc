@@ -468,7 +468,7 @@ workflow ASCC_GENOMIC {
             params.diamond_uniprot_database_path,
             params.ncbi_taxonomy_path,
             params.btk_yaml,
-            [], //params.busco_lineages_folder,
+            params.busco_lineages_folder,
             params.busco_lineages,
             params.taxid,
         )
@@ -515,7 +515,9 @@ workflow ASCC_GENOMIC {
                     busco: busco_folder,
                     busco_lineages: busco_lineage_vals,
                     taxon: taxid,
-                    blastx_outext: "txt"
+                    blastx_outext: "txt",
+                    use_work_dir_as_temp: true
+
                 ]
             }
             .set{ pipeline_input }
