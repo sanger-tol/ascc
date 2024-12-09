@@ -12,19 +12,6 @@ workflow RUN_FCSGX {
     main:
     ch_versions     = Channel.empty()
 
-    Channel
-        .of(
-            'all.gxi', 'all.gxs',  'all.taxa.tsv', 'all.meta.jsonl', 'all.blast_div.tsv.gz'
-        )
-        .combine(
-            fcsgxpath
-        )
-        .map {suxfix, fcs_db ->
-            [file(fcs_db.toString() + '/' + suxfix)]
-        }
-        .collect()
-        .set { fcsgxdb }
-
 
     //
     // LOGIC: Create input channel for FCS_FCSGX, taxid is required to be the meta id.
@@ -46,7 +33,7 @@ workflow RUN_FCSGX {
     //
     FCS_FCSGX (
         reference_with_taxid,
-        fcsgxdb
+        fcsgxpath
     )
     ch_versions     = ch_versions.mix( FCS_FCSGX.out.versions )
 
