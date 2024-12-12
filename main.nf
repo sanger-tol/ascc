@@ -16,7 +16,6 @@ nextflow.enable.dsl = 2
 */
 
 include { VALIDATE_TAXID            } from './modules/local/validate_taxid'
-include { COPY_FCS_GX               } from './modules/local/copy_fcs_tmp'
 
 include { ASCC_GENOMIC              } from './workflows/ascc_genomic'
 include { ASCC_ORGANELLAR           } from './workflows/ascc_organellar'
@@ -109,6 +108,8 @@ workflow {
         params.input
     )
 
+    fcs_gx_database_path = Channel.of(params.fcs_gx_database_path)
+
     //
     // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
@@ -129,25 +130,6 @@ workflow {
         params.taxid,
         params.ncbi_taxonomy_path
     )
-
-
-    //
-    // TEMP MODULE: COPY FCS_GX_DB INTO TMP
-    //
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    VALID = ["ALL", "fcs-gx"]
-
-    if ( params.move_fcs && VALID.any{ include_workflow_steps.contains( it ) } ) {
-        COPY_FCS_GX (
-                params.fcs_gx_database_path,
-        )
-
-        fcs_gx_database_path = COPY_FCS_GX.out.fcsdb_path
-        delete_fcs = true
-    } else {
-        fcs_gx_database_path = Channel.of(params.fcs_gx_database_path)
-        delete_fcs = false
-    }
 
 
     //

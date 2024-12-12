@@ -400,7 +400,8 @@ workflow ASCC_GENOMIC {
             .set{ auto_filt_input }
 
         //
-        // LOGIC: NOW MULTIMAP THE CHANNELS INTO CONSTITUENT CHANNELS SO THAT WE CAN RUN THE AUTOFILTER
+        // LOGIC: NOW MULTIMAP THE CHANNELS INTO CONSTITUENT CHANNELS SO THAT WE CAN RUN
+        //          THE AUTOFILTER
         //
         auto_filt_input
             .combine(Channel.of(params.taxid))
