@@ -17,6 +17,7 @@ workflow ESSENTIAL_JOBS {
 
     //
     // MODULE: Decompress FASTA file if needed
+    //          TAKEN FROM SANGER-TOL-BTK
     //
     if ( params.fasta.endsWith('.gz') ) {
         ch_unzipped = GUNZIP ( fasta ).gunzip
