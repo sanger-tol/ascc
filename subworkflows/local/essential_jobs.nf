@@ -1,6 +1,8 @@
 
 include { FILTER_FASTA                                  } from '../../modules/local/filter_fasta'
 include { GC_CONTENT                                    } from '../../modules/local/gc_content'
+include { GUNZIP                                        } from '../../modules/nf-core/gunzip/main'
+
 include { GENERATE_GENOME                               } from '../../subworkflows/local/generate_genome'
 include { TRAILINGNS_CHECK                              } from '../../subworkflows/local/trailingns_check'
 
@@ -14,9 +16,20 @@ workflow ESSENTIAL_JOBS {
 
 
     //
+    // MODULE: Decompress FASTA file if needed
+    //
+    if ( params.fasta.endsWith('.gz') ) {
+        ch_unzipped = GUNZIP ( fasta ).gunzip
+        ch_versions = ch_versions.mix ( GUNZIP.out.versions )
+    } else {
+        ch_unzipped = fasta
+    }
+
+
+    //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    input_ref
+    ch_unzipped
         .map { meta, ref ->
             tuple([ id      : meta.id,
                     sliding : params.seqkit_sliding,
