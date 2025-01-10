@@ -16,15 +16,20 @@ workflow ESSENTIAL_JOBS {
 
 
     //
-    // MODULE: Decompress FASTA file if needed
-    //          TAKEN FROM SANGER-TOL-BTK
+    // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
-    if ( params.fasta.endsWith('.gz') ) {
-        ch_unzipped = GUNZIP ( fasta ).gunzip
-        ch_versions = ch_versions.mix ( GUNZIP.out.versions )
-    } else {
-        ch_unzipped = fasta
-    }
+    ch_unzipped = input_ref
+        .map { meta, ref ->
+            def unzipped
+            if (ref.name.endsWith('.gz')) {
+                processed_file = ref.uncompress()
+                println "Unzipped: ${ref.name} to ${processed_file.name}"
+            } else {
+                processed_file = ref
+                println "No unzipping needed for: ${ref.name}"
+            }
+            [ meta, processed_file ]
+        }
 
 
     //
