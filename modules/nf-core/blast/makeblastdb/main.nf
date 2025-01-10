@@ -30,7 +30,7 @@ process BLAST_MAKEBLASTDB {
     makeblastdb \\
         -in ${fasta_name} \\
         ${args}
-    mkdir -p ${prefix}
+    mkdir ${prefix}
     mv ${fasta_name}* ${prefix}
 
     cat <<-END_VERSIONS > versions.yml
