@@ -4,12 +4,12 @@ process SANGER_TOL_BTK {
 
     input:
     tuple val(meta),    path(reference)
-    tuple val(meta3),   path(samplesheet_csv) // this is a merged channel to ensure that both come from the right place.
-    path blastp,        stageAs: "blastp.dmnd"
+    path(samplesheet_csv)
+    path blastp,                        stageAs: "blastp.dmnd"
     path blastn
     path blastx
     path tax_dump
-    path btk_yaml,      stageAs: "BTK.yaml"
+    path btk_yaml,                      stageAs: "BTK.yaml"
     val busco_lineages_folder
     val busco_lineages
     val taxon

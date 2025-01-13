@@ -391,21 +391,53 @@ workflow ASCC_ORGANELLAR {
     if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
 
         //
-        // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR USE IN THE BTK PIPELINE
+        // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
+        //          USE IN THE BTK PIPELINE
         //
+
+
         GENERATE_SAMPLESHEET (
             RUN_READ_COVERAGE.out.bam_ch
         )
         ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
+
+        //
+        // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
+        //
+        GENERATE_SAMPLESHEET.out.csv
+            .map{ meta, csv ->
+                tuple(
+                    [ id: meta.id ],
+                    csv
+                )
+            }
+            .set {coverage_id}
+
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map{ meta, ref ->
+                tuple(
+                    [ id: meta.id ],
+                    ref
+                )
+            }
+            .combine(coverage_id, by: 0)
+            .multiMap { meta_1, ref, csv ->
+                reference: [meta_1, ref]
+                samplesheet: csv
+            }
+            .set { combined_input }
+
+
         //
         // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
         //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
         //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
-        //              This will also eventually check for the above run_btk boolean from autofilter
+        //              This will also eventually check for the above run_btk boolean from
+        //              autofilter
         SANGER_TOL_BTK (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-            GENERATE_SAMPLESHEET.out.csv,
+            combined_input.reference,
+            combined_input.samplesheet,
             params.diamond_uniprot_database_path,
             params.nt_database_path,
             params.diamond_uniprot_database_path,
