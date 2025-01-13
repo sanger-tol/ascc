@@ -1,6 +1,6 @@
 reads_path: /home/runner/work/ascc/ascc/asccTinyTest_V2/pacbio/
 reads_type: "hifi"
-pacbio_barcode_file: /home/runner/work/ascc/ascc/pacbio_barcode/pacbio_adaptors.fa
+pacbio_barcode_file: /home/runner/work/ascc/ascc/assets/pacbio_adaptors.fa
 pacbio_barcode_names: "bc2001,bc2009"
 scientific_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
