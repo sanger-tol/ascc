@@ -12,10 +12,10 @@ include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 
 workflow PACBIO_BARCODE_CHECK {
     take:
-    reference_tuple             // tuple    [[meta.id], reference ]
-    pacbio_data               // tuple    [[meta.id], pacbio-files]
+    reference_tuple         // tuple    [[meta.id], reference ]
+    pacbio_data             // tuple    [[meta.id], pacbio-files]
     pacbio_type
-    barcodes_file                    // tuple    [[meta.id], barcode-file]
+    barcodes_file           // tuple    [[meta.id], barcode-file]
     barcode_names           // val      (csv-list-string)
 
     main:
@@ -42,7 +42,7 @@ workflow PACBIO_BARCODE_CHECK {
     // LOGIC: ENSURE THE VALID CHANNEL IS MIXED WITH THE BARCODES CHANNEL
     //          ACTS AS A GATEKEEPER FOR THE FLOW
     //
-    Channel.of(barcodes_file)
+    Channel.fromPath(barcodes_file)
         .set {barcode_data_file}
 
     CHECK_BARCODE.out.result
@@ -50,7 +50,7 @@ workflow PACBIO_BARCODE_CHECK {
         .combine( barcode_data_file )
         .map {str_info, file ->
             tuple(
-                [id: "BARCODE_TO_MAKEDB"],
+                [id: "BARCODE_TO_MAKEDB", info: str_info],
                 file
             )
         }
