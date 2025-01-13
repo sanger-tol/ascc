@@ -113,4 +113,11 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker -params-file ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/github_testing/github_test.yaml --input ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/assets/github_testing/samplesheet.csv --exclude busco_btk --organellar_exclude busco_btk
+          ls
+
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test,docker \
+            -params-file ${GITHUB_WORKSPACE}/assets/github_testing/github_test.yaml \
+            --input ${GITHUB_WORKSPACE}/assets/github_testing/samplesheet.csv \
+            --exclude busco_btk \
+            --organellar_exclude busco_btk
