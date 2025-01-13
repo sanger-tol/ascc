@@ -41,8 +41,6 @@ jobs:
         # Download A fungal test data set that is full enough to show some real output.
         run: |
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
-          pwd
-          ls
 
           cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
 
@@ -87,16 +85,6 @@ jobs:
           mkdir NT_database
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz | tar -C NT_database -xzf -
 
-      - name: Download the pacbio barcode
-        run: |
-          mkdir pacbio_barcode
-          wget -O pacbio_barcode/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip -c https://www.pacb.com/wp-content/uploads/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
-          cd pacbio_barcode
-          unzip SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
-          mv SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta pacbio_adaptors.fa
-          rm -rf SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip __MACOSX
-          cd ../
-
       - name: Download the subset of Diamond database
         run: |
           mkdir diamond
@@ -106,7 +94,6 @@ jobs:
         run: |
           mkdir vecscreen
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz | tar -C vecscreen -xzf -
-          ls -lh
 
       - name: Run FULL pipeline with test data
         # TODO nf-core: You can customise CI pipeline run tests as required
