@@ -305,7 +305,7 @@ workflow ASCC_ORGANELLAR {
         ch_kraken3,
         nr_full,
         un_full,
-        Channel.of(params.ncbi_taxonomy_path).first()
+        Channel.fromPath(params.ncbi_taxonomy_path).first()
     )
     ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
@@ -340,7 +340,7 @@ workflow ASCC_ORGANELLAR {
     //     ref_tuple
     //         .combine(tiara_tuple, by: 0) // Essentially merge on meta, which the above standardises
     //         .combine(fcs_tuple, by: 0)
-    //         .combine(Channel.of(params.ncbi_ranked_lineage_path))
+    //         .combine(Channel.fromPath(params.ncbi_ranked_lineage_path))
     //         .set{ auto_filt_input }
 
     //     //
