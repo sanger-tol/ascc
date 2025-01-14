@@ -13,13 +13,13 @@ include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 workflow PACBIO_BARCODE_CHECK {
     take:
     reference_tuple         // tuple    [[meta.id], reference ]
-    pacbio_data             // tuple    [[meta.id], pacbio-files]
+    pacbio_data            // tuple    [[meta.id], pacbio-files]
     pacbio_type
-    barcodes_file           // tuple    [[meta.id], barcode-file]
-    barcode_names           // val      (csv-list-string)
+    barcodes_file          // tuple    [[meta.id], barcode-file]
+    barcode_names          // val      (csv-list-string)
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions = Channel.empty()
 
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
@@ -35,35 +35,28 @@ workflow PACBIO_BARCODE_CHECK {
         barcodes_file,
         barcode_names
     )
-    ch_versions     = ch_versions.mix(CHECK_BARCODE.out.versions)
-
+    ch_versions = ch_versions.mix(CHECK_BARCODE.out.versions)
 
     //
-    // LOGIC: ENSURE THE VALID CHANNEL IS MIXED WITH THE BARCODES CHANNEL
-    //          ACTS AS A GATEKEEPER FOR THE FLOW
+    // LOGIC: CREATE DATABASE WITH UNIQUE NAME BASED ON INPUT FILE
     //
     Channel.fromPath(barcodes_file)
-        .set {barcode_data_file}
-
-    CHECK_BARCODE.out.result
-        .filter{it.contains("barcodes")} // Indicates it is a valid barcode
-        .combine( barcode_data_file )
-        .map {str_info, file ->
+        .map { file ->
+            def timestamp = new java.util.Date().format('yyyyMMddHHmmss')
             tuple(
-                [id: "BARCODE_TO_MAKEDB", info: str_info],
+                [id: "BARCODE_DB_${timestamp}"],
                 file
             )
         }
-        .set {ch_new_barcodes}
-
+        .set {ch_barcode_db}
 
     //
     // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
     BLAST_MAKEBLASTDB (
-        ch_new_barcodes
+        ch_barcode_db
     )
-    ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
 
     //
