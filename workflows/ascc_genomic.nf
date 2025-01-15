@@ -210,43 +210,43 @@ workflow ASCC_GENOMIC {
     }
 
 
-    // //
-    // // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
-    // //
-    // if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_FCSADAPTOR (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //     )
+    //
+    // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
+    //
+    if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
+        RUN_FCSADAPTOR (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        )
 
-    //     RUN_FCSADAPTOR.out.ch_euk
-    //         .map{it[1]}
-    //         .combine(
-    //             RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
-    //         )
-    //         .set{ ch_fcsadapt }
+        RUN_FCSADAPTOR.out.ch_euk
+            .map{it[1]}
+            .combine(
+                RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
+            )
+            .set{ ch_fcsadapt }
 
-    //     ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-    // } else {
-    //     ch_fcsadapt         = []
-    // }
+        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    } else {
+        ch_fcsadapt         = []
+    }
 
 
-    // //
-    // // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
-    // //
-    // if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_FCSGX (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         fcs_db,
-    //         params.taxid,
-    //         params.ncbi_ranked_lineage_path
-    //     )
+    //
+    // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
+    //
+    if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
+        RUN_FCSGX (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            fcs_db,
+            params.taxid,
+            params.ncbi_ranked_lineage_path
+        )
 
-    //     ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
-    // } else {
-    //     ch_fcsgx            = []
-    // }
+        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+    } else {
+        ch_fcsgx            = []
+    }
 
 
     //
@@ -447,8 +447,6 @@ workflow ASCC_GENOMIC {
 
 
     // if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
-
-    // // MIX UP OF FILES!!
 
     //     //
     //     // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
