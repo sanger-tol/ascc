@@ -226,16 +226,16 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
     //
-    if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
-        RUN_VECSCREEN (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-            params.vecscreen_database_path
-        )
-        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
-        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
-    } else {
-        ch_vecscreen        = []
-    }
+    // if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
+    //     RUN_VECSCREEN (
+    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
+    //         params.vecscreen_database_path
+    //     )
+    //     ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
+    //     ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    // } else {
+    //     ch_vecscreen        = []
+    // }
 
 
     // //
