@@ -341,109 +341,109 @@ workflow ASCC_GENOMIC {
     ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
 
 
-    // //
-    // // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
-    // //
-    // CREATE_BTK_DATASET (
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //     ch_dot_genome,
-    //     ch_kmers,
-    //     ch_tiara,
-    //     ch_nt_blast,
-    //     ch_fcsgx,
-    //     ch_bam,
-    //     ch_coverage,
-    //     ch_kraken1,
-    //     ch_kraken2,
-    //     ch_kraken3,
-    //     nr_full,
-    //     un_full,
-    //     Channel.fromPath(params.ncbi_taxonomy_path).first()
-    // )
-    // ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    //
+    // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
+    //
+    CREATE_BTK_DATASET (
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+        ch_dot_genome,
+        ch_kmers,
+        ch_tiara,
+        ch_nt_blast,
+        ch_fcsgx,
+        ch_bam,
+        ch_coverage,
+        ch_kraken1,
+        ch_kraken2,
+        ch_kraken3,
+        nr_full,
+        un_full,
+        Channel.fromPath(params.ncbi_taxonomy_path).first()
+    )
+    ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
 
-    // //
-    // // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
-    // //
-    // if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") || include_workflow_steps.contains('ALL') ) {
-    //     //
-    //     // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
-    //     //          - We can't just combine on meta.id as some of the Channels have other data
-    //     //              in there too so we just sanitise, and _then_ combine on 0, and
-    //     //              _then_ add back in the taxid as we need that for this process.
-    //     //              Thankfully taxid is a param so easy enough to add back in.
-    //     //                  Actually, it just makes more sense to passs in as its own channel.
-    //     //
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //         .map{meta, file ->
-    //             tuple([id: meta.id], file)
-    //         }
-    //         .set{ ref_tuple }
+    //
+    // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
+    //
+    if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") || include_workflow_steps.contains('ALL') ) {
+        //
+        // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
+        //          - We can't just combine on meta.id as some of the Channels have other data
+        //              in there too so we just sanitise, and _then_ combine on 0, and
+        //              _then_ add back in the taxid as we need that for this process.
+        //              Thankfully taxid is a param so easy enough to add back in.
+        //                  Actually, it just makes more sense to passs in as its own channel.
+        //
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map{meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ ref_tuple }
 
-    //     EXTRACT_TIARA_HITS.out.ch_tiara
-    //         .map{meta, file ->
-    //             tuple([id: meta.id], file)
-    //         }
-    //         .set{ tiara_tuple }
+        EXTRACT_TIARA_HITS.out.ch_tiara
+            .map{meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ tiara_tuple }
 
-    //     RUN_FCSGX.out.fcsgxresult
-    //         .map{meta, file ->
-    //             tuple([id: meta.id], file)
-    //         }
-    //         .set{ fcs_tuple }
+        RUN_FCSGX.out.fcsgxresult
+            .map{meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ fcs_tuple }
 
-    //     ref_tuple
-    //         .combine(tiara_tuple, by: 0) // Essentially merge on meta, which the above standardises
-    //         .combine(fcs_tuple, by: 0)
-    //         .combine(Channel.fromPath(params.ncbi_ranked_lineage_path))
-    //         .set{ auto_filt_input }
+        ref_tuple
+            .combine(tiara_tuple, by: 0) // Essentially merge on meta, which the above standardises
+            .combine(fcs_tuple, by: 0)
+            .combine(Channel.fromPath(params.ncbi_ranked_lineage_path))
+            .set{ auto_filt_input }
 
-    //     //
-    //     // LOGIC: NOW MULTIMAP THE CHANNELS INTO CONSTITUENT CHANNELS SO THAT WE CAN RUN
-    //     //          THE AUTOFILTER
-    //     //
-    //     auto_filt_input
-    //         .combine(Channel.of(params.taxid))
-    //         .multiMap{
-    //             meta, ref, tiara, fcs, ncbi, thetaxid ->
-    //                 reference: tuple([id: meta.id, taxid: thetaxid], ref)
-    //                 tiara_file: tuple(meta, tiara)
-    //                 fcs_file: tuple(meta, fcs)
-    //                 ncbi_rank: ncbi
-    //         }
-    //         .set{ autofilter_input_formatted}
+        //
+        // LOGIC: NOW MULTIMAP THE CHANNELS INTO CONSTITUENT CHANNELS SO THAT WE CAN RUN
+        //          THE AUTOFILTER
+        //
+        auto_filt_input
+            .combine(Channel.of(params.taxid))
+            .multiMap{
+                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                    reference: tuple([id: meta.id, taxid: thetaxid], ref)
+                    tiara_file: tuple(meta, tiara)
+                    fcs_file: tuple(meta, fcs)
+                    ncbi_rank: ncbi
+            }
+            .set{ autofilter_input_formatted}
 
-    //     //
-    //     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
-    //     //
-    //     AUTOFILTER_AND_CHECK_ASSEMBLY (
-    //         autofilter_input_formatted.reference,
-    //         autofilter_input_formatted.tiara_file,
-    //         autofilter_input_formatted.fcs_file,
-    //         autofilter_input_formatted.ncbi_rank
-    //     )
-    //     ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
-    //     ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
+        //
+        // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
+        //
+        AUTOFILTER_AND_CHECK_ASSEMBLY (
+            autofilter_input_formatted.reference,
+            autofilter_input_formatted.tiara_file,
+            autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.ncbi_rank
+        )
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
-    //     //
-    //     // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE
-    //     //          OUTPUT FILE.
-    //     //
-    //     AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-    //         .map { file -> file.text.trim() }
-    //         .branch { it ->
-    //             run_btk: "ABNORMAL" ? it.contains("YES_ABNORMAL"): false
-    //             dont_run: []
-    //         }
-    //         .set { btk_bool }
+        //
+        // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE
+        //          OUTPUT FILE.
+        //
+        AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map { file -> file.text.trim() }
+            .branch { it ->
+                run_btk: "ABNORMAL" ? it.contains("YES_ABNORMAL"): false
+                dont_run: []
+            }
+            .set { btk_bool }
 
 
-    //     ch_versions         = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
-    // } else {
-    //     ch_autofilt_assem   = []
-    //     ch_autofilt_indicator = []
-    // }
+        ch_versions         = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+    } else {
+        ch_autofilt_assem   = []
+        ch_autofilt_indicator = []
+    }
 
 
     // if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
@@ -578,26 +578,26 @@ workflow ASCC_GENOMIC {
     // }
 
 
-    // //
-    // // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
-    // //
-    // ASCC_MERGE_TABLES (
-    //     ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
-    //     ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
-    //     ch_tiara,                                         // FROM -- TIARA.classifications[0]
-    //     [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
-    //     ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
-    //     ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
-    //     ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
-    //     nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
-    //     un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
-    //     [],                                               // MARKER SCAN -- NOT IN PIPELINE
-    //     [],                                               // CONTIGVIZ -- NOT IN PIPELINE
-    //     CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
-    //     busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
-    //     ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
-    // )
-    // ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    //
+    // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
+    //
+    ASCC_MERGE_TABLES (
+        ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
+        ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
+        ch_tiara,                                         // FROM -- TIARA.classifications[0]
+        [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
+        ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
+        ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
+        ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
+        nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
+        un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
+        [],                                               // MARKER SCAN -- NOT IN PIPELINE
+        [],                                               // CONTIGVIZ -- NOT IN PIPELINE
+        CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
+        busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
+        ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
+    )
+    ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
 
     //
