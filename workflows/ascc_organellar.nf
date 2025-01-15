@@ -122,7 +122,8 @@ workflow ASCC_ORGANELLAR {
         }
         .set{ valid_length_fasta }
 
-    valid_length_fasta.valid.view{"VALID ORGANELLES $it"}
+    valid_length_fasta.valid.view{"VALID ORGANELLES: $it"}
+    valid_length_fasta.invalid.view{"-- INVALID ORGANELLES: $it"}
 
 
     //
@@ -192,19 +193,19 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    // if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_FCSGX (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-    //         fcs_db,
-    //         params.taxid,
-    //         params.ncbi_ranked_lineage_path
-    //     )
+    if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
+        RUN_FCSGX (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
+            fcs_db,
+            params.taxid,
+            params.ncbi_ranked_lineage_path
+        )
 
-    //     ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
-    // } else {
-    //     ch_fcsgx            = []
-    // }
+        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+    } else {
+        ch_fcsgx            = []
+    }
 
 
     //

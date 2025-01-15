@@ -14,7 +14,7 @@ workflow PACBIO_BARCODE_CHECK {
     take:
     reference_tuple         // tuple    [[meta.id], reference ]
     pacbio_data             // tuple    [[meta.id], pacbio-files]
-    pacbio_type
+    pacbio_type             // val      (params.pacbio_type)
     barcodes_file           // tuple    [[meta.id], barcode-file]
     barcode_names           // val      (csv-list-string)
 
