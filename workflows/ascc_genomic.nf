@@ -86,31 +86,31 @@ workflow ASCC_GENOMIC {
     ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
 
-    // if ( include_workflow_steps.contains('kmers') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("kmers")) {
+    if ( include_workflow_steps.contains('kmers') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("kmers")) {
 
-    //     //
-    //     // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
-    //     //
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //         .map { meta, file ->
-    //             file.countFasta() * 3
-    //         }
-    //         .set {autoencoder_epochs_count}
+        //
+        // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
+        //
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map { meta, file ->
+                file.countFasta() * 3
+            }
+            .set {autoencoder_epochs_count}
 
-    //     //
-    //     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
-    //     //
-    //     GET_KMERS_PROFILE (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         params.kmer_length,
-    //         params.dimensionality_reduction_methods,
-    //         autoencoder_epochs_count
-    //     )
-    //     ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
-    //     ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
-    // } else {
-    //     ch_kmers            = []
-    // }
+        //
+        // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
+        //
+        GET_KMERS_PROFILE (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            params.kmer_length,
+            params.dimensionality_reduction_methods,
+            autoencoder_epochs_count
+        )
+        ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+        ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
+    } else {
+        ch_kmers            = []
+    }
 
 
     // //
