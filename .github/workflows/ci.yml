@@ -115,4 +115,5 @@ jobs:
           name: nextflow-log
           path: /home/runner/work/ascc/ascc/.nextflow.log
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 5

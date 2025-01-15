@@ -581,23 +581,23 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
     //
-    ASCC_MERGE_TABLES (
-        ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
-        ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
-        ch_tiara,                                         // FROM -- TIARA.classifications[0]
-        [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
-        ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
-        ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
-        ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
-        nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
-        un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
-        [],                                               // MARKER SCAN -- NOT IN PIPELINE
-        [],                                               // CONTIGVIZ -- NOT IN PIPELINE
-        CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
-        busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
-        ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
-    )
-    ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    // ASCC_MERGE_TABLES (
+    //     ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
+    //     ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
+    //     ch_tiara,                                         // FROM -- TIARA.classifications[0]
+    //     [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
+    //     ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
+    //     ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
+    //     ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
+    //     nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
+    //     un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
+    //     [],                                               // MARKER SCAN -- NOT IN PIPELINE
+    //     [],                                               // CONTIGVIZ -- NOT IN PIPELINE
+    //     CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
+    //     busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
+    //     ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
+    // )
+    // ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
 
     //
