@@ -113,45 +113,45 @@ workflow ASCC_GENOMIC {
     }
 
 
-    // //
-    // // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
-    // //
-    // if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
-    //     EXTRACT_TIARA_HITS (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //     )
-    //     ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-    //     ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
-    // } else {
-    //     ch_tiara            = []
-    // }
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
+    //
+    if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
+        EXTRACT_TIARA_HITS (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        )
+        ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
+    } else {
+        ch_tiara            = []
+    }
 
 
-    // //
-    // // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-    // //
-    // if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast")) {
-    //     //
-    //     // NOTE: ch_nt_blast needs to be set in two places incase it
-    //     //          fails during the run
-    //     //
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+    //
+    if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast")) {
+        //
+        // NOTE: ch_nt_blast needs to be set in two places incase it
+        //          fails during the run
+        //
+        ch_nt_blast         = []
+        ch_blast_lineage    = []
 
-    //     EXTRACT_NT_BLAST (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         params.nt_database_path,
-    //         params.ncbi_accession_ids_folder,
-    //         params.ncbi_ranked_lineage_path
-    //     )
-    //     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-    //     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-    //     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+        EXTRACT_NT_BLAST (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            params.nt_database_path,
+            params.ncbi_accession_ids_folder,
+            params.ncbi_ranked_lineage_path
+        )
+        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
 
-    // } else {
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
-    // }
+    } else {
+        ch_nt_blast         = []
+        ch_blast_lineage    = []
+    }
 
 
     // if ( include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL') ) {
