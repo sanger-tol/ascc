@@ -42,7 +42,7 @@ workflow ESSENTIAL_JOBS {
                     window  : params.seqkit_window,
                     taxid   : params.taxid
                 ],
-                file(ref)
+                ref
             )}
         .set { new_input_fasta }
 
