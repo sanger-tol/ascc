@@ -32,7 +32,7 @@ workflow ESSENTIAL_JOBS {
         }
         .set {ch_unzipped}
 
-    println "Things ${ch_unzipped}"
+
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
@@ -47,8 +47,6 @@ workflow ESSENTIAL_JOBS {
             )
         }
         .set { new_input_fasta }
-
-    println "Injected ${new_input_fasta}"
 
 
     //

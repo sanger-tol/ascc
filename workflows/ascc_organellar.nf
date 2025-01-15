@@ -84,18 +84,18 @@ workflow ASCC_ORGANELLAR {
     ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
 
-    // //
-    // // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
-    // //
-    // if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
-    //     EXTRACT_TIARA_HITS (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //     )
-    //     ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-    //     ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
-    // } else {
-    //     ch_tiara            = []
-    // }
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
+    //
+    if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
+        EXTRACT_TIARA_HITS (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        )
+        ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
+        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
+    } else {
+        ch_tiara            = []
+    }
 
 
     // //
