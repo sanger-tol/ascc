@@ -107,12 +107,12 @@ jobs:
             -params-file ${GITHUB_WORKSPACE}/assets/github_testing/github_test.yaml \
             --input ${GITHUB_WORKSPACE}/assets/github_testing/samplesheet.csv \
             --exclude busco_btk \
-            --organellar_exclude busco_btk \
-            -verbose
+            --organellar_exclude busco_btk
 
-      - name: "Upload Artifact"
+      - name: Upload Nextflow log
         uses: actions/upload-artifact@v4
         with:
-          name: Nextflow_log
-          path: ${GITHUB_WORKSPACE}/.nextflow.log
+          name: nextflow-log
+          path: .nextflow.log
+          if-no-files-found: warn
           retention-days: 5
