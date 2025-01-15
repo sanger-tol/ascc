@@ -98,26 +98,29 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    // //
-    // // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
-    // //
-    // ESSENTIAL_JOBS.out.reference_with_seqkit
-    //     .map{ meta, file ->
-    //         tuple(
-    //             [
-    //                 id: meta.id,
-    //                 sliding: meta.sliding,
-    //                 window: meta.window,
-    //                 seq_count: CountFastaLength(file)
-    //             ],
-    //             file
-    //         )
-    //     }
-    //     .branch { meta, file ->
-    //         valid:      meta.seq_count >= params.seqkit_window
-    //         invalid:    true
-    //     }
-    //     .set{ valid_length_fasta }
+    //
+    // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
+    //
+    ESSENTIAL_JOBS.out.reference_with_seqkit
+        //
+        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
+        //
+        .map{ meta, file ->
+            tuple(
+                [
+                    id: meta.id,
+                    sliding: meta.sliding,
+                    window: meta.window,
+                    seq_count: CountFastaLength(file)
+                ],
+                file
+            )
+        }
+        .branch { meta, file ->
+            valid:      meta.seq_count >= params.seqkit_window
+            invalid:    true
+        }
+        .set{ valid_length_fasta }
 
 
     // //

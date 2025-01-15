@@ -100,14 +100,12 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          ls
-
           nextflow run ${GITHUB_WORKSPACE} \
             -profile test,docker \
             -params-file ${GITHUB_WORKSPACE}/assets/github_testing/github_test.yaml \
             --input ${GITHUB_WORKSPACE}/assets/github_testing/samplesheet.csv \
-            --exclude busco_btk \
-            --organellar_exclude busco_btk
+            --exclude btk_busco \
+            --organellar_exclude btk_busco
 
       - name: Upload Nextflow log
         uses: actions/upload-artifact@v4
