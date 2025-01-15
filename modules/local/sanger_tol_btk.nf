@@ -9,7 +9,6 @@ process SANGER_TOL_BTK {
     path blastn
     path blastx
     path tax_dump
-    path btk_yaml,                      stageAs: "BTK.yaml"
     val busco_lineages_folder
     val busco_lineages
     val taxon
