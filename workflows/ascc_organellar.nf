@@ -150,20 +150,20 @@ workflow ASCC_ORGANELLAR {
     // }
 
 
-    // //
-    // // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
-    // //
-    // if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
-    //     PACBIO_BARCODE_CHECK (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Should this be `valid_length_fasta.valid`
-    //         params.reads_path,
-    //         params.reads_type,
-    //         params.pacbio_barcode_file,
-    //         params.pacbio_barcode_names
-    //     )
+    //
+    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
+    //
+    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
+        PACBIO_BARCODE_CHECK (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Should this be `valid_length_fasta.valid`
+            params.reads_path,
+            params.reads_type,
+            params.pacbio_barcode_file,
+            params.pacbio_barcode_names
+        )
 
-    //     ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-    // }
+        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    }
 
 
     // //
@@ -205,37 +205,37 @@ workflow ASCC_ORGANELLAR {
     // // }
 
 
-    // //
-    // // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
-    // //
-    // if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_READ_COVERAGE (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-    //         params.reads_path,
-    //         params.reads_type,
-    //     )
-    //     ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-    //     ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    // } else {
-    //     ch_coverage         = []
-    //     ch_bam              = []
-    // }
+    //
+    // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
+    //
+    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
+        RUN_READ_COVERAGE (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
+            params.reads_path,
+            params.reads_type,
+        )
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    } else {
+        ch_coverage         = []
+        ch_bam              = []
+    }
 
 
     //
-    // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
+    // SUBWORKFLOW:
     //
-    // if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_VECSCREEN (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-    //         params.vecscreen_database_path
-    //     )
-    //     ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
-    // } else {
-    //     ch_vecscreen        = []
-    // }
+    if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
+        RUN_VECSCREEN (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
+            params.vecscreen_database_path
+        )
+        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    } else {
+        ch_vecscreen        = []
+    }
 
 
     // //

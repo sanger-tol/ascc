@@ -268,7 +268,7 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
+    // SUBWORKFLOW:
     //
     if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
         RUN_VECSCREEN (
