@@ -122,6 +122,8 @@ workflow ASCC_ORGANELLAR {
         }
         .set{ valid_length_fasta }
 
+    valid_length_fasta.valid.view{"VALID ORGANELLES $it"}
+
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
