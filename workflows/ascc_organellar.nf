@@ -123,47 +123,47 @@ workflow ASCC_ORGANELLAR {
         .set{ valid_length_fasta }
 
 
-    // //
-    // // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-    // //
-    // if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid) {
-    //     //
-    //     // NOTE: ch_nt_blast needs to be set in two places incase it
-    //     //          fails during the run
-    //     //
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+    //
+    if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid) {
+        //
+        // NOTE: ch_nt_blast needs to be set in two places incase it
+        //          fails during the run
+        //
+        ch_nt_blast         = []
+        ch_blast_lineage    = []
 
-    //     EXTRACT_NT_BLAST (
-    //         valid_length_fasta.valid,
-    //         params.nt_database_path,
-    //         params.ncbi_accession_ids_folder,
-    //         params.ncbi_ranked_lineage_path
-    //     )
-    //     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-    //     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-    //     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+        EXTRACT_NT_BLAST (
+            valid_length_fasta.valid,
+            params.nt_database_path,
+            params.ncbi_accession_ids_folder,
+            params.ncbi_ranked_lineage_path
+        )
+        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
 
-    // } else {
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
-    // }
+    } else {
+        ch_nt_blast         = []
+        ch_blast_lineage    = []
+    }
 
 
-    // //
-    // // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
-    // //
-    // if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
-    //     PACBIO_BARCODE_CHECK (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         params.reads_path,
-    //         params.reads_type,
-    //         params.pacbio_barcode_file,
-    //         params.pacbio_barcode_names
-    //     )
+    //
+    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
+    //
+    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
+        PACBIO_BARCODE_CHECK (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Should this be `valid_length_fasta.valid`
+            params.reads_path,
+            params.reads_type,
+            params.pacbio_barcode_file,
+            params.pacbio_barcode_names
+        )
 
-    //     ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-    // }
+        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    }
 
 
     // //
@@ -171,7 +171,7 @@ workflow ASCC_ORGANELLAR {
     // //
     // if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
     //     RUN_FCSADAPTOR (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG
+    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG // Again should this be the validated fasta?
     //     )
 
     //     RUN_FCSADAPTOR.out.ch_euk
@@ -192,7 +192,7 @@ workflow ASCC_ORGANELLAR {
     // //
     // // if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
     // //     RUN_FCSGX (
-    // //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+    // //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
     // //         fcs_db,
     // //         params.taxid,
     // //         params.ncbi_ranked_lineage_path
@@ -210,7 +210,7 @@ workflow ASCC_ORGANELLAR {
     // //
     // if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
     //     RUN_READ_COVERAGE (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
     //         params.reads_path,
     //         params.reads_type,
     //     )
@@ -223,19 +223,19 @@ workflow ASCC_ORGANELLAR {
     // }
 
 
-    // //
-    // // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
-    // //
-    // if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_VECSCREEN (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         params.vecscreen_database_path
-    //     )
-    //     ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
-    // } else {
-    //     ch_vecscreen        = []
-    // }
+    //
+    // SUBWORKFLOW: COLLECT SOFTWARE VERSIONS
+    //
+    if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
+        RUN_VECSCREEN (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
+            params.vecscreen_database_path
+        )
+        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    } else {
+        ch_vecscreen        = []
+    }
 
 
     // //

@@ -110,8 +110,13 @@ jobs:
       - name: Upload Nextflow log
         uses: actions/upload-artifact@v4
         with:
-          name: nextflow-log
+          name: nextflow-${{ strategy.job-index }}-log
           path: /home/runner/work/ascc/ascc/.nextflow.log
           if-no-files-found: warn
           include-hidden-files: true
-          retention-days: 5
+          retention-days: 1
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nextflow-*
+          merge-multiple: true
