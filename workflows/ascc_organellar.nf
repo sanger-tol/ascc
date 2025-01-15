@@ -150,20 +150,20 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    //
-    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
-    //
-    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
-        PACBIO_BARCODE_CHECK (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Should this be `valid_length_fasta.valid`
-            params.reads_path,
-            params.reads_type,
-            params.pacbio_barcode_file,
-            params.pacbio_barcode_names
-        )
+    // //
+    // // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
+    // //
+    // if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
+    //     PACBIO_BARCODE_CHECK (
+    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Should this be `valid_length_fasta.valid`
+    //         params.reads_path,
+    //         params.reads_type,
+    //         params.pacbio_barcode_file,
+    //         params.pacbio_barcode_names
+    //     )
 
-        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-    }
+    //     ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    // }
 
 
     // //
