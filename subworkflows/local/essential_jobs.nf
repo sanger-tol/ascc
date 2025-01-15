@@ -18,7 +18,7 @@ workflow ESSENTIAL_JOBS {
     //
     // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
-    ch_unzipped = input_ref
+    input_ref
         .map { meta, ref ->
             def unzipped
             if (ref.name.endsWith('.gz')) {
@@ -28,10 +28,11 @@ workflow ESSENTIAL_JOBS {
                 processed_file = ref
                 println "No unzipping needed for: ${ref.name}"
             }
-            [ meta, processed_file ]
+            [ meta, file(processed_file) ]
         }
+        .set {ch_unzipped}
 
-
+    println "Things ${ch_unzipped}"
     //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
@@ -43,8 +44,11 @@ workflow ESSENTIAL_JOBS {
                     taxid   : params.taxid
                 ],
                 ref
-            )}
+            )
+        }
         .set { new_input_fasta }
+
+    println "Injected ${new_input_fasta}"
 
 
     //
