@@ -446,79 +446,79 @@ workflow ASCC_GENOMIC {
     }
 
 
-    // if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
+    if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('ALL') || btk_busco_run_mode == "mandatory" && !exclude_workflow_steps.contains('btk_busco') && include_workflow_steps.contains('btk_busco') ) {
 
-    //     //
-    //     // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
-    //     //          USE IN THE BTK PIPELINE
-    //     //
+        //
+        // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
+        //          USE IN THE BTK PIPELINE
+        //
 
-    //     GENERATE_SAMPLESHEET (
-    //         RUN_READ_COVERAGE.out.bam_ch
-    //     )
-    //     ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+        GENERATE_SAMPLESHEET (
+            RUN_READ_COVERAGE.out.bam_ch
+        )
+        ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
-    //     //
-    //     // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
-    //     //
-    //     GENERATE_SAMPLESHEET.out.csv
-    //         .map{ meta, csv ->
-    //             tuple(
-    //                 [ id: meta.id ],
-    //                 csv
-    //             )
-    //         }
-    //         .set {coverage_id}
+        //
+        // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
+        //
+        GENERATE_SAMPLESHEET.out.csv
+            .map{ meta, csv ->
+                tuple(
+                    [ id: meta.id ],
+                    csv
+                )
+            }
+            .set {coverage_id}
 
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //         .map{ meta, ref ->
-    //             tuple(
-    //                 [ id: meta.id ],
-    //                 ref
-    //             )
-    //         }
-    //         .combine(coverage_id, by: 0)
-    //         .multiMap { meta_1, ref, csv ->
-    //             reference: [meta_1, ref]
-    //             samplesheet: csv
-    //         }
-    //         .set { combined_input }
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map{ meta, ref ->
+                tuple(
+                    [ id: meta.id ],
+                    ref
+                )
+            }
+            .combine(coverage_id, by: 0)
+            .multiMap { meta_1, ref, csv ->
+                reference: [meta_1, ref]
+                samplesheet: csv
+            }
+            .set { combined_input }
 
 
-    //     //
-    //     // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
-    //     //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
-    //     //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
-    //     //              This will also eventually check for the above run_btk boolean from
-    //     //              autofilter
-    //     SANGER_TOL_BTK (
-    //         combined_input.reference,
-    //         combined_input.samplesheet,
-    //         params.diamond_uniprot_database_path,
-    //         params.nt_database_path,
-    //         params.diamond_uniprot_database_path,
-    //         params.ncbi_taxonomy_path,
-    //         params.btk_yaml,
-    //         params.busco_lineages_folder,
-    //         params.busco_lineages,
-    //         params.taxid,
-    //     )
-    //     ch_versions         = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+        //
+        // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
+        //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
+        //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
+        //              This will also eventually check for the above run_btk boolean from
+        //              autofilter
+        SANGER_TOL_BTK (
+            combined_input.reference,
+            combined_input.samplesheet,
+            params.diamond_uniprot_database_path,
+            params.nt_database_path,
+            params.diamond_uniprot_database_path,
+            params.ncbi_taxonomy_path,
+            params.btk_yaml,
+            params.busco_lineages_folder,
+            params.busco_lineages,
+            params.taxid,
+        )
+        ch_versions         = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
-    //     //
-    //     // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
-    //     //
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    //         .map{ meta, file ->
-    //             tuple([id: meta.id], file)
-    //         }
-    //         .set{ new_gg }
+        //
+        // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
+        //
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map{ meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ new_gg }
 
-    //     GENERATE_SAMPLESHEET.out.csv
-    //         .map{ meta, file ->
-    //             tuple([id: meta.id], file)
-    //         }
-    //         .set{ new_csv }
+        GENERATE_SAMPLESHEET.out.csv
+            .map{ meta, file ->
+                tuple([id: meta.id], file)
+            }
+            .set{ new_csv }
 
 
     //     //
@@ -564,40 +564,40 @@ workflow ASCC_GENOMIC {
     //     //    []
     //     //)
 
-    //     //
-    //     // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
-    //     //
-    //     MERGE_BTK_DATASETS (
-    //         CREATE_BTK_DATASET.out.btk_datasets,
-    //         SANGER_TOL_BTK.out.dataset
-    //     )
-    //     ch_versions         = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-    //     busco_merge_btk     = MERGE_BTK_DATASETS.out.busco_summary_tsv.map{it[1]}
-    // } else {
-    //     busco_merge_btk     = []
-    // }
+        //
+        // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
+        //
+        MERGE_BTK_DATASETS (
+            CREATE_BTK_DATASET.out.btk_datasets,
+            SANGER_TOL_BTK.out.dataset
+        )
+        ch_versions         = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        busco_merge_btk     = MERGE_BTK_DATASETS.out.busco_summary_tsv.map{it[1]}
+    } else {
+        busco_merge_btk     = []
+    }
 
 
-    //
-    // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
-    //
-    // ASCC_MERGE_TABLES (
-    //     ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
-    //     ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
-    //     ch_tiara,                                         // FROM -- TIARA.classifications[0]
-    //     [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
-    //     ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
-    //     ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
-    //     ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
-    //     nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
-    //     un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
-    //     [],                                               // MARKER SCAN -- NOT IN PIPELINE
-    //     [],                                               // CONTIGVIZ -- NOT IN PIPELINE
-    //     CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
-    //     busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
-    //     ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
-    // )
-    // ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+
+    SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
+
+    ASCC_MERGE_TABLES (
+        ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
+        ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
+        ch_tiara,                                         // FROM -- TIARA.classifications[0]
+        [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
+        ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
+        ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
+        ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
+        nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
+        un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
+        [],                                               // MARKER SCAN -- NOT IN PIPELINE
+        [],                                               // CONTIGVIZ -- NOT IN PIPELINE
+        CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
+        busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
+        ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
+    )
+    ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
 
     //
