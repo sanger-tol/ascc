@@ -61,14 +61,14 @@ jobs:
           mkdir ncbi_taxdump
           curl -L https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar -C ncbi_taxdump -xzf -
 
-      # - name: Download the FCS-gx database
-      #   run: |
-      #     mkdir FCS_gx
-      #     wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.taxa.tsv -O FCS_gx/all.taxa.tsv
-      #     wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.gxi -O FCS_gx/all.gxi
-      #     wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.gxs -O FCS_gx/all.gxs
-      #     wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.meta.jsonl -O FCS_gx/all.meta.jsonl
-      #     wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.blast_div.tsv.gz -O FCS_gx/all.blast_div.tsv.gz
+      - name: Download the FCS-gx database
+        run: |
+          mkdir FCS_gx
+          wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.taxa.tsv -O FCS_gx/all.taxa.tsv
+          wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.gxi -O FCS_gx/all.gxi
+          wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.gxs -O FCS_gx/all.gxs
+          wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.meta.jsonl -O FCS_gx/all.meta.jsonl
+          wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.blast_div.tsv.gz -O FCS_gx/all.blast_div.tsv.gz
 
       - name: Download the BUSCO lineage database
         run: |
