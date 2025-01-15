@@ -194,20 +194,20 @@ workflow ASCC_GENOMIC {
     }
 
 
-    // //
-    // // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
-    // //
-    // if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
-    //     PACBIO_BARCODE_CHECK (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         params.reads_path,
-    //         params.reads_type,
-    //         params.pacbio_barcode_file,
-    //         params.pacbio_barcode_names
-    //     )
+    //
+    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
+    //
+    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
+        PACBIO_BARCODE_CHECK (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            params.reads_path,
+            params.reads_type,
+            params.pacbio_barcode_file,
+            params.pacbio_barcode_names
+        )
 
-    //     ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-    // }
+        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    }
 
 
     // //
@@ -249,22 +249,22 @@ workflow ASCC_GENOMIC {
     // }
 
 
-    // //
-    // // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
-    // //
-    // if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
-    //     RUN_READ_COVERAGE (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         params.reads_path,
-    //         params.reads_type,
-    //     )
-    //     ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-    //     ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    // } else {
-    //     ch_coverage         = []
-    //     ch_bam              = []
-    // }
+    //
+    // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
+    //
+    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
+        RUN_READ_COVERAGE (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            params.reads_path,
+            params.reads_type,
+        )
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    } else {
+        ch_coverage         = []
+        ch_bam              = []
+    }
 
 
     // //
