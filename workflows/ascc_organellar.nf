@@ -276,23 +276,23 @@ workflow ASCC_ORGANELLAR {
     // }
 
 
-    // // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    // //
-    // //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    // if ( include_workflow_steps.contains('uniprot_diamond') && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && valid_length_fasta.valid ) {
-    //     UP_DIAMOND (
-    //         valid_length_fasta.valid,
-    //         params.diamond_uniprot_database_path
-    //     )
-    //     un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-    //     un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
-    //     ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-    // } else {
-    //     un_hits             = []
-    //     un_full             = []
-    // }
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    if ( include_workflow_steps.contains('uniprot_diamond') && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && valid_length_fasta.valid ) {
+        UP_DIAMOND (
+            valid_length_fasta.valid,
+            params.diamond_uniprot_database_path
+        )
+        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
+        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+    } else {
+        un_hits             = []
+        un_full             = []
+    }
 
-    // ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
+    ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
 
     // CREATE_BTK_DATASET (
     //     ESSENTIAL_JOBS.out.reference_tuple_from_GG,
