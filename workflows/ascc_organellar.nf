@@ -126,28 +126,28 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid) {
-        //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run
-        //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
+    // if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid) {
+    //     //
+    //     // NOTE: ch_nt_blast needs to be set in two places incase it
+    //     //          fails during the run
+    //     //
+    //     ch_nt_blast         = []
+    //     ch_blast_lineage    = []
 
-        EXTRACT_NT_BLAST (
-            valid_length_fasta.valid,
-            params.nt_database_path,
-            params.ncbi_accession_ids_folder,
-            params.ncbi_ranked_lineage_path
-        )
-        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+    //     EXTRACT_NT_BLAST (
+    //         valid_length_fasta.valid,
+    //         params.nt_database_path,
+    //         params.ncbi_accession_ids_folder,
+    //         params.ncbi_ranked_lineage_path
+    //     )
+    //     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    //     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+    //     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
 
-    } else {
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
-    }
+    // } else {
+    //     ch_nt_blast         = []
+    //     ch_blast_lineage    = []
+    // }
 
 
     // //
