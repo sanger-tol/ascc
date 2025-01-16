@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+import argparse
+import pandas as pd
+import textwrap
+import os
+import sys
+import general_purpose_functions as gpf
+
 VERSION = "2.0.0"
 DESCRIPTION = """
 Script for merging contaminant check results into one table
@@ -9,13 +16,6 @@ Written by Eerik Anuin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
-
-import argparse
-import pandas as pd
-import textwrap
-import os
-import sys
-import general_purpose_functions as gpf
 
 
 def parse_args():

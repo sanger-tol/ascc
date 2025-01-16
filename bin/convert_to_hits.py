@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import general_purpose_functions as gpf
+from collections import OrderedDict
+import textwrap
+import argparse
+
 VERSION = "2.0.0"
 
 DESCRIPTION = """
@@ -14,11 +19,6 @@ Written by Eerik Aunin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
-import general_purpose_functions as gpf
-from collections import OrderedDict
-import textwrap
-import argparse
-
 
 def save_file(output_list, name, prefix):
     with open(f"{prefix}_{name}_diamond_blastx_top_hits.csv", "w") as f:

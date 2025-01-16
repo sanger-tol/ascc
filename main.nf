@@ -170,13 +170,17 @@ workflow {
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
-    SANGERTOL_ASCC_ORGANELLAR (
-        branched_assemblies.organellar_genome,
-        VALIDATE_TAXID.out.versions,
-        organellar_include,
-        organellar_exclude,
-        fcs_gx_database_path
-    )
+
+    if ( !params.genomic_only ) {
+
+        SANGERTOL_ASCC_ORGANELLAR (
+            branched_assemblies.organellar_genome,
+            VALIDATE_TAXID.out.versions,
+            organellar_include,
+            organellar_exclude,
+            fcs_gx_database_path
+        )
+    }
 
     //
     // SUBWORKFLOW: Run completion tasks

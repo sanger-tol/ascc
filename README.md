@@ -67,12 +67,17 @@ First, prepare a samplesheet with your input data that looks as follows:
 
 ```csv
 sample,assembly_type,assembly_file
-idImaFly1,Primary,assembly_file.fasta
+test_sample1,PRIMARY,/path/to/primary_assembly.fa
+test_sample1,HAPLO,/path/to/haplotigs_assembly.fa
+test_sample1,MITO,/path/to/mitochondrial_assembly.fa
+test_sample1,PLASTID,/path/to/plastid_assembly.fa
 ```
 
-Each row represents a an assembled haplotype or organelle of the sample.
+Each row represents an assembled haplotype or organelle of the sample. The sample ID (the first column) is up to the user to choose. `assembly_type` should be one of either `PRIMARY` (for primary assembly), `HAPLO` (for haplotigs assembly), `MITO` (for mitochondrial assembly) and `PLASTID` for plastid assembly.
+This setup assumes that you have an assembly where the primary contigs or scaffolds are in a separate file from the haplotype scaffolds or contigs. It also assumes that you have separated the organellar sequences out of the main assembly into separate files.
 
-The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md)
+It is okay to leave out assembly components from the run. E.g. if your assembly does not have a mitochondrial sequence, you can leave the row with the `MITO` tag out. If your assembly does not have a plastid sequence, you can leave the row with the `PLASTID` tag out.
+The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md).
 
 Now, you can run the pipeline using:
 

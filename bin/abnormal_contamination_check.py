@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+import general_purpose_functions as gpf
+import sys
+import os.path
+import pathlib
+import argparse
+import textwrap
+
 VERSION = "V1.0.0"
 
 DESCRIPTION = """
@@ -20,13 +27,6 @@ written by James Torrance
 -------------------------------------
 
 """
-
-import general_purpose_functions as gpf
-import sys
-import os.path
-import pathlib
-import argparse
-import textwrap
 
 
 def parse_args():

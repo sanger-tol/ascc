@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+import general_purpose_functions as gpf
+import os
+import sys
+import argparse
+import textwrap
+
 VERSION = "V1.0.0"
 
 DESCRIPTION = """
@@ -17,13 +24,6 @@ FCS-GX and Tiara results.
 -------------------------------------
 
 """
-
-from pathlib import Path
-import general_purpose_functions as gpf
-import os
-import sys
-import argparse
-import textwrap
 
 
 def parse_args():
