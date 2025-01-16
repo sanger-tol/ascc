@@ -12,29 +12,29 @@
 
 ```yaml
 scientific_name: scientific name of the assembled organism
-taxid: NCBI taxonomy ID of the assembled species (or genus)
+taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
 reads_path: path to a directory that contains gzipped reads
-reads_type: type of reads (only "hifi" is currently supported)
-pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
-pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example, "bc2008,bc2009". The barcode names exist in the barcode sequences database file (/ascc/assets/pacbio_adaptors.fa)
-kmer_length: kmer length for kmer counting (which is done using kcounter). The default kmer length is 7
-dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following. "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf". The default method is "pca". This field should be formatted as ["pca","random_trees"]
-nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database should have built-in taxonomy
-nt_database_prefix: prefix for the NCBI nt database. The default is "nt"
+reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
+pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
+pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
+kmer_length: kmer length for kmer counting (which is done using kcounter). Default: 7
+dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following: ["pca","umap","t-sne","isomap","lle_standard","lle_hessian","lle_modified","mds","se","random_trees","kernel_pca","pca_svd","autoencoder_sigmoid","autoencoder_linear","autoencoder_selu","autoencoder_relu","nmf"]. The default method is "pca". This field should be formatted as a YAML list, e.g. ["pca","random_trees"]
+nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database should have built-in taxonomy. Must end with a trailing slash
+nt_database_prefix: prefix for the NCBI nt database. Default: "nt"
 nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
-ncbi_accession_ids_folder: path to the directory with NCBI accession2taxid files ("/accession2taxid")
-ncbi_taxonomy_path: path to NCBI taxdump directory ("/taxdump/")
-ncbi_ranked_lineage_path: path to NCBI ranked lineage file ("/taxdump/rankedlineage.dmp")
-busco_lineages_folder: path to BUSCO 5 lineages directory
-busco_lineages: a comma separated list of lineages for use in busco
-fcs_gx_database_path: path to the directory containing the FCS-GX database
+ncbi_accession_ids_folder: path to the directory with NCBI accession2taxid files (e.g. "/accession2taxid/"). Must end with a trailing slash
+ncbi_taxonomy_path: path to NCBI taxdump directory (e.g. "/taxdump/"). Must end with a trailing slash
+ncbi_ranked_lineage_path: path to NCBI ranked lineage file (e.g. "/taxdump/rankedlineage.dmp")
+busco_lineages_folder: path to BUSCO 5 lineages directory. Must end with a trailing slash
+busco_lineages: a comma separated list of BUSCO lineages that will be used in the sanger-tol/blobtoolkit pipeline run. For example: "diptera_odb10,insecta_odb10". Available lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/
+fcs_gx_database_path: path to the directory containing the FCS-GX database. Must end with a trailing slash
 vecscreen_database_path: path to the FASTA file with adapter sequences for VecScreen ("/ascc/assets/vecscreen_adaptors_for_screening_euks.fa")
 diamond_uniprot_database_path: path to a Diamond database made from Uniprot protein sequences ("uniprot_reference_proteomes_with_taxonnames.dmnd"). The database needs to have built-in taxonomy
 diamond_nr_database_path: path to a Diamond database made from NCBI nr protein sequences ("nr.dmnd"). The database needs to have built-in taxonomy
-seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. The default value is 100000
-seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. The default value is 6000
-n_neighbours: The n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. The default value is 13
-btk_yaml: path to /ascc/assets/btk_draft.yaml. This is default and only servers to bypass GCA requirements of sanger-tol/blobtoolkit
+seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
+seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
+n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
+btk_yaml: path to a dummy YAML file that is provided with this pipeline, at "/ascc/assets/btk_draft.yaml". This is default and only serves to bypass GCA requirements of sanger-tol/blobtoolkit
 ```
 
 ## Running the pipeline
@@ -42,7 +42,7 @@ btk_yaml: path to /ascc/assets/btk_draft.yaml. This is default and only servers 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run sanger-tol/ascc --input {INPUT YAML} --outdir {OUTDIR} --steps {COMMA SEPARATED LIST OF STEPS TO RUN} -profile singularity
+nextflow run sanger-tol/ascc --input {INPUT YAML} --outdir {OUTDIR} --include {COMMA SEPARATED LIST OF STEPS TO RUN} --organellar_include {COMMA SEPARATED LIST OF STEPS TO RUN} profile singularity
 ```
 
 This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
