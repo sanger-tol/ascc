@@ -19,15 +19,15 @@ pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences data
 pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
 kmer_length: kmer length for kmer counting (which is done using kcounter). Default: 7
 dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following: ["pca","umap","t-sne","isomap","lle_standard","lle_hessian","lle_modified","mds","se","random_trees","kernel_pca","pca_svd","autoencoder_sigmoid","autoencoder_linear","autoencoder_selu","autoencoder_relu","nmf"]. The default method is "pca". This field should be formatted as a YAML list, e.g. ["pca","random_trees"]
-nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database should have built-in taxonomy. Must end with a trailing slash
+nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database should have built-in taxonomy. Should end with a trailing slash
 nt_database_prefix: prefix for the NCBI nt database. Default: "nt"
 nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
-ncbi_accession_ids_folder: path to the directory with NCBI accession2taxid files (e.g. "/accession2taxid/"). Must end with a trailing slash
-ncbi_taxonomy_path: path to NCBI taxdump directory (e.g. "/taxdump/"). Must end with a trailing slash
+ncbi_accession_ids_folder: path to the directory with NCBI accession2taxid files (e.g. "/accession2taxid/"). Should end with a trailing slash
+ncbi_taxonomy_path: path to NCBI taxdump directory (e.g. "/taxdump/"). Should end with a trailing slash
 ncbi_ranked_lineage_path: path to NCBI ranked lineage file (e.g. "/taxdump/rankedlineage.dmp")
-busco_lineages_folder: path to BUSCO 5 lineages directory. Must end with a trailing slash
+busco_lineages_folder: path to BUSCO 5 lineages directory. Should end with a trailing slash
 busco_lineages: a comma separated list of BUSCO lineages that will be used in the sanger-tol/blobtoolkit pipeline run. For example: "diptera_odb10,insecta_odb10". Available lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/
-fcs_gx_database_path: path to the directory containing the FCS-GX database. Must end with a trailing slash
+fcs_gx_database_path: path to the directory containing the FCS-GX database. Should end with a trailing slash
 vecscreen_database_path: path to the FASTA file with adapter sequences for VecScreen ("/ascc/assets/vecscreen_adaptors_for_screening_euks.fa")
 diamond_uniprot_database_path: path to a Diamond database made from Uniprot protein sequences ("uniprot_reference_proteomes_with_taxonnames.dmnd"). The database needs to have built-in taxonomy
 diamond_nr_database_path: path to a Diamond database made from NCBI nr protein sequences ("nr.dmnd"). The database needs to have built-in taxonomy
@@ -42,10 +42,70 @@ btk_yaml: path to a dummy YAML file that is provided with this pipeline, at "/as
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run sanger-tol/ascc --input {INPUT YAML} --outdir {OUTDIR} --include {COMMA SEPARATED LIST OF STEPS TO RUN} --organellar_include {COMMA SEPARATED LIST OF STEPS TO RUN} profile singularity
+Usage:
+nextflow run sanger-tol/ascc \
+    --input {INPUT YAML} \
+    --outdir {OUTDIR} \
+    [--include {COMMA SEPARATED LIST OF STEPS TO RUN}] \
+    [--exclude {COMMA SEPARATED LIST OF STEPS TO EXCLUDE}] \
+    [--organellar_include {COMMA SEPARATED LIST OF STEPS TO RUN}] \
+    [--organellar_exclude {COMMA SEPARATED LIST OF STEPS TO EXCLUDE}] \
+    -profile singularity
 ```
 
 This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
+
+Pipeline component options:
+
+`--include`: comma-separated list of pipeline components to run on chromosomal DNA sequences (primary and haplotigs).<br>
+`--exclude`: comma-separated list of pipeline components to exclude from running on chromosomal DNA sequences.<br>
+`--organellar_include`: comma-separated list of pipeline components to run on organellar DNA sequences (mitochondrial and plastid).<br>
+`--organellar_exclude`: comma-separated list of pipeline components to exclude from running on organellar DNA sequences.
+
+Available pipeline components:
+- `kmers`              : K-mer counting and dimensionality reduction analysis using kcounter, scikit-learn, and TensorFlow
+- `tiara`              : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin
+- `coverage`           : Analysis of sequence coverage using minimap2-based read mapping
+- `nt_blast`          : Nucleotide BLAST search against NCBI nt database for taxonomic classification
+- `nr_diamond`        : DIAMOND BLASTX search against NCBI non-redundant protein database
+- `uniprot_diamond`   : DIAMOND BLASTX search against UniProt database
+- `kraken`            : Taxonomic classification using Kraken2 against NCBI nt database
+- `fcs-gx`            : NCBI's Foreign Contamination Screen - Genome Cross-Check for contamination detection
+- `fcs-adaptor`       : NCBI's Foreign Contamination Screen - Adaptor Screen for adapter contamination
+- `vecscreen`         : Vector contamination screening
+- `btk_busco`         : BlobToolKit analysis incorporating BUSCO results
+- `pacbio_barcodes`   : Detection of PacBio barcode contamination
+- `organellar_blast`  : BLAST-based detection of organellar sequences
+- `autofilter_assembly`: Automated assembly filtering (requires `tiara` and `fcs-gx`)
+- `ALL`               : Run all available components
+- `NONE`              : Run no components
+
+Dependencies:
+- `autofilter_assembly` requires both `tiara` and `fcs-gx` to be run first
+
+Outputs:
+- Results are collected as BlobToolKit datasets and CSV tables
+- Adapter and organellar contamination reports are provided as text files
+- When multiple classification tools are run, the pipeline can derive consensus classifications
+- Coverage estimates per taxonomic group are provided when applicable
+
+
+### Example usage
+
+#### Basic run with essential components
+```
+nextflow run sanger-tol/ascc --input config.yaml --outdir results --include tiara,coverage,nt_blast --organellar_include nt_blast,coverage -profile singularity
+```
+
+#### Comprehensive analysis
+```
+nextflow run sanger-tol/ascc --input config.yaml --outdir results --include kmers,tiara,coverage,nt_blast,nr_diamond,kraken,fcs-gx,btk_busco --organellar_include nt_blast,coverage -profile singularity
+```
+
+#### Run everything except specific components
+```
+nextflow run sanger-tol/ascc --input config.yaml --outdir results --include ALL --exclude vecscreen,pacbio_barcodes --organellar_include ALL -profile singularity
+```
 
 Note that the pipeline will create the following files in your working directory:
 
