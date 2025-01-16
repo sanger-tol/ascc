@@ -70,11 +70,11 @@ Available pipeline components:
 - `nr_diamond`        : DIAMOND BLASTX search against NCBI non-redundant protein database
 - `uniprot_diamond`   : DIAMOND BLASTX search against UniProt database
 - `kraken`            : Taxonomic classification using Kraken2 against NCBI nt database
-- `fcs-gx`            : NCBI's FCS-GX (Foreign Contamination Screen - Genome Cross-Check) for contamination detection
-- `fcs-adaptor`       : NCBI's FCS-Adaptor (Foreign Contamination Screen - Adaptor Screen) for adapter contamination
-- `vecscreen`         : NCBI's vector contamination screening
+- `fcs-gx`            : NCBI's FCS-GX (foreign contamination screen with cross-species aligner)
+- `fcs-adaptor`       : NCBI's FCS-Adaptor (foreign contamination screen for adapter sequences)
+- `vecscreen`         : NCBI's vector and adapter contamination screening (older tool than FCS-Adaptor but allows using a custom database)
 - `btk_busco`         : BlobToolKit Pipeline (sequence classification using BUSCO, Diamond and BLAST)
-- `pacbio_barcodes`   : Detection of PacBio barcode contamination
+- `pacbio_barcodes`   : Detection of PacBio barcode contamination using BLAST
 - `organellar_blast`  : BLAST-based detection of organellar sequences
 - `autofilter_assembly`: Automated assembly filtering (requires `tiara` and `fcs-gx`)
 - `ALL`               : Run all available components
