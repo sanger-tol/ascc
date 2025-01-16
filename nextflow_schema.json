@@ -23,6 +23,11 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "genomic_only": {
+                    "type": "boolean",
+                    "description": "There maybe occasions where the end user only has the Primary Genomic Assembly, in this case this value should be `--genomic_only true`. The value `--exclude organellar_blast` should also be included in the CLI",
+                    "fa_icon": "fa fa-check"
+                },
                 "scientific_name": {
                     "type": "string",
                     "description": "Scientific name of sample according to NCBI",
