@@ -63,6 +63,7 @@ The FCS-adaptor database is included in the FCS-adaptor installation, so it does
 A FASTA file with the sequences for making a VecScreen database is included in the ASCC repository. It is the `vecscreen_adaptors_for_screening_euks.fa` file in the `assets` directory of this pipeline ([vecscreen_adaptors_for_screening_euks.fa](../assets/vecscreen_adaptors_for_screening_euks.fa)).
 
 VecScreen requires a BLAST V4 database as input, we can generate this with the above file use the following.
+
 ```
 makeblastdb -in vecscreen_adaptors_for_screening_euks.fa -parse_seqids -blastdb_version 4 -dbtype nucl
 ```
