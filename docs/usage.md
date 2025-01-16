@@ -64,16 +64,16 @@ Pipeline component options:
 
 Available pipeline components:
 - `kmers`              : K-mer counting and dimensionality reduction analysis using kcounter, scikit-learn, and TensorFlow
-- `tiara`              : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin
+- `tiara`              : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin using Tiara
 - `coverage`           : Analysis of sequence coverage using minimap2-based read mapping
 - `nt_blast`          : Nucleotide BLAST search against NCBI nt database for taxonomic classification
 - `nr_diamond`        : DIAMOND BLASTX search against NCBI non-redundant protein database
 - `uniprot_diamond`   : DIAMOND BLASTX search against UniProt database
 - `kraken`            : Taxonomic classification using Kraken2 against NCBI nt database
-- `fcs-gx`            : NCBI's Foreign Contamination Screen - Genome Cross-Check for contamination detection
-- `fcs-adaptor`       : NCBI's Foreign Contamination Screen - Adaptor Screen for adapter contamination
-- `vecscreen`         : Vector contamination screening
-- `btk_busco`         : BlobToolKit analysis incorporating BUSCO results
+- `fcs-gx`            : NCBI's FCS-GX (Foreign Contamination Screen - Genome Cross-Check) for contamination detection
+- `fcs-adaptor`       : NCBI's FCS-Adaptor (Foreign Contamination Screen - Adaptor Screen) for adapter contamination
+- `vecscreen`         : NCBI's vector contamination screening
+- `btk_busco`         : BlobToolKit Pipeline (sequence classification using BUSCO, Diamond and BLAST)
 - `pacbio_barcodes`   : Detection of PacBio barcode contamination
 - `organellar_blast`  : BLAST-based detection of organellar sequences
 - `autofilter_assembly`: Automated assembly filtering (requires `tiara` and `fcs-gx`)
@@ -86,8 +86,6 @@ Dependencies:
 Outputs:
 - Results are collected as BlobToolKit datasets and CSV tables
 - Adapter and organellar contamination reports are provided as text files
-- When multiple classification tools are run, the pipeline can derive consensus classifications
-- Coverage estimates per taxonomic group are provided when applicable
 
 
 ### Example usage
