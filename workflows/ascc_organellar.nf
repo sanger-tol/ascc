@@ -121,7 +121,7 @@ workflow ASCC_ORGANELLAR {
         }
         .set{ valid_length_fasta }
 
-    valid_length_fasta.view{"Running blast on VALID ORGANELLE: $it"}
+    valid_length_fasta.view{"Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $it"}
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
