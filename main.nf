@@ -135,14 +135,14 @@ workflow {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
-    // SANGERTOL_ASCC_GENOMIC (
-    //     branched_assemblies.sample_genome,
-    //     branched_assemblies.organellar_genome,
-    //     VALIDATE_TAXID.out.versions,
-    //     params.include,
-    //     params.exclude,
-    //     fcs_gx_database_path,
-    // )
+    SANGERTOL_ASCC_GENOMIC (
+        branched_assemblies.sample_genome,
+        branched_assemblies.organellar_genome,
+        VALIDATE_TAXID.out.versions,
+        params.include,
+        params.exclude,
+        fcs_gx_database_path,
+    )
 
 
     //

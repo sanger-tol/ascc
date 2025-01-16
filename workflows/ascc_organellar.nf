@@ -87,7 +87,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
+    if ( (include_workflow_steps.contains('tiara') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("tiara") ) {
         EXTRACT_TIARA_HITS (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG
         )
@@ -116,49 +116,47 @@ workflow ASCC_ORGANELLAR {
                 file
             )
         }
-        .branch { meta, file ->
-            valid:      meta.seq_count >= params.seqkit_window
-            invalid:    true
+        .filter { meta, file ->
+                    meta.seq_count >= params.seqkit_window
         }
         .set{ valid_length_fasta }
 
-    valid_length_fasta.valid.view{"VALID ORGANELLES: $it"}
-    valid_length_fasta.invalid.view{"-- INVALID ORGANELLES: $it"}
-
+    valid_length_fasta.view{"Running blast on VALID ORGANELLE: $it"}
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    // if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast") && valid_length_fasta.valid) {
-    //     //
-    //     // NOTE: ch_nt_blast needs to be set in two places incase it
-    //     //          fails during the run
-    //     //
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
+    if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true) ) {
+        //
+        // NOTE: ch_nt_blast needs to be set in two places incase it
+        //          fails during the run (This IS an expected outcome of this subworkflow)
+        //
 
-    //     EXTRACT_NT_BLAST (
-    //         valid_length_fasta.valid,
-    //         params.nt_database_path,
-    //         params.ncbi_accession_ids_folder,
-    //         params.ncbi_ranked_lineage_path
-    //     )
-    //     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-    //     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-    //     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+        ch_nt_blast         = []
+        ch_blast_lineage    = []
 
-    // } else {
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
-    // }
+        EXTRACT_NT_BLAST (
+            valid_length_fasta,
+            Channel.value(params.nt_database_path),
+            Channel.value(params.ncbi_accession_ids_folder),
+            Channel.value(params.ncbi_ranked_lineage_path)
+        )
+        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+
+    } else {
+        ch_nt_blast         = Channel.empty()
+        ch_blast_lineage    = Channel.empty()
+    }
 
 
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("pacbio_barcodes") ) {
         PACBIO_BARCODE_CHECK (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Should this be `valid_length_fasta.valid`
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
             params.reads_path,
             params.reads_type,
             params.pacbio_barcode_file,
@@ -172,7 +170,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-adaptor") ) {
         RUN_FCSADAPTOR (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG // Again should this be the validated fasta?
         )
@@ -193,7 +191,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-gx") ) {
         RUN_FCSGX (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             fcs_db,
@@ -227,9 +225,9 @@ workflow ASCC_ORGANELLAR {
 
 
     //
-    // SUBWORKFLOW:
+    // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("vecscreen") ) {
         RUN_VECSCREEN (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             params.vecscreen_database_path
@@ -242,9 +240,9 @@ workflow ASCC_ORGANELLAR {
 
 
     //
-    // SUBWORKFLOW: Run the kraken classifier
+    // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("kraken") ) {
         RUN_NT_KRAKEN(
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
             params.nt_kraken_database_path,
@@ -262,58 +260,58 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    // //
-    // // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    // //
-    // if ( include_workflow_steps.contains('nr_diamond') && !exclude_workflow_steps.contains("nr_diamond") && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nr_diamond") && valid_length_fasta.valid ) {
-    //     NR_DIAMOND (
-    //         valid_length_fasta.valid,
-    //         params.diamond_nr_database_path
-    //     )
-    //     nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
-    //     nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
-    //     ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-    // } else {
-    //     nr_hits             = []
-    //     nr_full             = []
-    // }
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL') ) && !valid_length_fasta.ifEmpty(true) && !exclude_workflow_steps.contains("nr_diamond") ) {
+        NR_DIAMOND (
+            valid_length_fasta,
+            params.diamond_nr_database_path
+        )
+        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
+        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+    } else {
+        nr_hits             = []
+        nr_full             = []
+    }
 
 
-    // // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    // //
-    // //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    // if ( include_workflow_steps.contains('uniprot_diamond') && valid_length_fasta.valid || include_workflow_steps.contains('ALL') && valid_length_fasta.valid ) {
-    //     UP_DIAMOND (
-    //         valid_length_fasta.valid,
-    //         params.diamond_uniprot_database_path
-    //     )
-    //     un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-    //     un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
-    //     ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-    // } else {
-    //     un_hits             = []
-    //     un_full             = []
-    // }
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL'))  && !valid_length_fasta.ifEmpty(true) && !exclude_workflow_steps.contains("uniprot_diamond") ) {
+        UP_DIAMOND (
+            valid_length_fasta,
+            params.diamond_uniprot_database_path
+        )
+        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
+        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+    } else {
+        un_hits             = []
+        un_full             = []
+    }
 
-    // ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
+    ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
 
-    // CREATE_BTK_DATASET (
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //     ch_dot_genome,
-    //     [], //ch_kmers
-    //     ch_tiara,
-    //     ch_nt_blast,
-    //     [], //ch_fcsgx,
-    //     ch_bam,
-    //     ch_coverage,
-    //     ch_kraken1,
-    //     ch_kraken2,
-    //     ch_kraken3,
-    //     nr_full,
-    //     un_full,
-    //     Channel.fromPath(params.ncbi_taxonomy_path).first()
-    // )
-    // ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    CREATE_BTK_DATASET (
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+        ch_dot_genome,
+        [], //ch_kmers
+        ch_tiara,
+        ch_nt_blast,
+        [], //ch_fcsgx,
+        ch_bam,
+        ch_coverage,
+        ch_kraken1,
+        ch_kraken2,
+        ch_kraken3,
+        nr_full,
+        un_full,
+        Channel.fromPath(params.ncbi_taxonomy_path).first()
+    )
+    ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
     // //
     // // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
