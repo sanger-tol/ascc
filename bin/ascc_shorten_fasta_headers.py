@@ -16,7 +16,7 @@ Modified by Damon-Lee Pointon (@dp24/@DLBPointon)
 #
 # Copyright (c) 2020-2022 Genome Research Ltd.
 #
-# Author: Eerik Aunin (ea10@sanger.ac.uk)
+# Author: Eerik Aunin (eeaunin@gmail.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
-Script for detecting trailing Ns that should be trimmed from an assembly, from James Torrance (jt8@sanger.ac.uk). Edited by Eerik Aunin (ea10@sanger.ac.uk)
+Script for detecting trailing Ns that should be trimmed from an assembly,
+Written by James Torrance (jt8@sanger.ac.uk).
+Edited by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import re
@@ -43,9 +45,11 @@ def main(fasta_file, output_file):
             startseq = ""
             if start_n_match:
                 startseq = start_n_match.group(1)
+
             endseq = ""
             if end_n_match:
                 endseq = end_n_match.group(1)
+
             realseq_length = len(seq_string) - len(startseq) - len(endseq)
             # Handle "all Ns exception"
             if len(startseq) == len(seq_string):
@@ -85,7 +89,7 @@ def main(fasta_file, output_file):
 
                         # Does the *end* of this block satisfy the window condition?
                         bases_in_window = 0
-                        start_of_first_base_block_in_window = None
+                        start_of_first_base_block_in_window = 0 # Replacement of the None assignment with 0 to apease the linting gods
                         for non_n_region in non_n_regions:
                             if non_n_region[1] >= current_non_n_end - winsize:
                                 start_of_first_base_block_in_window = non_n_region[0]

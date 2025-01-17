@@ -8,9 +8,7 @@ process FILTER_BARCODE {
         'biocontainers/biopython:1.78' }"
 
     input:
-    tuple val(meta) , path(fasta)
-    tuple val(meta2), path(blast_data)
-    val barcodes
+    tuple val(meta) , path(fasta), path(blast_data), val(barcodes)
 
     output:
     tuple val(meta), path( "*filtered.txt" )    , emit: debarcoded

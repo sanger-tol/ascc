@@ -14,6 +14,7 @@ workflow RUN_DIAMOND {
     ch_ext          = Channel.of("txt")
     ch_columns      = Channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
 
+
     //
     // MODULE: CREATE SLIDING WINDOW OF THE INPUT ASSEMBLY
     //
@@ -22,16 +23,44 @@ workflow RUN_DIAMOND {
     )
     ch_versions     = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
+
     //
-    // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB
+    // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
+    //
+    Channel
+        .of(diamond_db)
+        .map{ it ->
+            tuple(
+                [id: "db"],
+                it
+            )
+        }
+        .set{diamond_db_path}
+
+    SEQKIT_SLIDING.out.fastx
+        .combine(ch_ext)
+        .combine(ch_columns)
+        .combine(diamond_db_path)
+        .multiMap{ meta, reference, extensions, columns, meta2, db_path ->
+            reference: tuple(meta, reference)
+            db_path: tuple(meta2, db_path)
+            ext_ch: extensions
+            col_ch: columns
+        }
+        .set {blast_input}
+
+
+    //
+    // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB.
     //
     DIAMOND_BLASTX (
-        SEQKIT_SLIDING.out.fastx,
-        diamond_db,
-        ch_ext,
-        ch_columns
+        blast_input.reference,
+        blast_input.db_path,
+        blast_input.ext_ch,
+        blast_input.col_ch
     )
     ch_versions     = ch_versions.mix(DIAMOND_BLASTX.out.versions)
+
 
     //
     // MODULE: COMBINE THE CHUNKS INTO THE FULL GENOME
@@ -41,6 +70,7 @@ workflow RUN_DIAMOND {
     )
     ch_versions     = ch_versions.mix(DIAMOND_BLAST_CHUNK_TO_FULL.out.versions)
 
+
     //
     // MODULE: CONVERT THE FULL GENOME FILE INTO A HITS FILE
     //
@@ -48,6 +78,7 @@ workflow RUN_DIAMOND {
         DIAMOND_BLAST_CHUNK_TO_FULL.out.full
     )
     ch_versions     = ch_versions.mix(CONVERT_TO_HITS_FILE.out.versions)
+
 
     //
     // MODULE: REFORMAT THE DIAMOND OUTPUT

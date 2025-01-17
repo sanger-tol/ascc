@@ -14,8 +14,8 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     path ncbi_rankedlineage
 
     output:
-    tuple val(meta), path("autofiltered.fasta"),                        emit: decontaminated_assembly
-    tuple val(meta), path("ABNORMAL_CHECK.csv"),                        emit: fcs_tiara_summary
+    tuple val(meta), path("*autofiltered.fasta"),                        emit: decontaminated_assembly
+    tuple val(meta), path("*ABNORMAL_CHECK.csv"),                       emit: fcs_tiara_summary
     tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
     path("fcs-gx_alarm_indicator_file.txt"),                            emit: alarm_file
     path("autofiltering_done_indicator_file.txt"),                      emit: indicator_file
@@ -30,11 +30,12 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         --taxid $meta.taxid \\
         --tiara $tiara_txt \\
         --fcsgx_sum $fcs_csv \\
+        --out_prefix $prefix \\
         --ncbi_rankedlineage_path $ncbi_rankedlineage \\
 
     abnormal_contamination_check.py \\
         $reference \\
-        ABNORMAL_CHECK.csv
+        ${prefix}_ABNORMAL_CHECK.csv
 
     # The below indicator file is used in Sanger-Tol to allow for other processes
     # to begin once generated. This allows us to speed up the overall flow of the

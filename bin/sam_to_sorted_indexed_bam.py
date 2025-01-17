@@ -6,7 +6,7 @@ Script conversion of .sam file with mapped reads to sorted and indexed .bam file
 #
 # Copyright (c) 2020-2021 Genome Research Ltd.
 #
-# Author: Eerik Aunin (ea10@sanger.ac.uk)
+# Author: Eerik Aunin (eeaunin@gmail.com)
 #
 # This file is a part of the Genome Decomposition Analysis (GDA) pipeline.
 #

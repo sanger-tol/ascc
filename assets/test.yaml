@@ -1,31 +1,26 @@
-assembly_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa
-assembly_title: asccTinyTest_V2
 reads_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/
 reads_type: "hifi"
-pacbio_barcodes: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
-pacbio_multiplexing_barcode_names: "bc2008,bc2009"
-sci_name: "Plasmodium yoelii yoelii 17XNL"
+pacbio_barcode_file: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
+pacbio_barcode_names: "bc2008,bc2009"
+scientific_name: "Plasmodium yoelii yoelii 17XNL"
 taxid: 352914
-mito_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
-plastid_fasta_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
-kmer_len: 7
-dimensionality_reduction_methods: "pca,random_trees"
+kmer_length: 7
+dimensionality_reduction_methods: ["pca", "random_trees"]
 # all available methods
 # "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
-nt_database: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240704_blast_tiny_testdb/blastdb/
+nt_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240704_blast_tiny_testdb/blastdb/
 nt_database_prefix: tiny_plasmodium_blastdb.fa
-nt_kraken_db_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/kraken2/kraken2/
-ncbi_accessionids_folder: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/20240709_tiny_accession2taxid/
+nt_kraken_database_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/kraken2/kraken2/
+ncbi_accession_ids_folder: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/20240709_tiny_accession2taxid/
 ncbi_taxonomy_path: /lustre/scratch123/tol/resources/taxonomy/latest/new_taxdump
-ncbi_rankedlineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
-busco_lineages_folder: /lustre/scratch123/tol/resources/busco/data/v5/2021-08-27/lineages
+ncbi_ranked_lineage_path: /lustre/scratch123/tol/teams/tola/users/ea10/databases/taxdump/rankedlineage.dmp
+busco_lineages_folder: /lustre/scratch123/tol/resources/busco/latest/
 busco_lineages: "diptera_odb10,insecta_odb10"
-fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb/
+fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb
 vecscreen_database_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/vecscreen/
 diamond_uniprot_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240704_diamond_tiny_testdb/ascc_tinytest_diamond_db.dmnd
 diamond_nr_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240704_diamond_tiny_testdb/ascc_tinytest_diamond_db.dmnd
-seqkit:
-  sliding: 100000
-  window: 6000
+seqkit_sliding: 100000
+seqkit_window: 6000
 n_neighbours: 13
 btk_yaml: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/btk_draft.yaml

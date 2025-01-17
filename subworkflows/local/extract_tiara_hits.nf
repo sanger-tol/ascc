@@ -8,6 +8,10 @@ workflow EXTRACT_TIARA_HITS {
     main:
     ch_versions     = Channel.empty()
 
+
+    //
+    // MODULE: IDENTIFY THE EUKARYOTIC SEQUENCES IN THE REFERENCE USING DEEP LEARNING
+    //
     TIARA_TIARA (
         reference_tuple
     )

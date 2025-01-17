@@ -12,24 +12,14 @@ workflow RUN_FCSGX {
     main:
     ch_versions     = Channel.empty()
 
-    Channel
-        .of(
-            'all.gxi', 'all.gxs',  'all.taxa.tsv', 'all.meta.jsonl', 'all.blast_div.tsv.gz'
-        )
-        .combine(
-            fcsgxpath
-        )
-        .map {suxfix, dbpath ->
-            [file(dbpath + '/' + suxfix)]
-        }
-        .collect()
-        .set { fcsgxdb }
 
     //
-    // Create input channel for FCS_FCSGX, taxid is required to be the meta id.
+    // LOGIC: Create input channel for FCS_FCSGX, taxid is required to be the meta id.
     //
     reference
-        .combine( taxid )
+        .combine(
+            Channel.of(taxid)
+        )
         .map { it ->
                 tuple ([    id:     it[0].id,
                             taxid:  it[2]       ],
@@ -37,17 +27,19 @@ workflow RUN_FCSGX {
             }
         .set { reference_with_taxid }
 
+
     //
-    // MODULE: FCS_FCSGX run on assembly fasta tuple with taxid againist fcsgxdb.
+    // MODULE: FCS_FCSGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
     //
     FCS_FCSGX (
         reference_with_taxid,
-        fcsgxdb
+        fcsgxpath
     )
     ch_versions     = ch_versions.mix( FCS_FCSGX.out.versions )
 
+
     //
-    // Create input channel for parsing result module.
+    // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
     FCS_FCSGX.out.fcs_gx_report
         .map{ it ->
@@ -56,6 +48,7 @@ workflow RUN_FCSGX {
                 )
         }
         .set { report_path }
+
 
     //
     // MODULE: PARSE_FCSGX_RESULT to parse the FCS_FCSGX result output in csv format.

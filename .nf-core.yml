@@ -1,22 +1,44 @@
-repository_type: pipeline
 lint:
-  files_exist: false
-  files_unchanged:
+  files_exist:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
-    - .github/ISSUE_TEMPLATE/bug_report.yml
-    - .github/workflows/branch.yml
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - conf/igenomes.config
+    - lib/nfcore_external_java_deps.jar
+    - lib/NfcoreSchema.groovy
+    - lib/NfcoreTemplate.groovy
+    - lib/Utils.groovy
+    - lib/WorkflowMain.groovy
+  files_unchanged:
+    - LICENCE
     - .github/CONTRIBUTING.md
     - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/branch.yml
     - .github/workflows/linting_comment.yml
-    - assets/email_template.html
-    - pyproject.toml
-    - LICENSE
     - .github/workflows/linting.yml
-    - lib/NfcoreTemplate.groovy
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - CODE_OF_CONDUCT.md
+    - gitignore
+    - assets/nf-core-ascc_logo_light.png
+    - assets/email_template.html
+    - docs/images/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_dark.png
+  multiqc_config:
+    - report_comment
   nextflow_config:
     - manifest.name
     - manifest.homePage
-  multiqc_config: False
+    - params.show_hidden_params
+    - params.schema_ignore_params
+    - params.validationSchemaIgnoreParams
+  template_strings: false
+nf_core_version: 2.14.1
+repository_type: pipeline
+template:
+  prefix: sanger-tol
+  skip:
+    - igenomes

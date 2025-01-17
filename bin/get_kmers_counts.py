@@ -2,7 +2,7 @@
 """
 Script for counting kmer frequencies per sequence in a FASTA file
 Output (STDOUT): kmer counts as a CSV table
-Developed by Eerik Aunin (ea10@sanger.ac.uk)
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import argparse

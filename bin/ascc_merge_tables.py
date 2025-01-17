@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+import argparse
+import pandas as pd
+import textwrap
+import os
+import sys
+import general_purpose_functions as gpf
+
 VERSION = "2.0.0"
 DESCRIPTION = """
 Script for merging contaminant check results into one table
@@ -9,13 +16,6 @@ Written by Eerik Anuin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
-
-import argparse
-import pandas as pd
-import textwrap
-import os
-import sys
-import general_purpose_functions as gpf
 
 
 def parse_args():
@@ -98,7 +98,7 @@ def load_and_merge_dataframes(paths_dict):
         bacterial_kraken_df = pd.read_csv(paths_dict["bacterial_kraken"], sep=",")
         if bacterial_kraken_df.shape[0] > 0:
             bacterial_kraken_df.rename(columns={bacterial_kraken_df.columns[0]: "scaff"}, inplace=True)
-            bacterial_kraken_df.rename(columns={"taxid": "kraken_taxid"}, inplace=True)
+            bacterial_kraken_df.rename(columns={"taxid": "nt_kraken_taxid"}, inplace=True)
         else:
             sys.stderr.write(
                 "No rows were found in bacterial Kraken output table ({})\n".format(paths_dict["bacterial_kraken"])
@@ -110,21 +110,14 @@ def load_and_merge_dataframes(paths_dict):
         nt_kraken_df = pd.read_csv(paths_dict["nt_kraken"], sep=",")
         if nt_kraken_df.shape[0] > 0:
             nt_kraken_df.rename(columns={nt_kraken_df.columns[0]: "scaff"}, inplace=True)
-            nt_kraken_df.rename(columns={"taxid": "kraken_taxid"}, inplace=True)
+            nt_kraken_df.rename(columns={"taxid": "nt_kraken_taxid"}, inplace=True)
         else:
             sys.stderr.write("No rows were found in nt Kraken output table ({})\n".format(paths_dict["nt_kraken"]))
             nt_kraken_df = None
 
     dim_reduction_df = None
     if paths_dict["dim_reduction_embeddings"] is not None:
-        dim_reduction_df = pd.read_csv(paths_dict["dim_reduction_embeddings"], sep=",")
-        if dim_reduction_df.shape[0] == 0:
-            sys.stderr.write(
-                "No rows were found in kmers dimensionality reduction output table ({})\n".format(
-                    paths_dict["dim_reduction_embeddings"]
-                )
-            )
-            dim_reduction_df = None
+        dim_reduction_df = parse_or_pass(paths_dict["dim_reduction_embeddings"], "DIMENSIONAL-REDUCTION-EMBEDDINGS")
 
     btk_df = None
     if paths_dict["blobtoolkit"] is not None:
@@ -194,51 +187,27 @@ def load_and_merge_dataframes(paths_dict):
 
     fcs_gx_df = None
     if paths_dict["fcs_gx"] is not None:
-        fcs_gx_df = pd.read_csv(paths_dict["fcs_gx"], sep=",")
-        if fcs_gx_df.shape[0] == 0:
-            sys.stderr.write("No rows were found in FCS-GX output table ({})\n".format(paths_dict["fcs_gx"]))
-            fcs_gx_df = None
+        fcs_gx_df = parse_or_pass(paths_dict["fcs_gx"], "FCSGX")
 
     nt_blast_df = None
     if paths_dict["nt_blast"] is not None:
-        nt_blast_df = pd.read_csv(paths_dict["nt_blast"], sep=",")
-        if nt_blast_df.shape[0] == 0:
-            sys.stderr.write("No rows were found in nt BLAST output table ({})\n".format(paths_dict["nt_blast"]))
-            nt_blast_df = None
+        nt_blast_df = parse_or_pass(paths_dict["nt_blast"], "NT_BLAST")
 
     nr_diamond_df = None
     if paths_dict["nr_diamond"] is not None:
-        nr_diamond_df = pd.read_csv(paths_dict["nr_diamond"], sep=",")
-        if nr_diamond_df.shape[0] == 0:
-            sys.stderr.write("No rows were found in nr Diamond output table ({})\n".format(paths_dict["nr_diamond"]))
-            nr_diamond_df = None
+        nr_diamond_df = parse_or_pass(paths_dict["nr_diamond"], "NR_DIAMOND")
 
     uniprot_diamond_df = None
     if paths_dict["uniprot_diamond"] is not None:
-        uniprot_diamond_df = pd.read_csv(paths_dict["uniprot_diamond"], sep=",")
-        if uniprot_diamond_df.shape[0] == 0:
-            sys.stderr.write(
-                "No rows were found in Uniprot Diamond output table ({})\n".format(paths_dict["uniprot_diamond"])
-            )
-            uniprot_diamond_df = None
+        uniprot_diamond_df = parse_or_pass(paths_dict["uniprot_diamond"], "UNIPROT_DIAMOND")
 
     cobiontid_markerscan_df = None
     if paths_dict["cobiontid_markerscan"] is not None:
-        cobiontid_markerscan_df = pd.read_csv(paths_dict["cobiontid_markerscan"], sep=",")
-        if cobiontid_markerscan_df.shape[0] == 0:
-            sys.stderr.write(
-                "No rows were found in CobiontID MarkerScan output table ({})\n".format(
-                    paths_dict["cobiontid_markerscan"]
-                )
-            )
-            uniprot_diamond_df = None
+        cobiontid_markerscan_df = parse_or_pass(paths_dict["cobiontid_markerscan"], "COBIONT MARKERSCAN")
 
     contigviz_df = None
     if paths_dict["contigviz"] is not None:
-        contigviz_df = pd.read_csv(paths_dict["contigviz"], sep=",")
-        if contigviz_df.shape[0] == 0:
-            sys.stderr.write("No rows were found in ContigViz output table ({})\n".format(paths_dict["contigviz"]))
-            contigviz_df = None
+        contigviz_df = parse_or_pass(paths_dict["contigviz"], "CONTIG VIZ")
 
     if coverage_df is not None:
         df = pd.merge(df, coverage_df, on="scaff", how="outer")
@@ -268,6 +237,14 @@ def load_and_merge_dataframes(paths_dict):
         df = pd.merge(df, btk_busco_df, on="scaff", how="outer")
 
     return df
+
+
+def parse_or_pass(input_file: str, name: str):
+    try:
+        return pd.read_csv(input_file, sep=",")
+    except:
+        sys.stderr.write(f"Process:: {name} :: No rows in file: {input_file}")
+        return None
 
 
 def main(args):

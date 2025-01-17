@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script for getting lineage for Kraken results
-Developed by Eerik Aunin (ea10@sanger.ac.uk)
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import general_purpose_functions as gpf

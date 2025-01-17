@@ -15,6 +15,10 @@ workflow RUN_NT_KRAKEN {
     main:
     ch_versions     = Channel.empty()
 
+
+    //
+    // LOGIC: MODIFY THE INPUT TUPLE TO INCLUDE THE single_end VALUE
+    //
     assembly_fasta
         .map{ it ->
             tuple([id: it[0].id,
@@ -24,8 +28,10 @@ workflow RUN_NT_KRAKEN {
             )
         }
         .set { modified_input }
+
+
     //
-    // MODULE: Kraken2 run on assembly fasta.
+    // MODULE: RUN KRAKEN2 ON THE INPUT GENOME - GENERATES TAXONOMIC CLASSIFICATION.
     //
     KRAKEN2_KRAKEN2 (
         modified_input,      // val(meta), path(reads)
@@ -35,8 +41,9 @@ workflow RUN_NT_KRAKEN {
     )
     ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions)
 
+
     //
-    // MODULE: Get lineage for kraken output.
+    // MODULE: GET LINEAGE FOR THE KRAKEN OUTPUT.
     //
     GET_LINEAGE_FOR_KRAKEN (
         KRAKEN2_KRAKEN2.out.classified_reads_assignment,

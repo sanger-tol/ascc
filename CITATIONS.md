@@ -10,19 +10,44 @@
 
 ## Pipeline tools
 
-- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [FCS-adaptor](https://github.com/ncbi/fcs/wiki/FCS-adaptor-quickstart.)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+  > Astashyn, Alexander, Eric S. Tvedte, Deacon Sweeney, Victor Sapojnikov, Nathan Bouk, Victor Joukov, Eyal Mozes, et al. 2023. “FCS-Adaptor.” FCS-Adaptor. June 6, 2023.
+  > ———. 2024. “Rapid and Sensitive Detection of Genome Contamination at Scale with FCS-GX.” Genome Biology 25 (1): 60.
 
-- [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
+- [Kcounter](https://github.com/apcamargo/kcounter).
 
-  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+  > Buchfink, Benjamin, Klaus Reuter, and Hajk-Georg Drost. 2021. “Sensitive Protein Alignments at Tree-of-Life Scale Using DIAMOND.” Nature Methods 18 (4): 366–68.
+  > Camargo, Antônio. 2020. “Kcounter.” Kcounter. February 17, 2020. https://github.com/apcamargo/kcounter.
+
+- [BlobToolKit](https://github.com/sanger-tol/blobtoolkit).
+
+  > Challis, Richard, Edward Richards, Jeena Rajan, Guy Cochrane, and Mark Blaxter. 2020. “BlobToolKit - Interactive Quality Assessment of Genome Assemblies.” G3 10 (4): 1361–74. Diaz, Alexander Ramos, Zaynab Butt, Priyanka Surana, Richard Challis, Sujai Kumar, and Matthieu Muffato. 2023. “BlobToolKit Pipeline.” BlobToolKit Pipeline. May 18, 2023.
+
+- [Tiara](https://github.com/ibe-uw/tiara).
+
+  > Karlicki, Michał, Stanisław Antonowicz, and Anna Karnkowska. 2022. “Tiara: Deep Learning-Based Classification System for Eukaryotic Sequences.” Bioinformatics 38 (2): 344–50.
+
+- [Minimap2](https://github.com/lh3/minimap2).
+
+  > Li, Heng. 2018. “Minimap2: Pairwise Alignment for Nucleotide Sequences.” Bioinformatics 34 (18): 3094–3100.
+
+- [TensorFlow](https://www.tensorflow.org/)
+
+  > Martín Abadi, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen, Craig Citro, Greg S. Corrado, et al. 2015. “TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems.”
+
+- [VecScreen](https://manpages.debian.org/testing/ncbi-tools-bin/vecscreen.1.en.html).
+
+  > NCBI. 2001. “NCBI VecScreen.” NCBI VecScreen. October 5, 2001.
+
+- [Scikit-Learn]
+  Pedregosa, F., G. Varoquaux, A. Gramfort, and V. Michel. 2011. “Scikit-Learn: Machine Learning in Python. JMLR 12, 2825–2830 (2011).” Journal of Machine Learning Research 12 (October): 2825–30.
 
 ## Software packaging/containerisation tools
 
-- [Anaconda](https://anaconda.com)
+- [Conda](https://conda.org/)
 
-  > Anaconda Software Distribution. Computer software. Vers. 2-2.4.0. Anaconda, Nov. 2016. Web.
+  > conda contributors. conda: A system-level, binary package and environment manager running on all major operating systems and platforms. Computer software. https://github.com/conda/conda
 
 - [Bioconda](https://pubmed.ncbi.nlm.nih.gov/29967506/)
 

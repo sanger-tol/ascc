@@ -26,51 +26,23 @@ jobs:
     strategy:
       matrix:
         NXF_VER:
-          - "22.10.1"
+          - "23.04.0"
           - "latest-everything"
     steps:
-      - name: Get branch names
-        # Pulls the names of current branches in repo
-        # steps.branch-names.outputs.current_branch is used later and returns the name of the branch the PR is made FROM not to
-        id: branch-names
-        uses: tj-actions/branch-names@v8
-
       - name: Check out pipeline code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Nextflow
-        uses: nf-core/setup-nextflow@v1
+        uses: nf-core/setup-nextflow@v2
         with:
           version: "${{ matrix.NXF_VER }}"
-
-      - name: Set up Singularity
-        run: |
-          mkdir -p $NXF_SINGULARITY_CACHEDIR
-          mkdir -p $NXF_SINGULARITY_LIBRARYDIR
-
-      - name: Setup apptainer
-        uses: eWaterCycle/setup-apptainer@main
-
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install nf-core
-        run: |
-          pip install nf-core
-
-      - name: NF-Core Download - download singularity containers
-        # Forcibly download repo on active branch and download SINGULARITY containers into the CACHE dir if not found
-        # Must occur after singularity install or will crash trying to dl containers
-        # Zip up this fresh download and run the checked out version
-        run: |
-          nf-core download sanger-tol/ascc --revision ${{ steps.branch-names.outputs.current_branch }} --compress none -d --force --outdir sanger-ascc --container-cache-utilisation amend --container-system singularity
 
       - name: Download test data
         # Download A fungal test data set that is full enough to show some real output.
         run: |
           curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
+
+          cp /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa /home/runner/work/ascc/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa
 
       - name: Temporary ASCC Diamond Data
         run: |
@@ -113,16 +85,6 @@ jobs:
           mkdir NT_database
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz | tar -C NT_database -xzf -
 
-      - name: Download the pacbio barcode
-        run: |
-          mkdir pacbio_barcode
-          wget -O pacbio_barcode/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip -c https://www.pacb.com/wp-content/uploads/SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
-          cd pacbio_barcode
-          unzip SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
-          mv SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta pacbio_adaptors.fa
-          rm -rf SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip __MACOSX
-          cd ../
-
       - name: Download the subset of Diamond database
         run: |
           mkdir diamond
@@ -132,11 +94,26 @@ jobs:
         run: |
           mkdir vecscreen
           curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz | tar -C vecscreen -xzf -
-          ls -lh
 
-      - name: Singularity - Run FULL pipeline with test data
-        # TODO nf-core: You can customise CI pipeline run tests as required
-        # For example: adding multiple test runs with different parameters
-        # Remember that you can parallelise this by using strategy.matrix
+      - name: Run FULL pipeline with test data
         run: |
-          nextflow run ./sanger-ascc/${{ steps.branch-names.outputs.current_branch }}/main.nf -profile test,singularity --outdir ./results --include ALL --exclude btk_busco
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test,docker \
+            -params-file ${GITHUB_WORKSPACE}/assets/github_testing/github_test.yaml \
+            --input ${GITHUB_WORKSPACE}/assets/github_testing/samplesheet.csv \
+            --exclude btk_busco \
+            --organellar_exclude btk_busco
+
+      - name: Upload Nextflow log
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextflow-${{ strategy.job-index }}-log
+          path: /home/runner/work/ascc/ascc/.nextflow.log
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 1
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: nextflow-*
+          merge-multiple: true

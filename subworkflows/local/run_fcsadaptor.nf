@@ -13,6 +13,7 @@ workflow RUN_FCSADAPTOR {
     main:
     ch_versions     = Channel.empty()
 
+
     //
     // MODULE: FCS_FCSADAPTOR run on assembly fasta for prokaryote.
     //
@@ -20,6 +21,7 @@ workflow RUN_FCSADAPTOR {
         reference_tuple      // val(meta), path(fasta)
     )
     ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_PROK.out.versions)
+
 
     //
     // MODULE: FCS_FCSADAPTOR run with eukaryote settings

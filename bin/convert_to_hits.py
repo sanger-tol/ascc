@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import general_purpose_functions as gpf
+from collections import OrderedDict
+import textwrap
+import argparse
+
 VERSION = "2.0.0"
 
 DESCRIPTION = """
@@ -14,19 +19,14 @@ Written by Eerik Aunin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
-import general_purpose_functions as gpf
-from collections import OrderedDict
-import textwrap
-import argparse
 
-
-def save_file(output_list, name):
-    with open(f"{name}_diamond_blastx_top_hits.csv", "w") as f:
+def save_file(output_list, name, prefix):
+    with open(f"{prefix}_{name}_diamond_blastx_top_hits.csv", "w") as f:
         for line in output_list:
             f.write(f"{line}\n")
 
 
-def main(in_path, diamond_database_title):
+def main(in_path, diamond_database_title, out_prefix):
     in_data = gpf.ll(in_path)
 
     top_hits_dict = OrderedDict()
@@ -67,7 +67,7 @@ def main(in_path, diamond_database_title):
         out_line = seq_name + "," + out_line
         output.append(out_line)
 
-    save_file(output, diamond_database_title)
+    save_file(output, diamond_database_title, out_prefix)
 
 
 if __name__ == "__main__":
@@ -79,5 +79,6 @@ if __name__ == "__main__":
     parser.add_argument("in_path", type=str, help="Path to Diamond BLASTX results")
     parser.add_argument("diamond_database_title", type=str, help="Name of the Diamond database (e.g. nr or Uniprot)")
     parser.add_argument("-v", "--version", action="version", version=VERSION)
+    parser.add_argument("-o", "--out_prefix", type=str, help="Output Prefix")
     args = parser.parse_args()
-    main(args.in_path, args.diamond_database_title)
+    main(args.in_path, args.diamond_database_title, args.out_prefix)

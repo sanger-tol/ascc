@@ -3,18 +3,15 @@ process SANGER_TOL_BTK {
     label 'process_low'
 
     input:
-    tuple val(meta), path(reference, stageAs: "REFERENCE.fa")
-    tuple val(meta1), path(bam) // Name needs to remain the same as previous process as they are referenced in the samplesheet
-    tuple val(meta2), path(samplesheet_csv, stageAs: "SAMPLESHEET.csv")
-    path blastp, stageAs: "blastp.dmnd"
+    tuple val(meta),    path(reference)
+    path(samplesheet_csv)
+    path blastp,                        stageAs: "blastp.dmnd"
     path blastn
     path blastx
-    path btk_config_file
     path tax_dump
-    path btk_yaml, stageAs: "BTK.yaml"
+    val busco_lineages_folder
     val busco_lineages
     val taxon
-    val gca_accession
 
     output:
     tuple val(meta), path("${meta.id}_btk_out/blobtoolkit/${meta.id}*"),    emit: dataset
@@ -28,14 +25,9 @@ process SANGER_TOL_BTK {
     script:
     def prefix              =   task.ext.prefix         ?:  "${meta.id}"
     def args                =   task.ext.args           ?:  ""
-    def executor            =   task.ext.executor       ?:  ""
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
-    def btk_config          =   btk_config_file         ? "-c $btk_config_file"         : ""
-    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
-    // YAML used to avoid the use of GCA accession number
-    //    https://github.com/sanger-tol/blobtoolkit/issues/77
-
+    def pipeline_version    =   task.ext.version        ?: "0.6.0"
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -47,20 +39,21 @@ process SANGER_TOL_BTK {
 
 
     """
-    $executor 'nextflow run sanger-tol/blobtoolkit \\
+    nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
         -profile  $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
-        --fasta "\$(realpath REFERENCE.fa)" \\
+        --fasta "\$(realpath $reference)" \\
+        --busco $busco_lineages_folder \\
         --busco_lineages $busco_lineages \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\
         --blastn "\$(realpath $blastn)" \\
         --blastx "\$(realpath $blastx)" \\
-        $btk_config \\
-        $args'
+        --use_work_dir_as_temp true \\
+        $args
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
 

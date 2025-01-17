@@ -18,6 +18,7 @@ def main():
     parser.add_argument("contamination_files", nargs="+")
     parser.add_argument("--assembly_file")
     parser.add_argument("--extracts_dir", default="./")
+    parser.add_argument("--out_prefix", default="assembly")
     parser.add_argument("-v", action="version", version="1.0")
     args = parser.parse_args()
 
@@ -28,7 +29,7 @@ def main():
             assembly_file = re.sub("\.contamination", ".fa.gz", contamination_file)
         else:
             assembly_file = args.assembly_file
-        assembly_name = "assembly"
+        assembly_name = args.out_prefix
 
         # If at first you don't succeed, try again with a .fasta suffix:
         if not os.path.isfile(assembly_file):
