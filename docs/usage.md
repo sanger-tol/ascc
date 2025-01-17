@@ -63,44 +63,49 @@ Pipeline component options:
 `--organellar_exclude`: comma-separated list of pipeline components to exclude from running on organellar DNA sequences.
 
 Available pipeline components:
-- `kmers`              : K-mer counting and dimensionality reduction analysis using kcounter, scikit-learn, and TensorFlow
-- `tiara`              : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin using Tiara
-- `coverage`           : Analysis of sequence coverage using minimap2-based read mapping
-- `nt_blast`          : Nucleotide BLAST search against NCBI nt database for taxonomic classification
-- `nr_diamond`        : DIAMOND BLASTX search against NCBI non-redundant protein database
-- `uniprot_diamond`   : DIAMOND BLASTX search against UniProt database
-- `kraken`            : Taxonomic classification using Kraken2 against NCBI nt database
-- `fcs-gx`            : NCBI's FCS-GX (foreign contamination screen with cross-species aligner)
-- `fcs-adaptor`       : NCBI's FCS-Adaptor (foreign contamination screen for adapter sequences)
-- `vecscreen`         : NCBI's vector and adapter contamination screening (older tool than FCS-Adaptor but allows using a custom database)
-- `btk_busco`         : BlobToolKit Pipeline (sequence classification using BUSCO, Diamond and BLAST)
-- `pacbio_barcodes`   : Detection of PacBio barcode contamination using BLAST
-- `organellar_blast`  : BLAST-based detection of organellar sequences
+
+- `kmers` : K-mer counting and dimensionality reduction analysis using kcounter, scikit-learn, and TensorFlow
+- `tiara` : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin using Tiara
+- `coverage` : Analysis of sequence coverage using minimap2-based read mapping
+- `nt_blast` : Nucleotide BLAST search against NCBI nt database for taxonomic classification
+- `nr_diamond` : DIAMOND BLASTX search against NCBI non-redundant protein database
+- `uniprot_diamond` : DIAMOND BLASTX search against UniProt database
+- `kraken` : Taxonomic classification using Kraken2 against NCBI nt database
+- `fcs-gx` : NCBI's FCS-GX (foreign contamination screen with cross-species aligner)
+- `fcs-adaptor` : NCBI's FCS-Adaptor (foreign contamination screen for adapter sequences)
+- `vecscreen` : NCBI's vector and adapter contamination screening (older tool than FCS-Adaptor but allows using a custom database)
+- `btk_busco` : BlobToolKit Pipeline (sequence classification using BUSCO, Diamond and BLAST)
+- `pacbio_barcodes` : Detection of PacBio barcode contamination using BLAST
+- `organellar_blast` : BLAST-based detection of organellar sequences
 - `autofilter_assembly`: Automated assembly filtering (requires `tiara` and `fcs-gx`)
-- `ALL`               : Run all available components
-- `NONE`              : Run no components
+- `ALL` : Run all available components
+- `NONE` : Run no components
 
 Dependencies:
+
 - `autofilter_assembly` requires both `tiara` and `fcs-gx` to be run first
 
 Outputs:
+
 - Results are collected as BlobToolKit datasets and CSV tables
 - Adapter and organellar contamination reports are provided as text files
-
 
 ### Example usage
 
 #### Basic run with essential components
+
 ```
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --include tiara,coverage,nt_blast --organellar_include nt_blast,coverage -profile singularity
 ```
 
 #### Comprehensive analysis
+
 ```
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --include kmers,tiara,coverage,nt_blast,nr_diamond,kraken,fcs-gx,btk_busco --organellar_include nt_blast,coverage -profile singularity
 ```
 
 #### Run everything except specific components
+
 ```
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --include ALL --exclude vecscreen,pacbio_barcodes --organellar_include ALL -profile singularity
 ```
