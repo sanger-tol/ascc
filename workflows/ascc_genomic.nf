@@ -80,7 +80,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
-    if ( include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials")) {
+    if ( include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials") || include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials")) {
 
         ESSENTIAL_JOBS(
             ch_samplesheet
