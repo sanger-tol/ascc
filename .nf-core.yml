@@ -36,8 +36,7 @@ lint:
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
   template_strings:
-    - paper/paper.md
-    - paper/paper.bib
+    - /home/runner/work/ascc/ascc/paper/paper.bib
 nf_core_version: 2.14.1
 repository_type: pipeline
 template:
