@@ -3,7 +3,7 @@
 """
 Script for kmer count dimensionality reduction, using multiple methods.
 
-Developed by Eerik Aunin (ea10@sanger.ac.uk)
+Developed by Eerik Aunin (eeaunin@gmail.com)
 
 Modified by Damon-Lee Pointon (dp24)
 """

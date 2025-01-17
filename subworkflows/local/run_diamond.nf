@@ -6,7 +6,6 @@ include {   REFORMAT_DIAMOND_OUTFMT6                            } from '../../mo
 
 workflow RUN_DIAMOND {
     take:
-    // TODO: isnt this already seqkitted?
     reference_tuple     // tuple [[meta.id, meta.sliding, meta.window], reference]
     diamond_db          // val (path)
 

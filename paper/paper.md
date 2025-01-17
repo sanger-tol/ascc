@@ -8,7 +8,7 @@ tags:
   - biodiversity
 authors:
   - name: Eerik Aunin
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0001-8385-2636
     equal-contrib: true
     affiliation: 1
   - name: Damon-Lee B Pointon
@@ -16,24 +16,20 @@ authors:
     equal-contrib: true
     affiliation: 1
   - name: James Torrance
-    orchid: 0000-0003-2949-6719
+    orchid: 0000-0000-0000-0000
     equal-contrib: true
     affiliation: 1
   - name: Ying Sims
-    orchid: 0000-0003-2949-6719
-    equal-contrib: true
+    orchid: 0000-0000-0000-0000
     affiliation: 1
   - name: Will Eagles
-    orchid: 0000-0003-2949-6719
-    equal-contrib: true
+    orchid: 0000-0000-0000-0000
     affiliation: 1
   - name: Matthieu Muffato
-    orchid: 0000-0003-2949-6719
-    equal-contrib: true
+    orchid: 0000-0000-0000-0000
     affiliation: 1
   - name: Shane A. McCarthy
-    orchid: 0000-0003-2949-6719
-    equal-contrib: true
+    orchid: 0000-0000-0000-0000
     affiliation: 1
 affiliations:
  - name: The Sanger Institute, Wellcome Genome Campus, UK

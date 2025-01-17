@@ -153,7 +153,7 @@
                 },
                 "n_neighbours": {
                     "type": "number",
-                    "description": "Nearest Neighbour value",
+                    "description": "Nearest Neighbour value - This is for the dimensional reduction of kmer counts (UMAP and t-SNE).",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "btk_yaml": {

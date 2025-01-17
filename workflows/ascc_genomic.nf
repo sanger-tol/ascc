@@ -538,48 +538,48 @@ workflow ASCC_GENOMIC {
             .set{ new_csv }
 
 
-    //     //
-    //     // LOGIC: COMBINE ALL THE REQUIRED CHANNELS TOGETHER INTO A MAP FOR NF-CASCADE VERSION
-    //     //          OF SANGER_TOL_BTK TO PARSE INTO THE INPUT PARAMS
-    //     //
-    //     //new_gg
-    //     //    .combine(new_csv, by: 0)
-    //     //    .combine(Channel.of(params.diamond_uniprot_database_path))
-    //     //    .combine(Channel.of(params.nt_database_path))
-    //     //    .combine(Channel.of(params.diamond_uniprot_database_path))
-    //     //    .combine(Channel.of(params.ncbi_taxonomy_path))
-    //     //    .combine(Channel.of(params.busco_lineages_folder))
-    //     //    .combine(Channel.of(params.busco_lineages))
-    //     //    .combine(Channel.of(params.taxid))
-    //     //    .map{
-    //     //        meta, reference, samplesheet, prot_db, nt_db, x_db, ncbi_taxdump, busco_folder, busco_lineage_vals, taxid ->
-    //     //        [
-    //     //            input: samplesheet,
-    //     //            fasta: reference,
-    //     //            blastp: prot_db,
-    //     //            blastn: nt_db,
-    //     //            blastx: x_db,
-    //     //            taxdump: ncbi_taxdump,
-    //     //            busco: busco_folder,
-    //     //            busco_lineages: busco_lineage_vals,
-    //     //            taxon: taxid,
-    //     //            blastx_outext: "txt",
-    //     //            use_work_dir_as_temp: true
-    //     //
-    //     //        ]
-    //     //    }
-    //     //    .set{ pipeline_input }
+        //
+        // LOGIC: COMBINE ALL THE REQUIRED CHANNELS TOGETHER INTO A MAP FOR NF-CASCADE VERSION
+        //          OF SANGER_TOL_BTK TO PARSE INTO THE INPUT PARAMS
+        //
+        //new_gg
+        //    .combine(new_csv, by: 0)
+        //    .combine(Channel.of(params.diamond_uniprot_database_path))
+        //    .combine(Channel.of(params.nt_database_path))
+        //    .combine(Channel.of(params.diamond_uniprot_database_path))
+        //    .combine(Channel.of(params.ncbi_taxonomy_path))
+        //    .combine(Channel.of(params.busco_lineages_folder))
+        //    .combine(Channel.of(params.busco_lineages))
+        //    .combine(Channel.of(params.taxid))
+        //    .map{
+        //        meta, reference, samplesheet, prot_db, nt_db, x_db, ncbi_taxdump, busco_folder, busco_lineage_vals, taxid ->
+        //        [
+        //            input: samplesheet,
+        //            fasta: reference,
+        //            blastp: prot_db,
+        //            blastn: nt_db,
+        //            blastx: x_db,
+        //            taxdump: ncbi_taxdump,
+        //            busco: busco_folder,
+        //            busco_lineages: busco_lineage_vals,
+        //            taxon: taxid,
+        //            blastx_outext: "txt",
+        //            use_work_dir_as_temp: true
+        //
+        //        ]
+        //    }
+        //    .set{ pipeline_input }
 
-    //     //
-    //     // PIPELINE: SANGER_TOL_BTK_CASCADE USES NF-CASCADE WRITTEN BY MAHESH
-    //     //
-    //     //SANGER_TOL_BTK_CASCADE(
-    //     //    "sanger-tol/blobtoolkit",
-    //     //    "-r 0.6.0 -profile sanger,singularity",
-    //     //    [],
-    //     //    pipeline_input,
-    //     //    []
-    //     //)
+        //
+        // PIPELINE: SANGER_TOL_BTK_CASCADE USES NF-CASCADE WRITTEN BY MAHESH
+        //
+        //SANGER_TOL_BTK_CASCADE(
+        //    "sanger-tol/blobtoolkit",
+        //    "-r 0.6.0 -profile sanger,singularity",
+        //    [],
+        //    pipeline_input,
+        //    []
+        //)
 
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE

@@ -2,7 +2,7 @@
 """
 Script for detecting trailing Ns that should be trimmed from an assembly,
 Written by James Torrance (jt8@sanger.ac.uk).
-Edited by Eerik Aunin (ea10@sanger.ac.uk)
+Edited by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import re

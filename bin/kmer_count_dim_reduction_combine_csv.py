@@ -2,7 +2,7 @@
 
 """
 Script to combine kmer count dimensionality reduction embedding csv files.
-Adapted from Eerik Aunin (ea10@sanger.ac.uk), by William Eagles (we3@sanger.ac.uk)
+Adapted from Eerik Aunin (eeaunin@gmail.com), by William Eagles (we3@sanger.ac.uk)
 """
 
 import pandas as pd

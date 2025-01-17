@@ -7,7 +7,7 @@ File for functions that can be reused in many Python scripts
 #
 # Copyright (c) 2020-2021 Genome Research Ltd.
 #
-# Author: Eerik Aunin (ea10@sanger.ac.uk)
+# Author: Eerik Aunin (eeaunin@gmail.com)
 #
 # This file is a part of the Genome Decomposition Analysis (GDA) pipeline.
 #
