@@ -61,7 +61,7 @@ workflow ASCC_GENOMIC {
     include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
     exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
 
-    full_list               = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"]
+    full_list               = ["essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
@@ -80,10 +80,24 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
-    ESSENTIAL_JOBS(
-        ch_samplesheet
-    )
-    ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+    if ( include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials")) {
+
+        ESSENTIAL_JOBS(
+            ch_samplesheet
+        )
+        ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+
+        reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
+        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
+
+    } else {
+        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+
+        reference_tuple_from_GG = ch_samplesheet // This is the reference genome input channel
+        ej_dot_genome           = []
+        ej_gc_coverage          = []
+    }
 
 
     if ( include_workflow_steps.contains('kmers') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("kmers")) {
@@ -91,7 +105,7 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
         //
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        reference_tuple_from_GG
             .map { meta, file ->
                 file.countFasta() * 3
             }
@@ -101,7 +115,7 @@ workflow ASCC_GENOMIC {
         // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
         //
         GET_KMERS_PROFILE (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.kmer_length,
             params.dimensionality_reduction_methods,
             autoencoder_epochs_count
@@ -118,7 +132,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
         EXTRACT_TIARA_HITS (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            reference_tuple_from_GG
         )
         ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
         ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
@@ -139,7 +153,7 @@ workflow ASCC_GENOMIC {
         ch_blast_lineage    = []
 
         EXTRACT_NT_BLAST (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.nt_database_path,
             params.ncbi_accession_ids_folder,
             params.ncbi_ranked_lineage_path
@@ -171,7 +185,7 @@ workflow ASCC_GENOMIC {
         // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
         //
         MITO_ORGANELLAR_BLAST (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             organellar_check.mito
         )
 
@@ -182,7 +196,7 @@ workflow ASCC_GENOMIC {
         // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
         //
         PLASTID_ORGANELLAR_BLAST (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             organellar_check.plastid
         )
         ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
@@ -199,7 +213,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
         PACBIO_BARCODE_CHECK (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.reads_path,
             params.reads_type,
             params.pacbio_barcode_file,
@@ -215,7 +229,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSADAPTOR (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            reference_tuple_from_GG
         )
 
         RUN_FCSADAPTOR.out.ch_euk
@@ -236,7 +250,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
         RUN_FCSGX (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             fcs_db,
             params.taxid,
             params.ncbi_ranked_lineage_path
@@ -254,7 +268,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
         RUN_READ_COVERAGE (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.reads_path,
             params.reads_type,
         )
@@ -272,7 +286,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
         RUN_VECSCREEN (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.vecscreen_database_path
         )
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
@@ -287,7 +301,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL') ) {
         RUN_NT_KRAKEN(
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.nt_kraken_database_path,
             params.ncbi_ranked_lineage_path
         )
@@ -310,7 +324,7 @@ workflow ASCC_GENOMIC {
     //
     if ( include_workflow_steps.contains('nr_diamond') && !exclude_workflow_steps.contains("nr_diamond") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nr_diamond")) {
         NR_DIAMOND (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.diamond_nr_database_path
         )
         nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
@@ -325,9 +339,9 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("uniprot_diamond") ) {
         UP_DIAMOND (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            reference_tuple_from_GG,
             params.diamond_uniprot_database_path
         )
         un_full             = UP_DIAMOND.out.reformed.map{it[1]}
@@ -338,30 +352,31 @@ workflow ASCC_GENOMIC {
         un_full             = []
     }
 
-    ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
+    if ( (include_workflow_steps.contains('btk_dataset') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("btk_dataset")) {
+        ch_dot_genome           = ej_dot_genome.map{it[1]}
 
 
-    //
-    // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
-    //
-    CREATE_BTK_DATASET (
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-        ch_dot_genome,
-        ch_kmers,
-        ch_tiara,
-        ch_nt_blast,
-        ch_fcsgx,
-        ch_bam,
-        ch_coverage,
-        ch_kraken1,
-        ch_kraken2,
-        ch_kraken3,
-        nr_full,
-        un_full,
-        Channel.fromPath(params.ncbi_taxonomy_path).first()
-    )
-    ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
-
+        //
+        // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
+        //
+        CREATE_BTK_DATASET (
+            reference_tuple_from_GG,
+            ch_dot_genome,
+            ch_kmers,
+            ch_tiara,
+            ch_nt_blast,
+            ch_fcsgx,
+            ch_bam,
+            ch_coverage,
+            ch_kraken1,
+            ch_kraken2,
+            ch_kraken3,
+            nr_full,
+            un_full,
+            Channel.fromPath(params.ncbi_taxonomy_path).first()
+        )
+        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    }
 
     //
     // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
@@ -375,7 +390,7 @@ workflow ASCC_GENOMIC {
         //              Thankfully taxid is a param so easy enough to add back in.
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        reference_tuple_from_GG
             .map{meta, file ->
                 tuple([id: meta.id], file)
             }
@@ -470,7 +485,7 @@ workflow ASCC_GENOMIC {
             }
             .set {coverage_id}
 
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        reference_tuple_from_GG
             .map{ meta, ref ->
                 tuple(
                     [ id: meta.id ],
@@ -507,7 +522,7 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
         //
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        reference_tuple_from_GG
             .map{ meta, file ->
                 tuple([id: meta.id], file)
             }
@@ -577,28 +592,29 @@ workflow ASCC_GENOMIC {
     }
 
 
-    //
-    // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
-    //
+        //
+        // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
+        //
+    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("merge_tables") ) {
 
-    ASCC_MERGE_TABLES (
-        ESSENTIAL_JOBS.out.gc_content_txt,                // FROM -- GC_COVERAGE.tsv
-        ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
-        ch_tiara,                                         // FROM -- TIARA.classifications[0]
-        [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
-        ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
-        ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
-        ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
-        nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
-        un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
-        [],                                               // MARKER SCAN -- NOT IN PIPELINE
-        [],                                               // CONTIGVIZ -- NOT IN PIPELINE
-        CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
-        busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
-        ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
-    )
-    ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
-
+        ASCC_MERGE_TABLES (
+            ej_gc_coverage,                                   // FROM -- GC_COVERAGE.tsv
+            ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
+            ch_tiara,                                         // FROM -- TIARA.classifications[0]
+            [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
+            ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
+            ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
+            ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
+            nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
+            un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
+            [],                                               // MARKER SCAN -- NOT IN PIPELINE
+            [],                                               // CONTIGVIZ -- NOT IN PIPELINE
+            CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
+            busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
+            ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
+        )
+        ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    }
 
     //
     // Collate and save software versions
