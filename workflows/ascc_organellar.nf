@@ -79,7 +79,6 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
     if ( include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials")) {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         ESSENTIAL_JOBS(
             ch_samplesheet
@@ -92,6 +91,8 @@ workflow ASCC_ORGANELLAR {
         reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
 
     } else {
+        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+
         reference_tuple_from_GG = ch_samplesheet // This is the reference genome input channel
         ej_dot_genome           = []
         ej_gc_coverage          = []

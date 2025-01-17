@@ -80,7 +80,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
-    if ( include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials") || include_workflow_steps.contains('essentials') && !exclude_workflow_steps.contains("essentials")) {
+    if ( (include_workflow_steps.contains('essentials') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("essentials")) {
 
         ESSENTIAL_JOBS(
             ch_samplesheet
@@ -90,6 +90,8 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
+        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
+
 
     } else {
         log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
@@ -97,10 +99,11 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ch_samplesheet // This is the reference genome input channel
         ej_dot_genome           = []
         ej_gc_coverage          = []
+        reference_tuple_w_seqkt = []
     }
 
 
-    if ( include_workflow_steps.contains('kmers') && !exclude_workflow_steps.contains("kmers") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("kmers")) {
+    if ( (include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("kmers")) {
 
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
