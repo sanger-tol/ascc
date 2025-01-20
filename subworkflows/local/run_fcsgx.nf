@@ -1,4 +1,4 @@
-include { FCSGX_RUNGX           } from '../../modules/nf-core/fcsgx_rungx/main'
+include { FCSGX_RUNGX           } from '../../modules/nf-core/fcsgx/fcsgx_rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../modules/local/parse_fcsgx_result'
 
 workflow RUN_FCSGX {
