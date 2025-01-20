@@ -36,9 +36,9 @@
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
                         "installed_by": ["modules"]
                     },
-                    "fcs/fcsgx": {
+                    "fcsgx/rungx": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "ca0b47f14ab29d460e269fc41973bf85e063391b",
                         "installed_by": ["modules"]
                     },
                     "gnu/sort": {

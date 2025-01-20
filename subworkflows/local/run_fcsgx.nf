@@ -1,4 +1,4 @@
-include { FCS_FCSGX             } from '../../modules/nf-core/fcs/fcsgx/main'
+include { FCSGX_RUNGX           } from '../../modules/nf-core/fcsgx_rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../modules/local/parse_fcsgx_result'
 
 workflow RUN_FCSGX {
@@ -29,19 +29,20 @@ workflow RUN_FCSGX {
 
 
     //
-    // MODULE: FCS_FCSGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
+    // MODULE: FCSGX_RUNGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
     //
-    FCS_FCSGX (
+    FCSGX_RUNGX (
         reference_with_taxid,
-        fcsgxpath
+        fcsgxpath,
+        []
     )
-    ch_versions     = ch_versions.mix( FCS_FCSGX.out.versions )
+    ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
 
 
     //
     // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
-    FCS_FCSGX.out.fcs_gx_report
+    FCSGX_RUNGX.out.fcs_gx_report
         .map{ it ->
                 tuple(  it[0],
                         it[1].getParent()
@@ -51,7 +52,7 @@ workflow RUN_FCSGX {
 
 
     //
-    // MODULE: PARSE_FCSGX_RESULT to parse the FCS_FCSGX result output in csv format.
+    // MODULE: PARSE_FCSGX_RESULT to parse the FCSGX_RUNGX result output in csv format.
     //
     PARSE_FCSGX_RESULT (
         report_path,
