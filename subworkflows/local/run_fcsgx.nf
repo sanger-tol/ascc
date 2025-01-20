@@ -1,4 +1,4 @@
-include { FCSGX_RUNGX           } from '../../modules/nf-core/fcsgx/fcsgx_rungx/main'
+include { FCSGX_RUNGX           } from '../../modules/nf-core/fcsgx/rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../modules/local/parse_fcsgx_result'
 
 workflow RUN_FCSGX {
@@ -21,9 +21,13 @@ workflow RUN_FCSGX {
             Channel.of(taxid)
         )
         .map { it ->
-                tuple ([    id:     it[0].id,
-                            taxid:  it[2]       ],
-                        it[1])
+                tuple (
+                        [
+                            id: it[0].id    // Meta.id
+                        ],
+                        it[2],              // TaxID
+                        it[1]               // RefFile
+                    )
             }
         .set { reference_with_taxid }
 
@@ -42,7 +46,7 @@ workflow RUN_FCSGX {
     //
     // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
-    FCSGX_RUNGX.out.fcs_gx_report
+    FCSGX_RUNGX.out.fcsgx_report
         .map{ it ->
                 tuple(  it[0],
                         it[1].getParent()

@@ -16,7 +16,7 @@ ncbi_taxonomy_path: /lustre/scratch123/tol/resources/taxonomy/latest/new_taxdump
 ncbi_ranked_lineage_path: /lustre/scratch123/tol/resources/taxonomy/latest/new_taxdump/rankedlineage.dmp
 busco_lineages_folder: /lustre/scratch123/tol/resources/busco/latest
 busco_lineages: "metazoa_odb10"
-fcs_gx_database_path: /tmp/tol_data/fcs-gx/latest/
+fcs_gx_database_path: /tmp/tol_data/fcs-gx/2023-01-24/
 vecscreen_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/ascc_databases/vecscreen_database/
 diamond_uniprot_database_path: /lustre/scratch123/tol/resources/uniprot_reference_proteomes/latest/reference_proteomes.dmnd
 diamond_nr_database_path: /lustre/scratch123/tol/resources/nr/latest/nr.dmnd
