@@ -61,7 +61,11 @@ workflow ASCC_GENOMIC {
     include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
     exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
 
-    full_list               = ["essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"]
+    full_list               = [
+        "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",
+        "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
+        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"
+    ]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
@@ -79,8 +83,9 @@ workflow ASCC_GENOMIC {
 
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
+    //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( (include_workflow_steps.contains('essentials') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("essentials")) {
+    if ( !exclude_workflow_steps.contains("essentials")) {
 
         ESSENTIAL_JOBS(
             ch_samplesheet
@@ -451,10 +456,12 @@ workflow ASCC_GENOMIC {
         AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { file -> file.text.trim() }
             .branch { it ->
-                run_btk: "ABNORMAL" ? it.contains("YES_ABNORMAL"): false
+                run_btk: "ABNORMAL" ? it.contains("YES_ABNORMAL_CONTAMINATION"): false
                 dont_run: []
             }
             .set { btk_bool }
+
+            btk_bool.run_btk.view{"BTK BOOL: $it"}
 
 
         ch_versions         = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
@@ -463,8 +470,24 @@ workflow ASCC_GENOMIC {
         ch_autofilt_indicator = []
     }
 
-
-    if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') || btk_busco_run_mode == "mandatory" ||  include_workflow_steps.contains('btk_busco') ) {
+    //
+    // LOGIC: IF NOT IN EXCLUDE STEPS AND ( BTK_BUSCO AND AUTOFILTER IN INCLUDE STEPS _OR_ ALL STEPS ARE ACTIVE) AND MODE IS CONDITIONAL AND ABNORMAL CONTAMINATION HAS BEEN FOUND
+    //              OR
+    //        IF NOT IN EXCLUDE STEPS AND ( BTK_BUSCO AND AUTOFILTER IN INCLUDE STEPS _OR_ ALL STEPS ARE ACTIVE) AND MODE IS MANDATORY
+    //
+    if (
+        (
+            !exclude_workflow_steps.contains("btk_busco") &&
+            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly")) || include_workflow_steps.contains('ALL')) &&
+            btk_busco_run_mode == "conditional" &&
+            btk_bool.run_btk
+        ) ||
+        (
+            !exclude_workflow_steps.contains("btk_busco") &&
+            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly")) || include_workflow_steps.contains('ALL')) &&
+            btk_busco_run_mode == "mandatory"
+        )
+    ) {
 
         //
         // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR

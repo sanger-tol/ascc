@@ -6,7 +6,7 @@
 // MODULE IMPORT BLOCK
 //
 include { CHECK_BARCODE          } from '../../modules/local/check_barcode'
-include { BLAST_MAKEBLASTDB      } from '../../modules/nf-core/blast/makeblastdb'
+include { BLAST_MAKEBLASTDB_BARCODES as BLAST_MAKEBLASTDB     } from '../../modules/local/makeblastdb_barcodes'
 include { BLAST_BLASTN           } from '../../modules/nf-core/blast/blastn'
 include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 
