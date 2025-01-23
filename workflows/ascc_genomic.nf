@@ -182,6 +182,44 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("nr_diamond")
+    ) {
+        NR_DIAMOND (
+            reference_tuple_from_GG,
+            params.diamond_nr_database_path
+        )
+        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
+        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+    } else {
+        nr_hits             = []
+        nr_full             = []
+    }
+
+
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("uniprot_diamond")
+    ) {
+        UP_DIAMOND (
+            reference_tuple_from_GG,
+            params.diamond_uniprot_database_path
+        )
+        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
+        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+    } else {
+        un_hits             = []
+        un_full             = []
+    }
+
+
     if ( (include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("organellar_blast")
     ) {
@@ -346,43 +384,6 @@ workflow ASCC_GENOMIC {
         ch_kraken3          = []
     }
 
-
-    //
-    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    //
-    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("nr_diamond")
-    ) {
-        NR_DIAMOND (
-            reference_tuple_from_GG,
-            params.diamond_nr_database_path
-        )
-        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
-        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-    } else {
-        nr_hits             = []
-        nr_full             = []
-    }
-
-
-    //
-    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("uniprot_diamond")
-    ) {
-        UP_DIAMOND (
-            reference_tuple_from_GG,
-            params.diamond_uniprot_database_path
-        )
-        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-    } else {
-        un_hits             = []
-        un_full             = []
-    }
 
     if ( (include_workflow_steps.contains('btk_dataset') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("btk_dataset")
