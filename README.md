@@ -88,7 +88,7 @@ nextflow run sanger-tol/ascc \
    -profile <docker/singularity/.../institute> \
    --input samplesheet \
    --params-input YAML \
-   --outdir <OUTDIR> -entry SANGERTOL_ASCC --include ALL
+   --outdir <OUTDIR> -entry SANGERTOL_ASCC
 ```
 
 > **Warning:**
