@@ -9,6 +9,7 @@ process GENERATE_SAMPLESHEET {
 
     input:
     tuple val(meta),    path(pacbio_path)
+    path(alarm_file)
 
     output:
     tuple val(meta), path("*csv"),  emit: csv
