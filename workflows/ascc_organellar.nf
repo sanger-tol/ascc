@@ -209,7 +209,9 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
+    if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("coverage")
+    ) {
         RUN_READ_COVERAGE (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             params.reads_path,
@@ -227,7 +229,9 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( (include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("vecscreen") ) {
+    if ( (include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("vecscreen")
+    ) {
         RUN_VECSCREEN (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             params.vecscreen_database_path
@@ -242,7 +246,9 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("kraken") ) {
+    if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("kraken")
+    ) {
         RUN_NT_KRAKEN(
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
             params.nt_kraken_database_path,
@@ -263,7 +269,9 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL') ) && !valid_length_fasta.ifEmpty(true) && !exclude_workflow_steps.contains("nr_diamond") ) {
+    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("nr_diamond")
+    ) {
         NR_DIAMOND (
             valid_length_fasta,
             params.diamond_nr_database_path
@@ -281,7 +289,9 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL'))  && !valid_length_fasta.ifEmpty(true) && !exclude_workflow_steps.contains("uniprot_diamond") ) {
+    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("uniprot_diamond")
+    ) {
         UP_DIAMOND (
             valid_length_fasta,
             params.diamond_uniprot_database_path

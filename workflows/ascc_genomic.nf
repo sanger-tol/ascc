@@ -306,7 +306,7 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // SUBWORKFLOW:
+    // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
     if ( (include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("vecscreen")
@@ -367,14 +367,11 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // LOGIC:
-    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("uniprot_diamond")
     ) {
-        //
-        // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-        //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
         UP_DIAMOND (
             reference_tuple_from_GG,
             params.diamond_uniprot_database_path
