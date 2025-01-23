@@ -38,6 +38,7 @@ process GENERATE_SAMPLESHEET {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
         generate_samplesheet: \$(generate_samplesheet.py -v)
     END_VERSIONS
     """
