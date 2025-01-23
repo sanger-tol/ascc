@@ -220,46 +220,46 @@ workflow ASCC_GENOMIC {
     // }
 
 
-    if ( (include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("organellar_blast")
-    ) {
+    // if ( (include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL')) &&
+    //         !exclude_workflow_steps.contains("organellar_blast")
+    // ) {
 
-        //
-        // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
-        //
-        organellar_genomes
-            .branch { meta, assembly ->
-                mito:       meta.assembly_type == "MITO"
-                plastid:    meta.assembly_type == "PLASTID"
-                invalid:    true    // if value but not of the above conditions
-            }
-            .set { organellar_check }
+    //     //
+    //     // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
+    //     //
+    //     organellar_genomes
+    //         .branch { meta, assembly ->
+    //             mito:       meta.assembly_type == "MITO"
+    //             plastid:    meta.assembly_type == "PLASTID"
+    //             invalid:    true    // if value but not of the above conditions
+    //         }
+    //         .set { organellar_check }
 
-        //
-        // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
-        //
-        MITO_ORGANELLAR_BLAST (
-            reference_tuple_from_GG,
-            organellar_check.mito
-        )
+    //     //
+    //     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
+    //     //
+    //     MITO_ORGANELLAR_BLAST (
+    //         reference_tuple_from_GG,
+    //         organellar_check.mito
+    //     )
 
-        ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
-        ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+    //     ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
+    //     ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
 
-        //
-        // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
-        //
-        PLASTID_ORGANELLAR_BLAST (
-            reference_tuple_from_GG,
-            organellar_check.plastid
-        )
-        ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
-        ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    //     //
+    //     // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
+    //     //
+    //     PLASTID_ORGANELLAR_BLAST (
+    //         reference_tuple_from_GG,
+    //         organellar_check.plastid
+    //     )
+    //     ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
+    //     ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
-    } else {
-        ch_mito             = []
-        ch_chloro           = []
-    }
+    // } else {
+    //     ch_mito             = []
+    //     ch_chloro           = []
+    // }
 
 
     //
