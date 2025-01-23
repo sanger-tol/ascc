@@ -10,7 +10,7 @@ workflow RUN_READ_COVERAGE {
 
     take:
     reference_tuple          // Channel [ val(meta), path(file) ]
-    pacbio_data              // Channel val( str )
+    pacbio_data              // [Path(1), Path(2)...]
     platform                 // Channel val( str )
 
     main:
@@ -22,7 +22,7 @@ workflow RUN_READ_COVERAGE {
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
     //
-    ch_grabbed_reads_path       = GrabFiles( pacbio_data )
+    ch_grabbed_reads_path       = GrabFiles( params.reads_path )
 
     ch_grabbed_reads_path
         .flatten()

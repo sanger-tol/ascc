@@ -53,7 +53,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
         validate_versions,
         include_steps,
         exclude_steps,
-        fcs
+        fcs,
     )
 }
 
@@ -79,7 +79,7 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
         validate_versions,
         include_steps,
         exclude_steps,
-        fcs
+        fcs,
     )
 }
 /*
@@ -123,6 +123,10 @@ workflow {
         .set { branched_assemblies }
 
 
+    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
+
+
     //
     // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
     //
@@ -130,6 +134,23 @@ workflow {
         params.taxid,
         params.ncbi_taxonomy_path
     )
+
+
+    //
+    // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
+    //
+    // if (
+    //     (
+    //         (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
+    //         (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
+    //     ) || (
+    //         include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
+    //     )
+    // ) {
+    //     ch_grabbed_reads_path       = GrabFiles( params.reads_path )
+    // }
+    ch_grabbed_reads_path           = []
+
 
 
     //
@@ -141,7 +162,7 @@ workflow {
         VALIDATE_TAXID.out.versions,
         params.include,
         params.exclude,
-        fcs_gx_database_path,
+        fcs_gx_database_path
     )
 
 
@@ -194,6 +215,19 @@ workflow {
         params.hook_url
     )
 
+}
+
+process GrabFiles {
+    tag "Grab PacBio Data"
+    executor 'local'
+
+    input:
+    path("in")
+
+    output:
+    path("in/*.{fa,fasta,fna}.{gz}")
+
+    "true"
 }
 
 /*
