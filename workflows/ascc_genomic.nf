@@ -156,68 +156,68 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("nt_blast")
-    ) {
-        //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run
-        //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
+    // if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
+    //         !exclude_workflow_steps.contains("nt_blast")
+    // ) {
+    //     //
+    //     // NOTE: ch_nt_blast needs to be set in two places incase it
+    //     //          fails during the run
+    //     //
+    //     ch_nt_blast         = []
+    //     ch_blast_lineage    = []
 
-        EXTRACT_NT_BLAST (
-            reference_tuple_from_GG,
-            params.nt_database_path,
-            params.ncbi_accession_ids_folder,
-            params.ncbi_ranked_lineage_path
-        )
-        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+    //     EXTRACT_NT_BLAST (
+    //         reference_tuple_from_GG,
+    //         params.nt_database_path,
+    //         params.ncbi_accession_ids_folder,
+    //         params.ncbi_ranked_lineage_path
+    //     )
+    //     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    //     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+    //     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
 
-    } else {
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
-    }
+    // } else {
+    //     ch_nt_blast         = []
+    //     ch_blast_lineage    = []
+    // }
 
 
-    //
-    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    //
-    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("nr_diamond")
-    ) {
-        NR_DIAMOND (
-            reference_tuple_from_GG,
-            params.diamond_nr_database_path
-        )
-        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
-        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-    } else {
-        nr_hits             = []
-        nr_full             = []
-    }
+    // //
+    // // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    // //
+    // if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
+    //         !exclude_workflow_steps.contains("nr_diamond")
+    // ) {
+    //     NR_DIAMOND (
+    //         reference_tuple_from_GG,
+    //         params.diamond_nr_database_path
+    //     )
+    //     nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
+    //     nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
+    //     ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+    // } else {
+    //     nr_hits             = []
+    //     nr_full             = []
+    // }
 
 
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("uniprot_diamond")
-    ) {
-        UP_DIAMOND (
-            reference_tuple_from_GG,
-            params.diamond_uniprot_database_path
-        )
-        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-    } else {
-        un_hits             = []
-        un_full             = []
-    }
+    // if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
+    //         !exclude_workflow_steps.contains("uniprot_diamond")
+    // ) {
+    //     UP_DIAMOND (
+    //         reference_tuple_from_GG,
+    //         params.diamond_uniprot_database_path
+    //     )
+    //     un_full             = UP_DIAMOND.out.reformed.map{it[1]}
+    //     un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
+    //     ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+    // } else {
+    //     un_hits             = []
+    //     un_full             = []
+    // }
 
 
     if ( (include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL')) &&
@@ -385,33 +385,33 @@ workflow ASCC_GENOMIC {
     }
 
 
-    if ( (include_workflow_steps.contains('btk_dataset') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("btk_dataset")
-    ) {
-        ch_dot_genome           = ej_dot_genome.map{it[1]}
+    // if ( (include_workflow_steps.contains('btk_dataset') || include_workflow_steps.contains('ALL')) &&
+    //         !exclude_workflow_steps.contains("btk_dataset")
+    // ) {
+    //     ch_dot_genome           = ej_dot_genome.map{it[1]}
 
 
-        //
-        // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
-        //
-        CREATE_BTK_DATASET (
-            reference_tuple_from_GG,
-            ch_dot_genome,
-            ch_kmers,
-            ch_tiara,
-            ch_nt_blast,
-            ch_fcsgx,
-            ch_bam,
-            ch_coverage,
-            ch_kraken1,
-            ch_kraken2,
-            ch_kraken3,
-            nr_full,
-            un_full,
-            Channel.fromPath(params.ncbi_taxonomy_path).first()
-        )
-        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
-    }
+    //     //
+    //     // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
+    //     //
+    //     CREATE_BTK_DATASET (
+    //         reference_tuple_from_GG,
+    //         ch_dot_genome,
+    //         ch_kmers,
+    //         ch_tiara,
+    //         ch_nt_blast,
+    //         ch_fcsgx,
+    //         ch_bam,
+    //         ch_coverage,
+    //         ch_kraken1,
+    //         ch_kraken2,
+    //         ch_kraken3,
+    //         nr_full,
+    //         un_full,
+    //         Channel.fromPath(params.ncbi_taxonomy_path).first()
+    //     )
+    //     ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    // }
 
     //
     // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
@@ -653,29 +653,29 @@ workflow ASCC_GENOMIC {
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
-    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("merge_tables") ) {
+    // if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("merge_tables") ) {
 
-        //
-        // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
-        //
-        ASCC_MERGE_TABLES (
-            ej_gc_coverage,                                   // FROM -- GC_COVERAGE.tsv
-            ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
-            ch_tiara,                                         // FROM -- TIARA.classifications[0]
-            [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
-            ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
-            ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
-            ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
-            nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
-            un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
-            [],                                               // MARKER SCAN -- NOT IN PIPELINE
-            [],                                               // CONTIGVIZ -- NOT IN PIPELINE
-            CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
-            busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
-            ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
-        )
-        ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
-    }
+    //     //
+    //     // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
+    //     //
+    //     ASCC_MERGE_TABLES (
+    //         ej_gc_coverage,                                   // FROM -- GC_COVERAGE.tsv
+    //         ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
+    //         ch_tiara,                                         // FROM -- TIARA.classifications[0]
+    //         [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
+    //         ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
+    //         ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
+    //         ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
+    //         nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
+    //         un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
+    //         [],                                               // MARKER SCAN -- NOT IN PIPELINE
+    //         [],                                               // CONTIGVIZ -- NOT IN PIPELINE
+    //         CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
+    //         busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
+    //         ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
+    //     )
+    //     ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    // }
 
     //
     // Collate and save software versions
