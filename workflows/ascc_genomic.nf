@@ -43,6 +43,7 @@ include { methodsDescriptionText                        } from '../subworkflows/
 workflow ASCC_GENOMIC {
 
     take:
+    workflow_name           // value
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
     validate_taxid_versions // Versions channel from main.nf
@@ -82,6 +83,15 @@ workflow ASCC_GENOMIC {
 
 
     //
+    // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
+    //
+    ch_samplesheet
+        .map { meta, sample ->
+            println "GENOMIC WORKFLOW:\n\t-- $meta -- $sample"
+        }
+
+
+    //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
@@ -111,7 +121,6 @@ workflow ASCC_GENOMIC {
     if ( (include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("kmers")
     ) {
-
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
         //
