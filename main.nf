@@ -15,13 +15,14 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { VALIDATE_TAXID            } from './modules/local/validate_taxid'
+include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate_taxid'
+include { GUNZIP as MAIN_WORKFLOW_GUNZIP                    } from './modules/nf-core/gunzip/main'
 
-include { ASCC_GENOMIC              } from './workflows/ascc_genomic'
-include { ASCC_ORGANELLAR           } from './workflows/ascc_organellar'
+include { ASCC_GENOMIC                                      } from './workflows/ascc_genomic'
+include { ASCC_ORGANELLAR                                   } from './workflows/ascc_organellar'
 
-include { PIPELINE_INITIALISATION   } from './subworkflows/local/utils_nfcore_ascc_pipeline'
-include { PIPELINE_COMPLETION       } from './subworkflows/local/utils_nfcore_ascc_pipeline'
+include { PIPELINE_INITIALISATION                           } from './subworkflows/local/utils_nfcore_ascc_pipeline'
+include { PIPELINE_COMPLETION                               } from './subworkflows/local/utils_nfcore_ascc_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,6 +95,8 @@ workflow {
     //
 
     main:
+    ch_versions = Channel.empty()
+
 
     //
     // SUBWORKFLOW: Run initialisation tasks
@@ -111,10 +114,44 @@ workflow {
     fcs_gx_database_path = Channel.of(params.fcs_gx_database_path)
 
     //
+    // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
+    //
+
+    PIPELINE_INITIALISATION.out.samplesheet
+        .branch { meta, file ->
+            zipped: file.name.endsWith('.gz')
+            unzipped: !file.name.endsWith('.gz')
+        }
+        .set {ch_input}
+
+
+    //
+    // MODULE: UNZIP INPUTS IF NEEDED
+    //
+    MAIN_WORKFLOW_GUNZIP (
+        ch_input.zipped
+    )
+
+    // TODO: NOT THE RIGHT PLACE FOR THIS
+    // SHOULD THIS BE MOVED INTO A SUBWORKFLOW AND EXECUTED INSIDE THE SUBWORKFLOWS
+    ch_versions = ch_versions.mix(MAIN_WORKFLOW_GUNZIP.out.versions)
+
+
+    //
+    // LOGIC: MIX CHANELS WHICH MAY OR MAY NOT BE EMPTY INTO A SINGLE QUEUE CHANNEL
+    //
+    unzipped_input = Channel.empty()
+
+    unzipped_input
+        .mix(ch_input.unzipped, MAIN_WORKFLOW_GUNZIP.out.gunzip)
+        .set { standardised_unzipped_input }
+
+
+    //
     // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
     //
-    PIPELINE_INITIALISATION.out.samplesheet
+    standardised_unzipped_input
         .branch{
             organellar_genome: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
             sample_genome: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
@@ -130,7 +167,7 @@ workflow {
     //
     // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
     //
-    VALIDATE_TAXID(
+    MAIN_WORKFLOW_VALIDATE_TAXID(
         params.taxid,
         params.ncbi_taxonomy_path
     )
@@ -156,10 +193,11 @@ workflow {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
+    // TODO: THIS WOULD HAVE BEEN SIMPLER TO FIX BY COMBINING THE ORGANELLAR GENOMES TO GENOMIC!!!
     SANGERTOL_ASCC_GENOMIC (
         branched_assemblies.sample_genome,
         branched_assemblies.organellar_genome,
-        VALIDATE_TAXID.out.versions,
+        MAIN_WORKFLOW_VALIDATE_TAXID.out.versions,
         params.include,
         params.exclude,
         fcs_gx_database_path
@@ -196,7 +234,7 @@ workflow {
 
         SANGERTOL_ASCC_ORGANELLAR (
             branched_assemblies.organellar_genome,
-            VALIDATE_TAXID.out.versions,
+            MAIN_WORKFLOW_VALIDATE_TAXID.out.versions,
             organellar_include,
             organellar_exclude,
             fcs_gx_database_path

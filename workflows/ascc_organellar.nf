@@ -76,6 +76,15 @@ workflow ASCC_ORGANELLAR {
 
 
     //
+    // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
+    //
+    ch_samplesheet
+        .map { meta, sample ->
+            println "ORGANELLAR WORKFLOW:\n\t-- $meta -- $sample"
+        }
+
+
+    //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
     ESSENTIAL_JOBS(
