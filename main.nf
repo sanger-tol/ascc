@@ -95,6 +95,8 @@ workflow {
     //
 
     main:
+    ch_versions = Channel.empty()
+
 
     //
     // SUBWORKFLOW: Run initialisation tasks
@@ -129,6 +131,10 @@ workflow {
     MAIN_WORKFLOW_GUNZIP (
         ch_input.zipped
     )
+
+    // TODO: NOT THE RIGHT PLACE FOR THIS
+    // SHOULD THIS BE MOVED INTO A SUBWORKFLOW AND EXECUTED INSIDE THE SUBWORKFLOWS
+    ch_versions = ch_versions.mix(MAIN_WORKFLOW_GUNZIP.out.versions)
 
 
     //
