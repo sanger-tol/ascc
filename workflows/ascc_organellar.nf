@@ -236,8 +236,10 @@ workflow ASCC_ORGANELLAR {
         }
         .set{ valid_length_fasta }
 
-    println "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $valid_length_fasta"
-
+    valid_length_fasta
+        .map{ meta, file ->
+            println "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+        }
 
     //
     // LOGIC: THIS CONDITIONAL SHOULD EXECUTE THE PROCESS WHEN:
