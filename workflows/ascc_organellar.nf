@@ -99,32 +99,6 @@ workflow ASCC_ORGANELLAR {
 
 
     //
-    // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
-    //
-    ESSENTIAL_JOBS.out.reference_with_seqkit
-        //
-        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
-        //
-        .map{ meta, file ->
-            tuple(
-                [
-                    id: meta.id,
-                    sliding: meta.sliding,
-                    window: meta.window,
-                    seq_count: CountFastaLength(file)
-                ],
-                file
-            )
-        }
-        .filter { meta, file ->
-                    meta.seq_count >= params.seqkit_window
-        }
-        .set{ valid_length_fasta }
-
-    valid_length_fasta.view{"Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $it"}
-
-
-    //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
     if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("pacbio_barcodes") ) {
@@ -237,6 +211,32 @@ workflow ASCC_ORGANELLAR {
         ch_kraken2          = []
         ch_kraken3          = []
     }
+
+
+    //
+    // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
+    //
+    ESSENTIAL_JOBS.out.reference_with_seqkit
+        //
+        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
+        //
+        .map{ meta, file ->
+            tuple(
+                [
+                    id: meta.id,
+                    sliding: meta.sliding,
+                    window: meta.window,
+                    seq_count: CountFastaLength(file)
+                ],
+                file
+            )
+        }
+        .filter { meta, file ->
+                    meta.seq_count >= params.seqkit_window
+        }
+        .set{ valid_length_fasta }
+
+    valid_length_fasta.view{"Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $it"}
 
 
     //
