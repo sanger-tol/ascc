@@ -37,15 +37,6 @@ workflow RUN_READ_COVERAGE {
     // - Removed the mix function from this as it is not needed, there shouldn't be multiple read
     // types
     //
-    reference_tuple
-        .map{meta, file ->
-            tuple(meta, pacbio_data)
-        }
-        .set { pacbio_tuple }
-
-    Channel
-        .of(platform)
-        .set {platform_type}
 
     if ( platform == "hifi" || platform == "clr" || platform == "ont" ) {
 
@@ -67,9 +58,7 @@ workflow RUN_READ_COVERAGE {
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND LONGREAD DATA
         //
         PE_MAPPING  (
-            reference_tuple,
-            pacbio_tuple,
-            platform_type
+            ref_and_data
         )
         ch_versions = ch_versions.mix(PE_MAPPING.out.versions)
 
