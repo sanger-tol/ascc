@@ -6,7 +6,6 @@ workflow RUN_FCSGX {
     take:
     reference               // Channel [ val(meta), path(file) ]
     fcsgxpath               // Channel path(file)
-    taxid                   // Channel val(taxid)
     ncbi_rankedlineage_path // Channel path(file)
 
     main:
@@ -14,29 +13,10 @@ workflow RUN_FCSGX {
 
 
     //
-    // LOGIC: Create input channel for FCS_FCSGX, taxid is required to be the meta id.
-    //
-    reference
-        .combine(
-            Channel.of(taxid)
-        )
-        .map { it ->
-                tuple (
-                        [
-                            id: it[0].id    // Meta.id
-                        ],
-                        it[2],              // TaxID
-                        it[1]               // RefFile
-                    )
-            }
-        .set { reference_with_taxid }
-
-
-    //
     // MODULE: FCSGX_RUNGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
     //
     FCSGX_RUNGX (
-        reference_with_taxid,
+        reference,
         fcsgxpath,
         []
     )

@@ -189,10 +189,9 @@ workflow {
         )
     ) {
         ch_grabbed_reads_path       = GrabFiles( params.reads_path )
+    } else {
+        ch_grabbed_reads_path       = []
     }
-    ch_grabbed_reads_path           = []
-
-
 
     //
     // WORKFLOW: Run main workflow for GENOMIC samples

@@ -10,6 +10,7 @@ workflow RUN_READ_COVERAGE {
 
     take:
     reference_tuple          // Channel [ val(meta), path(file) ]
+    reads
     pacbio_data              // [Path(1), Path(2)...]
     platform                 // Channel val( str )
 
@@ -22,9 +23,7 @@ workflow RUN_READ_COVERAGE {
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
     //
-    ch_grabbed_reads_path       = GrabFiles( params.reads_path )
-
-    ch_grabbed_reads_path
+    reads
         .flatten()
         .set{ collection_of_reads }
 
@@ -122,17 +121,4 @@ workflow RUN_READ_COVERAGE {
     tsv_ch          = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
     bam_ch          = SAMTOOLS_SORT.out.bam
     versions        = ch_versions.ifEmpty(null)
-}
-
-process GrabFiles {
-    tag "Grab PacBio Data"
-    executor 'local'
-
-    input:
-    path("in")
-
-    output:
-    path("in/*.{fa,fasta,fna}.{gz}")
-
-    "true"
 }
