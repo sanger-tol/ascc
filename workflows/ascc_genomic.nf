@@ -43,7 +43,6 @@ include { methodsDescriptionText                        } from '../subworkflows/
 workflow ASCC_GENOMIC {
 
     take:
-    workflow_name           // value
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
     validate_taxid_versions // Versions channel from main.nf
