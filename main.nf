@@ -42,6 +42,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
     include_steps
     exclude_steps
     fcs
+    reads
 
     main:
 
@@ -55,6 +56,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
         include_steps,
         exclude_steps,
         fcs,
+        reads
     )
 }
 
@@ -69,6 +71,7 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
     include_steps
     exclude_steps
     fcs
+    reads
 
     main:
 
@@ -81,6 +84,7 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
         include_steps,
         exclude_steps,
         fcs,
+        reads
     )
 }
 /*
@@ -176,16 +180,16 @@ workflow {
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
     //
-    // if (
-    //     (
-    //         (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
-    //         (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
-    //     ) || (
-    //         include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
-    //     )
-    // ) {
-    //     ch_grabbed_reads_path       = GrabFiles( params.reads_path )
-    // }
+    if (
+        (
+            (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
+            (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
+        ) || (
+            include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
+        )
+    ) {
+        ch_grabbed_reads_path       = GrabFiles( params.reads_path )
+    }
     ch_grabbed_reads_path           = []
 
 
@@ -200,7 +204,8 @@ workflow {
         MAIN_WORKFLOW_VALIDATE_TAXID.out.versions,
         params.include,
         params.exclude,
-        fcs_gx_database_path
+        fcs_gx_database_path,
+        ch_grabbed_reads_path
     )
 
 
@@ -237,7 +242,8 @@ workflow {
             MAIN_WORKFLOW_VALIDATE_TAXID.out.versions,
             organellar_include,
             organellar_exclude,
-            fcs_gx_database_path
+            fcs_gx_database_path,
+            ch_grabbed_reads_path
         )
     }
 

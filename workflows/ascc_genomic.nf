@@ -50,6 +50,7 @@ workflow ASCC_GENOMIC {
     include_steps           // params.include_steps
     exclude_steps           // params.exclude_steps
     fcs_db                  // path(path)
+    reads
 
     main:
     ch_versions = Channel.empty()

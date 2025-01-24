@@ -47,6 +47,7 @@ workflow ASCC_ORGANELLAR {
     include_steps           // params.include_steps
     exclude_steps           // params.exclude_steps
     fcs_db                  // path(file)
+    reads
 
     main:
     ch_versions = Channel.empty()
