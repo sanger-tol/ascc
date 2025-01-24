@@ -236,13 +236,17 @@ workflow ASCC_ORGANELLAR {
         }
         .set{ valid_length_fasta }
 
-    valid_length_fasta.view{"Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $it"}
+    println "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $valid_length_fasta"
 
 
     //
-    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+    // LOGIC: THIS CONDITIONAL SHOULD EXECUTE THE PROCESS WHEN:
+    //          INCLUDE STEPS ARE EITHER nt_blast AND all
+    //              _AS WELL AS_
+    //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
     //
-    // if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true) ) {
+    // if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
+    //      !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true) ) {
     //     //
     //     // NOTE: ch_nt_blast needs to be set in two places incase it
     //     //          fails during the run (This IS an expected outcome of this subworkflow)
@@ -250,6 +254,9 @@ workflow ASCC_ORGANELLAR {
 
     //     ch_nt_blast         = []
     //     ch_blast_lineage    = []
+
+
+        // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
 
     //     EXTRACT_NT_BLAST (
     //         valid_length_fasta,
