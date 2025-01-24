@@ -2,3 +2,4 @@ sample,assembly_type,assembly_file
 asccTinyTest_V2,PRIMARY,/lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240319_ascc_test_file_sizes/download_test2/asccTinyTest/assembly/Pyoeliiyoelii17XNL_assembly.fa
 asccTinyTest_V2,HAPLO,/lustre/scratch123/tol/resources/treeval/sanger-tol-asccthesecond/test_hap2.fa
 asccTinyTest_V2,MITO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+asccTinyTest_V2,PLASTID,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
