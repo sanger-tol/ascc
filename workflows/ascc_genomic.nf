@@ -65,7 +65,7 @@ workflow ASCC_GENOMIC {
     full_list               = [
         "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",
         "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
-        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"
+        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset", "ALL", "NONE"
     ]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
@@ -87,7 +87,7 @@ workflow ASCC_GENOMIC {
     //
     ch_samplesheet
         .map { meta, sample ->
-            println "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.warn "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
         }
 
 
@@ -409,8 +409,8 @@ workflow ASCC_GENOMIC {
     }
 
 
-    if ( (include_workflow_steps.contains('btk_dataset') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("btk_dataset")
+    if ( (include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("create_btk_dataset")
     ) {
         ch_dot_genome           = ej_dot_genome.map{it[1]}
 
@@ -539,7 +539,7 @@ workflow ASCC_GENOMIC {
         ) ||
         (
             !exclude_workflow_steps.contains("btk_busco") &&
-            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly")) || include_workflow_steps.contains('ALL')) &&
+            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly") && include_workflow_steps.contains("create_btk_dataset")) || include_workflow_steps.contains('ALL')) &&
             btk_busco_run_mode == "mandatory"
         )
     ) {
@@ -676,7 +676,9 @@ workflow ASCC_GENOMIC {
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
-    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("merge_tables") ) {
+    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("merge_tables") && include_workflow_steps.contains("create_btk_dataset")
+    ) {
 
         //
         // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
