@@ -30,6 +30,7 @@ workflow RUN_READ_COVERAGE {
     reference_tuple
         .combine(collection_of_reads)
         .set { ref_and_data }
+        // [meta], ref, [reads]
 
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM
