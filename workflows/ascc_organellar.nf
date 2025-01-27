@@ -184,6 +184,10 @@ workflow ASCC_ORGANELLAR {
     if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("coverage")
     ) {
+        reads.view{"READS: $it"}
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG.view{"REF: $it"}
+        println params.reads_type
+
         RUN_READ_COVERAGE (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             reads,
