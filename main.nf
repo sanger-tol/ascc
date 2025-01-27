@@ -186,6 +186,8 @@ workflow {
             (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
         ) || (
             include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
+        ) || (
+            include_workflow_steps.contains('ALL') && params.profile_name == 'test'
         )
     ) {
         ch_grabbed_reads_path       = GrabFiles( params.reads_path )

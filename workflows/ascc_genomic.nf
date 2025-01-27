@@ -349,21 +349,21 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    // if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
-    //         !exclude_workflow_steps.contains("coverage")
-    // ) {
-    //     RUN_READ_COVERAGE (
-    //         reference_tuple_from_GG,
-    //         reads,
-    //         params.reads_type,
-    //     )
-    //     ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-    //     ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    // } else {
-    //     ch_coverage         = []
-    //     ch_bam              = []
-    // }
+    if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("coverage")
+    ) {
+        RUN_READ_COVERAGE (
+            reference_tuple_from_GG,
+            reads,
+            params.reads_type,
+        )
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    } else {
+        ch_coverage         = []
+        ch_bam              = []
+    }
 
     ch_coverage         = []
     ch_bam              = []

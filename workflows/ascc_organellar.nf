@@ -178,28 +178,28 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    // //
-    // // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
-    // //
-    // if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
-    //         !exclude_workflow_steps.contains("coverage")
-    // ) {
-    //     reads.view{"READS: $it"}
-    //     ESSENTIAL_JOBS.out.reference_tuple_from_GG.view{"REF: $it"}
-    //     println params.reads_type
+    //
+    // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
+    //
+    if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("coverage")
+    ) {
+        reads.view{"READS: $it"}
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG.view{"REF: $it"}
+        println params.reads_type
 
-    //     RUN_READ_COVERAGE (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-    //         reads,
-    //         params.reads_type,
-    //     )
-    //     ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-    //     ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
-    //     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    // } else {
-    //     ch_coverage         = []
-    //     ch_bam              = []
-    // }
+        RUN_READ_COVERAGE (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
+            reads,
+            params.reads_type,
+        )
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
+        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    } else {
+        ch_coverage         = []
+        ch_bam              = []
+    }
 
 
     //

@@ -18,8 +18,6 @@ workflow RUN_READ_COVERAGE {
     ch_align_bam    = Channel.empty()
     ch_refer_bam    = Channel.empty()
 
-
-
     reads.view{"READS: $it"}
     reference_tuple.view{"REF: $it"}
     println platform
