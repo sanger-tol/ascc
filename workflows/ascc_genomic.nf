@@ -72,8 +72,8 @@ workflow ASCC_GENOMIC {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
-    println "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    println "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
+    log.info "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
+    log.info "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
 
     //

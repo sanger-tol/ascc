@@ -69,8 +69,8 @@ workflow ASCC_ORGANELLAR {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
-    println "ORGANELLAR RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    println "ORGANELLAR RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
+    log.info "ORGANELLAR RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
+    log.info "ORGANELLAR RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
 
     //
@@ -84,7 +84,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            println "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
         }
 
 
@@ -184,10 +184,6 @@ workflow ASCC_ORGANELLAR {
     if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("coverage")
     ) {
-        reads.view{"READS: $it"}
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG.view{"REF: $it"}
-        println params.reads_type
-
         RUN_READ_COVERAGE (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             reads,
@@ -267,7 +263,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            println "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+            log.info "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
         }
 
     //
