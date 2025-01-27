@@ -13,7 +13,7 @@ include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 workflow PACBIO_BARCODE_CHECK {
     take:
     reference_tuple         // tuple    [[meta.id], reference ]
-    pacbio_data             // tuple    [[meta.id], pacbio-files]
+    pacbio_data             // tuple    pacbio-files-folder
     pacbio_type             // val      (params.pacbio_type)
     barcodes_file           // tuple    [[meta.id], barcode-file]
     barcode_names           // val      (csv-list-string)

@@ -47,6 +47,7 @@ workflow ASCC_ORGANELLAR {
     include_steps           // params.include_steps
     exclude_steps           // params.exclude_steps
     fcs_db                  // path(file)
+    reads
 
     main:
     ch_versions = Channel.empty()
@@ -83,7 +84,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            println "ORGANELLAR WORKFLOW:\n\t-- $meta -- $sample"
+            println "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
         }
 
 
@@ -151,11 +152,23 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
     if ( (include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-gx") ) {
+
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .combine(fcs_db)
+            .combine(Channel.of(params.taxid))
+            .combine(Channel.of(params.ncbi_ranked_lineage_path))
+            .multiMap { meta, ref, db, taxid, tax_path ->
+                reference: [meta, taxid, ref]
+                fcs_db_path: db
+                taxid_val: taxid
+                ncbi_tax_path: tax_path
+            }
+            .set { joint_channel }
+
         RUN_FCSGX (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-            fcs_db,
-            params.taxid,
-            params.ncbi_ranked_lineage_path
+            joint_channel.reference,
+            joint_channel.fcs_db_path,
+            joint_channel.ncbi_tax_path
         )
 
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
@@ -171,9 +184,13 @@ workflow ASCC_ORGANELLAR {
     if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("coverage")
     ) {
+        reads.view{"READS: $it"}
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG.view{"REF: $it"}
+        println params.reads_type
+
         RUN_READ_COVERAGE (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
-            params.reads_path,
+            reads,
             params.reads_type,
         )
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}

@@ -49,6 +49,7 @@ workflow ASCC_GENOMIC {
     include_steps           // params.include_steps
     exclude_steps           // params.exclude_steps
     fcs_db                  // path(path)
+    reads
 
     main:
     ch_versions = Channel.empty()
@@ -278,7 +279,8 @@ workflow ASCC_GENOMIC {
     ) {
         PACBIO_BARCODE_CHECK (
             reference_tuple_from_GG,
-            params.reads_path,
+            params.reads_path,  // TODO: TEAM WANT TO BE ABLE TO SPECIFY PACBIO FILES
+                                // MAY NEED A PROCESS TO PULL THEM INTO A SINGLE FOLDER BEFORE PROCESING
             params.reads_type,
             params.pacbio_barcode_file,
             params.pacbio_barcode_names
@@ -317,11 +319,24 @@ workflow ASCC_GENOMIC {
     if ( (include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("fcs-gx")
     ) {
+
+        reference_tuple_from_GG
+            .combine(fcs_db)
+            .combine(Channel.of(params.taxid))
+            .combine(Channel.of(params.ncbi_ranked_lineage_path))
+            .multiMap { meta, ref, db, taxid, tax_path ->
+                reference: [meta, taxid, ref]
+                fcs_db_path: db
+                taxid_val: taxid
+                ncbi_tax_path: tax_path
+            }
+            .set { joint_channel }
+
+
         RUN_FCSGX (
-            reference_tuple_from_GG,
-            fcs_db,
-            params.taxid,
-            params.ncbi_ranked_lineage_path
+            joint_channel.reference,
+            joint_channel.fcs_db_path,
+            joint_channel.ncbi_tax_path
         )
 
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
@@ -339,7 +354,7 @@ workflow ASCC_GENOMIC {
     ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            params.reads_path,
+            reads,
             params.reads_type,
         )
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
@@ -350,6 +365,8 @@ workflow ASCC_GENOMIC {
         ch_bam              = []
     }
 
+    ch_coverage         = []
+    ch_bam              = []
 
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
