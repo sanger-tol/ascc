@@ -523,7 +523,7 @@ workflow ASCC_GENOMIC {
         ) ||
         (
             !exclude_workflow_steps.contains("btk_busco") &&
-            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly")) || include_workflow_steps.contains('ALL')) &&
+            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly") && include_workflow_steps.contains("create_btk_dataset")) || include_workflow_steps.contains('ALL')) &&
             btk_busco_run_mode == "mandatory"
         )
     ) {
@@ -660,7 +660,9 @@ workflow ASCC_GENOMIC {
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
-    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("merge_tables") ) {
+    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("merge_tables") && include_workflow_steps.contains("create_btk_dataset")
+    ) {
 
         //
         // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
