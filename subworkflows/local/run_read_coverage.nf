@@ -18,9 +18,6 @@ workflow RUN_READ_COVERAGE {
     ch_align_bam    = Channel.empty()
     ch_refer_bam    = Channel.empty()
 
-    reads.view{"READS: $it"}
-    reference_tuple.view{"REF: $it"}
-    println platform
 
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
@@ -33,6 +30,7 @@ workflow RUN_READ_COVERAGE {
         .combine(collection_of_reads)
         .set { ref_and_data }
         // [meta], ref, [reads]
+
 
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM

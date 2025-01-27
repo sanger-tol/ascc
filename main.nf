@@ -195,6 +195,7 @@ workflow {
         ch_grabbed_reads_path       = []
     }
 
+
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
@@ -231,7 +232,6 @@ workflow {
     }
 
 
-
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
@@ -247,6 +247,7 @@ workflow {
             ch_grabbed_reads_path
         )
     }
+
 
     //
     // SUBWORKFLOW: Run completion tasks

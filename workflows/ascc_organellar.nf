@@ -245,128 +245,128 @@ workflow ASCC_ORGANELLAR {
     //
     // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
     //
-    // ESSENTIAL_JOBS.out.reference_with_seqkit
-    //     //
-    //     // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
-    //     //
-    //     .map{ meta, file ->
-    //         tuple(
-    //             [
-    //                 id: meta.id,
-    //                 sliding: meta.sliding,
-    //                 window: meta.window,
-    //                 seq_count: CountFastaLength(file)
-    //             ],
-    //             file
-    //         )
-    //     }
-    //     .filter { meta, file ->
-    //                 meta.seq_count >= params.seqkit_window
-    //     }
-    //     .set{ valid_length_fasta }
+    ESSENTIAL_JOBS.out.reference_with_seqkit
+        //
+        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
+        //
+        .map{ meta, file ->
+            tuple(
+                [
+                    id: meta.id,
+                    sliding: meta.sliding,
+                    window: meta.window,
+                    seq_count: CountFastaLength(file)
+                ],
+                file
+            )
+        }
+        .filter { meta, file ->
+                    meta.seq_count >= params.seqkit_window
+        }
+        .set{ valid_length_fasta }
 
-    // valid_length_fasta
-    //     .map{ meta, file ->
-    //         println "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
-    //     }
+    valid_length_fasta
+        .map{ meta, file ->
+            println "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+        }
 
-    // //
-    // // LOGIC: THIS CONDITIONAL SHOULD EXECUTE THE PROCESS WHEN:
-    // //          INCLUDE STEPS ARE EITHER nt_blast AND all
-    // //              _AS WELL AS_
-    // //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
-    // //
-    // if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
-    //         !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true)
-    // ) {
-    //     //
-    //     // NOTE: ch_nt_blast needs to be set in two places incase it
-    //     //          fails during the run (This IS an expected outcome of this subworkflow)
-    //     //
-    //     ch_nt_blast         = []
-    //     ch_blast_lineage    = []
-
-
-    //     SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-
-    //     EXTRACT_NT_BLAST (
-    //         valid_length_fasta,
-    //         Channel.value(params.nt_database_path),
-    //         Channel.value(params.ncbi_accession_ids_folder),
-    //         Channel.value(params.ncbi_ranked_lineage_path)
-    //     )
-    //     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-    //     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-    //     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
-
-    // } else {
-    //     ch_nt_blast         = Channel.empty()
-    //     ch_blast_lineage    = Channel.empty()
-    // }
+    //
+    // LOGIC: THIS CONDITIONAL SHOULD EXECUTE THE PROCESS WHEN:
+    //          INCLUDE STEPS ARE EITHER nt_blast AND all
+    //              _AS WELL AS_
+    //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
+    //
+    if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true)
+    ) {
+        //
+        // NOTE: ch_nt_blast needs to be set in two places incase it
+        //          fails during the run (This IS an expected outcome of this subworkflow)
+        //
+        ch_nt_blast         = []
+        ch_blast_lineage    = []
 
 
-    // //
-    // // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    // //
-    // if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
-    //         !exclude_workflow_steps.contains("nr_diamond") && !valid_length_fasta.ifEmpty(true)
-    // ) {
-    //     NR_DIAMOND (
-    //         valid_length_fasta,
-    //         params.diamond_nr_database_path
-    //     )
-    //     nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
-    //     nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
-    //     ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-    // } else {
-    //     nr_hits             = []
-    //     nr_full             = []
-    // }
+        SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+
+        EXTRACT_NT_BLAST (
+            valid_length_fasta,
+            Channel.value(params.nt_database_path),
+            Channel.value(params.ncbi_accession_ids_folder),
+            Channel.value(params.ncbi_ranked_lineage_path)
+        )
+        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+
+    } else {
+        ch_nt_blast         = Channel.empty()
+        ch_blast_lineage    = Channel.empty()
+    }
 
 
-    // //
-    // // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    // //
-    // //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    // if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
-    //         !exclude_workflow_steps.contains("uniprot_diamond") && !valid_length_fasta.ifEmpty(true)
-    // ) {
-    //     UP_DIAMOND (
-    //         valid_length_fasta,
-    //         params.diamond_uniprot_database_path
-    //     )
-    //     un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-    //     un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
-    //     ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-    // } else {
-    //     un_hits             = []
-    //     un_full             = []
-    // }
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("nr_diamond") && !valid_length_fasta.ifEmpty(true)
+    ) {
+        NR_DIAMOND (
+            valid_length_fasta,
+            params.diamond_nr_database_path
+        )
+        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
+        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+    } else {
+        nr_hits             = []
+        nr_full             = []
+    }
 
 
-    // if ( (include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
-    //         !exclude_workflow_steps.contains("create_btk_dataset")
-    // ) {
-    //     ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("uniprot_diamond") && !valid_length_fasta.ifEmpty(true)
+    ) {
+        UP_DIAMOND (
+            valid_length_fasta,
+            params.diamond_uniprot_database_path
+        )
+        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
+        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
+        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+    } else {
+        un_hits             = []
+        un_full             = []
+    }
 
-    //     CREATE_BTK_DATASET (
-    //         ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-    //         ch_dot_genome,
-    //         [], //ch_kmers
-    //         ch_tiara,
-    //         ch_nt_blast,
-    //         [], //ch_fcsgx,
-    //         ch_bam,
-    //         ch_coverage,
-    //         ch_kraken1,
-    //         ch_kraken2,
-    //         ch_kraken3,
-    //         nr_full,
-    //         un_full,
-    //         Channel.fromPath(params.ncbi_taxonomy_path).first()
-    //     )
-    //     ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
-    // }
+
+    if ( (include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("create_btk_dataset")
+    ) {
+        ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
+
+        CREATE_BTK_DATASET (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            ch_dot_genome,
+            [], //ch_kmers
+            ch_tiara,
+            ch_nt_blast,
+            [], //ch_fcsgx,
+            ch_bam,
+            ch_coverage,
+            ch_kraken1,
+            ch_kraken2,
+            ch_kraken3,
+            nr_full,
+            un_full,
+            Channel.fromPath(params.ncbi_taxonomy_path).first()
+        )
+        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    }
 
 
     //
