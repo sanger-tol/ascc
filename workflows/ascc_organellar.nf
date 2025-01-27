@@ -59,7 +59,10 @@ workflow ASCC_ORGANELLAR {
     include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
     exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
 
-    full_list               = ["kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"]
+    full_list               = [
+        "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond",
+        "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
+        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset", "ALL", "NONE"]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
@@ -323,25 +326,30 @@ workflow ASCC_ORGANELLAR {
         un_full             = []
     }
 
-    ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
 
-    CREATE_BTK_DATASET (
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-        ch_dot_genome,
-        [], //ch_kmers
-        ch_tiara,
-        ch_nt_blast,
-        [], //ch_fcsgx,
-        ch_bam,
-        ch_coverage,
-        ch_kraken1,
-        ch_kraken2,
-        ch_kraken3,
-        nr_full,
-        un_full,
-        Channel.fromPath(params.ncbi_taxonomy_path).first()
-    )
-    ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    if ( (include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("create_btk_dataset")
+    ) {
+        ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
+
+        CREATE_BTK_DATASET (
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
+            ch_dot_genome,
+            [], //ch_kmers
+            ch_tiara,
+            ch_nt_blast,
+            [], //ch_fcsgx,
+            ch_bam,
+            ch_coverage,
+            ch_kraken1,
+            ch_kraken2,
+            ch_kraken3,
+            nr_full,
+            un_full,
+            Channel.fromPath(params.ncbi_taxonomy_path).first()
+        )
+        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    }
 
 
     //
