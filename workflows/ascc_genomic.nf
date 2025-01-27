@@ -677,8 +677,8 @@ workflow ASCC_GENOMIC {
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
-    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("merge_tables") && include_workflow_steps.contains("create_btk_dataset")
+    if (
+        !exclude_workflow_steps.contains("essentials")
     ) {
 
         //
