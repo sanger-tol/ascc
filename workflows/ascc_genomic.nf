@@ -355,7 +355,6 @@ workflow ASCC_GENOMIC {
     //     RUN_READ_COVERAGE (
     //         reference_tuple_from_GG,
     //         reads,
-    //         params.reads_path,
     //         params.reads_type,
     //     )
     //     ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}

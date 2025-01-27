@@ -187,7 +187,6 @@ workflow ASCC_ORGANELLAR {
         RUN_READ_COVERAGE (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             reads,
-            params.reads_path,
             params.reads_type,
         )
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}

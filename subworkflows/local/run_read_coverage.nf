@@ -11,7 +11,6 @@ workflow RUN_READ_COVERAGE {
     take:
     reference_tuple          // Channel [ val(meta), path(file) ]
     reads
-    pacbio_data              // [Path(1), Path(2)...]
     platform                 // Channel val( str )
 
     main:
@@ -19,6 +18,11 @@ workflow RUN_READ_COVERAGE {
     ch_align_bam    = Channel.empty()
     ch_refer_bam    = Channel.empty()
 
+
+
+    reads.view{"READS: $it"}
+    reference_tuple.view{"REF: $it"}
+    println platform
 
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
