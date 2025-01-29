@@ -1,0 +1,22 @@
+Changes in module 'nf-core/fcsgx/rungx'
+--- modules/nf-core/fcsgx/rungx/main.nf
++++ modules/nf-core/fcsgx/rungx/main.nf
+@@ -25,11 +25,12 @@
+     script:
+     def args = task.ext.args ?: ''
+     def prefix = task.ext.prefix ?: "${meta.id}"
+-    def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
+-    def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
++
++    // At Sanger we have a permenant home for the DB on NVME storage
++    // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
++    // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
++    def database = ramdisk_path ?: gxdb
+     """
+-    # Copy DB to RAM-disk when supplied. Otherwise, the tool is very slow.
+-    $mv_database_to_ram
+ 
+     export GX_NUM_CORES=${task.cpus}
+     run_gx.py \\
+
+************************************************************

@@ -1,7 +1,6 @@
 
 include { FILTER_FASTA                                  } from '../../modules/local/filter_fasta'
 include { GC_CONTENT                                    } from '../../modules/local/gc_content'
-include { GUNZIP                                        } from '../../modules/nf-core/gunzip/main'
 
 include { GENERATE_GENOME                               } from '../../subworkflows/local/generate_genome'
 include { TRAILINGNS_CHECK                              } from '../../subworkflows/local/trailingns_check'
@@ -16,27 +15,9 @@ workflow ESSENTIAL_JOBS {
 
 
     //
-    // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
-    //
-    input_ref
-        .map { meta, ref ->
-            def unzipped
-            if (ref.name.endsWith('.gz')) {
-                processed_file = ref.uncompress()
-                println "Unzipped: ${ref.name} to ${processed_file.name}"
-            } else {
-                processed_file = ref
-                println "No unzipping needed for: ${ref.name}"
-            }
-            [ meta, file(processed_file) ]
-        }
-        .set {ch_unzipped}
-
-
-    //
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
-    ch_unzipped
+    input_ref
         .map { meta, ref ->
             tuple([ id      : meta.id,
                     sliding : params.seqkit_sliding,

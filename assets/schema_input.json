@@ -21,7 +21,7 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.fa$",
+                "pattern": "^\\S+\\.(fa|fa.gz|fna|fna.gz|fasta|fasta.gz)$",
                 "errorMessage": "Fasta file representing the genome assembly to be cleaned."
             }
         },

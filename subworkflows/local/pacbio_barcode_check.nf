@@ -6,14 +6,14 @@
 // MODULE IMPORT BLOCK
 //
 include { CHECK_BARCODE          } from '../../modules/local/check_barcode'
-include { BLAST_MAKEBLASTDB      } from '../../modules/nf-core/blast/makeblastdb'
+include { BLAST_MAKEBLASTDB_BARCODES as BLAST_MAKEBLASTDB     } from '../../modules/local/makeblastdb_barcodes'
 include { BLAST_BLASTN           } from '../../modules/nf-core/blast/blastn'
 include { FILTER_BARCODE         } from '../../modules/local/filter_barcode'
 
 workflow PACBIO_BARCODE_CHECK {
     take:
     reference_tuple         // tuple    [[meta.id], reference ]
-    pacbio_data             // tuple    [[meta.id], pacbio-files]
+    pacbio_data             // tuple    pacbio-files-folder
     pacbio_type             // val      (params.pacbio_type)
     barcodes_file           // tuple    [[meta.id], barcode-file]
     barcode_names           // val      (csv-list-string)

@@ -9,6 +9,7 @@ process GENERATE_SAMPLESHEET {
 
     input:
     tuple val(meta),    path(pacbio_path)
+    path(alarm_file)
 
     output:
     tuple val(meta), path("*csv"),  emit: csv
@@ -37,6 +38,7 @@ process GENERATE_SAMPLESHEET {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
         generate_samplesheet: \$(generate_samplesheet.py -v)
     END_VERSIONS
     """

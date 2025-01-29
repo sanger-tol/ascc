@@ -26,20 +26,16 @@
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
                         "installed_by": ["modules"]
                     },
-                    "fastqc": {
-                        "branch": "master",
-                        "git_sha": "21f230b8cca43755bf73470e6fd0290832a98aef",
-                        "installed_by": ["modules"]
-                    },
                     "fcs/fcsadaptor": {
                         "branch": "master",
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
                         "installed_by": ["modules"]
                     },
-                    "fcs/fcsgx": {
+                    "fcsgx/rungx": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
-                        "installed_by": ["modules"]
+                        "git_sha": "ca0b47f14ab29d460e269fc41973bf85e063391b",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/fcsgx/rungx/fcsgx-rungx.diff"
                     },
                     "gnu/sort": {
                         "branch": "master",

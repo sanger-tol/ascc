@@ -4,33 +4,15 @@ include { SAMTOOLS_MERGE                            } from '../../modules/nf-cor
 workflow PE_MAPPING {
 
     take:
-    reference_tuple          // Channel [ val(meta), path(file) ]
-    pacbio_tuple             // Channel [ val(meta), val( str ) ]
-    reads_type               // Channel val( str )
+    reference_data_tuple     // Channel [ val(meta), path(file), path(file) ]
 
     main:
     ch_versions     = Channel.empty()
 
-
-    //
-    // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
-    //
-    ch_grabbed_reads_path       = GrabFiles( pacbio_tuple )
-
-    ch_grabbed_reads_path
-        .map { meta, files ->
-            tuple( files )
-        }
-        .flatten()
-        .set { ch_reads_path }
-
-
     //
     // LOGIC: MAKE MINIMAP INPUT CHANNEL
     //
-    reference_tuple
-        .combine( ch_reads_path )
-        .combine( reads_type )
+    reference_data_tuple
         .map { meta, ref, reads_path, reads_type ->
             tuple(
                 [   id          : meta.id,

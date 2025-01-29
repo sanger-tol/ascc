@@ -1,4 +1,4 @@
-include { FCS_FCSGX             } from '../../modules/nf-core/fcs/fcsgx/main'
+include { FCSGX_RUNGX           } from '../../modules/nf-core/fcsgx/rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../modules/local/parse_fcsgx_result'
 
 workflow RUN_FCSGX {
@@ -6,7 +6,6 @@ workflow RUN_FCSGX {
     take:
     reference               // Channel [ val(meta), path(file) ]
     fcsgxpath               // Channel path(file)
-    taxid                   // Channel val(taxid)
     ncbi_rankedlineage_path // Channel path(file)
 
     main:
@@ -14,34 +13,20 @@ workflow RUN_FCSGX {
 
 
     //
-    // LOGIC: Create input channel for FCS_FCSGX, taxid is required to be the meta id.
+    // MODULE: FCSGX_RUNGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
     //
-    reference
-        .combine(
-            Channel.of(taxid)
-        )
-        .map { it ->
-                tuple ([    id:     it[0].id,
-                            taxid:  it[2]       ],
-                        it[1])
-            }
-        .set { reference_with_taxid }
-
-
-    //
-    // MODULE: FCS_FCSGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
-    //
-    FCS_FCSGX (
-        reference_with_taxid,
-        fcsgxpath
+    FCSGX_RUNGX (
+        reference,
+        fcsgxpath,
+        []
     )
-    ch_versions     = ch_versions.mix( FCS_FCSGX.out.versions )
+    ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
 
 
     //
     // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
-    FCS_FCSGX.out.fcs_gx_report
+    FCSGX_RUNGX.out.fcsgx_report
         .map{ it ->
                 tuple(  it[0],
                         it[1].getParent()
@@ -51,7 +36,7 @@ workflow RUN_FCSGX {
 
 
     //
-    // MODULE: PARSE_FCSGX_RESULT to parse the FCS_FCSGX result output in csv format.
+    // MODULE: PARSE_FCSGX_RESULT to parse the FCSGX_RUNGX result output in csv format.
     //
     PARSE_FCSGX_RESULT (
         report_path,
