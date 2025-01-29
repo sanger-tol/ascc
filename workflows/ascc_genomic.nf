@@ -87,7 +87,7 @@ workflow ASCC_GENOMIC {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.warn "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.info "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
         }
 
 
@@ -172,9 +172,6 @@ workflow ASCC_GENOMIC {
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
         //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
-
         EXTRACT_NT_BLAST (
             reference_tuple_from_GG,
             params.nt_database_path,
@@ -182,8 +179,18 @@ workflow ASCC_GENOMIC {
             params.ncbi_ranked_lineage_path
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+
+        if (!EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty(true)) {
+            ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
+        } else {
+            ch_nt_blast         = []
+        }
+
+        if (!EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty(true)) {
+            ch_blast_lineage         = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+        } else {
+            ch_blast_lineage    = []
+        }
 
     } else {
         ch_nt_blast         = []
@@ -254,6 +261,7 @@ workflow ASCC_GENOMIC {
 
         ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
         ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+
 
         //
         // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
@@ -365,8 +373,6 @@ workflow ASCC_GENOMIC {
         ch_bam              = []
     }
 
-    ch_coverage         = []
-    ch_bam              = []
 
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
@@ -391,16 +397,28 @@ workflow ASCC_GENOMIC {
     if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("kraken")
     ) {
+
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
             params.nt_kraken_database_path,
             params.ncbi_ranked_lineage_path
         )
-        ch_kraken1          = RUN_NT_KRAKEN.out.classified.map{it[1]}
+
+        if (!RUN_NT_KRAKEN.out.classified.ifEmpty(true)) {
+            ch_kraken1          = RUN_NT_KRAKEN.out.classified.map{it[1]}
+        } else {
+            ch_kraken1 = []
+        }
+
         ch_kraken2          = RUN_NT_KRAKEN.out.report.map{it[1]}
 
-        // TODO: Channel is not getting populated even though the it is includes.
-        ch_kraken3          = RUN_NT_KRAKEN.out.lineage
+        if (!RUN_NT_KRAKEN.out.lineage.ifEmpty(true)) {
+
+            // TODO: Channel is not getting populated even though the it is includes.
+            ch_kraken3          = RUN_NT_KRAKEN.out.lineage
+        } else {
+            ch_kraken3 = []
+        }
 
         ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
     } else {
@@ -673,6 +691,7 @@ workflow ASCC_GENOMIC {
         busco_merge_btk     = []
     }
 
+
     //
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
@@ -684,6 +703,16 @@ workflow ASCC_GENOMIC {
         //
         // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
         //
+
+        println "ASCC_MERGE_TABLES - GC: $ej_gc_coverage"   // FROM -- GC_COVERAGE.tsv
+        println "ASCC_MERGE_TABLES - CO: $ch_coverage"      // FROM -- RUN_COVERAGE.tsv[0]
+        println "ASCC_MERGE_TABLES - TR: $ch_tiara"         // FROM -- TIARA.classifications[0]
+        println "ASCC_MERGE_TABLES - K3: $ch_kraken3"       // FROM -- RUN_NT_KRAKEN.lineage[0]
+        println "ASCC_MERGE_TABLES - BL: $ch_blast_lineage" // FROM -- E_NT_BLAST.ch_blast_hits[0]
+        println "ASCC_MERGE_TABLES - K3: $ch_kmers"         // FROM -- G_KMERS_PROF.combined_csv[0]
+        println "ASCC_MERGE_TABLES - NR: $nr_hits"          // FROM -- NR_DIAMOND.reformed[0]
+        println "ASCC_MERGE_TABLES - UN: $un_hits"          // FROM -- UP_DIAMOND.reformed[0]
+
         ASCC_MERGE_TABLES (
             ej_gc_coverage,                                   // FROM -- GC_COVERAGE.tsv
             ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]

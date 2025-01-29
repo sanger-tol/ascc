@@ -61,27 +61,24 @@ workflow EXTRACT_NT_BLAST {
     BLAST_CHUNK_TO_FULL ( blast_results )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
+
     //
     // MODULE: RE_ORDER THE DATA IN THE FULL_COORDINATE FILE
     //
     REFORMAT_FULL_OUTFMT6 ( BLAST_CHUNK_TO_FULL.out.full )
     ch_versions             = ch_versions.mix(REFORMAT_FULL_OUTFMT6.out.versions)
 
+
     //
     // LOGIC: BRANCH DEPENDING ON WHETHER FILE HAS CONTENTS
     //
     REFORMAT_FULL_OUTFMT6.out.full
-        .map { meta, file ->
-            tuple(  [   id: meta.id,
-                        sz: file.size() ],
-                    file
-            )
-        }
         .branch {
-            valid:      it[0].sz >= 1
-            invalid:    it[0].sz <= 0
+            valid:      it[1].readLines().size() >= 1
+            invalid:    true
         }
         .set { gatekeeper }
+
 
     //
     // MODULE: RETURN ONLY THE TOP HITS PER SEQUENCE
@@ -90,6 +87,7 @@ workflow EXTRACT_NT_BLAST {
         gatekeeper.valid
     )
     ch_versions             = ch_versions.mix(BLAST_GET_TOP_HITS.out.versions)
+
 
     //
     // MODULE: USING THE accession2taxid DATABASE WE RETREIVE LINEAGE INFORMATION PER TOP RESULT
@@ -100,6 +98,7 @@ workflow EXTRACT_NT_BLAST {
         ncbi_lineage_path
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
+
 
     emit:
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full

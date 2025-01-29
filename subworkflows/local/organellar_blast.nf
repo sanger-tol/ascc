@@ -80,6 +80,10 @@ workflow ORGANELLAR_BLAST {
     //
     // LOGIC: IF FILTER_COMMENTS RETURNS FILE WITH NO LINES THEN SUBWORKFLOWS STOPS
     //
+
+    //
+    // CHANNELS NEED MATCHING UP
+    //
     FILTER_COMMENTS.out.txt
         .branch { meta, file ->
             valid: file.countLines() >= 1
@@ -87,10 +91,23 @@ workflow ORGANELLAR_BLAST {
         }
         .set {no_comments}
 
+    reference_tuple
+        .map{meta, file ->
+            [[id: meta.id], file]
+        }
+        .set{fixed_ref}
+
+    log.debug "ORGANELLAR_BLAST REFERENCE: $fixed_ref"
+
+    log.debug "ORGANELLAR_BLAST VALID ORGANELLAR: $no_comments.valid"
+
     no_comments
         .valid
-        .combine(reference_tuple, by: 0)
-        .multiMap { meta, no_comment_file, meta2, reference ->
+        .map{ meta, file ->
+            [[id: meta.id], file]
+        }
+        .combine(fixed_ref, by: 0)
+        .multiMap { meta, no_comment_file, reference ->
             filtered: tuple(meta, no_comment_file)
             reference: tuple(meta, reference)
 

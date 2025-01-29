@@ -190,7 +190,7 @@ workflow {
             include_workflow_steps.contains('ALL') && params.profile_name == 'test'
         )
     ) {
-        ch_grabbed_reads_path       = GrabFiles( params.reads_path )
+        ch_grabbed_reads_path       = MAIN_WORKFLOW_GrabFiles( params.reads_path )
     } else {
         ch_grabbed_reads_path       = []
     }
@@ -263,7 +263,7 @@ workflow {
 
 }
 
-process GrabFiles {
+process MAIN_WORKFLOW_GrabFiles {
     tag "Grab PacBio Data"
     executor 'local'
 
