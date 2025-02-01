@@ -270,23 +270,52 @@ def evaluate_clustering(embedding, labels):
     """
     metrics = {}
 
+    n_samples = len(labels)
+    n_unique_labels = len(set(labels))
+
+    # Check if we have enough samples and labels for meaningful metrics
+    if n_samples < 4 or n_unique_labels < 2 or n_unique_labels >= n_samples:
+        log_message(
+            f"Dataset too small for clustering metrics (samples: {n_samples}, "
+            f"unique labels: {n_unique_labels}). Skipping metrics calculation.",
+            level="warning",
+        )
+        return {
+            "silhouette": float("nan"),
+            "calinski_harabasz": float("nan"),
+            "davies_bouldin": float("nan"),
+            "adjusted_rand": float("nan"),
+        }
+
     # Silhouette score (-1 to 1, higher is better)
-    metrics["silhouette"] = silhouette_score(embedding, labels)
+    try:
+        metrics["silhouette"] = silhouette_score(embedding, labels)
+    except Exception as e:
+        log_message(f"Failed to calculate silhouette score: {str(e)}", level="warning")
+        metrics["silhouette"] = float("nan")
 
     # Calinski-Harabasz Index (higher is better)
-    metrics["calinski_harabasz"] = calinski_harabasz_score(embedding, labels)
+    try:
+        metrics["calinski_harabasz"] = calinski_harabasz_score(embedding, labels)
+    except Exception as e:
+        log_message(f"Failed to calculate Calinski-Harabasz score: {str(e)}", level="warning")
+        metrics["calinski_harabasz"] = float("nan")
 
     # Davies-Bouldin Index (lower is better)
-    metrics["davies_bouldin"] = davies_bouldin_score(embedding, labels)
+    try:
+        metrics["davies_bouldin"] = davies_bouldin_score(embedding, labels)
+    except Exception as e:
+        log_message(f"Failed to calculate Davies-Bouldin score: {str(e)}", level="warning")
+        metrics["davies_bouldin"] = float("nan")
 
     # HDBSCAN clustering comparison
-    clusterer = HDBSCAN(min_cluster_size=5, min_samples=5)
-    cluster_labels = clusterer.fit_predict(embedding)
-
-    # Compare with true labels using adjusted rand index
-    from sklearn.metrics import adjusted_rand_score
-
-    metrics["adjusted_rand"] = adjusted_rand_score(labels, cluster_labels)
+    try:
+        clusterer = HDBSCAN(min_cluster_size=min(5, n_samples - 1))
+        cluster_labels = clusterer.fit_predict(embedding)
+        metrics["adjusted_rand"] = adjusted_rand_score(labels, cluster_labels)
+    except Exception as e:
+        log_message(f"Failed to calculate adjusted rand index: {str(e)}", level="warning")
+        metrics["adjusted_rand"] = float("nan")
 
     return metrics
 
@@ -1571,6 +1600,67 @@ def run_lle(df_preprocessed, method, n_neighbors_setting, n_components):
     return embedding, embedding_title
 
 
+def check_minimum_samples(n_samples, n_features, method, n_components):
+    """
+    Check if there are enough samples for the selected method.
+    Returns (bool, str, int): (is_valid, message, n_components)
+    """
+
+    method_requirements = {
+        "pca": {"min_samples": 2, "message": "PCA requires at least 2 samples"},
+        "random_trees": {"min_samples": 2, "message": "Random Trees embedding requires at least 2 samples"},
+        "umap": {"min_samples": 10, "message": "UMAP works best with at least 10 samples"},
+        "t-sne": {"min_samples": 5, "message": "t-SNE requires at least 5 samples"},
+        "isomap": {"min_samples": 5, "message": "Isomap requires at least 5 samples"},
+        "lle_standard": {
+            "min_samples": max(n_components + 2, 5),
+            "message": f"Standard LLE requires at least {max(n_components + 2, 5)} samples",
+        },
+        "lle_hessian": {
+            "min_samples": max(n_components * (n_components + 3) // 2 + 1, 5),
+            "message": f"Hessian LLE requires at least {max(n_components * (n_components + 3) // 2 + 1, 5)} samples",
+        },
+        "lle_modified": {
+            "min_samples": max(n_components + 2, 5),
+            "message": f"Modified LLE requires at least {max(n_components + 2, 5)} samples",
+        },
+        "mds": {"min_samples": 4, "message": "MDS requires at least 4 samples"},
+        "se": {"min_samples": 4, "message": "Spectral Embedding requires at least 4 samples"},
+        "kernel_pca": {"min_samples": 2, "message": "Kernel PCA requires at least 2 samples"},
+        "pca_svd": {"min_samples": 2, "message": "PCA with SVD requires at least 2 samples"},
+        "nmf": {"min_samples": 2, "message": "NMF requires at least 2 samples"},
+        "autoencoder_relu": {
+            "min_samples": 10,
+            "message": "Autoencoder requires at least 10 samples for meaningful results",
+        },
+    }
+
+    # Add common checks for all autoencoder variants
+    if method.startswith("autoencoder_"):
+        method_requirements[method] = {
+            "min_samples": 10,
+            "message": "Autoencoder requires at least 10 samples for meaningful results",
+        }
+
+    if method not in method_requirements:
+        return True, ""  # Unknown method, assume it's valid
+
+    req = method_requirements[method]
+    is_valid = n_samples >= req["min_samples"]
+
+    # Additional check for n_components
+    if is_valid and n_components >= n_samples:
+        is_valid = False
+        req["message"] = f"Number of components ({n_components}) must be less than number of samples ({n_samples})"
+
+    # Check for feature count
+    if is_valid and n_features < 2:
+        is_valid = False
+        req["message"] = "At least 2 features are required"
+
+    return is_valid, req["message"], n_components
+
+
 def run_dim_reduction(
     df,
     seq_lengths,
@@ -1586,7 +1676,28 @@ def run_dim_reduction(
     embedding = None
     embedding_title = None
 
-    n_samples = df.shape[0]
+    n_samples, n_features = df.shape
+
+    # Adjust n_components before anything else
+    if n_components >= n_samples:
+        n_components = max(1, n_samples - 1)
+        log_message(
+            f"Adjusting n_components from {n_components + 1} to {n_components} "
+            f"for {selected_method} due to small sample size",
+            level="warning",
+        )
+
+    # Check if we have enough samples for the selected method
+    is_valid, message, _ = check_minimum_samples(n_samples, n_features, selected_method, n_components)
+
+    if not is_valid:
+        log_message(f"Skipping {selected_method}: {message}", level="warning")
+        return None, None, False
+
+    if not is_valid:
+        log_message(f"Skipping {selected_method}: {message}", level="warning")
+        return None, None, False
+
     methods_with_neighbors = {"umap", "isomap", "lle_standard", "lle_hessian", "lle_modified", "se"}
 
     # Validate n_components at the start
@@ -1596,14 +1707,6 @@ def run_dim_reduction(
     if n_components <= 0:
         log_message(f"Invalid n_components value ({n_components})", level="error")
         return None, None
-
-    if n_components > max_comp:
-        log_message(
-            f"Reducing n_components from {n_components} to {max_comp} "
-            f"based on data dimensions ({n_samples} samples, {n_features} features)",
-            level="warning",
-        )
-        n_components = max_comp
 
     if optimise_n_neighbors and selected_method in methods_with_neighbors:
         log_message(f"Optimising parameters for {selected_method}...", level="info")
@@ -1822,7 +1925,12 @@ def main(
             level="info",
         )
 
+    # Early checks for minimal dataset
     df_row_count = df.shape[0]
+    if df_row_count == 0:
+        log_message("Empty input file", level="error")
+        sys.exit(1)
+
     if df_row_count == 1:
         log_message(
             "Skipping the dimensionality reduction of kmer counts, as the kmer counts table has only one row",
@@ -1833,6 +1941,8 @@ def main(
             empty_file.write("The kmer counts file is too small for analysis")
         sys.exit(0)
 
+    selected_methods = selected_methods.split(",")
+
     if df_row_count < n_components:
         log_message(
             f"Warning: Input data has {df_row_count} sequences. Because of this, the user-specified value of n_components ({n_components}) cannot be used. Changing the value of {n_components} to {df_row_count} to make it fit the low number of sequences in the input FASTA file",
@@ -1841,8 +1951,6 @@ def main(
         n_components = df_row_count
 
     Path(out_folder).mkdir(parents=True, exist_ok=True)
-    selected_methods = selected_methods.split(",")
-
     check_memory_requirements(df, selected_methods)
 
     if autoencoder_epochs_count == -1:
