@@ -25,9 +25,9 @@ The preprocessing pipeline includes:
 
 import os
 
-matplot_config_path = os.getcwd() + "/matplotconfig/"
-fonts_config_path = os.getcwd() + "/fontconfig/"
-numba_config_path = os.getcwd() + "/numbaconfig/"
+matplot_config_path = os.path.join(os.getcwd(), "matplotconfig")
+fonts_config_path = os.path.join(os.getcwd(), "fontconfig")
+numba_config_path = os.path.join(os.getcwd(), "numbaconfig")
 
 for i in [fonts_config_path, matplot_config_path, numba_config_path]:
     if not os.path.exists(i):
@@ -63,11 +63,12 @@ from pathlib import Path
 from datetime import datetime
 from functools import reduce
 import gc  # for garbage collection
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.neighbors import NearestNeighbors
 from tensorflow.keras import backend as K
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.cluster import HDBSCAN
+from sklearn.metrics import adjusted_rand_score
 
 
 def reset_random_seeds():
@@ -230,14 +231,18 @@ def preprocess_data(df, seq_lengths, scaling_method="log", use_tf_idf=False):
         df_normalised = df.div(seq_lengths.clip(lower=1e-10), axis=0)  # Prevent division by zero
         data_array = df_normalised.values
 
-        # Apply scaling as before
+        # Apply scaling
         if scaling_method == "log":
             return np.log1p(data_array)
-        elif scaling_method == "standard":
+        elif scaling_method == "minmax":
             scaler = MinMaxScaler(feature_range=(1e-6, 1.0 - 1e-6))
             return scaler.fit_transform(data_array)
-
-    return data_array
+        elif scaling_method == "standard":
+            scaler = StandardScaler()
+            return scaler.fit_transform(data_array)
+        else:
+            # No further scaling
+            return data_array
 
 
 def transform_kmer_counts(df):
@@ -1072,10 +1077,6 @@ def run_autoencoder(
     # -------------------------
 
     learning_rate = 0.001  # Base learning rate
-    batch_size = min(32, len(data_array) // 10)  # Smaller batches
-
-    # Compile model with default Adam optimizer
-    vae.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate))
 
     if nr_of_epochs > 100:
         log_message(
@@ -1694,15 +1695,10 @@ def run_dim_reduction(
         log_message(f"Skipping {selected_method}: {message}", level="warning")
         return None, None, False
 
-    if not is_valid:
-        log_message(f"Skipping {selected_method}: {message}", level="warning")
-        return None, None, False
-
     methods_with_neighbors = {"umap", "isomap", "lle_standard", "lle_hessian", "lle_modified", "se"}
 
     # Validate n_components at the start
     n_samples, n_features = df.shape
-    max_comp = min(n_samples, n_features)
 
     if n_components <= 0:
         log_message(f"Invalid n_components value ({n_components})", level="error")
@@ -1713,7 +1709,7 @@ def run_dim_reduction(
         try:
             best_n_neighbors, opt_results = find_best_n_neighbors_setting(df.values, selected_method)
 
-            # Save optimization results
+            # Save optimisation results
             if out_folder:
                 results_path = os.path.join(out_folder, f"{selected_method}_n_neighbors_optimisation.txt")
                 with open(results_path, "w") as f:
@@ -1725,7 +1721,7 @@ def run_dim_reduction(
                 n_neighbors_setting = best_n_neighbors
                 log_message(f"Best n_neighbors for {selected_method}: {best_n_neighbors}", level="info")
             else:
-                # Use default or provided n_neighbors if optimization fails
+                # Use default or provided n_neighbors if optimisation fails
                 log_message(
                     f"n_neighbors optimisation failed for {selected_method}. "
                     f"Using provided/default n_neighbors={n_neighbors_setting}",
@@ -1754,7 +1750,8 @@ def run_dim_reduction(
     elif selected_method in ["umap", "t-sne", "isomap", "mds"]:
         df_preprocessed = preprocess_data(df, seq_lengths, scaling_method="log", use_tf_idf=False)
     elif selected_method in ["random_trees", "nmf"]:
-        df_preprocessed = df.values  # Pass raw values because these methods don't require scaling
+        # df_preprocessed = df.values  # Pass raw values because these methods don't require scaling
+        df_preprocessed = preprocess_data(df, seq_lengths, scaling_method="log", use_tf_idf=False)
     elif selected_method in [
         "autoencoder_sigmoid",
         "autoencoder_linear",
@@ -1937,11 +1934,13 @@ def main(
             level="warning",
         )
         # Generate an empty file to satisfy nextflow expecting a file from script finishing with no file with small output
-        with open(f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv", "w") as empty_file:
+        with open(
+            os.path.join(os.getcwd(), f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv"), "w"
+        ) as empty_file:
             empty_file.write("The kmer counts file is too small for analysis")
         sys.exit(0)
 
-    selected_methods = selected_methods.split(",")
+    selected_methods = [m.strip() for m in selected_methods.split(",")]
 
     if df_row_count < n_components:
         log_message(
@@ -1996,10 +1995,8 @@ def main(
         lambda left, right: pd.merge(left, right, on=["scaff"], how="outer"),  # Merge DataFrames in list
         embeddings_list,
     )
-    out_path = out_folder + "/kmers_dim_reduction_embeddings.csv"
+    out_path = os.path.join(out_folder, "kmers_dim_reduction_embeddings.csv")
     out_df.to_csv(out_path, index=False)
-
-    os._exit(0)
 
 
 if __name__ == "__main__":
