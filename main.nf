@@ -190,7 +190,7 @@ workflow {
             include_workflow_steps.contains('ALL') && params.profile_name == 'test'
         )
     ) {
-        ch_grabbed_reads_path       = MAIN_WORKFLOW_GrabFiles( params.reads_path )
+        ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
     } else {
         ch_grabbed_reads_path       = []
     }
@@ -275,6 +275,7 @@ process MAIN_WORKFLOW_GrabFiles {
 
     "true"
 }
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

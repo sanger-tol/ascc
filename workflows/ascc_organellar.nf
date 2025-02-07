@@ -381,6 +381,8 @@ workflow ASCC_ORGANELLAR {
 //
 // Function: this is to count the length of ONLY the fasta sequence
 //
+// @param input_file: path
+// @return int
 def CountFastaLength(input_file) {
     int counter = 0;
     def list_lines = new File(input_file.toString()).text.readLines()

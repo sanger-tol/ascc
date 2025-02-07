@@ -48,7 +48,7 @@ workflow ASCC_GENOMIC {
     validate_taxid_versions // Versions channel from main.nf
     include_steps           // params.include_steps
     exclude_steps           // params.exclude_steps
-    fcs_db                  // path(path)
+    fcs_db                  // [path(path)]
     reads
 
     main:
@@ -75,6 +75,8 @@ workflow ASCC_GENOMIC {
     log.info "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
     log.info "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
+
+    //reads = CollectReads(reads_list)
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -180,17 +182,16 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
-        if (!EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty(true)) {
-            ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        } else {
-            ch_nt_blast         = []
-        }
+        //
+        // TODO: This needs testing
+        //
+        ch_nt_blast = EXTRACT_NT_BLAST.out.ch_blast_hits
+            .map { it -> it[1] }
+            .ifEmpty { [] }
 
-        if (!EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty(true)) {
-            ch_blast_lineage         = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
-        } else {
-            ch_blast_lineage    = []
-        }
+        ch_blast_lineage = EXTRACT_NT_BLAST.out.ch_top_lineages
+            .map { it -> it[1] }
+            .ifEmpty { [] }
 
     } else {
         ch_nt_blast         = []
@@ -403,24 +404,20 @@ workflow ASCC_GENOMIC {
             params.nt_kraken_database_path,
             params.ncbi_ranked_lineage_path
         )
-
-        if (!RUN_NT_KRAKEN.out.classified.ifEmpty(true)) {
-            ch_kraken1          = RUN_NT_KRAKEN.out.classified.map{it[1]}
-        } else {
-            ch_kraken1 = []
-        }
-
-        ch_kraken2          = RUN_NT_KRAKEN.out.report.map{it[1]}
-
-        if (!RUN_NT_KRAKEN.out.lineage.ifEmpty(true)) {
-
-            // TODO: Channel is not getting populated even though the it is includes.
-            ch_kraken3          = RUN_NT_KRAKEN.out.lineage
-        } else {
-            ch_kraken3 = []
-        }
-
         ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+        ch_kraken1 = RUN_NT_KRAKEN.out.classified
+            .map { it -> it[1] }
+            .ifEmpty { [] }
+
+        ch_kraken2 = RUN_NT_KRAKEN.out.report
+            .map { it -> it[1] }
+            .ifEmpty { [] }
+
+        ch_kraken3 = RUN_NT_KRAKEN.out.lineage
+            .map { it -> it[1] }
+            .ifEmpty { [] }
+
     } else {
         ch_kraken1          = []
         ch_kraken2          = []
@@ -709,7 +706,7 @@ workflow ASCC_GENOMIC {
         println "ASCC_MERGE_TABLES - TR: $ch_tiara"         // FROM -- TIARA.classifications[0]
         println "ASCC_MERGE_TABLES - K3: $ch_kraken3"       // FROM -- RUN_NT_KRAKEN.lineage[0]
         println "ASCC_MERGE_TABLES - BL: $ch_blast_lineage" // FROM -- E_NT_BLAST.ch_blast_hits[0]
-        println "ASCC_MERGE_TABLES - K3: $ch_kmers"         // FROM -- G_KMERS_PROF.combined_csv[0]
+        println "ASCC_MERGE_TABLES - KM: $ch_kmers"         // FROM -- G_KMERS_PROF.combined_csv[0]
         println "ASCC_MERGE_TABLES - NR: $nr_hits"          // FROM -- NR_DIAMOND.reformed[0]
         println "ASCC_MERGE_TABLES - UN: $un_hits"          // FROM -- UP_DIAMOND.reformed[0]
 
@@ -743,6 +740,20 @@ workflow ASCC_GENOMIC {
             newLine: true
         ).set { ch_collated_versions }
 }
+
+// CollectReads {
+//     tag "${meta.id}"
+//     executor 'local'
+
+//     input:
+//     tuple val(meta), path("in")
+
+//     output:
+//     tuple val(meta), path("in/*.{fa,fasta}.{gz}")
+
+//     "true"
+// }
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
