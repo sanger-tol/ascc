@@ -39,7 +39,7 @@
                     "fa_icon": "fas fa-hastag"
                 },
                 "reads_path": {
-                    "type": "string",
+                    "type": "array",
                     "description": "folder containing long read data files in FASTA.GZ format",
                     "fa_icon": "fas fa-file-lines"
                 },

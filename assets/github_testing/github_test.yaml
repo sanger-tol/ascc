@@ -1,4 +1,5 @@
-reads_path: /home/runner/work/ascc/ascc/asccTinyTest_V2/pacbio/
+reads_path:
+  - /home/runner/work/ascc/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz
 reads_type: "hifi"
 pacbio_barcode_file: /home/runner/work/ascc/ascc/assets/pacbio_adaptors.fa
 pacbio_barcode_names: "bc2001,bc2009"
