@@ -57,7 +57,7 @@ def parse_args(argv=None):
     )
     parser.add_argument("-t", "--tiara", default="N", type=str, help="Path to the tiara_out.txt file")
     parser.add_argument(
-        "-p", "--pca", default="N", type=str, help="Path to the kmers_dim_reduction_embeddings.csv file"
+        "-p", "--pca", default="N", type=str, help="Path to the kmers_dim_reduction_embeddings_combined.csv file"
     )
     parser.add_argument("-fc", "--fcs_gx", default="N", type=str, help="Path to the fcs-gx_summary.csv.csv file")
     parser.add_argument("-k", "--kraken", default="N", type=str, help="Path to the nt_kraken_lineage.txt file")
@@ -110,22 +110,21 @@ def tiara_results_to_btk_format(tiara_results_path, outfile_path):
 
 def detect_dim_reduction_methods(kmers_dim_reduction_output_path):
     """
-    Parses the header of the kmers dimensionality reduction report file to detect which dimensionality reduction methods were used
+    Parses the header of the kmers dimensionality reduction report file to detect
+    which dimensionality reduction methods were used and how many dimensions each has
+    Returns a dictionary where keys are method names and values are number of dimensions
     """
-    header_string = None
     with open(kmers_dim_reduction_output_path) as f:
-        header_string = f.readline()
-    header_string = header_string.strip()
+        header_string = f.readline().strip()
+
     split_header = header_string.split(",")
-    dim_reduction_methods = list()
-    for header_item in split_header:
-        if header_item.startswith("embedding_"):
-            if header_item.startswith("embedding_x_"):
-                header_item = header_item.split("embedding_x_")[1]
-            elif header_item.startswith("embedding_y_"):
-                header_item = header_item.split("embedding_y_")[1]
-            if header_item not in dim_reduction_methods:
-                dim_reduction_methods.append(header_item)
+    dim_reduction_methods = {}
+
+    for method in set(col.split("_")[-1] for col in split_header if col.startswith("embedding_dim_")):
+        # Count how many dimensions exist for this method
+        dims = sum(1 for col in split_header if f"embedding_dim_" in col and col.endswith(f"_{method}"))
+        dim_reduction_methods[method] = dims
+
     return dim_reduction_methods
 
 
@@ -176,9 +175,19 @@ def main(args):
 
     # ADDING KMER DIM REDUCTION
     if args.pca != "N" and os.path.isfile(args.pca) and os.stat(args.pca).st_size > 0:
-        used_dim_reduction_methods = detect_dim_reduction_methods(args.pca)
-        for dim_reduction_method in used_dim_reduction_methods:
-            add_embedding_command = f"blobtools add --text {args.pca} --text-delimiter ',' --text-cols scaff=identifiers,embedding_x_{dim_reduction_method}=embedding_x_{dim_reduction_method},embedding_y_{dim_reduction_method}=embedding_y_{dim_reduction_method} --text-header {args.output}"
+        method_dimensions = detect_dim_reduction_methods(args.pca)
+        for method, n_dims in method_dimensions.items():
+            # Create the text-cols string dynamically based on number of dimensions
+            cols_list = ["scaff=identifiers"]
+            cols_list.extend([f"embedding_dim_{i}_{method}=embedding_dim_{i}_{method}" for i in range(1, n_dims + 1)])
+            cols_string = ",".join(cols_list)
+
+            add_embedding_command = (
+                f"blobtools add --text {args.pca} "
+                f"--text-delimiter ',' "
+                f"--text-cols {cols_string} "
+                f"--text-header {args.output}"
+            )
             command_list.append(add_embedding_command)
 
     # ADDIND KRAKEN DATA

@@ -89,7 +89,9 @@ def main(fasta_file, output_file):
 
                         # Does the *end* of this block satisfy the window condition?
                         bases_in_window = 0
-                        start_of_first_base_block_in_window = 0 # Replacement of the None assignment with 0 to apease the linting gods
+                        start_of_first_base_block_in_window = (
+                            0  # Replacement of the None assignment with 0 to apease the linting gods
+                        )
                         for non_n_region in non_n_regions:
                             if non_n_region[1] >= current_non_n_end - winsize:
                                 start_of_first_base_block_in_window = non_n_region[0]

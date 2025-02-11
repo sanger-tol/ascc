@@ -20,6 +20,7 @@ Written by Eerik Aunin
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
 
+
 def save_file(output_list, name, prefix):
     with open(f"{prefix}_{name}_diamond_blastx_top_hits.csv", "w") as f:
         for line in output_list:
