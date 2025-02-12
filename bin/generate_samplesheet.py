@@ -17,11 +17,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Generate a csv file for BTK")
     parser.add_argument("sample_name", type=str, help="Name of sample")
     parser.add_argument(
-        "mapped_bam_file",
+        "path_to_reads",
         type=str,
-        help="Path containing the mapped BAM generated with PacBio data and the ASCC input assembly",
+        help="Path containing the PacBio reads",
     )
-    parser.add_argument("-v", "--version", action="version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", version="1.1.0")
+
     return parser.parse_args()
 
 
@@ -31,12 +32,13 @@ def main():
     data_list = []
 
     data_list.append("sample,datatype,datafile\n")
-    if args.mapped_bam_file.endswith(".bam"):
-        data_list.append(f"{args.sample_name},pacbio,{args.mapped_bam_file}\n")
-    else:
-        sys.exit("I was expecting a mapped BAM file")
 
-    with open(f"{args.sample_name}_samplesheet.csv", "w") as file:
+    [data_list.append(f"{args.sample_name},pacbio,{args.path_to_reads}{file}\n") for file in os.listdir(args.path_to_reads) if file.endswith('.fasta.gz') or file.endswith('.fa.gz')]
+
+    if len(data_list) <= 1:
+        sys.exit("I was expecting at least one FASTA.GZ file")
+
+    with open("samplesheet.csv", "w") as file:
         file.write("".join(data_list))
 
 

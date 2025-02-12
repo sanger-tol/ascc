@@ -121,7 +121,7 @@ workflow ASCC_ORGANELLAR {
     if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("pacbio_barcodes") ) {
         PACBIO_BARCODE_CHECK (
             ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-            params.reads_path, // TODO: COME ON MAN
+            params.reads_path,
             params.reads_type,
             params.pacbio_barcode_file,
             params.pacbio_barcode_names

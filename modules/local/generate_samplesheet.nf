@@ -8,7 +8,8 @@ process GENERATE_SAMPLESHEET {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta),    path(pacbio_path)
+    tuple val(meta), path(reference)
+    path( "input_pacbio_files/*" )
     path(alarm_file)
 
     output:
@@ -21,7 +22,7 @@ process GENERATE_SAMPLESHEET {
     """
     generate_samplesheet.py \\
         $prefix \\
-        "\$(realpath $pacbio_path)"
+        input_pacbio_files/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -9,6 +9,7 @@ process SANGER_TOL_BTK {
     path blastn
     path blastx
     path tax_dump
+    path( "input_pacbio_files/*" )
     val busco_lineages_folder
     val busco_lineages
     val taxon
@@ -53,6 +54,7 @@ process SANGER_TOL_BTK {
         --blastn "\$(realpath $blastn)" \\
         --blastx "\$(realpath $blastx)" \\
         --use_work_dir_as_temp true \\
+        --align \\
         $args
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
