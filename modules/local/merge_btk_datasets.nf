@@ -8,13 +8,12 @@ process MERGE_BTK_DATASETS {
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
-    tuple val(meta), path(create_btk_datasets)
-    tuple val(meta2), path(btk_busco_datasets)
+    tuple val(meta), path(create_btk_datasets), path(btk_busco_datasets)
 
     output:
-    tuple val(meta), path("merged_datasets"),                                   emit: merged_datasets
-    tuple val(meta), path("merged_datasets/btk_busco_summary_table_full.tsv"),  emit: busco_summary_tsv
-    path "versions.yml",                                                        emit: versions
+    tuple val(meta), path("merged_btk_datasets"),                                   emit: merged_datasets
+    tuple val(meta), path("merged_btk_datasets/btk_busco_summary_table_full.tsv"),  emit: busco_summary_tsv
+    path "versions.yml",                                                            emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,7 +27,7 @@ process MERGE_BTK_DATASETS {
 
     merge_btk_datasets.py \\
         -m $create_btk_datasets \\
-        -o ./merged_datasets \\
+        -o ./merged_btk_datasets \\
         -b $btk_busco_datasets \\
         $args
 
