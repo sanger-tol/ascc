@@ -323,8 +323,7 @@ workflow ASCC_GENOMIC {
     ) {
         PACBIO_BARCODE_CHECK (
             reference_tuple_from_GG,
-            params.reads_path,  // TODO: TEAM WANT TO BE ABLE TO SPECIFY PACBIO FILES
-                                // MAY NEED A PROCESS TO PULL THEM INTO A SINGLE FOLDER BEFORE PROCESING
+            params.reads_path,
             params.reads_type,
             params.pacbio_barcode_file,
             params.pacbio_barcode_names
@@ -675,7 +674,8 @@ workflow ASCC_GENOMIC {
         //          USE IN THE BTK PIPELINE
         //
         GENERATE_SAMPLESHEET (
-            RUN_READ_COVERAGE.out.bam_ch,
+            reference_tuple_from_GG,
+            params.reads_path,
             AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
         )
         ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
@@ -715,6 +715,7 @@ workflow ASCC_GENOMIC {
             params.nt_database_path,
             params.diamond_uniprot_database_path,
             params.ncbi_taxonomy_path,
+            params.reads_path,
             params.busco_lineages_folder,
             params.busco_lineages,
             params.taxid,
@@ -836,7 +837,7 @@ workflow ASCC_GENOMIC {
             .map { id, data ->
                 [id: id, data: data]
             }
-            .set {number_1}
+            .set {ascc_merged_data}
 
         def processes = [
             'GC_COV', 'Coverage', 'TIARA',
@@ -845,7 +846,7 @@ workflow ASCC_GENOMIC {
         ]
 
         def processChannels = processes.collectEntries { process ->
-            [(process): number_1
+            [(process): ascc_merged_data
                 .map { sample ->
                     def data = sample.data.find { it.meta.process == process }
                     data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
@@ -853,18 +854,17 @@ workflow ASCC_GENOMIC {
             ]
         }
 
-        def combined_channel_1 = processChannels['GC_COV']
+        def ascc_combined_channels = processChannels['GC_COV']
         processes.tail().each { process ->
-            combined_channel_1 = combined_channel_1
+            ascc_combined_channels = ascc_combined_channels
                                     .combine(processChannels[process], by: 0)
         }
 
-        combined_channel_1.view()
         //
         // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
         //
         ASCC_MERGE_TABLES (
-            combined_channel_1.map { it[1..-1] } // Remove the first item in tuple (mapping key)
+            ascc_combined_channels.map { it[1..-1] } // Remove the first item in tuple (mapping key)
         )
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
     }
