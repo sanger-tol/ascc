@@ -105,9 +105,13 @@ workflow ASCC_ORGANELLAR {
             ESSENTIAL_JOBS.out.reference_tuple_from_GG
         )
         ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
+        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara
+                                .map { it ->
+                                    [[id: it[0].id, process: "TIARA"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
     } else {
-        ch_tiara            = []
+        ch_tiara            = Channel.of( [[],[]] )
     }
 
 
@@ -132,19 +136,25 @@ workflow ASCC_ORGANELLAR {
     //
     if ( (include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-adaptor") ) {
         RUN_FCSADAPTOR (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG // Again should this be the validated fasta?
+            ESSENTIAL_JOBS.out.reference_tuple_from_GG
         )
 
         RUN_FCSADAPTOR.out.ch_euk
-            .map{it[1]}
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
+            .map { meta, file1, file2 ->
+                tuple(
+                    [id: meta.id, process: "FCS-Adaptor"],
+                    file1,
+                    file2
+                )
+            }
             .set{ ch_fcsadapt }
+            // TODO: IS THIS AN ISSUE?
 
-        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     } else {
-        ch_fcsadapt         = []
+        ch_fcsadapt         = Channel.of([[],[]])
     }
 
 
@@ -170,11 +180,15 @@ workflow ASCC_ORGANELLAR {
             joint_channel.fcs_db_path,
             joint_channel.ncbi_tax_path
         )
-
-        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
+                                .map { it ->
+                                    [[id: it[0].id, process: "FCSGX result"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
     } else {
-        ch_fcsgx            = []
+        ch_fcsgx         = Channel.of( [[],[]] )
     }
 
 
@@ -189,12 +203,22 @@ workflow ASCC_ORGANELLAR {
             reads,
             params.reads_type,
         )
-        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
+                                .map { it ->
+                                    [[id: it[0].id, process: "Coverage"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch
+                                .map { it ->
+                                    [[id: it[0].id, process: "Mapped Bam"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
     } else {
-        ch_coverage         = []
-        ch_bam              = []
+        ch_coverage         = Channel.of( [[],[]] )
+        ch_bam              = Channel.of( [[],[]] )
     }
 
 
@@ -208,12 +232,15 @@ workflow ASCC_ORGANELLAR {
             ESSENTIAL_JOBS.out.reference_tuple_from_GG, // Again should this be the validated fasta?
             params.vecscreen_database_path
         )
-        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
+                                .map { it ->
+                                    [[id: it[0].id, process: "Vecscreen"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
     } else {
-        ch_vecscreen        = []
+        ch_vecscreen        = Channel.of([[],[]])
     }
-
 
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
@@ -226,15 +253,28 @@ workflow ASCC_ORGANELLAR {
             params.nt_kraken_database_path,
             params.ncbi_ranked_lineage_path
         )
-        ch_kraken1          = RUN_NT_KRAKEN.out.classified.map{it[1]}
-        ch_kraken2          = RUN_NT_KRAKEN.out.report.map{it[1]}
-        ch_kraken3          = RUN_NT_KRAKEN.out.lineage
+        ch_kraken1 = RUN_NT_KRAKEN.out.classified
+                        .map { it ->
+                            [[id: it[0].id, process: "Kraken 1"], it[1]]
+                        }
+                    .ifEmpty { [[],[]] }
 
-        ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+        ch_kraken2 = RUN_NT_KRAKEN.out.report
+                        .map { it ->
+                            [[id: it[0].id, process: "Kraken 2"], it[1]]
+                        }
+                    .ifEmpty { [[],[]] }
+
+        ch_kraken3 = RUN_NT_KRAKEN.out.lineage
+                        .map { it ->
+                            [[id: it[0].id, process: "Kraken 3"], it[1]]
+                        }
+                    .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1          = []
-        ch_kraken2          = []
-        ch_kraken3          = []
+        ch_kraken1 = Channel.of([[],[]])
+        ch_kraken2 = Channel.of([[],[]])
+        ch_kraken3 = Channel.of([[],[]])
+
     }
 
 
@@ -292,12 +332,21 @@ workflow ASCC_ORGANELLAR {
             Channel.value(params.ncbi_ranked_lineage_path)
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
 
     } else {
-        ch_nt_blast         = Channel.empty()
-        ch_blast_lineage    = Channel.empty()
+        ch_nt_blast         = Channel.of( [[],[]] )
+        ch_blast_lineage    = Channel.of( [[],[]] )
     }
 
 
@@ -311,12 +360,22 @@ workflow ASCC_ORGANELLAR {
             valid_length_fasta,
             params.diamond_nr_database_path
         )
-        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
-        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
         ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+        nr_full             = NR_DIAMOND.out.reformed
+                                .map { it ->
+                                    [[id: it[0].id, process: "NR-FULL"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        nr_hits             = NR_DIAMOND.out.hits_file
+                                .map { it ->
+                                    [[id: it[0].id, process: "NR-HITS"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
     } else {
-        nr_hits             = []
-        nr_full             = []
+        nr_full             = Channel.of( [[],[]] )
+        nr_hits             = Channel.of( [[],[]] )
     }
 
 
@@ -331,34 +390,101 @@ workflow ASCC_ORGANELLAR {
             valid_length_fasta,
             params.diamond_uniprot_database_path
         )
-        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+        un_full             = UP_DIAMOND.out.reformed
+                                .map { it ->
+                                    [[id: it[0].id, process: "UN-FULL"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        un_hits             = UP_DIAMOND.out.hits_file
+                                .map { it ->
+                                    [[id: it[0].id, process: "UN-HITS"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
     } else {
-        un_hits             = []
-        un_full             = []
+        un_full             = Channel.of( [[],[]] )
+        un_hits             = Channel.of( [[],[]] )
     }
 
 
     if ( (include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("create_btk_dataset")
     ) {
-        ch_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{it[1]}
 
+                //
+        // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
+        //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
+        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
+        //
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .map{ it -> tuple([
+                id: it[0].id,
+                taxid: it[0].taxid,
+                sci_name: it[0].sci_name,
+                process: "REFERENCE"], it[1])
+            }
+            .mix(
+                ESSENTIAL_JOBS.out.dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
+                ch_tiara,
+                ch_nt_blast,
+                // ch_fcs
+                // ch_kmers were removed
+                ch_bam,
+                ch_coverage,
+                ch_kraken1,
+                ch_kraken2,
+                ch_kraken3,
+                nr_full,
+                un_full
+            )
+            .map { meta, file ->
+                [meta.id, [meta: meta, file: file]]
+            }
+            .filter { id, data -> id != [] }
+            .groupTuple()
+            .map { id, data ->
+                [id: id, data: data]
+            }
+            .set {ch_organellar_cbtk_input}
+
+
+        //
+        // LOGIC: LIST OF PROCESSES TO CHECK FOR
+        //
+        def processes = [
+            'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
+            'FCSGX result', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
+            'Kraken 1', 'Kraken 3'
+        ]
+
+        //
+        // LOGIC: Create a channel for each process
+        //
+        def processChannels = processes.collectEntries { process ->
+            [(process): ch_organellar_cbtk_input
+                .map { sample ->
+                    def data = sample.data.find { it.meta.process == process }
+                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+                }
+            ]
+        }
+
+
+        //
+        // LOGIC: Combine all channels using a series of combine operations
+        //
+        def combined_channel = processChannels['REFERENCE']
+        processes.tail().each { process ->
+            combined_channel = combined_channel.combine(processChannels[process], by: 0)
+        }
+
+
+        //
+        // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
+        //
         CREATE_BTK_DATASET (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-            ch_dot_genome,
-            [], //ch_kmers
-            ch_tiara,
-            ch_nt_blast,
-            [], //ch_fcsgx,
-            ch_bam,
-            ch_coverage,
-            ch_kraken1,
-            ch_kraken2,
-            ch_kraken3,
-            nr_full,
-            un_full,
+            combined_channel,
             Channel.fromPath(params.ncbi_taxonomy_path).first()
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
@@ -381,6 +507,8 @@ workflow ASCC_ORGANELLAR {
 //
 // Function: this is to count the length of ONLY the fasta sequence
 //
+// @param input_file: path
+// @return int
 def CountFastaLength(input_file) {
     int counter = 0;
     def list_lines = new File(input_file.toString()).text.readLines()

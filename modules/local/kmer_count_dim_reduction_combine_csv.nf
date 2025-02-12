@@ -11,8 +11,8 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
     tuple val(meta), path(input_files)
 
     output:
-    path '*_kmers_dim_reduction_embeddings_combined.csv',   emit: csv
-    path "versions.yml",                                    emit: versions
+    tuple val(meta), path ('*_kmers_dim_reduction_embeddings_combined.csv'),    emit: csv
+    path "versions.yml",                                                        emit: versions
 
     when:
     task.ext.when == null || task.ext.when

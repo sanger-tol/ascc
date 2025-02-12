@@ -125,6 +125,8 @@ def main(blast_output_path, out_folder, accession2taxid_folder, lineages_path, c
         )
     )
     for key in blast_results_dict:
+        # A print line to estimate progress through script
+        # print(f"processing {key} -- key {list(blast_results_dict.keys()).index(key)} of {len(blast_results_dict)}")
         contig_results_dict = blast_results_dict[key]
         for result_key in contig_results_dict:
             accession = str(result_key)

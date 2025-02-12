@@ -8,7 +8,7 @@ process CHECK_BARCODE {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta) , path(pacbio_dir)
+    tuple val(meta) , path(pacbio_dir, stageAs:"in/*")
     path barcodes
     val multiplex_csv
 
@@ -23,7 +23,7 @@ process CHECK_BARCODE {
     OUTPUT=\$(\\
         pacbio_barcode_check.py \\
             -b ${barcodes} \\
-            -p ${pacbio_dir} \\
+            -p in/ \\
             -m ${multiplex_csv})
 
     cat <<-END_VERSIONS > versions.yml
