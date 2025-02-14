@@ -79,6 +79,11 @@ This setup assumes that you have an assembly where the primary contigs or scaffo
 It is okay to leave out assembly components from the run. E.g. if your assembly does not have a mitochondrial sequence, you can leave the row with the `MITO` tag out. If your assembly does not have a plastid sequence, you can leave the row with the `PLASTID` tag out.
 The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md).
 
+The documentation of the kmers dimensionality reduction is covered in separate markdown files dedicated to this topic:
+
+- [Kmers Dimensionality Reduction](./docs/kmers_dim_reduction.md)
+- [Kmers Autoencoder](./docs/kmers_autoencoder.md)
+
 Now, you can run the pipeline using:
 
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->

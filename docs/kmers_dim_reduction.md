@@ -24,26 +24,87 @@ The tool seamlessly integrates with BlobToolKit, allowing users to:
 - Generate lists of sequences belonging to specific clusters
 - Complement traditional GC-coverage plots with alternative taxonomic visualisations
 
-### Data Normalization
+### Data Normalisation
 
-Before applying dimensionality reduction methods, the k-mer count data is normalized to a range of 0 to 1. This normalization step:
+Before applying dimensionality reduction methods, the k-mer count data is normalised to a range of 0 to 1. This normalisation step:
 
 - Ensures all features contribute equally to the analysis
 - Improves numerical stability during computation
 - Makes the results more comparable across different sequences
 - Helps prevent any single feature from dominating the analysis
 
+## Validation Dataset
+
+To demonstrate and evaluate the various dimensionality reduction methods, we use a synthetic dataset derived from complete genome assemblies. This dataset was specifically constructed to represent a realistic scenario of mixed genomic content while maintaining reliable taxonomic labels for validation purposes.
+
+### Dataset Construction
+
+The dataset was created by collecting complete genome sequences from diverse organisms:
+
+- **Chlamydomonas reinhardtii**:
+  - Nuclear genome (CM023806.1)
+  - Chloroplast (NC_005353.1)
+  - Mitochondrion (NC_001638.1)
+- **Aspergillus fumigatus**:
+  - Nuclear genome (NC_007194.1)
+  - Mitochondrion (NC_017016.1)
+- **Pseudooceanicola atlanticus** (CP051248.1)
+- **Streptococcus agalactiae** (CP051848.1)
+- **Brevibacterium siliguriense** (NZ_LT629766.1)
+- **Halothece sp. PCC 7418** (NC_019779.1)
+- **Methanofollis liminatans** (NZ_CM001555.1)
+
+The sequences were fragmented with:
+- Maximum length of 50 kb
+- Resulting in 3,177 sequence fragments
+- Total assembly size of 158 Mb
+- Average fragment length of ~49.7 kb
+
+### Dataset Characteristics
+
+The dataset contains a taxonomically diverse mix of sequences:
+- Eukaryotic (algal and fungal)
+- Bacterial
+- Archaeal
+- Organellar (chloroplast and mitochondrial)
+
+Key features:
+- Represents multiple distinct taxonomic groups in a single dataset
+- Includes both nuclear and organellar DNA from the same species
+- Comprises sequences of uniform length (mostly 50 kb, with shorter fragments at contig ends)
+
+### Rationale for Synthetic Dataset
+
+This synthetic dataset was chosen over real environmental samples for several key reasons:
+
+1. **Reliable Sequence Classifications**:
+   - All sequences are publicly available
+   - Pre-existing, high-confidence taxonomic classifications from NCBI
+
+2. **Validation Independence**:
+   - External classifications prevent circular validation when testing taxonomic separation methods
+
+3. **Fragment Size Control**:
+   - Uniform fragmentation helps evaluate method performance across consistent sequence lengths
+   - Short sequences (≤50 kb) represent the most difficult cases for taxonomic classification
+
+4. **Statistical Power**:
+   - The fragmentation process provides sufficient sequence count (>3,000)
+   - Enables robust evaluation of dimensionality reduction methods
+
+The dataset's characteristics make it particularly suitable for evaluating taxonomic separation methods, as it combines the complexity of multi-species genomic content with reliable reference classifications for validation.
+
 ## Available Methods
 
-The tool implements multiple dimensionality reduction techniques, ranging from classical approaches to modern neural network-based methods. Based on empirical testing, these methods can be broadly categorised by their effectiveness in taxonomic separation:
+The tool implements multiple dimensionality reduction techniques, ranging from classical approaches to modern neural network-based methods. Based on empirical testing with our validation dataset, these methods can be broadly categorised by their effectiveness in taxonomic separation. Example visualisations for each method are available in the `kmers_dim_reduction_btk_figures` directory.
 
 ### Highly Effective Methods
 
 #### Principal Component Analysis (PCA) and Variants
 
-- Standard PCA: Linear dimensionality reduction projecting data onto directions of maximum variance [1]
-- PCA with SVD solver: Uses randomised Singular Value Decomposition for improved performance with large datasets ([Implementation](https://www.tutorialspoint.com/scikit_learn/scikit_learn_dimensionality_reduction_using_pca.htm)) [2]
-- Kernel PCA: Non-linear variant using the kernel trick for capturing more complex relationships ([Implementation](https://www.tutorialspoint.com/scikit_learn/scikit_learn_dimensionality_reduction_using_pca.htm)) [3]
+- Standard PCA: Linear dimensionality reduction projecting data onto directions of maximum variance [1] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.pca.png))
+- PCA with SVD solver: Uses randomised Singular Value Decomposition for improved performance with large datasets ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.pca_with_svd_solver.png)) [2]
+- Kernel PCA: Non-linear variant using the kernel trick for capturing more complex relationships ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.kernel_pca.png)) [3]
 
 Key advantages:
 
@@ -54,7 +115,7 @@ Key advantages:
 
 #### Uniform Manifold Approximation and Projection (UMAP)
 
-- Non-linear dimensionality reduction that preserves both local and global structure [4]
+- Non-linear dimensionality reduction that preserves both local and global structure [4] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.umap.png))
 - Particularly effective at separating distinct taxonomic groups while maintaining relationships between similar sequences [5]
 
 Key advantages:
@@ -67,13 +128,18 @@ Key advantages:
 
 - Neural network-based approach combining deep learning with UMAP visualisation [6]
 - Particularly useful for complex datasets
+- Multiple activation functions available:
+  - ReLU ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.autoencoder_relu_umap.png))
+  - SELU ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.autoencoder_selu_umap.png))
+  - Tanh ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.autoencoder_tanh_umap.png))
+  - Linear (BlobToolKit visualisation unavailable due to UI limitation with long text overlapping control buttons)
 - See [Autoencoder Documentation](kmers_autoencoder.md) for detailed implementation
 
 ### Moderately Effective Methods
 
 #### t-Distributed Stochastic Neighbor Embedding (t-SNE)
 
-- Non-linear technique emphasising local structure preservation [7]
+- Non-linear technique emphasising local structure preservation [7] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.t-SNE.png))
 - Fixed at 3 components due to library constraints
 - May not preserve global structure as well as UMAP
 - Significantly slower than PCA, especially for larger datasets
@@ -81,25 +147,25 @@ Key advantages:
 
 #### Isomap
 
-- Non-linear dimensionality reduction using geodesic distances [8]
+- Non-linear dimensionality reduction using geodesic distances [8] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.isomap.png))
 - Preserves global geometry
 - Works well with data lying on a manifold
 - Can be computationally intensive for large datasets
 - Key parameters:
-  - n_neighbors: Number of neighbors to consider (optimized automatically)
+  - `n_neighbors`: Number of neighbours to consider (optimised automatically)
   - n_components: Number of dimensions in output (typically 2-3)
   - metric: Distance metric used (default: 'euclidean')
 
 #### Random Trees Embedding
 
-- Unsupervised transformation using randomised decision trees [9]
+- Unsupervised transformation using randomised decision trees [9] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.random_trees.png))
 - Implementation based on [scikit-learn manifold learning examples](https://scikit-learn.org/stable/auto_examples/manifold/plot_lle_digits.html#sphx-glr-auto-examples-manifold-plot-lle-digits-py)
 - Handles non-linear relationships
 - Memory-efficient for large datasets
 
 #### Non-Negative Matrix Factorization (NMF)
 
-- Decomposes data into non-negative components [10]
+- Decomposes data into non-negative components [10] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.non_negative_matrix_factorisation.png))
 - Implementation based on [scikit-learn NMF](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html)
 - Natural for count data like k-mer frequencies
 - May require parameter tuning
@@ -108,30 +174,30 @@ Key advantages:
 
 #### Locally Linear Embedding (LLE) Variants
 
-- Standard LLE: Preserves local geometry by linear reconstruction [11]
-- Modified and Hessian variants available
+- Standard LLE: Preserves local geometry by linear reconstruction [11] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.LLE_standard.png))
+- Hessian variant available ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.LLE_hessian.png))
 - Implementation based on [scikit-learn manifold learning examples](https://scikit-learn.org/stable/auto_examples/manifold/plot_lle_digits.html#sphx-glr-auto-examples-manifold-plot-lle-digits-py)
 - Less reliable for taxonomic separation
 - Sensitive to parameter choice
 - Key parameters:
-  - n_neighbors: Number of neighbors to consider (optimized automatically)
+  - `n_neighbors`: Number of neighbours to consider (optimised automatically)
   - n_components: Number of dimensions in output
-  - reg: Regularization constant
+  - reg: Regularisation constant
   - eigen_solver: Method for eigenvalue decomposition
 
 #### Multidimensional Scaling (MDS)
 
-- Preserves pairwise distances between points [12]
+- Preserves pairwise distances between points [12] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.MDS.png))
 - Computationally intensive
 - Limited performance in taxonomic separation
 
 #### Spectral Embedding
 
-- Based on eigendecomposition of similarity matrix [13]
+- Based on eigendecomposition of similarity matrix [13] ([example plot](kmers_dim_reduction_btk_figures/btk_datasets_CBD.blob.circle.spectral_embedding.png))
 - May not handle noise well
 - Inconsistent results with genomic data
 - Key parameters:
-  - n_neighbors: Number of neighbors in adjacency matrix (optimized automatically)
+  - `n_neighbors`: Number of neighbours in adjacency matrix (optimised automatically)
   - n_components: Number of dimensions in output
   - affinity: Type of affinity matrix to construct
 
