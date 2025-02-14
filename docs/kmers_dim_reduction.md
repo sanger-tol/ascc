@@ -55,6 +55,7 @@ The dataset was created by collecting complete genome sequences from diverse org
 - **Methanofollis liminatans** (NZ_CM001555.1)
 
 The sequences were fragmented with:
+
 - Maximum length of 50 kb
 - Resulting in 3,177 sequence fragments
 - Total assembly size of 158 Mb
@@ -63,12 +64,14 @@ The sequences were fragmented with:
 ### Dataset Characteristics
 
 The dataset contains a taxonomically diverse mix of sequences:
+
 - Eukaryotic (algal and fungal)
 - Bacterial
 - Archaeal
 - Organellar (chloroplast and mitochondrial)
 
 Key features:
+
 - Represents multiple distinct taxonomic groups in a single dataset
 - Includes both nuclear and organellar DNA from the same species
 - Comprises sequences of uniform length (mostly 50 kb, with shorter fragments at contig ends)
@@ -78,13 +81,16 @@ Key features:
 This synthetic dataset was chosen over real environmental samples for several key reasons:
 
 1. **Reliable Sequence Classifications**:
+
    - All sequences are publicly available
    - Pre-existing, high-confidence taxonomic classifications from NCBI
 
 2. **Validation Independence**:
+
    - External classifications prevent circular validation when testing taxonomic separation methods
 
 3. **Fragment Size Control**:
+
    - Uniform fragmentation helps evaluate method performance across consistent sequence lengths
    - Short sequences (≤50 kb) represent the most difficult cases for taxonomic classification
 
