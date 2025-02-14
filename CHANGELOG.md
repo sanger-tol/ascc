@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.1.0 - [date]
+## v0.1.0 - Red Book [14/02/2025]
 
 Initial release of sanger-tol/ascc, created with the [nf-core](https://nf-co.re/) template.
 
@@ -82,8 +82,8 @@ The intention of this pipeline is to succeed the currently in production Cobiont
 | FCSGX_RUNGX                             | -           | 0.5.4--h4ac6f70_1                                                                                                                 |
 | GNU_SORT                                | -           | 9.3                                                                                                                               |
 | GUNZIP                                  | -           | ubuntu:22.04                                                                                                                      |
-| KRAKEN2_KRAKEN2                         | -           |                                                                                                                                   |
-| MINIMAP2_ALIGN                          | -           |                                                                                                                                   |
+| KRAKEN2_KRAKEN2                         | -           | kraken2:2.1.3,pigz:2.8                                                                                                            |
+| MINIMAP2_ALIGN                          | -           | minimap2:2.28--he4a0461_0,samtools=1.20                                                                                           |
 | MINIMAP2_INDEX                          | -           | 2.28--he4a0461_0                                                                                                                  |
 | NCBITOOLS_VECSCREEN                     | -           | ncbi-tools-bin:6.1.20170106-6-deb_cv2                                                                                             |
 | SAMTOOLS\_\*                            | -           | 1.21--h50ea8bc_0                                                                                                                  |
@@ -98,7 +98,7 @@ The intention of this pipeline is to succeed the currently in production Cobiont
 | CHECK_BARCODE                           | -           | python:3.9. pacbio_barcode_check.py:1.0.0                                                                                         |
 | CHUNK_ASSEMBLY_FOR_VECSCREEN            | -           | biopython:1.81, chunk_assembly_for_vecscreen.py:1.0.0                                                                             |
 | CONVERT_TO_HITS_FILE                    | -           | python:3.9, convert_to_hits.py:1.0.0                                                                                              |
-| CREATE_BTK_DATASET                      | -           | blobtoolkit:4.3.9, python:3.9, create_btk_dataset.py:1.0.0                                                                        |
+| CREATE_BTK_DATASET                      | -           | blobtoolkit:4.3.9, python:3.9, create_btk_dataset.py:2.0.0                                                                        |
 | EXTRACT_CONTAMINANTS                    | -           | python:3.9, biopython:1.78, pybedtools:0.9.0, extract_contaminants_by_type.py:1.0.0                                               |
 | FILTER_BARCODE                          | -           | biopython:1.78, python:3.9, filter_barcode_blast_results.py:1.0.0                                                                 |
 | FILTER_COMMENTS                         | -           | coreutils:9.1                                                                                                                     |
@@ -113,7 +113,7 @@ The intention of this pipeline is to succeed the currently in production Cobiont
 | GET_LINEAGE_FOR_TOP                     | -           | python:3.9, get_lineage_for_top.py:1.0.0                                                                                          |
 | KMER_COUNT_DIM_REDUCTION_COMBINE_CSV    | -           | pandas:1.5.2, python:3.9, kmer_count_dim_reduction_combine_csv.py:1.0.0                                                           |
 | KMER_COUNT_DIM_REDUCTION                | -           | python:3.9, pandas:2.2.1, tensorlflow:2.15.0, scikit-learn:1.4.1, umap:0.5.5, matplotlib:3.8.0, kmer_count_dim_reduction.py:1.0.0 |
-| MERGE_BTK_DATASETS                      | -           | blobtoolkit:4.3.9, merge_btk_datasets.py:1.0.0                                                                                    |
+| MERGE_BTK_DATASETS                      | -           | blobtoolkit:4.3.9, merge_btk_datasets.py:2.0.0                                                                                    |
 | ORGANELLE_CONTAMINATION_RECOMMENDATIONS | -           | python:3.9, organelle_contamination_recommendation.py:1.0.0                                                                       |
 | PARSE_FCSGX_RESULT                      | -           | python:3.9, parse_fcsgx_result.py:1.0.0                                                                                           |
 | REFORMAT_FULL_OUTFMT6                   | -           | python:3.9, reformat_blast_outfmt6.py:1.0.0                                                                                       |
