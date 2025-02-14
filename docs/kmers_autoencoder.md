@@ -41,14 +41,14 @@ The pipeline implements a specialised Variational Autoencoder (VAE) for genomic 
 - Mirror of encoder architecture with transposed dimensions
 - Additional regularisation to ensure non-negative outputs
 - Residual connections matching encoder structure
-- Final sigmoid activation to reconstruct normalized k-mer frequencies between 0-1
+- Final sigmoid activation to reconstruct normalised k-mer frequencies between 0-1
 
 ### Activation Modes
 
 The autoencoder supports multiple activation functions for its dense layers:
 
 - **ReLU** (Rectified Linear Unit): A widely used default activation, effective in preventing vanishing gradients
-- **SeLU** (Scaled Exponential Linear Unit): Self-normalizing, suitable for deeper networks
+- **SeLU** (Scaled Exponential Linear Unit): Self-normalising, suitable for deeper networks
 - **Tanh**: Maps inputs to [-1,1], useful for symmetric distributions
 - **Sigmoid**: Compresses outputs between [0,1], potentially limiting gradient updates
 - **Linear**: No transformation, mainly used for debugging
@@ -80,7 +80,7 @@ Empirical testing has shown that ReLU is the recommended default choice, with Se
 
 ### Optimisation Strategy
 
-- Uses an [adaptive learning rate](https://en.wikipedia.org/wiki/Learning_rate#Adaptive_learning_rate) strategy with [Adam optimizer](https://arxiv.org/abs/1412.6980) [6]
+- Uses an [adaptive learning rate](https://en.wikipedia.org/wiki/Learning_rate#Adaptive_learning_rate) strategy with [Adam optimiser](https://arxiv.org/abs/1412.6980) [6]
 - Implements early stopping to prevent overfitting
 - Monitors reconstruction quality and latent space structure
 - Automatically adjusts KL divergence weight
@@ -125,7 +125,7 @@ Detailed per-epoch metrics including:
 
 Files containing embedding quality measures:
 
-- Trustworthiness: Measures how well local neighborhoods are preserved in the embedding
+- Trustworthiness: Measures how well local neighbourhoods are preserved in the embedding
   - Values range from 0 to 1
   - Values >0.9: Excellent preservation of local structure
   - Values 0.7-0.9: Good preservation, suitable for most analyses
@@ -144,7 +144,7 @@ Files containing embedding quality measures:
 ### Coordinate Files
 
 - `autoencoder_[activation mode]_raw_coordinates.csv`: Raw embeddings from the autoencoder, where the file name reflects the activation mode used
-- `kmers_dim_reduction_embeddings.csv`: Final embeddings combining VAE latent space with UMAP projection, optimized for species separation. UMAP optimization occurs when `--skip_n_neighbors_optimisation` isn't used (default).
+- `kmers_dim_reduction_embeddings.csv`: Final embeddings combining VAE latent space with UMAP projection, optimised for species separation. UMAP optimisation occurs when `--skip_n_neighbors_optimisation` isn't used (default).
 
 ## Performance Considerations
 

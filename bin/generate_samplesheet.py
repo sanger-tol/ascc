@@ -33,7 +33,11 @@ def main():
 
     data_list.append("sample,datatype,datafile\n")
 
-    [data_list.append(f"{args.sample_name},pacbio,{args.path_to_reads}{file}\n") for file in os.listdir(args.path_to_reads) if file.endswith('.fasta.gz') or file.endswith('.fa.gz')]
+    [
+        data_list.append(f"{args.sample_name},pacbio,{args.path_to_reads}{file}\n")
+        for file in os.listdir(args.path_to_reads)
+        if file.endswith(".fasta.gz") or file.endswith(".fa.gz")
+    ]
 
     if len(data_list) <= 1:
         sys.exit("I was expecting at least one FASTA.GZ file")

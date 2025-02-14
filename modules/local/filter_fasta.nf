@@ -21,7 +21,7 @@ process FILTER_FASTA {
     def args        = task.ext.args     ?: ''
     def max_length  = task.ext.cutoff   ?: 1900000000 // This is the default value and maximum supported length of sequence per scaffold
     """
-    ascc_shorten_fasta_headers.py \\
+    sanitise_input_fasta_file.py \\
         ${input_fasta} > ${prefix}_shortened.fasta
 
     filter_fasta_by_length.py \\
@@ -32,7 +32,7 @@ process FILTER_FASTA {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        ascc_shorten_fasta_headers: \$(ascc_shorten_fasta_headers.py -v)
+        sanitise_input_fasta_file: \$(sanitise_input_fasta_file.py -v)
         filter_fasta_by_length: \$(filter_fasta_by_length.py -v)
     END_VERSIONS
     """
@@ -45,7 +45,7 @@ process FILTER_FASTA {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        ascc_shorten_fasta_headers: \$(ascc_shorten_fasta_headers.py -v)
+        sanitise_input_fasta_file: \$(sanitise_input_fasta_file.py -v)
         filter_fasta_by_length: \$(filter_fasta_by_length.py -v)
     END_VERSIONS
     """

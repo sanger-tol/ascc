@@ -102,7 +102,7 @@ The intention of this pipeline is to succeed the currently in production Cobiont
 | EXTRACT_CONTAMINANTS                    | -           | python:3.9, biopython:1.78, pybedtools:0.9.0, extract_contaminants_by_type.py:1.0.0                                               |
 | FILTER_BARCODE                          | -           | biopython:1.78, python:3.9, filter_barcode_blast_results.py:1.0.0                                                                 |
 | FILTER_COMMENTS                         | -           | coreutils:9.1                                                                                                                     |
-| FILTER_FASTA                            | -           | python:3.9, ascc_shorten_fasta_headers.py:1.0.0, filter_fasta_by_length.py:1.0.0                                                  |
+| FILTER_FASTA                            | -           | python:3.9, sanitise_input_fasta_file.py:1.2.0, filter_fasta_by_length.py:1.0.0                                                   |
 | FILTER_VECSCREEN_RESULTS                | -           | python:3.9, VSlistTo1HitPerLine.py:1.0.0                                                                                          |
 | REFORMAT_DIAMOND_OUTFMT6                | -           | python:3.9, reformat_diamond_outfmt6.py:1.0.0                                                                                     |
 | GC_CONTENT                              | -           | python:3.9, gc_content.py:1.0.0                                                                                                   |
