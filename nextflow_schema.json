@@ -1,8 +1,8 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
     "title": "sanger-tol/ascc pipeline parameters",
-    "description": "Pipeline for detecting cobionts and contaminants in genome assemblies",
+    "description": "testing multirun assemblies",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -10,20 +10,159 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "input",
-                "outdir"
-            ],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
+                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
+                },
+                "genomic_only": {
+                    "type": "boolean",
+                    "description": "There maybe occasions where the end user only has the Primary Genomic Assembly, in this case this value should be `--genomic_only true`. The value `--exclude organellar_blast` should also be included in the CLI",
+                    "fa_icon": "fa fa-check"
+                },
+                "scientific_name": {
+                    "type": "string",
+                    "description": "Scientific name of sample according to NCBI",
+                    "fa_icon": "fas fa-input-text"
+                },
+                "taxid": {
+                    "type": "integer",
+                    "description": "TaxID according to NCBI",
+                    "fa_icon": "fas fa-hastag"
+                },
+                "reads_path": {
+                    "type": "array",
+                    "description": "folder containing long read data files in FASTA.GZ format",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "reads_type": {
+                    "type": "string",
+                    "description": "Type of read (hifi)",
+                    "fa_icon": "fas fa-input-text"
+                },
+                "pacbio_barcode_file": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "mimetype": "text/fasta",
+                    "pattern": "^\\S+\\.fa$",
+                    "description": "Fasta format file containing barcode data",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "pacbio_barcode_names": {
+                    "type": "string",
+                    "description": "barcodes to use in run",
+                    "fa_icon": "fas fa-input-text"
+                },
+                "kmer_length": {
+                    "type": "number",
+                    "description": "Length of kmer to use in run",
+                    "fa_icon": "fas fa-hashtag"
+                },
+                "dimensionality_reduction_methods": {
+                    "type": "array",
+                    "description": "dimensionality_reduction_methods to use in runs",
+                    "fa_icon": "fas fa-input-text"
+                },
+                "nt_database_path": {
+                    "type": "string",
+                    "description": "folder containing nt database",
+                    "fa_icon": "fas fa-folder"
+                },
+                "nt_database_prefix": {
+                    "type": "string",
+                    "description": "Prefix of the NT database",
+                    "fa_icon": "fas fa-input-text"
+                },
+                "nt_kraken_database_path": {
+                    "type": "string",
+                    "description": "folder containing Kraken2 database",
+                    "fa_icon": "fas fa-folder"
+                },
+                "ncbi_accession_ids_folder": {
+                    "type": "string",
+                    "description": "folder containing accession2taxid file",
+                    "fa_icon": "fas fa-folder"
+                },
+                "ncbi_taxonomy_path": {
+                    "type": "string",
+                    "description": "folder containing dmp files",
+                    "fa_icon": "fas fa-folder"
+                },
+                "ncbi_ranked_lineage_path": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.dmp$",
+                    "description": "Path to rankedlineage.dmp",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "busco_lineages_folder": {
+                    "type": "string",
+                    "description": "BUSCO folder containing busco Lineages folder",
+                    "fa_icon": "fas fa-folder"
+                },
+                "busco_lineages": {
+                    "type": "string",
+                    "description": "CSV list of lineages to use in run",
+                    "fa_icon": "fas fa-input-text"
+                },
+                "fcs_gx_database_path": {
+                    "type": "string",
+                    "description": "FCS_GX folder containing database",
+                    "fa_icon": "fas fa-folder"
+                },
+                "vecscreen_database_path": {
+                    "type": "string",
+                    "description": "Vecscreen folder containing database",
+                    "fa_icon": "fas fa-folder"
+                },
+                "diamond_uniprot_database_path": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.dmnd$",
+                    "description": "Path to Uniprot Diamond DB",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "diamond_nr_database_path": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.dmnd$",
+                    "description": "Path to NR Diamond DB",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "seqkit_sliding": {
+                    "type": "number",
+                    "description": "Length of slide for Seqkit",
+                    "fa_icon": "fas fa-hashtag"
+                },
+                "seqkit_window": {
+                    "type": "number",
+                    "description": "Length of the window for Seqkit",
+                    "fa_icon": "fas fa-hashtag"
+                },
+                "n_neighbours": {
+                    "type": "number",
+                    "description": "Nearest Neighbour value - This is for the dimensional reduction of kmer counts (UMAP and t-SNE).",
+                    "fa_icon": "fas fa-hashtag"
+                },
+                "btk_yaml": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.yaml$",
+                    "description": "Path to BTK yaml",
+                    "fa_icon": "fas fa-file"
                 },
                 "outdir": {
                     "type": "string",
@@ -42,24 +181,31 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
-                }
-            }
-        },
-        "reference_genome_options": {
-            "title": "Reference genome options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
-            "properties": {
-                "fasta": {
+                },
+                "include": {
                     "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
+                    "description": "Select steps to run.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "exclude": {
+                    "type": "string",
+                    "description": "Deselect steps to run.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "organellar_include": {
+                    "type": "string",
+                    "description": "Select steps to run - specific to the organallar workflow.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "organellar_exclude": {
+                    "type": "string",
+                    "description": "Deselect steps to run - specific to the organallar workflow.",
+                    "fa_icon": "fas fa-file-lines"
+                },
+                "btk_busco_run_mode": {
+                    "type": "string",
+                    "description": "Should btk be run as mandatory or conditional on levels of contamination.",
+                    "fa_icon": "fas fa-file-lines"
                 }
             }
         },
@@ -157,14 +303,12 @@
                     "type": "boolean",
                     "description": "Display help text.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "publish_dir_mode": {
@@ -173,14 +317,7 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -195,7 +332,6 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "default": false,
                     "hidden": true
                 },
                 "max_multiqc_email_size": {
@@ -210,7 +346,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "default": false,
                     "hidden": true
                 },
                 "hook_url": {
@@ -249,7 +384,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 },
@@ -257,7 +391,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
                 },
@@ -265,9 +398,15 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters in lenient more.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
+                },
+                "pipelines_testdata_base_path": {
+                    "type": "string",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
                 }
             }
         }
@@ -275,9 +414,6 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/reference_genome_options"
         },
         {
             "$ref": "#/definitions/institutional_config_options"

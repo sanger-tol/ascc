@@ -1,3 +1,5 @@
-sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+sample,assembly_type,assembly_file
+asccTinyTest_V2,PRIMARY,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa
+asccTinyTest_V2,HAPLO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters_hap2.fa.gz
+asccTinyTest_V2,MITO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+asccTinyTest_V2,PLASTID,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_apicoplast_ncbi.fa
