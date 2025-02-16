@@ -111,19 +111,32 @@ def tiara_results_to_btk_format(tiara_results_path, outfile_path):
 def detect_dim_reduction_methods(kmers_dim_reduction_output_path):
     """
     Parses the header of the kmers dimensionality reduction report file to detect
-    which dimensionality reduction methods were used and how many dimensions each has
-    Returns a dictionary where keys are method names and values are number of dimensions
+    which dimensionality reduction methods were used and how many dimensions each has.
+    Returns a dictionary where keys are method names and values are number of dimensions.
+
+    The function extracts method names by removing the 'embedding_dim_X_' prefix from column names,
+    preserving the complete method name including any underscores it may contain.
     """
+    import re
+
     with open(kmers_dim_reduction_output_path) as f:
         header_string = f.readline().strip()
 
     split_header = header_string.split(",")
     dim_reduction_methods = {}
 
-    for method in set(col.split("_")[-1] for col in split_header if col.startswith("embedding_dim_")):
-        # Count how many dimensions exist for this method
-        dims = sum(1 for col in split_header if f"embedding_dim_" in col and col.endswith(f"_{method}"))
-        dim_reduction_methods[method] = dims
+    # Get columns that start with embedding_dim_
+    embedding_cols = [col for col in split_header if col.startswith("embedding_dim_")]
+
+    # Extract method names by removing the embedding_dim_X_ prefix
+    for col in embedding_cols:
+        # Use regex to remove the prefix pattern 'embedding_dim_digits_'
+        method = re.sub(r"^embedding_dim_\d+_", "", col)
+
+        # Count dimensions for this method if we haven't seen it yet
+        if method not in dim_reduction_methods:
+            dims = sum(1 for c in embedding_cols if re.sub(r"^embedding_dim_\d+_", "", c) == method)
+            dim_reduction_methods[method] = dims
 
     return dim_reduction_methods
 
