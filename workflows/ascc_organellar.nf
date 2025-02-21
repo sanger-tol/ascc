@@ -28,7 +28,7 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
 
-include { paramsSummaryMap                              } from 'plugin/nf-validation'
+include { paramsSummaryMap                              } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
