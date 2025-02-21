@@ -15,6 +15,7 @@
             },
             "assembly_type": {
                 "type": "string",
+                "enum": ["PRIMARY", "HAPLO", "MITO", "PLASTID"],
                 "errorMessage": "Not a valid assembly type, must be of [PRIMARY,HAPLOTYPE,MITO,PLASTID]"
             },
             "assembly_file": {

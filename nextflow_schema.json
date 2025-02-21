@@ -45,8 +45,9 @@
                 },
                 "reads_type": {
                     "type": "string",
-                    "description": "Type of read (hifi)",
-                    "fa_icon": "fas fa-input-text"
+                    "description": "Type of read",
+                    "fa_icon": "fas fa-input-text",
+                    "enum": ["hifi", "clr", "ont", "illumina"]
                 },
                 "pacbio_barcode_file": {
                     "type": "string",
