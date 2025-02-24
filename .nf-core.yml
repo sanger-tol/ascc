@@ -22,7 +22,8 @@ lint:
     - .github/workflows/linting.yml
     - .github/ISSUE_TEMPLATE/bug_report.yml
     - CODE_OF_CONDUCT.md
-    - gitignore
+    - .gitignore
+    - .prettierignore
     - assets/nf-core-ascc_logo_light.png
     - assets/email_template.html
     - docs/images/nf-core-ascc_logo_light.png
@@ -32,6 +33,9 @@ lint:
   nextflow_config:
     - manifest.name
     - manifest.homePage
+    - params.max_cpus
+    - params.max_memory
+    - params.max_time
     - params.show_hidden_params
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
