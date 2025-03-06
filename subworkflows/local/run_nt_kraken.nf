@@ -20,11 +20,11 @@ workflow RUN_NT_KRAKEN {
     // LOGIC: MODIFY THE INPUT TUPLE TO INCLUDE THE single_end VALUE
     //
     assembly_fasta
-        .map{ it ->
-            tuple([id: it[0].id,
+        .map{ meta, file ->
+            tuple([id: meta.id,
                     single_end: true
                 ],
-                it[1]
+                file
             )
         }
         .set { modified_input }
