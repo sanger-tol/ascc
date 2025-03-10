@@ -570,6 +570,10 @@ workflow ASCC_GENOMIC {
             Channel.fromPath(params.ncbi_taxonomy_path).first()
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+
+        create_summary = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
+    } else {
+        create_summary = Channel.of([[],[]])
     }
 
 
@@ -819,7 +823,7 @@ workflow ASCC_GENOMIC {
             }
             .mix(
                 ej_dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
-                CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])},
+                create_summary,
                 busco_merge_btk.map{ it -> tuple([id: it[0].id, process: "BUSCO_MERGE"], it[1])},
                 ch_kmers,
                 ch_tiara,

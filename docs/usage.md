@@ -57,7 +57,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 Usage:
 nextflow run sanger-tol/ascc \
-    --input {SAMPLESHEET} \
+    --input {SAMPLESHEET.CSV} \
     -params-file {INPUT YAML}
     --outdir {OUTDIR} \
     [--include {COMMA SEPARATED LIST OF STEPS TO RUN}] \
