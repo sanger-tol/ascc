@@ -1,6 +1,8 @@
 // MODULE IMPORT BLOCK
 include { BLAST_V5_DATABASE     } from '../../modules/local/blast_v5_database'
-include { BLAST_BLASTN as BLAST_BLASTN_MOD }   from '../../modules/nf-core/blast/blastn'
+include { BLAST_BLASTN as BLAST_BLASTN_MOD } from '../../modules/nf-core/blast/blastn' addParams(
+    args: '-outfmt "6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -dust yes -lcase_masking'
+)
 
 include { SEQKIT_SLIDING        } from '../../modules/nf-core/seqkit/sliding/main'
 include { BLAST_CHUNK_TO_FULL   } from '../../modules/local/blast_chunk_to_full'

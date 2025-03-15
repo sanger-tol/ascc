@@ -19,7 +19,7 @@ process BLAST_BLASTN {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: '-outfmt "6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue" -max_target_seqs 10 -max_hsps 1 -evalue 1e-25 -dust yes -lcase_masking'
+    def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def is_compressed = fasta.getExtension() == "gz" ? true : false
     def fasta_name = is_compressed ? fasta.getBaseName() : fasta
