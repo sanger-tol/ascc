@@ -184,7 +184,6 @@ workflow ASCC_GENOMIC {
         EXTRACT_NT_BLAST (
             reference_tuple_from_GG,
             params.nt_database_path,
-            params.ncbi_accession_ids_folder,
             params.ncbi_ranked_lineage_path
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
@@ -510,6 +509,8 @@ workflow ASCC_GENOMIC {
                 ch_kmers,
                 ch_tiara,
                 ch_nt_blast,
+                // Use the BLAST top hits for BTK
+                EXTRACT_NT_BLAST.out.ch_btk_format.map { it -> [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]] }.ifEmpty { [[],[]] },
                 ch_fcsgx,
                 ch_bam,
                 ch_coverage,
@@ -826,6 +827,7 @@ workflow ASCC_GENOMIC {
                 ch_fcsgx,
                 ch_coverage,
                 ch_kraken3,
+                ch_blast_lineage,
                 nr_hits,
                 un_hits
             )

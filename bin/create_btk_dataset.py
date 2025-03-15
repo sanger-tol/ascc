@@ -165,7 +165,7 @@ def main(args):
 
     if len(hits_file) > 0:
         add_hits_command = "blobtools add"
-        for file in hits_file_paths:
+        for file in hits_file:  # Only include files that exist and are not empty
             add_hits_command += f" --hits {file}"
         add_hits_command += f" --taxrule bestsum --taxdump {args.taxdump} {args.output}"
         command_list.append(add_hits_command)

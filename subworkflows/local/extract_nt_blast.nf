@@ -12,7 +12,6 @@ workflow EXTRACT_NT_BLAST {
     take:
     input_genome            // Channel.of([ [ id: sample_id ], fasta ])
     blastn_db_path          // Channel.of( path )
-    ncbi_accessions         // Channel.of( path )
     ncbi_lineage_path       // Channel.of( path )
 
     main:
@@ -90,19 +89,20 @@ workflow EXTRACT_NT_BLAST {
 
 
     //
-    // MODULE: USING THE accession2taxid DATABASE WE RETREIVE LINEAGE INFORMATION PER TOP RESULT
+    // MODULE: RETRIEVE LINEAGE INFORMATION FOR TOP BLAST RESULTS USING TAXIDS
     //
     GET_LINEAGE_FOR_TOP (
         BLAST_GET_TOP_HITS.out.tophits,
-        ncbi_accessions,
         ncbi_lineage_path
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
 
+    // No conversion needed - BLAST results are already in the format expected by BlobToolKit
 
     emit:
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
     ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
+    ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full  // Format for BTK - full coordinates file
     versions                = ch_versions.ifEmpty(null)
 
 }
