@@ -22,7 +22,7 @@ process GET_LINEAGE_FOR_TOP {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py --help | grep "Process BLAST results" | wc -l)
+        get_lineage_for_top: \$(get_lineage_for_top.py --version | sed 's/^//')
     END_VERSIONS
     """
 
@@ -33,7 +33,7 @@ process GET_LINEAGE_FOR_TOP {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: 1
+        get_lineage_for_top: 1.0.0
     END_VERSIONS
     """
 }

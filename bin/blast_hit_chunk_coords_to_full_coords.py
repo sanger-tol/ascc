@@ -28,7 +28,7 @@ def process_nucleotide_blast_file(in_path):
             if len(split_line) < 11:  # Skip malformed lines
                 sys.stderr.write(f"Warning: Skipping malformed line: {line}\n")
                 continue
-                
+
             field1_split = split_line[0].split("_sliding:")
             qseqid = field1_split[0]
             qoffset = int(field1_split[1].split("-")[0])
@@ -60,7 +60,7 @@ def process_diamond_file(in_path):
             if len(split_line) < 8:  # Skip malformed lines
                 sys.stderr.write(f"Warning: Skipping malformed line: {line}\n")
                 continue
-                
+
             field1_split = split_line[0].split("_sliding:")
             qseqid = field1_split[0]
             qoffset = int(field1_split[1].split("-")[0])

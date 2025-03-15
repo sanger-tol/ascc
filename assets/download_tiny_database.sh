@@ -5,7 +5,6 @@ cd ascc_tiny_test_databases
 curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
 curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
 curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
-curl https://dp24.cog.sanger.ac.uk/ascc/accession2taxid.tar.gz | tar -xzf -
 mkdir ncbi_taxdump
 curl -L https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar -C ncbi_taxdump -xzf -
 mkdir FCS_gx

@@ -12,7 +12,6 @@ dimensionality_reduction_methods: ["pca", "random_trees"]
 nt_database_path: /home/runner/work/ascc/ascc/blastdb/
 nt_database_prefix: tiny_plasmodium_blastdb.fa
 nt_kraken_database_path: /home/runner/work/ascc/ascc/kraken2/kraken2
-ncbi_accession_ids_folder: /home/runner/work/ascc/ascc/20240709_tiny_accession2taxid/
 ncbi_taxonomy_path: /home/runner/work/ascc/ascc/ncbi_taxdump/
 ncbi_ranked_lineage_path: /home/runner/work/ascc/ascc/ncbi_taxdump/rankedlineage.dmp
 busco_lineages_folder: /home/runner/work/ascc/ascc/busco_database

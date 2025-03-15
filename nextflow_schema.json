@@ -87,11 +87,6 @@
                     "description": "folder containing Kraken2 database",
                     "fa_icon": "fas fa-folder"
                 },
-                "ncbi_accession_ids_folder": {
-                    "type": "string",
-                    "description": "folder containing accession2taxid file",
-                    "fa_icon": "fas fa-folder"
-                },
                 "ncbi_taxonomy_path": {
                     "type": "string",
                     "description": "folder containing dmp files",

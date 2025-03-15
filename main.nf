@@ -17,6 +17,7 @@ nextflow.enable.dsl = 2
 
 include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate_taxid'
 include { GUNZIP as MAIN_WORKFLOW_GUNZIP                    } from './modules/nf-core/gunzip/main'
+include { CHECK_NT_BLAST_TAXONOMY                           } from './modules/local/check_nt_blast_taxonomy/main'
 
 include { ASCC_GENOMIC                                      } from './workflows/ascc_genomic'
 include { ASCC_ORGANELLAR                                   } from './workflows/ascc_organellar'
@@ -176,6 +177,29 @@ workflow {
         params.ncbi_taxonomy_path
     )
 
+    //
+    // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
+    //
+    include_workflow_steps_genomic = params.include ? params.include.split(",") : ["ALL"]
+    exclude_workflow_steps_genomic = params.exclude ? params.exclude.split(",") : ["NONE"]
+
+    include_workflow_steps_organellar = params.organellar_include ? params.organellar_include.split(",") : include_workflow_steps_genomic
+    exclude_workflow_steps_organellar = params.organellar_exclude ? params.organellar_exclude.split(",") : exclude_workflow_steps_genomic
+
+    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !exclude_workflow_steps_genomic.contains("nt_blast")
+    run_nt_blast_organellar = (include_workflow_steps_organellar.contains('nt_blast') || include_workflow_steps_organellar.contains('ALL')) && !exclude_workflow_steps_organellar.contains("nt_blast")
+
+    //
+    // MODULE: CHECK IF NT BLAST DATABASE HAS TAXONOMY INCLUDED (ONLY IF NT BLAST IS INCLUDED)
+    // This check is specifically for the nt BLAST database used in the EXTRACT_NT_BLAST subworkflow,
+    // not for other BLAST databases used elsewhere in the pipeline (VecScreen, PacBio barcodes check, etc.)
+    //
+    if (run_nt_blast_genomic || run_nt_blast_organellar) {
+        CHECK_NT_BLAST_TAXONOMY(
+            params.nt_database_path
+        )
+        ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
+    }
 
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
