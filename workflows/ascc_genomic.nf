@@ -198,10 +198,17 @@ workflow ASCC_GENOMIC {
                                     [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
+                                
+        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
 
     } else {
         ch_nt_blast         = Channel.of( [[],[]] )
         ch_blast_lineage    = Channel.of( [[],[]] )
+        ch_btk_format       = Channel.of( [[],[]] )
     }
 
 
@@ -510,7 +517,7 @@ workflow ASCC_GENOMIC {
                 ch_tiara,
                 ch_nt_blast,
                 // Use the BLAST top hits for BTK
-                EXTRACT_NT_BLAST.out.ch_btk_format.map { it -> [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]] }.ifEmpty { [[],[]] },
+                ch_btk_format,
                 ch_fcsgx,
                 ch_bam,
                 ch_coverage,

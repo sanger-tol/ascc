@@ -321,6 +321,7 @@ workflow ASCC_ORGANELLAR {
         //
         ch_nt_blast         = []
         ch_blast_lineage    = []
+        ch_btk_format       = []
 
 
         //
@@ -343,10 +344,17 @@ workflow ASCC_ORGANELLAR {
                                     [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
+                                
+        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
 
     } else {
         ch_nt_blast         = Channel.of( [[],[]] )
         ch_blast_lineage    = Channel.of( [[],[]] )
+        ch_btk_format       = Channel.of( [[],[]] )
     }
 
 
@@ -428,7 +436,7 @@ workflow ASCC_ORGANELLAR {
                 ESSENTIAL_JOBS.out.dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
                 ch_tiara,
                 ch_nt_blast,
-                EXTRACT_NT_BLAST.out.ch_btk_format.map { it -> [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]] }.ifEmpty { [[],[]] },
+                ch_btk_format,
                 // ch_fcs
                 // ch_kmers were removed
                 ch_bam,
