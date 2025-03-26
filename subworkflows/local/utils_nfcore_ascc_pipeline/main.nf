@@ -9,8 +9,8 @@
 */
 
 include { UTILS_NFVALIDATION_PLUGIN } from '../../nf-core/utils_nfvalidation_plugin'
-include { paramsSummaryMap          } from 'plugin/nf-validation'
-include { fromSamplesheet           } from 'plugin/nf-validation'
+include { paramsSummaryMap          } from 'plugin/nf-schema'
+include { samplesheetToList         } from 'plugin/nf-schema'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
@@ -77,7 +77,7 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
     Channel
-        .fromSamplesheet("input")
+        .fromList(samplesheetToList(params.input, "${baseDir}/assets/schema_input.json"))
         .map {
             sample, type_of_assembly, assembly_file ->
                 return [[ id: sample.id + '_' + type_of_assembly, assembly_type: type_of_assembly, single_end:true ], assembly_file ]

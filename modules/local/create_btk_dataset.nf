@@ -8,20 +8,19 @@ process CREATE_BTK_DATASET {
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
-
-        tuple val(id), val(meta), path(reference),
-            val(nt_blast_meta), path(nt_blast_file, stageAs: "BLAST_HITS.tsv"),
-            val(tiara_meta), path(tiara_file, stageAs: "TIARA.txt"),
-            val(kraken2_meta), path(kraken2_file, stageAs: "KRAKEN_REPORT.txt"),
-            val(genome_meta), path(dot_genome, stageAs: "SORTED.genome"),
-            val(kmers_meta), path(kmers_file, stageAs: "KMERS_dim_reduction_embeddings_combined.csv"),
-            val(fcsgx_meta), path(fcsgx_file, stageAs: "FCSGX_parsed.csv"),
-            val(nr_full_meta), path(nr_full_file, stageAs: "NUCLEOT_DIAMOND_FULL.tsv"),
-            val(un_full_meta), path(un_full_file, stageAs: "UNIPROT_DIAMOND_FULL.tsv"),
-            val(mapped_bam_meta), path(mapped_bam_file, stageAs: "MAPPED.bam"),
-            val(coverage_meta), path(coverage_file, stageAs: "COVERAGE_AVERAGE.txt"),
-            val(kraken1_meta), path(kraken1_file, stageAs: "KRAKEN_CLASSIFIED.txt"),
-            val(kraken3_meta), path(kraken3_file, stageAs: "KRAKEN_LINEAGE.txt")
+    tuple val(id), val(meta), path(reference),
+        val(nt_blast_meta), path(nt_blast_file, stageAs: "BLAST_HITS.tsv"),
+        val(tiara_meta), path(tiara_file, stageAs: "TIARA.txt"),
+        val(kraken2_meta), path(kraken2_file, stageAs: "KRAKEN_REPORT.txt"),
+        val(genome_meta), path(dot_genome, stageAs: "SORTED.genome"),
+        val(kmers_meta), path(kmers_file, stageAs: "KMERS_dim_reduction_embeddings_combined.csv"),
+        val(fcsgx_meta), path(fcsgx_file, stageAs: "FCSGX_parsed.csv"),
+        val(nr_full_meta), path(nr_full_file, stageAs: "NUCLEOT_DIAMOND_FULL.tsv"),
+        val(un_full_meta), path(un_full_file, stageAs: "UNIPROT_DIAMOND_FULL.tsv"),
+        val(mapped_bam_meta), path(mapped_bam_file, stageAs: "MAPPED.bam"),
+        val(coverage_meta), path(coverage_file, stageAs: "COVERAGE_AVERAGE.txt"),
+        val(kraken1_meta), path(kraken1_file, stageAs: "KRAKEN_CLASSIFIED.txt"),
+        val(kraken3_meta), path(kraken3_file, stageAs: "KRAKEN_LINEAGE.txt")
 
     path ncbi_taxdump,  stageAs: "TAXDUMP"
 
@@ -37,14 +36,14 @@ process CREATE_BTK_DATASET {
     script:
     def prefix          = task.ext.prefix   ?: "${meta.id}"
     def args            = task.ext.args     ?: ""
-    def blastn_arg      = nt_blast_file          ? "-bh ${nt_blast_file}"     : ""
-    def nt_diamond_arg  = nr_full_file        ? "-nr ${nr_full_file}"   : ""
-    def un_diamond_arg  = un_full_file        ? "-ud ${un_full_file}"   : ""
-    def kraken_arg      = kraken3_file    ? "-k ${kraken3_file}": ""
-    def mapped_arg      = mapped_bam_file        ? "-r ${mapped_bam_file}"    : ""
-    def tiara_arg       = tiara_file             ? "-t ${tiara_file}"         : ""
-    def pca_arg         = kmers_file             ? "-p ${kmers_file}"         : ""
-    def fcs_arg         = fcsgx_file             ? "-fc ${fcsgx_file}"        : ""
+    def blastn_arg      = nt_blast_file     ? "-bh ${nt_blast_file}"     : ""
+    def nt_diamond_arg  = nr_full_file      ? "-nr ${nr_full_file}"      : ""
+    def un_diamond_arg  = un_full_file      ? "-ud ${un_full_file}"      : ""
+    def kraken_arg      = kraken3_file      ? "-k ${kraken3_file}"       : ""
+    def mapped_arg      = mapped_bam_file   ? "-r ${mapped_bam_file}"    : ""
+    def tiara_arg       = tiara_file        ? "-t ${tiara_file}"         : ""
+    def pca_arg         = kmers_file        ? "-p ${kmers_file}"         : ""
+    def fcs_arg         = fcsgx_file        ? "-fc ${fcsgx_file}"        : ""
 
     """
     mkdir -p btk_datasets_CBD/

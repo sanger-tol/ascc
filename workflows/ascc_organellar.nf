@@ -28,7 +28,7 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
 
-include { paramsSummaryMap                              } from 'plugin/nf-validation'
+include { paramsSummaryMap                              } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
@@ -151,7 +151,6 @@ workflow ASCC_ORGANELLAR {
                 )
             }
             .set{ ch_fcsadapt }
-            // TODO: IS THIS AN ISSUE?
 
     } else {
         ch_fcsadapt         = Channel.of([[],[]])
@@ -283,7 +282,7 @@ workflow ASCC_ORGANELLAR {
     //
     ESSENTIAL_JOBS.out.reference_with_seqkit
         //
-        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
+        // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         //
         .map{ meta, file ->
             tuple(
@@ -316,15 +315,8 @@ workflow ASCC_ORGANELLAR {
             !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true)
     ) {
         //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run (This IS an expected outcome of this subworkflow)
+        // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
         //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
-
-
-        SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-
         EXTRACT_NT_BLAST (
             valid_length_fasta,
             Channel.value(params.nt_database_path),
@@ -412,7 +404,7 @@ workflow ASCC_ORGANELLAR {
             !exclude_workflow_steps.contains("create_btk_dataset")
     ) {
 
-                //
+        //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
