@@ -87,5 +87,5 @@ workflow GET_KMERS_PROFILE {
 
     emit:
     combined_csv = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-    versions     = ch_versions.ifEmpty(null)
+    versions     = ch_versions
 }

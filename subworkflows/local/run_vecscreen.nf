@@ -56,5 +56,5 @@ workflow RUN_VECSCREEN {
 
     emit:
     vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
-    versions                    = ch_versions.ifEmpty( null ) // channel: [ versions.yml ]
+    versions                    = ch_versions
 }

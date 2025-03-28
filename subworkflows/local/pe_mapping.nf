@@ -78,7 +78,7 @@ workflow PE_MAPPING {
     ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
 
     emit:
-    versions           = ch_versions.ifEmpty(null)
+    versions           = ch_versions.
     mapped_bam         = SAMTOOLS_MERGE.out.bam
 }
 

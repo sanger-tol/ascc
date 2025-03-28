@@ -106,5 +106,5 @@ workflow PACBIO_BARCODE_CHECK {
 
     emit:
     filtered        = FILTER_BARCODE.out.debarcoded
-    versions        = ch_versions.ifEmpty(null)
+    versions        = ch_versions
 }

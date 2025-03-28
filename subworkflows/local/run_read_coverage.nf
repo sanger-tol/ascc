@@ -22,14 +22,11 @@ workflow RUN_READ_COVERAGE {
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
     //
-    reads
-        .flatten()
-        .set{ collection_of_reads }
+    collection_of_reads = reads.flatten()
 
-    reference_tuple
-        .combine(collection_of_reads)
-        .set { ref_and_data }
-        // [meta], ref, [reads]
+    ref_and_data        =   reference_tuple
+                                .combine(collection_of_reads)
+
 
 
     //
@@ -47,10 +44,8 @@ workflow RUN_READ_COVERAGE {
         SE_MAPPING (
             ref_and_data
         )
-        ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
-
-        SE_MAPPING.out.mapped_bam
-            .set { ch_align_bam }
+        ch_versions     = ch_versions.mix(SE_MAPPING.out.versions)
+        ch_align_bam    = SE_MAPPING.out.mapped_bam
 
     }
     else if ( platform == "illumina" ) {
@@ -61,10 +56,8 @@ workflow RUN_READ_COVERAGE {
         PE_MAPPING  (
             ref_and_data
         )
-        ch_versions = ch_versions.mix(PE_MAPPING.out.versions)
-
-        PE_MAPPING.out.mapped_bam
-            .set { ch_align_bam }
+        ch_versions     = ch_versions.mix(PE_MAPPING.out.versions)
+        ch_align_bam    = PE_MAPPING.out.mapped_bam
 
     }
 
@@ -76,7 +69,7 @@ workflow RUN_READ_COVERAGE {
         ch_align_bam,
         [[],[]]
     )
-    ch_versions = ch_versions.mix( SAMTOOLS_SORT.out.versions )
+    ch_versions         = ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
 
     //
@@ -85,7 +78,7 @@ workflow RUN_READ_COVERAGE {
     SAMTOOLS_INDEX (
         SAMTOOLS_SORT.out.bam
     )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+    ch_versions         = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
 
     //
@@ -95,7 +88,7 @@ workflow RUN_READ_COVERAGE {
         SAMTOOLS_SORT.out.bam,
         [[],[]]
     )
-    ch_versions = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
+    ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
 
 
     //
@@ -104,11 +97,11 @@ workflow RUN_READ_COVERAGE {
     SAMTOOLS_DEPTH_AVERAGE_COVERAGE (
         SAMTOOLS_DEPTH.out.tsv
     )
-    ch_versions = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
+    ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
 
 
     emit:
-    tsv_ch          = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
-    bam_ch          = SAMTOOLS_SORT.out.bam
-    versions        = ch_versions.ifEmpty(null)
+    tsv_ch              = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
+    bam_ch              = SAMTOOLS_SORT.out.bam
+    versions            = ch_versions
 }

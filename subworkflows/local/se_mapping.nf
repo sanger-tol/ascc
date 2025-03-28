@@ -77,6 +77,6 @@ workflow SE_MAPPING {
 
 
     emit:
-    versions       = ch_versions.ifEmpty(null)
+    versions       = ch_versions
     mapped_bam     = SAMTOOLS_MERGE.out.bam
 }

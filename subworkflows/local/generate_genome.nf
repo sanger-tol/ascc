@@ -50,5 +50,5 @@ workflow GENERATE_GENOME {
     dot_genome      = GNU_SORT.out.sorted
     ref_index       = CUSTOM_GETCHROMSIZES.out.fai
     reference_tuple = to_chromsize
-    versions        = ch_versions.ifEmpty(null)
+    versions        = ch_versions
 }

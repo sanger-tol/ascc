@@ -21,7 +21,7 @@
 - Individual report files for adapter, PacBio barcode and organellar contaminants.
   The only required input file for ASCC is the assembly FASTA file. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species and comprehensive runs with assemblies with complex composition.
 
-![sanger-tol/ascc overview diagram](docs/images/ascc_overview_diagram.png)
+![sanger-tol/ascc overview diagram](./docs/images/ASCC-diagram.png)
 
 The pipeline is in a raw state of development and has not yet been thorougly tested. Its components are functional, though, so it possible to run it.
 

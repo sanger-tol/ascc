@@ -92,5 +92,5 @@ workflow RUN_DIAMOND {
     full            = DIAMOND_BLAST_CHUNK_TO_FULL.out.full
     reformed        = REFORMAT_DIAMOND_OUTFMT6.out.full
     hits_file       = CONVERT_TO_HITS_FILE.out.hits_file
-    versions        = ch_versions.ifEmpty(null)
+    versions        = ch_versions
 }

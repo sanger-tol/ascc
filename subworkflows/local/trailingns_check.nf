@@ -19,5 +19,5 @@ workflow TRAILINGNS_CHECK {
 
     emit:
     trailing_ns_report  = TRAILINGNS.out.trailing_ns_report
-    versions            = ch_versions.ifEmpty( null )
+    versions            = ch_versions
 }

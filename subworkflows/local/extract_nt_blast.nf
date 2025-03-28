@@ -103,7 +103,7 @@ workflow EXTRACT_NT_BLAST {
     emit:
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
     ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
-    versions                = ch_versions.ifEmpty(null)
+    versions                = ch_versions
 
 }
 

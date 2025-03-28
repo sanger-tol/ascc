@@ -10,7 +10,7 @@ process FCSGX_RUNGX {
     input:
     tuple val(meta), val(taxid), path(fasta)
     path gxdb
-    val ramdisk_path
+    path ramdisk_path
 
     output:
     tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report

@@ -19,6 +19,6 @@ workflow EXTRACT_TIARA_HITS {
 
     emit:
     ch_tiara            = TIARA_TIARA.out.classifications
-    versions            = ch_versions.ifEmpty(null)
+    versions            = ch_versions
 
 }

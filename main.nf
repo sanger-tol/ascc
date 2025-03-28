@@ -37,7 +37,6 @@ workflow SANGERTOL_ASCC_GENOMIC {
     take:
     samplesheet // channel: samplesheet read in from --input
     organelles
-    validate_versions
     include_steps
     exclude_steps
     fcs
@@ -51,7 +50,6 @@ workflow SANGERTOL_ASCC_GENOMIC {
     ASCC_GENOMIC (
         samplesheet,
         organelles,
-        validate_versions,
         include_steps,
         exclude_steps,
         fcs,
@@ -66,7 +64,6 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
 
     take:
     samplesheet // channel: samplesheet read in from --input
-    validate_versions
     include_steps
     exclude_steps
     fcs
@@ -79,7 +76,6 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
     //
     ASCC_ORGANELLAR (
         samplesheet,
-        validate_versions,
         include_steps,
         exclude_steps,
         fcs,
@@ -114,6 +110,8 @@ workflow {
     // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
 
+    PIPELINE_INITIALISATION.out.samplesheet.view()
+
     PIPELINE_INITIALISATION.out.samplesheet
         .branch { meta, file ->
             zipped: file.name.endsWith('.gz')
@@ -131,7 +129,7 @@ workflow {
 
     // TODO: NOT THE RIGHT PLACE FOR THIS
     // SHOULD THIS BE MOVED INTO A SUBWORKFLOW AND EXECUTED INSIDE THE SUBWORKFLOWS
-    ch_versions = ch_versions.mix(MAIN_WORKFLOW_GUNZIP.out.versions)
+    //ch_versions = ch_versions.mix(MAIN_WORKFLOW_GUNZIP.out.versions)
 
 
     //
@@ -167,8 +165,8 @@ workflow {
     // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
     //
     MAIN_WORKFLOW_VALIDATE_TAXID(
-        params.taxid,
-        params.ncbi_taxonomy_path
+        Channel.of(params.taxid),
+        Channel.of(params.ncbi_taxonomy_path)
     )
 
 
@@ -182,7 +180,7 @@ workflow {
         ) || (
             include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
         ) || (
-            include_workflow_steps.contains('ALL') && params.profile_name == 'test'
+            include_workflow_steps.contains('ALL')
         )
     ) {
         ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
@@ -198,7 +196,6 @@ workflow {
     SANGERTOL_ASCC_GENOMIC (
         branched_assemblies.sample_genome,
         branched_assemblies.organellar_genome,
-        MAIN_WORKFLOW_VALIDATE_TAXID.out.versions,
         params.include,
         params.exclude,
         fcs_gx_database_path,
@@ -235,7 +232,6 @@ workflow {
 
         SANGERTOL_ASCC_ORGANELLAR (
             branched_assemblies.organellar_genome,
-            MAIN_WORKFLOW_VALIDATE_TAXID.out.versions,
             organellar_include,
             organellar_exclude,
             fcs_gx_database_path,
@@ -254,7 +250,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        SANGERTOL_ASCC.out.multiqc_report
+        []
     )
 }
 

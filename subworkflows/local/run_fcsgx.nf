@@ -46,6 +46,6 @@ workflow RUN_FCSGX {
 
     emit:
     fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
-    versions       = ch_versions.ifEmpty(null)
+    versions       = ch_versions
 
 }

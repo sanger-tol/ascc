@@ -43,7 +43,6 @@ workflow ASCC_ORGANELLAR {
 
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
-    validate_taxid_versions // Versions channel from main.nf
     include_steps           // params.include_steps
     exclude_steps           // params.exclude_steps
     fcs_db                  // path(file)
@@ -51,7 +50,6 @@ workflow ASCC_ORGANELLAR {
 
     main:
     ch_versions = Channel.empty()
-    ch_versions = ch_versions.mix(validate_taxid_versions)
 
     //
     // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
@@ -139,7 +137,7 @@ workflow ASCC_ORGANELLAR {
             ESSENTIAL_JOBS.out.reference_tuple_from_GG
         )
 
-        RUN_FCSADAPTOR.out.ch_euk
+        ch_fcsadapt = RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
@@ -150,7 +148,6 @@ workflow ASCC_ORGANELLAR {
                     file2
                 )
             }
-            .set{ ch_fcsadapt }
             // TODO: IS THIS AN ISSUE?
 
     } else {
@@ -163,7 +160,7 @@ workflow ASCC_ORGANELLAR {
     //
     if ( (include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-gx") ) {
 
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        joint_channel = ESSENTIAL_JOBS.out.reference_tuple_from_GG
             .combine(fcs_db)
             .combine(Channel.of(params.taxid))
             .combine(Channel.of(params.ncbi_ranked_lineage_path))
@@ -173,7 +170,6 @@ workflow ASCC_ORGANELLAR {
                 taxid_val: taxid
                 ncbi_tax_path: tax_path
             }
-            .set { joint_channel }
 
         RUN_FCSGX (
             joint_channel.reference,
@@ -281,9 +277,9 @@ workflow ASCC_ORGANELLAR {
     //
     // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
     //
-    ESSENTIAL_JOBS.out.reference_with_seqkit
+    valid_length_fasta = ESSENTIAL_JOBS.out.reference_with_seqkit
         //
-        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
+        // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         //
         .map{ meta, file ->
             tuple(
@@ -299,7 +295,6 @@ workflow ASCC_ORGANELLAR {
         .filter { meta, file ->
                     meta.seq_count >= params.seqkit_window
         }
-        .set{ valid_length_fasta }
 
     valid_length_fasta
         .map{ meta, file ->
@@ -315,15 +310,10 @@ workflow ASCC_ORGANELLAR {
     if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true)
     ) {
-        //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run (This IS an expected outcome of this subworkflow)
-        //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
 
-
-        SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+        //
+        //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+        //
 
         EXTRACT_NT_BLAST (
             valid_length_fasta,
@@ -412,12 +402,12 @@ workflow ASCC_ORGANELLAR {
             !exclude_workflow_steps.contains("create_btk_dataset")
     ) {
 
-                //
+        //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        ch_organellar_cbtk_input = ESSENTIAL_JOBS.out.reference_tuple_from_GG
             .map{ it -> tuple([
                 id: it[0].id,
                 taxid: it[0].taxid,
@@ -446,8 +436,6 @@ workflow ASCC_ORGANELLAR {
             .map { id, data ->
                 [id: id, data: data]
             }
-            .set {ch_organellar_cbtk_input}
-
 
         //
         // LOGIC: LIST OF PROCESSES TO CHECK FOR

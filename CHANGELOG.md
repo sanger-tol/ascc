@@ -3,6 +3,19 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.0 - Red Speaker [28/03/2025]
+
+Release 2 of sanger-tol/ascc, updated with the [nf-core](https://nf-co.re/) template (v3.2).
+
+THIS IS STILL AN IN DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+### Enhancements & Fixes
+
+- Template Updated to 3.2
+- An update to the KMER counting scripts and related processes.
+
+
+
 ## v0.1.0 - Red Book [14/02/2025]
 
 Initial release of sanger-tol/ascc, created with the [nf-core](https://nf-co.re/) template.

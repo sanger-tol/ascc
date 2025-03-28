@@ -35,5 +35,5 @@ workflow RUN_FCSADAPTOR {
     ch_euk          = FCS_FCSADAPTOR_EUK.out.adaptor_report
     ch_prok         = FCS_FCSADAPTOR_PROK.out.adaptor_report
 
-    versions        = ch_versions.ifEmpty(null)
+    versions        = ch_versions
 }
