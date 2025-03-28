@@ -266,6 +266,114 @@ Different components may reveal different aspects of sequence relationships:
 - Useful for complex datasets
 - More computationally intensive
 
+## BlobToolKit Visualisation Results
+
+This section presents BlobToolKit visualisations of the Chlamydomonas reinhardtii test dataset using various dimensionality reduction methods. The methods are organised by their effectiveness in separating taxonomic groups in this specific dataset.
+
+### High-performing Methods
+
+These methods demonstrated good separation of taxonomic groups in the test dataset, creating well-defined clusters that align with known taxonomic classifications.
+
+#### PCA and Variants
+
+![PCA](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.pca.png)
+
+Standard PCA provides clear separation of taxonomic groups in the Chlamydomonas dataset, with distinct clusters for the different organisms and organelles.
+
+![PCA with SVD Solver](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.pca_with_svd_solver.png)
+
+PCA with SVD solver produces results similar to standard PCA but can be more efficient for large-scale genomic data.
+
+![Kernel PCA](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.kernel_pca.png)
+
+Kernel PCA captures more complex relationships between sequences, resulting in well-defined clusters for the different taxonomic groups.
+
+#### UMAP
+
+![UMAP](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.umap.png)
+
+UMAP creates compact, well-separated clusters for the different taxonomic groups in the dataset, demonstrating its effectiveness for taxonomic separation.
+
+#### Autoencoder with UMAP
+
+![Autoencoder Linear + UMAP](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle_autoencoder_linear_umap.png)
+
+The combination of a linear autoencoder with UMAP produces good separation of taxonomic groups.
+
+![Autoencoder ReLU + UMAP](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.autoencoder_relu_umap.png)
+
+Autoencoder with ReLU activation followed by UMAP creates distinct clusters for different taxonomic groups.
+
+![Autoencoder SELU + UMAP](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.autoencoder_selu_umap.png)
+
+Autoencoder with SELU activation followed by UMAP also performs well in separating taxonomic groups.
+
+![Autoencoder Tanh + UMAP](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.autoencoder_tanh_umap.png)
+
+Autoencoder with Tanh activation followed by UMAP demonstrates good separation of taxonomic groups.
+
+#### Isomap
+
+![Isomap](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.isomap.png)
+
+Isomap effectively separates the taxonomic groups in the dataset, preserving global geometry.
+
+#### Spectral Embedding
+
+![Spectral Embedding](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.spectral_embedding.png)
+
+Spectral Embedding performs well in the Chlamydomonas dataset, showing clear separation between taxonomic groups despite being categorised as a method with limited testing in general evaluations.
+
+### Intermediate-performing Methods
+
+These methods show some separation between taxonomic groups, but the boundaries are less clear and clusters may overlap.
+
+#### t-SNE
+
+![t-SNE](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.t-SNE.png)
+
+t-SNE shows separation between taxonomic groups, but the boundaries are somewhat fuzzy and clusters overlap.
+
+#### Locally Linear Embedding (Standard)
+
+![LLE Standard](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.LLE_standard.png)
+
+Standard LLE provides separates some of the species well but others clump together.
+
+#### Random Trees Embedding
+
+![Random Trees](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.random_trees.png)
+
+Random Trees Embedding has separated the eukaryotic species (Chlamydomonas and Aspergillus) well. The bacteria are separated from the eukaryotic species but the clusters of individual bacterial species have some overlap with one another.
+
+### Low-performing Methods
+
+These methods did not effectively separate taxonomic groups in the test dataset.
+
+#### Autoencoder with Sigmoid
+
+![Autoencoder Sigmoid](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.autoencoder_sigmoid.png)
+
+Autoencoder with Sigmoid activation does not effectively separate taxonomic groups in the dataset.
+
+#### Non-Negative Matrix Factorization (NNMF)
+
+![NNMF](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.nnmf.png)
+
+NNMF fails to create distinct clusters for different taxonomic groups in this dataset.
+
+#### Multidimensional Scaling (MDS)
+
+![MDS](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.MDS.png)
+
+MDS does not effectively separate taxonomic groups in the dataset.
+
+#### Locally Linear Embedding (Hessian)
+
+![LLE Hessian](kmers_dim_reduction_btk_plots/btk_datasets_CBD.blob.circle.LLE_hessian.png)
+
+Hessian LLE performs poorly in separating taxonomic groups in this dataset.
+
 ## Pipeline Configuration
 
 ### YAML Configuration Options
