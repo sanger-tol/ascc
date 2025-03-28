@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script for reformatting output from VecScreen that has been processed using the VSlistTo1HitPerLine.awk script. 
+Script for reformatting output from VecScreen that has been processed using the VSlistTo1HitPerLine.awk script.
 This script removes no-hit entries from the report file and converts coordinates in assembly chunks to coordinates in the full assembly.
 The original script was written in Perl by James Torrance. Rewritten by Eerik Aunin.
 """

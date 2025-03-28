@@ -14,8 +14,6 @@ THIS IS STILL AN IN DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 - Template Updated to 3.2
 - An update to the KMER counting scripts and related processes.
 
-
-
 ## v0.1.0 - Red Book [14/02/2025]
 
 Initial release of sanger-tol/ascc, created with the [nf-core](https://nf-co.re/) template.

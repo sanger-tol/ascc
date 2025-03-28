@@ -57,7 +57,6 @@ A text file containing a report of trailing Ns found in the genome. Trailing Ns 
 
 ![Trailing Ns Workflow](./images/ascc-1.0.0-trailing-ns.drawio.png)
 
-
 ### Mito Organellar Blast
 
 <details markdown="1">
