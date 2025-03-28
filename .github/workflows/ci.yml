@@ -57,7 +57,7 @@ jobs:
       - name: Download the NCBI taxdump database
         run: |
           mkdir ncbi_taxdump
-          curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar -C ncbi_taxdump -xzf -
+          curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ncbi -xzf new_taxdump.tar.gz
 
       - name: Download the FCS-gx database
         run: |
