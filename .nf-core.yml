@@ -36,9 +36,16 @@ lint:
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
   template_strings: false
-nf_core_version: 2.14.1
+nf_core_version: 3.2.0
 repository_type: pipeline
 template:
-  prefix: sanger-tol
-  skip:
+  author: DLBPointon, eeaunin
+  description: Assembly Screen for Cobionts and Contaminants
+  force: false
+  is_nfcore: false
+  name: ascc
+  org: sanger-tol
+  outdir: .
+  skip_features:
     - igenomes
+  version: 0.1.0

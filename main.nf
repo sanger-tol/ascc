@@ -7,14 +7,13 @@
 ----------------------------------------------------------------------------------------
 */
 
-nextflow.enable.dsl = 2
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// Move the top two into pipelie init
 include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate_taxid'
 include { GUNZIP as MAIN_WORKFLOW_GUNZIP                    } from './modules/nf-core/gunzip/main'
 
@@ -94,20 +93,13 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
 */
 
 workflow {
-    //
-    // WORKFLOW: THIS WHOLE THING SHOULD BE IN A SUBWORKFLOW REALY
-    //
 
     main:
-    ch_versions = Channel.empty()
-
-
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
     PIPELINE_INITIALISATION (
         params.version,
-        params.help,
         params.validate_params,
         params.monochrome_logs,
         args,
@@ -115,6 +107,7 @@ workflow {
         params.input
     )
 
+    // TODO: move to pipeline init
     fcs_gx_database_path = Channel.of(params.fcs_gx_database_path)
 
     //
@@ -151,6 +144,8 @@ workflow {
         .set { standardised_unzipped_input }
 
 
+
+    // TODO: move into pipeline init
     //
     // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
@@ -258,9 +253,9 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url
+        params.hook_url,
+        SANGERTOL_ASCC.out.multiqc_report
     )
-
 }
 
 process MAIN_WORKFLOW_GrabFiles {
