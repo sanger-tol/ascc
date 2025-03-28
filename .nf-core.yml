@@ -1,22 +1,51 @@
-repository_type: pipeline
 lint:
   files_exist:
-  - CODE_OF_CONDUCT.md
-  - assets/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_dark.png
-  - .github/ISSUE_TEMPLATE/config.yml
-  - .github/workflows/awstest.yml
-  - .github/workflows/awsfulltest.yml
-  - conf/igenomes.config
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - conf/igenomes.config
+    - lib/nfcore_external_java_deps.jar
+    - lib/NfcoreSchema.groovy
+    - lib/NfcoreTemplate.groovy
+    - lib/Utils.groovy
+    - lib/WorkflowMain.groovy
   files_unchanged:
-  - CODE_OF_CONDUCT.md
-  - assets/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_dark.png
-  - .github/ISSUE_TEMPLATE/bug_report.yml
-  nextflow_config:
-  - manifest.name
-  - manifest.homePage
+    - LICENCE
+    - .github/CONTRIBUTING.md
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/branch.yml
+    - .github/workflows/linting_comment.yml
+    - .github/workflows/linting.yml
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - CODE_OF_CONDUCT.md
+    - gitignore
+    - assets/nf-core-ascc_logo_light.png
+    - assets/email_template.html
+    - docs/images/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_dark.png
   multiqc_config:
-  - report_comment
+    - report_comment
+  nextflow_config:
+    - manifest.name
+    - manifest.homePage
+    - params.show_hidden_params
+    - params.schema_ignore_params
+    - params.validationSchemaIgnoreParams
+  template_strings: false
+nf_core_version: 3.2.0
+repository_type: pipeline
+template:
+  author: DLBPointon, eeaunin
+  description: Assembly Screen for Cobionts and Contaminants
+  force: false
+  is_nfcore: false
+  name: ascc
+  org: sanger-tol
+  outdir: .
+  skip_features:
+    - igenomes
+  version: 0.1.0
