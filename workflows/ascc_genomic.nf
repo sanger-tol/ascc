@@ -4,30 +4,30 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
-include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
-include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
-include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
-include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
-include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
+include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
+include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
+include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
+include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 
-include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs'
-include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast'
-include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
-include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
-include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check'
-include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
-include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
-include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
-include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
-include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
-include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
+include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
+include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
+include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
+include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
+include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
+include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
+include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
+include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
+include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
+include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
+include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
+include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -662,6 +662,7 @@ workflow ASCC_GENOMIC {
         GENERATE_SAMPLESHEET (
             reference_tuple_from_GG,
             params.reads_path,
+            Channel.of(params.reads_layout),
             AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
         )
         ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)

@@ -1,6 +1,7 @@
 reads_path:
   - /lustre/scratch124/tol/projects/asg/data/sponges/Cymbastela_concentrica/genomic_data/odCymConc1/pacbio/fasta/m84047_240125_151157_s4.ccs.bc2031.rmdup.filtered.fasta.gz
 reads_type: "hifi"
+reads_layout: "SINGLE"
 pacbio_barcode_file: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
 #pacbio_barcode_names: "bc2008,bc2009"
 scientific_name: "Cymbastela concentrica"

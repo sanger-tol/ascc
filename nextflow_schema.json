@@ -48,6 +48,12 @@
                     "description": "Type of read (hifi)",
                     "fa_icon": "fas fa-input-text"
                 },
+                "reads_layout": {
+                    "type": "string",
+                    "description": "Specify whether all reads are SINGLE or PAIRED end reads",
+                    "pattern": "^(SINGLE|PAIRED)$",
+                    "fa_icon": "fas fa-input-text"
+                },
                 "pacbio_barcode_file": {
                     "type": "string",
                     "format": "file-path",

@@ -14,7 +14,7 @@
 */
 
 // Move the top two into pipelie init
-include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate_taxid'
+include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate/taxid/main'
 include { GUNZIP as MAIN_WORKFLOW_GUNZIP                    } from './modules/nf-core/gunzip/main'
 
 include { ASCC_GENOMIC                                      } from './workflows/ascc_genomic'
@@ -109,9 +109,6 @@ workflow {
     //
     // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
-
-    PIPELINE_INITIALISATION.out.samplesheet.view()
-
     PIPELINE_INITIALISATION.out.samplesheet
         .branch { meta, file ->
             zipped: file.name.endsWith('.gz')
@@ -121,15 +118,13 @@ workflow {
 
 
     //
-    // MODULE: UNZIP INPUTS IF NEEDED
+    // MODULE: UNZIP INPUTS IF NEEDED | 
+    // TODO: MOVE INTO PIPELINE INIT
     //
     MAIN_WORKFLOW_GUNZIP (
         ch_input.zipped
     )
 
-    // TODO: NOT THE RIGHT PLACE FOR THIS
-    // SHOULD THIS BE MOVED INTO A SUBWORKFLOW AND EXECUTED INSIDE THE SUBWORKFLOWS
-    //ch_versions = ch_versions.mix(MAIN_WORKFLOW_GUNZIP.out.versions)
 
 
     //
@@ -163,6 +158,7 @@ workflow {
 
     //
     // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
+    // TODO: MOVE TO PIPELINE INIT
     //
     MAIN_WORKFLOW_VALIDATE_TAXID(
         Channel.of(params.taxid),
