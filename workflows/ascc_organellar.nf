@@ -46,6 +46,7 @@ workflow ASCC_ORGANELLAR {
     exclude_steps           // params.exclude_steps
     fcs_db                  // path(file)
     reads
+    scientific_name         // val(name)
 
     main:
     ch_versions = Channel.empty()
@@ -472,7 +473,8 @@ workflow ASCC_ORGANELLAR {
         //
         CREATE_BTK_DATASET (
             combined_channel,
-            Channel.fromPath(params.ncbi_taxonomy_path).first()
+            Channel.fromPath(params.ncbi_taxonomy_path).first(),
+            scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
     }

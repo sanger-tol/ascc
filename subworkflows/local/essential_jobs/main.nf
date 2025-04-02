@@ -42,7 +42,6 @@ workflow ESSENTIAL_JOBS {
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
-    FILTER_FASTA.out.fasta.view{"FILTERED FASTA: ${it}"}
     GC_CONTENT (
         FILTER_FASTA.out.fasta
     )

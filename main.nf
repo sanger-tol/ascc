@@ -41,6 +41,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
     exclude_steps
     fcs
     reads
+    scientific_name
 
     main:
 
@@ -53,7 +54,8 @@ workflow SANGERTOL_ASCC_GENOMIC {
         include_steps,
         exclude_steps,
         fcs,
-        reads
+        reads,
+        scientific_name
     )
 }
 
@@ -68,6 +70,7 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
     exclude_steps
     fcs
     reads
+    scientific_name
 
     main:
 
@@ -79,7 +82,8 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
         include_steps,
         exclude_steps,
         fcs,
-        reads
+        reads,
+        scientific_name
     )
 }
 /*
@@ -195,7 +199,8 @@ workflow {
         params.include,
         params.exclude,
         fcs_gx_database_path,
-        ch_grabbed_reads_path
+        ch_grabbed_reads_path,
+        Channel.of(params.scientific_name)
     )
 
 
@@ -231,7 +236,8 @@ workflow {
             organellar_include,
             organellar_exclude,
             fcs_gx_database_path,
-            ch_grabbed_reads_path
+            ch_grabbed_reads_path,
+            Channel.of(params.scientific_name)
         )
     }
 

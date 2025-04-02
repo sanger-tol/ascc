@@ -6,8 +6,9 @@
 // MODULE IMPORT BLOCK
 //
 include { CHECK_BARCODE                                         } from '../../../modules/local/check/barcode/main'
-include { BLAST_MAKEBLASTDB_BARCODES as BLAST_MAKEBLASTDB       } from '../../../modules/local/makeblastdb_barcodes'
-include { BLAST_BLASTN                                          } from '../../../modules/nf-core/blast/blastn'
+//include { BLAST_MAKEBLASTDB_BARCODES as BLAST_MAKEBLASTDB       } from '../../../modules/local/makeblastdb_barcodes'
+include { BLAST_MAKEBLASTDB                                     } from '../../../modules/nf-core/blast/makeblastdb/main'
+include { BLAST_BLASTN                                          } from '../../../modules/nf-core/blast/blastn/main'
 include { FILTER_BARCODE                                        } from '../../../modules/local/filter/barcode/main'
 
 workflow PACBIO_BARCODE_CHECK {

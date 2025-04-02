@@ -27,18 +27,11 @@ process BLAST_MAKEBLASTDB_BARCODES {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    ## IF STATEMENT FIXES ISSUES WHERE ON RESUME FILES ALREADY EXIST
-    ## IT JUST CRASHES BECAUSE THE FOLDER ALREADY EXISTS
-    ## SPECIFIC ERROR TO THE PACBIO_BARCODE_CHECK
-
-    ##if ! [[ -n "\$(find "${prefix}" -name "${fasta_name}*")" ]]
-    ##then
     makeblastdb \\
         -in ${fasta_name} \\
         ${args}
     mkdir ${prefix}
     mv ${fasta_name}* ${prefix}
-    ##fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

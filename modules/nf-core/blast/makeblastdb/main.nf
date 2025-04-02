@@ -11,8 +11,8 @@ process BLAST_MAKEBLASTDB {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("${meta.id}"), emit: db
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("*_OUTFOLDER")    , emit: db
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,8 +30,8 @@ process BLAST_MAKEBLASTDB {
     makeblastdb \\
         -in ${fasta_name} \\
         ${args}
-    mkdir ${prefix}
-    mv ${fasta_name}* ${prefix}
+    mkdir ${prefix}_OUTFOLDER
+    mv ${fasta_name}* ${prefix}_OUTFOLDER
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

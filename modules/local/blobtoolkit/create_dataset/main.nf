@@ -24,6 +24,7 @@ process CREATE_BTK_DATASET {
         val(kraken3_meta),      path(kraken3_file, stageAs: "KRAKEN_LINEAGE.txt")
 
     path ncbi_taxdump,  stageAs: "TAXDUMP"
+    val(scientific_name)
 
     output:
     tuple val(meta), path("btk_datasets_CBD"),              emit: btk_datasets
@@ -54,7 +55,7 @@ process CREATE_BTK_DATASET {
         -f ${reference} \\
         -d ./1/ \\
         -n "${prefix}" \\
-        -tn "${meta.sci_name}" \\
+        -tn "${scientific_name}" \\
         -id ${meta.taxid} \\
         -td ${ncbi_taxdump}/ \\
         $blastn_arg \\
