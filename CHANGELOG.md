@@ -11,14 +11,23 @@ THIS IS STILL AN IN DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
 ### NOTES
 
-!!! Please be aware that this current works on taxdumps prior to 2025-03-23 !!!
+!!! Please be aware that this ONLY works on taxdumps post 2025-03-23 !!!
+This is due to the script format expectations of the taxdump scripts and that column numbers change to 12.
+Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi-taxonomy/`
 
 ### Enhancements & Fixes
 
 - Template Updated to 3.2
 - An update to the KMER counting scripts and related processes.
 - Re-organisation of .nf files into current standards.
+- Updates to scripts using the ncbi_rankedlineage new_taxdump.
 
+### Dependencies
+
+| Module                        | Old Version                                                            | New Versions                                                           |
+| ----------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| PARSE_FCSGX_RESULT            | python:3.9, parse_fcsgx_result.py:1.0.0                                | python:3.9, parse_fcsgx_result.py:1.0.1                                |
+| AUTOFILTER_AND_CHECK_ASSEMBLY | python:3.9, autofilter.py:1.0.0, abnormal_contamination_check.py:1.0.0 | python:3.9, autofilter.py:1.0.0, abnormal_contamination_check.py:1.0.1 |
 
 ## v0.1.0 - Red Book [14/02/2025]
 

@@ -2,6 +2,7 @@
 """
 Script for parsing the result files of FCS-GX, originally written by Eerik Aunin (ea10)
 further refactoring/modifications by Yumi Sims (yy5)
+Updated by Damon-Lee Pointon (dp24)
 """
 
 import general_purpose_functions as gpf
@@ -152,7 +153,7 @@ def get_lineages_by_taxid(taxids_list, rankedlineage_path):
     for line in rankedlineage_data:
         split_line = line.split("|")
         split_line = [n.strip() for n in split_line]
-        assert len(split_line) == 11
+        assert len(split_line) == 12 # TAXDUMP COLUMN COUNT INCREASED FROM 11 to 12 ON 2025-03-30
         taxid = split_line[0]
         if taxid in taxids_list:
             current_lineage_dict = dict()
@@ -216,6 +217,6 @@ if __name__ == "__main__":
         help="Path to directory with FCS-GX output files (*.taxonomy.rpt and *.fcs_gx_report.txt)",
     )
     parser.add_argument("ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy")
-    parser.add_argument("-v", action="version", version="1.0")
+    parser.add_argument("-v", action="version", version="1.0.1")
     args = parser.parse_args()
     main(args.fcs_gx_reports_folder, args.ncbi_rankedlineage_path)
