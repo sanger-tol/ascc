@@ -9,11 +9,16 @@ Release 2 of sanger-tol/ascc, updated with the [nf-core](https://nf-co.re/) temp
 
 THIS IS STILL AN IN DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
+### NOTES
+
+!!! Please be aware that this current works on taxdumps prior to 2025-03-23 !!!
+
 ### Enhancements & Fixes
 
 - Template Updated to 3.2
 - An update to the KMER counting scripts and related processes.
 - Re-organisation of .nf files into current standards.
+
 
 ## v0.1.0 - Red Book [14/02/2025]
 
