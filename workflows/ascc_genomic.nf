@@ -136,6 +136,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
                                 .map { it ->
                                     [[id: it[0].id, process: "KMERS"], it[1]]
@@ -183,6 +187,11 @@ workflow ASCC_GENOMIC {
             params.ncbi_ranked_lineage_path
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
                                 .map { it ->
                                     [[id: it[0].id, process: "NT-BLAST"], it[1]]
@@ -212,6 +221,11 @@ workflow ASCC_GENOMIC {
             params.diamond_nr_database_path
         )
         ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         nr_full             = NR_DIAMOND.out.reformed
                                 .map { it ->
                                     [[id: it[0].id, process: "NR-FULL"], it[1]]
@@ -241,6 +255,11 @@ workflow ASCC_GENOMIC {
             params.diamond_uniprot_database_path
         )
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         un_full             = UP_DIAMOND.out.reformed
                                 .map { it ->
                                     [[id: it[0].id, process: "UN-FULL"], it[1]]
@@ -290,6 +309,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report
                                 .map { it ->
                                     [[id: it[0].id, process: "MITO"], it[1]]
@@ -337,6 +360,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
+        //
         ch_fcsadapt = RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
@@ -378,6 +405,11 @@ workflow ASCC_GENOMIC {
             joint_channel.ncbi_tax_path
         )
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
                                 .map { it ->
                                     [[id: it[0].id, process: "FCSGX result"], it[1]]
@@ -401,6 +433,11 @@ workflow ASCC_GENOMIC {
             params.reads_type,
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
                                 .map { it ->
                                     [[id: it[0].id, process: "Coverage"], it[1]]
@@ -430,6 +467,11 @@ workflow ASCC_GENOMIC {
             params.vecscreen_database_path
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
                                 .map { it ->
                                     [[id: it[0].id, process: "Vecscreen"], it[1]]
@@ -441,7 +483,7 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // SUBWORKFLOW: Run the kraken classifier
+    // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
     if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("kraken")
@@ -454,6 +496,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_kraken1 = RUN_NT_KRAKEN.out.classified
                         .map { it ->
                             [[id: it[0].id, process: "Kraken 1"], it[1]]
@@ -549,7 +595,6 @@ workflow ASCC_GENOMIC {
             combined_channel = combined_channel.combine(processChannels[process], by: 0)
         }
 
-        combined_channel.view()
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
         //
