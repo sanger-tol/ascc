@@ -38,4 +38,28 @@ process BLAST_MAKEBLASTDB {
         blast: \$(blastn -version 2>&1 | sed 's/^.*blastn: //; s/ .*\$//')
     END_VERSIONS
     """
+
+    stub:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def is_compressed = fasta.getExtension() == "gz" ? true : false
+    def fasta_name = is_compressed ? fasta.getBaseName() : fasta
+    """
+    touch ${fasta_name}.fasta
+    touch ${fasta_name}.fasta.ndb
+    touch ${fasta_name}.fasta.nhr
+    touch ${fasta_name}.fasta.nin
+    touch ${fasta_name}.fasta.njs
+    touch ${fasta_name}.fasta.not
+    touch ${fasta_name}.fasta.nsq
+    touch ${fasta_name}.fasta.ntf
+    touch ${fasta_name}.fasta.nto
+    mkdir ${prefix}
+    mv ${fasta_name}* ${prefix}
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        blast: \$(blastn -version 2>&1 | sed 's/^.*blastn: //; s/ .*\$//')
+    END_VERSIONS
+    """
 }
