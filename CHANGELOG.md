@@ -21,6 +21,7 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 - An update to the KMER counting scripts and related processes.
 - Re-organisation of .nf files into current standards.
 - Updates to scripts using the ncbi_rankedlineage new_taxdump.
+- Update to the GENERATE SAMPLESHEET script to convert from Python to Bash and add a counter
 
 ### Dependencies
 
@@ -28,6 +29,9 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 | ----------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | PARSE_FCSGX_RESULT            | python:3.9, parse_fcsgx_result.py:1.0.0                                | python:3.9, parse_fcsgx_result.py:1.0.1                                |
 | AUTOFILTER_AND_CHECK_ASSEMBLY | python:3.9, autofilter.py:1.0.0, abnormal_contamination_check.py:1.0.0 | python:3.9, autofilter.py:1.0.0, abnormal_contamination_check.py:1.0.1 |
+| BLASTN | 2.14.0 | 2.16.0 |
+| MAKEBLASTDB | 2.14.0 | 2.16.0 |
+| GENERATE_SAMPLESHEET |1.0.0 | 1.1.0
 
 ## v0.1.0 - Red Book [14/02/2025]
 

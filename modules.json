@@ -7,12 +7,12 @@
                 "nf-core": {
                     "blast/blastn": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "be58de79943289acb561a6246d1da5f85555a224",
                         "installed_by": ["modules"]
                     },
                     "blast/makeblastdb": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "be58de79943289acb561a6246d1da5f85555a224",
                         "installed_by": ["modules"]
                     },
                     "custom/getchromsizes": {
