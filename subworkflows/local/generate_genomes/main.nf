@@ -3,10 +3,10 @@
 //
 // MODULE IMPORT BLOCK
 //
-include { SAMTOOLS_FAIDX        } from '../../../modules/nf-core/samtools/faidx/main'
-include { CUSTOM_GETCHROMSIZES  } from '../../../modules/nf-core/custom/getchromsizes/main'
-include { GNU_SORT              } from '../../../modules/nf-core/gnu/sort'
-include { GET_LARGEST_SCAFF     } from '../../../modules/local/get/largest_scaffold/main'
+include { SAMTOOLS_FAIDX            } from '../../../modules/nf-core/samtools/faidx/main'
+include { CUSTOM_GETCHROMSIZES      } from '../../../modules/nf-core/custom/getchromsizes/main'
+include { GNU_SORT                  } from '../../../modules/nf-core/gnu/sort'
+include { GET_LARGEST_SCAFFOLD      } from '../../../modules/local/get/largest_scaffold/main'
 
 workflow GENERATE_GENOME {
     take:
@@ -40,13 +40,13 @@ workflow GENERATE_GENOME {
     // MODULE: CUT OUT THE LARGEST SCAFFOLD SIZE AND USE AS A COMPARATOR AGAINST 512MB
     //          THIS IS THE CUT OFF FOR TABIX USING TBI INDEXES
     //
-    GET_LARGEST_SCAFF (
+    GET_LARGEST_SCAFFOLD (
         CUSTOM_GETCHROMSIZES.out.sizes
     )
-    ch_versions     = ch_versions.mix( GET_LARGEST_SCAFF.out.versions )
+    ch_versions     = ch_versions.mix( GET_LARGEST_SCAFFOLD.out.versions )
 
     emit:
-    max_scaff_size  = GET_LARGEST_SCAFF.out.scaff_size.toInteger()
+    max_scaff_size  = GET_LARGEST_SCAFFOLD.out.scaff_size.toInteger()
     dot_genome      = GNU_SORT.out.sorted
     ref_index       = CUSTOM_GETCHROMSIZES.out.fai
     reference_tuple = to_chromsize
