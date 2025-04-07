@@ -27,12 +27,13 @@ process BLAST_MAKEBLASTDB {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
+    mkdir -p ${prefix}
+
     makeblastdb \\
         -in ${fasta_name} \\
+        -out ${prefix}/${meta.id} \\
         ${args}
-    mkdir -p ${prefix}
-    mv ${fasta_name}* ${prefix}
-
+    
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         blast: \$(blastn -version 2>&1 | sed 's/^.*blastn: //; s/ .*\$//')
