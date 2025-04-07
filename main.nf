@@ -178,13 +178,18 @@ workflow {
     )
 
     //
-    // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
+    // LOGIC: PARSE WORKFLOW STEPS FOR RUN
     //
+    
     include_workflow_steps_genomic = params.include ? params.include.split(",") : ["ALL"]
     exclude_workflow_steps_genomic = params.exclude ? params.exclude.split(",") : ["NONE"]
 
     include_workflow_steps_organellar = params.organellar_include ? params.organellar_include.split(",") : include_workflow_steps_genomic
     exclude_workflow_steps_organellar = params.organellar_exclude ? params.organellar_exclude.split(",") : exclude_workflow_steps_genomic
+
+    //
+    // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
+    //
 
     run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !exclude_workflow_steps_genomic.contains("nt_blast")
     run_nt_blast_organellar = (include_workflow_steps_organellar.contains('nt_blast') || include_workflow_steps_organellar.contains('ALL')) && !exclude_workflow_steps_organellar.contains("nt_blast")
@@ -199,6 +204,16 @@ workflow {
             params.nt_database_path
         )
         ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
+        
+        // Check the result and fail if needed
+        CHECK_NT_BLAST_TAXONOMY.out.status
+            .map { it.trim() }  // Trim any whitespace
+            .subscribe { status ->
+                if (status == "nt_database_taxonomy_files_not_found") {
+                    log.error "NT BLAST database taxonomy check failed"
+                    exit 1, "The NT BLAST database does not have taxonomy included. Please see the error message above for details."
+                }
+            }
     }
 
     //

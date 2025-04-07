@@ -76,4 +76,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not check_nt_blast_taxonomy(args.db_path):
-        sys.exit(1)
+        # Print status to stdout for Nextflow to capture
+        print("nt_database_taxonomy_files_not_found")
+        sys.exit(0)  # Exit normally
+    else:
+        # Print success status to stdout for Nextflow to capture
+        print("nt_database_taxonomy_files_found")
