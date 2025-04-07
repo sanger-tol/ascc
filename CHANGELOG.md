@@ -22,6 +22,7 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 - Re-organisation of .nf files into current standards.
 - Updates to scripts using the ncbi_rankedlineage new_taxdump.
 - Update to the GENERATE SAMPLESHEET script to convert from Python to Bash and add a counter
+- Updated GET_LARGEST_SCAFFOLD to replace shell block.
 
 ### Dependencies
 
