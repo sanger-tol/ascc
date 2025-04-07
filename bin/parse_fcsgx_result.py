@@ -152,7 +152,7 @@ def get_lineages_by_taxid(taxids_list, rankedlineage_path):
     for line in rankedlineage_data:
         split_line = line.split("|")
         split_line = [n.strip() for n in split_line]
-        assert len(split_line) == 11
+        assert len(split_line) >= 11, f"Expected at least 11 columns in rankedlineage.dmp, got {len(split_line)}"
         taxid = split_line[0]
         if taxid in taxids_list:
             current_lineage_dict = dict()
