@@ -157,6 +157,53 @@ workflow PIPELINE_INITIALISATION {
 
 
     //
+    // LOGIC: SETS THE PROCESSES THAT WILL ACTUALLY RUN
+    //
+    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
+
+
+    //
+    // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
+    //
+    if (
+        (
+            (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
+            (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
+        ) || (
+            include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
+        ) || (
+            include_workflow_steps.contains('ALL')
+        )
+    ) {
+        ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
+    } else {
+        ch_grabbed_reads_path       = []
+    }
+
+
+    //
+    // LOGIC: IT NOW MAKES SENSE TO BE USING SPECIFIC FLAGS FOR THE ORGANELLAR WORKFLOW
+    //          IF THEY ARE NOT SPECIFIED THEN THE USE OF THE GENOMIC ONES WILL SUFFICE.
+    //
+    if ( !params.organellar_include && params.include ) {
+        println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
+        organellar_include = params.include
+    } else {
+        println "Using ORGANELLE specific include/exclude flags"
+        organellar_include = params.organellar_include
+    }
+
+    if ( !params.organellar_exclude && params.exclude ) {
+        println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
+        organellar_exclude = params.exclude
+    } else {
+        println "Using ORGANELLE specific include/exclude flags"
+        organellar_exclude = params.organellar_exclude
+    }
+
+
+    //
     // NOTE: Setting the basic channels form the input
     //
     Channel.fromPath(params.pacbio_barcode_file)
@@ -172,6 +219,11 @@ workflow PIPELINE_INITIALISATION {
     barcodes_file           = barcode_data_file
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_pat
+    include_steps           = include_workflow_steps
+    exclude_steps           = exclude_workflow_steps
+    organellar_include
+    organellar_exclude
+    collected_reads         = ch_grabbed_reads_path
     versions                = ch_versions
 }
 

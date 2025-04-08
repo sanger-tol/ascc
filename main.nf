@@ -108,64 +108,19 @@ workflow {
     )
 
 
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
-
-
-    //
-    // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
-    //
-    if (
-        (
-            (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
-            (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
-        ) || (
-            include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
-        ) || (
-            include_workflow_steps.contains('ALL')
-        )
-    ) {
-        ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
-    } else {
-        ch_grabbed_reads_path       = []
-    }
-
-
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
-    // TODO: THIS WOULD HAVE BEEN SIMPLER TO FIX BY COMBINING THE ORGANELLAR GENOMES TO GENOMIC!!!
     SANGERTOL_ASCC_GENOMIC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
-        params.include,
-        params.exclude,
+        PIPELINE_INITIALISATION.out.include_steps,
+        PIPELINE_INITIALISATION.out.exclude_steps,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
-        ch_grabbed_reads_path,
+        PIPELINE_INITIALISATION.out.collected_reads,
         Channel.of(params.scientific_name),
         PIPELINE_INITIALISATION.out.pacbio_db,
     )
-
-
-    //
-    // LOGIC: IT NOW MAKES SENSE TO BE USING SPECIFIC FLAGS FOR THE ORGANELLAR WORKFLOW
-    //          IF THEY ARE NOT SPECIFIED THEN THE USE OF THE GENOMIC ONES WILL SUFFICE.
-    //
-    if ( !params.organellar_include && params.include ) {
-        println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_include = params.include
-    } else {
-        println "Using ORGANELLE specific include/exclude flags"
-        organellar_include = params.organellar_include
-    }
-
-    if ( !params.organellar_exclude && params.exclude ) {
-        println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_exclude = params.exclude
-    } else {
-        println "Using ORGANELLE specific include/exclude flags"
-        organellar_exclude = params.organellar_exclude
-    }
 
 
     //
@@ -175,11 +130,11 @@ workflow {
     if ( !params.genomic_only ) {
 
         SANGERTOL_ASCC_ORGANELLAR (
-            branched_assemblies.organellar_genome,
-            organellar_include,
-            organellar_exclude,
+            PIPELINE_INITIALISATION.out.organellar_genomes,
+            PIPELINE_INITIALISATION.out.organellar_include,
+            PIPELINE_INITIALISATION.out.organellar_exclude,
             PIPELINE_INITIALISATION.out.fcs_gx_database,
-            ch_grabbed_reads_path,
+            PIPELINE_INITIALISATION.out.collected_reads,
             Channel.of(params.scientific_name),
             PIPELINE_INITIALISATION.out.pacbio_db,
         )
