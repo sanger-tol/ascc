@@ -1,5 +1,5 @@
 process CHECK_BARCODE {
-    tag "${meta.id}"
+    tag "${barcodes}"
     label 'process_low'
 
     conda "conda-forge::python=3.9"

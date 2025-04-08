@@ -83,9 +83,13 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_samplesheet }
 
+    Channel.fromPath(params.pacbio_barcode_file)
+        .set {barcode_data_file}
+
     emit:
-    samplesheet = ch_samplesheet
-    versions    = ch_versions
+    samplesheet     = ch_samplesheet
+    barcodes_file   = barcode_data_file
+    versions        = ch_versions
 }
 
 /*

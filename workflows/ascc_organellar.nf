@@ -47,6 +47,7 @@ workflow ASCC_ORGANELLAR {
     fcs_db                  // path(file)
     reads
     scientific_name         // val(name)
+    pacbio_database         // tuple [[meta.id], pacbio_database]
 
     main:
     ch_versions = Channel.empty()
@@ -117,12 +118,20 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
     if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("pacbio_barcodes") ) {
+
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .combine(pacbio_database)
+            .multiMap{
+                ref_meta, ref_data, pdb_meta, pdb_data ->
+                    reference: [ref_meta, ref_data]
+                    pacbio_db: [pdb_meta, pdb_data]
+            }
+            .set { duplicated_db }
+
         PACBIO_BARCODE_CHECK (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-            params.reads_path,
-            params.reads_type,
-            params.pacbio_barcode_file,
-            params.pacbio_barcode_names
+            duplicated_db.reference,
+            params.pacbio_barcode_names,
+            duplicated_db.pacbio_db
         )
 
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)

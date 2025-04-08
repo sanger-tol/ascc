@@ -16,6 +16,7 @@
 // Move the top two into pipelie init
 include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate/taxid/main'
 include { GUNZIP as MAIN_WORKFLOW_GUNZIP                    } from './modules/nf-core/gunzip/main'
+include { PREPARE_BLASTDB as MAIN_WORKFLOW_PREPARE_BLASTDB  } from './subworkflows/local/prepare_blastdb/main'
 
 include { ASCC_GENOMIC                                      } from './workflows/ascc_genomic'
 include { ASCC_ORGANELLAR                                   } from './workflows/ascc_organellar'
@@ -42,6 +43,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
     fcs
     reads
     scientific_name
+    pacbio_db
 
     main:
 
@@ -55,7 +57,8 @@ workflow SANGERTOL_ASCC_GENOMIC {
         exclude_steps,
         fcs,
         reads,
-        scientific_name
+        scientific_name,
+        pacbio_db
     )
 }
 
@@ -71,6 +74,7 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
     fcs
     reads
     scientific_name
+    pacbio_db
 
     main:
 
@@ -83,7 +87,8 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
         exclude_steps,
         fcs,
         reads,
-        scientific_name
+        scientific_name,
+        pacbio_db
     )
 }
 /*
@@ -171,6 +176,18 @@ workflow {
 
 
     //
+    // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
+    //
+    MAIN_WORKFLOW_PREPARE_BLASTDB (
+        params.sample_id,
+        params.reads_path,
+        params.reads_type,
+        PIPELINE_INITIALISATION.out.barcodes_file,
+        params.pacbio_barcode_names
+    )
+
+
+    //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
     //
     if (
@@ -200,7 +217,8 @@ workflow {
         params.exclude,
         fcs_gx_database_path,
         ch_grabbed_reads_path,
-        Channel.of(params.scientific_name)
+        Channel.of(params.scientific_name),
+        MAIN_WORKFLOW_PREPARE_BLASTDB.out.barcodes_blast_db,
     )
 
 
@@ -237,7 +255,8 @@ workflow {
             organellar_exclude,
             fcs_gx_database_path,
             ch_grabbed_reads_path,
-            Channel.of(params.scientific_name)
+            Channel.of(params.scientific_name),
+            MAIN_WORKFLOW_PREPARE_BLASTDB.out.barcodes_blast_db,
         )
     }
 
