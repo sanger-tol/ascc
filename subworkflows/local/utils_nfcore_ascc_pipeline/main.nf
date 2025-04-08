@@ -144,13 +144,23 @@ workflow PIPELINE_INITIALISATION {
 
 
     //
+    // NOTE: Setting the basic channels form the input
+    //
+    Channel.fromPath(params.pacbio_barcode_file)
+        .set {barcode_data_file}
+
+    Channel.of(params.fcs_gx_database_path)
+        .set { fcs_gx_database_path}
+
+
+    //
     // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
     //
     PREPARE_BLASTDB (
         params.sample_id,
         params.reads_path,
         params.reads_type,
-        PIPELINE_INITIALISATION.out.barcodes_file,
+        barcode_data_file,
         params.pacbio_barcode_names
     )
     versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
@@ -202,15 +212,6 @@ workflow PIPELINE_INITIALISATION {
         organellar_exclude = params.organellar_exclude
     }
 
-
-    //
-    // NOTE: Setting the basic channels form the input
-    //
-    Channel.fromPath(params.pacbio_barcode_file)
-        .set {barcode_data_file}
-
-    Channel.of(params.fcs_gx_database_path)
-        .set { fcs_gx_database_path}
 
     emit:
     samplesheet             = ch_samplesheet
