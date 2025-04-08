@@ -23,16 +23,25 @@ process BLAST_MAKEBLASTDB {
     def is_compressed = fasta.getExtension() == "gz" ? true : false
     def fasta_name = is_compressed ? fasta.getBaseName() : fasta
     """
+    echo "CHECK 1"
+    ls -lha .
+
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
     fi
+
+    echo "CHECK 2"
+    ls -lha .
 
     mkdir -p ${prefix}
 
     makeblastdb \\
         -in ${fasta_name} \\
-        -out ${prefix}/${meta.id} \\
+        -out ${prefix}/${fasta_name} \\
         ${args}
+
+    echo "CHECK 3"
+    ls -lha .
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
