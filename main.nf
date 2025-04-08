@@ -13,11 +13,6 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Move the top two into pipelie init
-include { VALIDATE_TAXID as MAIN_WORKFLOW_VALIDATE_TAXID    } from './modules/local/validate/taxid/main'
-include { GUNZIP as MAIN_WORKFLOW_GUNZIP                    } from './modules/nf-core/gunzip/main'
-include { PREPARE_BLASTDB as MAIN_WORKFLOW_PREPARE_BLASTDB  } from './subworkflows/local/prepare_blastdb/main'
-
 include { ASCC_GENOMIC                                      } from './workflows/ascc_genomic'
 include { ASCC_ORGANELLAR                                   } from './workflows/ascc_organellar'
 
@@ -112,79 +107,9 @@ workflow {
         params.input
     )
 
-    // TODO: move to pipeline init
-    fcs_gx_database_path = Channel.of(params.fcs_gx_database_path)
-
-    //
-    // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
-    //
-    PIPELINE_INITIALISATION.out.samplesheet
-        .branch { meta, file ->
-            zipped: file.name.endsWith('.gz')
-            unzipped: !file.name.endsWith('.gz')
-        }
-        .set {ch_input}
-
-
-    //
-    // MODULE: UNZIP INPUTS IF NEEDED
-    // TODO: MOVE INTO PIPELINE INIT
-    //
-    MAIN_WORKFLOW_GUNZIP (
-        ch_input.zipped
-    )
-
-
-
-    //
-    // LOGIC: MIX CHANELS WHICH MAY OR MAY NOT BE EMPTY INTO A SINGLE QUEUE CHANNEL
-    //
-    unzipped_input = Channel.empty()
-
-    unzipped_input
-        .mix(ch_input.unzipped, MAIN_WORKFLOW_GUNZIP.out.gunzip)
-        .set { standardised_unzipped_input }
-
-
-
-    // TODO: move into pipeline init
-    //
-    // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
-    //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
-    //
-    standardised_unzipped_input
-        .branch{
-            organellar_genome: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
-            sample_genome: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
-            error: true
-        }
-        .set { branched_assemblies }
-
 
     include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
     exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
-
-
-    //
-    // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
-    // TODO: MOVE TO PIPELINE INIT
-    //
-    MAIN_WORKFLOW_VALIDATE_TAXID(
-        Channel.of(params.taxid),
-        Channel.of(params.ncbi_taxonomy_path)
-    )
-
-
-    //
-    // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
-    //
-    MAIN_WORKFLOW_PREPARE_BLASTDB (
-        params.sample_id,
-        params.reads_path,
-        params.reads_type,
-        PIPELINE_INITIALISATION.out.barcodes_file,
-        params.pacbio_barcode_names
-    )
 
 
     //
@@ -211,14 +136,14 @@ workflow {
     //
     // TODO: THIS WOULD HAVE BEEN SIMPLER TO FIX BY COMBINING THE ORGANELLAR GENOMES TO GENOMIC!!!
     SANGERTOL_ASCC_GENOMIC (
-        branched_assemblies.sample_genome,
-        branched_assemblies.organellar_genome,
+        PIPELINE_INITIALISATION.out.main_genomes,
+        PIPELINE_INITIALISATION.out.organellar_genomes,
         params.include,
         params.exclude,
-        fcs_gx_database_path,
+        PIPELINE_INITIALISATION.out.fcs_gx_database,
         ch_grabbed_reads_path,
         Channel.of(params.scientific_name),
-        MAIN_WORKFLOW_PREPARE_BLASTDB.out.barcodes_blast_db,
+        PIPELINE_INITIALISATION.out.pacbio_db,
     )
 
 
@@ -253,10 +178,10 @@ workflow {
             branched_assemblies.organellar_genome,
             organellar_include,
             organellar_exclude,
-            fcs_gx_database_path,
+            PIPELINE_INITIALISATION.out.fcs_gx_database,
             ch_grabbed_reads_path,
             Channel.of(params.scientific_name),
-            MAIN_WORKFLOW_PREPARE_BLASTDB.out.barcodes_blast_db,
+            PIPELINE_INITIALISATION.out.pacbio_db,
         )
     }
 

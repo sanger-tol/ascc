@@ -17,6 +17,11 @@ include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
+include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
+include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main'
+include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
+
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     SUBWORKFLOW TO INITIALISE PIPELINE
@@ -83,13 +88,91 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_samplesheet }
 
+
+    //
+    // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
+    //         MODULE DOES NOT OUTPUT ANYTHING BUT SHOULD KILL PIPELINE ON FAIL
+    //
+    VALIDATE_TAXID(
+        Channel.of(params.taxid),
+        Channel.of(params.ncbi_taxonomy_path)
+    )
+    ch_versions = ch_versions.mix(VALIDATE_TAXID.out.versions)
+
+
+    //
+    // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
+    //
+    PIPELINE_INITIALISATION.out.samplesheet
+        .branch { meta, file ->
+            zipped: file.name.endsWith('.gz')
+            unzipped: !file.name.endsWith('.gz')
+        }
+        .set {ch_input}
+
+
+    //
+    // MODULE: UNZIP INPUTS IF NEEDED
+    //
+    GUNZIP (
+        ch_input.zipped
+    )
+    ch_versions = ch_versions.mix(GUNZIP.out.versions)
+
+
+    //
+    // LOGIC: MIX CHANELS WHICH MAY OR MAY NOT BE EMPTY INTO A SINGLE QUEUE CHANNEL
+    //
+    unzipped_input = Channel.empty()
+
+    unzipped_input
+        .mix(ch_input.unzipped, MAIN_WORKFLOW_GUNZIP.out.gunzip)
+        .set { standardised_unzipped_input }
+
+
+    //
+    // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
+    //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
+    //
+    standardised_unzipped_input
+        .branch{
+            organellar_genome: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
+            genomic_genome: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
+            error: true
+        }
+        .set { branched_assemblies }
+
+
+    //
+    // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
+    //
+    PREPARE_BLASTDB (
+        params.sample_id,
+        params.reads_path,
+        params.reads_type,
+        PIPELINE_INITIALISATION.out.barcodes_file,
+        params.pacbio_barcode_names
+    )
+    versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
+
+
+    //
+    // NOTE: Setting the basic channels form the input
+    //
     Channel.fromPath(params.pacbio_barcode_file)
         .set {barcode_data_file}
 
+    Channel.of(params.fcs_gx_database_path)
+        .set { fcs_gx_database_path}
+
     emit:
-    samplesheet     = ch_samplesheet
-    barcodes_file   = barcode_data_file
-    versions        = ch_versions
+    samplesheet             = ch_samplesheet
+    main_genomes            = branched_assemblies.genomic_genome
+    organellar_genomes      = branched_assemblies.organellar_genome
+    barcodes_file           = barcode_data_file
+    pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
+    fcs_gx_database         = fcs_gx_database_pat
+    versions                = ch_versions
 }
 
 /*
