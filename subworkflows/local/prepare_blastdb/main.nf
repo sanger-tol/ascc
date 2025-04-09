@@ -56,5 +56,6 @@ workflow PREPARE_BLASTDB {
 
     emit:
     barcodes_blast_db       = BLAST_MAKEBLASTDB.out.db
+    versions                = ch_versions
 
 }
