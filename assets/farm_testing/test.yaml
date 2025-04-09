@@ -4,6 +4,7 @@ reads_type: "hifi"
 reads_layout: "SINGLE"
 pacbio_barcode_file: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
 #pacbio_barcode_names: "bc2008,bc2009"
+sample_id: "Cymbastela_concentrica"
 scientific_name: "Cymbastela concentrica"
 taxid: 352914
 kmer_length: 7

@@ -33,6 +33,11 @@
                     "description": "Scientific name of sample according to NCBI",
                     "fa_icon": "fas fa-input-text"
                 },
+                "sample_id": {
+                    "type": "string",
+                    "description": "Sample ID",
+                    "fa_icon": "fas fa-input-text"
+                },
                 "taxid": {
                     "type": "integer",
                     "description": "TaxID according to NCBI",

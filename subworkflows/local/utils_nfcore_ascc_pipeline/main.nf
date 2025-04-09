@@ -215,6 +215,7 @@ workflow PIPELINE_INITIALISATION {
 
     emit:
     samplesheet             = ch_samplesheet
+    sample_id               = params.sample_id
     main_genomes            = branched_assemblies.genomic_genome
     organellar_genomes      = branched_assemblies.organellar_genome
     barcodes_file           = barcode_data_file
