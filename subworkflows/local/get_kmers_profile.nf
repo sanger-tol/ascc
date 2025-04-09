@@ -72,10 +72,42 @@ workflow GET_KMERS_PROFILE {
     //
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
     //
+    // Extract only the kmers_dim_reduction_embeddings.csv files from each directory
     KMER_COUNT_DIM_REDUCTION.out.csv
         .filter{meta, file -> !file.toString().contains("EMPTY")}
+        .map { meta, files ->
+            log.debug "Processing files for ${meta.id}: ${files}"
+            def csv_files = []
+            files.each { file ->
+                log.debug "Checking file: ${file}"
+                if (file.toString().endsWith("kmers_dim_reduction_embeddings.csv")) {
+                    log.debug "Adding CSV file: ${file}"
+                    csv_files.add(file)
+                }
+            }
+            log.debug "Found ${csv_files.size()} CSV files for ${meta.id}"
+            if (csv_files.size() > 0) {
+                return tuple(meta, csv_files)
+            } else {
+                log.warn "No CSV files found for ${meta.id}, skipping"
+                return null
+            }
+        }
+        .filter { it != null }
         .groupTuple(by: [0])
+        .map { meta, files ->
+            log.debug "After groupTuple: ${meta.id} has ${files.size()} file groups"
+            log.debug "Files: ${files.flatten()}"
+            return tuple(meta, files.flatten())
+        }
         .set { collected_files_for_combine }
+
+    // Debug output using debug level logging
+    collected_files_for_combine.map { meta, files ->
+        log.debug "Files for combine: ${meta.id} -> ${files}"
+        return tuple(meta, files)
+    }
+    .set { collected_files_for_combine }
 
     //
     // MODULE: COMBINE OUTPUTS OF MULTIPLE METHODS
@@ -85,7 +117,14 @@ workflow GET_KMERS_PROFILE {
     )
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
 
+    // Collect the results directories from KMER_COUNT_DIM_REDUCTION
+    KMER_COUNT_DIM_REDUCTION.out.results_dir
+        .filter{meta, dir -> !dir.toString().contains("EMPTY")}
+        .groupTuple(by: [0])
+        .set { collected_results_dirs }
+
     emit:
     combined_csv = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
+    kmers_results = collected_results_dirs
     versions     = ch_versions.ifEmpty(null)
 }

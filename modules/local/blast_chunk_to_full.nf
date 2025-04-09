@@ -15,7 +15,7 @@ process BLAST_CHUNK_TO_FULL {
     path "versions.yml"              , emit: versions
 
     script:
-    def args    = task.ext.args     ?: "nucleotide"
+    def args    = task.ext.args
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
     blast_hit_chunk_coords_to_full_coords.py ${chunked} ${args} > ${meta.id}_full_coords.tsv

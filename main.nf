@@ -9,6 +9,16 @@
 
 nextflow.enable.dsl = 2
 
+// Handle the params-file parameter - check for both params_file and params-file
+// This needs to be at the very beginning of the script to ensure it's available throughout the workflow
+if (params.containsKey('params-file') && params['params-file']) {
+    params.params_file = params['params-file']
+} else if (params.containsKey('params_file') && params.params_file) {
+    // Already set correctly
+} else {
+    params.params_file = null
+}
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
@@ -178,6 +188,10 @@ workflow {
     )
 
     //
+    // LOGIC: PARSE WORKFLOW STEPS FOR RUN
+    //
+
+    //
     // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
     //
     include_workflow_steps_genomic = params.include ? params.include.split(",") : ["ALL"]
@@ -199,6 +213,16 @@ workflow {
             params.nt_database_path
         )
         ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
+
+        // Check the result and fail if needed
+        CHECK_NT_BLAST_TAXONOMY.out.status
+            .map { it.trim() }  // Trim any whitespace
+            .subscribe { status ->
+                if (status == "nt_database_taxonomy_files_not_found") {
+                    log.error "NT BLAST database taxonomy check failed"
+                    error 1, "The NT BLAST database does not have taxonomy included. Please see the error message above for details."
+                }
+            }
     }
 
     //

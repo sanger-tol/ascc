@@ -28,6 +28,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
+include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report'
 
 include { paramsSummaryMap                              } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -66,7 +67,7 @@ workflow ASCC_GENOMIC {
         "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",
         "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
         "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset",
-        "merge", "ALL", "NONE"
+        "merge", "html_report", "ALL", "NONE"
     ]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
@@ -815,7 +816,16 @@ workflow ASCC_GENOMIC {
         !exclude_workflow_steps.contains("essentials") && !exclude_workflow_steps.contains("merge")
     ) {
 
-//
+        // Define empty channels as fallbacks for optional processes
+        ch_create_btk_summary = Channel.of([[],[]])
+        
+        // Only use the actual output if the process was run
+        if ((include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("create_btk_dataset")) {
+            ch_create_btk_summary = CREATE_BTK_DATASET.out.create_summary
+        }
+
+        //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
@@ -827,7 +837,7 @@ workflow ASCC_GENOMIC {
             }
             .mix(
                 ej_dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
-                CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])},
+                ch_create_btk_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])},
                 busco_merge_btk.map{ it -> tuple([id: it[0].id, process: "BUSCO_MERGE"], it[1])},
                 ch_kmers,
                 ch_tiara,
@@ -876,6 +886,113 @@ workflow ASCC_GENOMIC {
             ascc_combined_channels.map { it[1..-1] } // Remove the first item in tuple (mapping key)
         )
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: GENERATE HTML REPORT
+    //
+    if ( (include_workflow_steps.contains('html_report') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("html_report")
+    ) {
+        // Create channels for HTML report inputs
+        // Initialize all channels as empty by default
+        ch_barcode_results = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_fcs_adaptor_euk = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_fcs_adaptor_prok = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_trim_ns_results = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_vecscreen_results = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_autofilter_results = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_merged_table = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_fasta_sanitation_log = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        
+        // Only access workflow outputs if the workflow was actually run
+        if ((include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("pacbio_barcodes")) {
+            ch_barcode_results = PACBIO_BARCODE_CHECK.out.filtered
+        }
+        
+        if ((include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("fcs-adaptor")) {
+            ch_fcs_adaptor_euk = RUN_FCSADAPTOR.out.ch_euk
+            ch_fcs_adaptor_prok = RUN_FCSADAPTOR.out.ch_prok
+        }
+        
+        if (!exclude_workflow_steps.contains("essentials")) {
+            ch_trim_ns_results = ESSENTIAL_JOBS.out.trailing_ns_report
+        }
+        
+        if ((include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("vecscreen")) {
+            ch_vecscreen_results = RUN_VECSCREEN.out.vecscreen_contam
+        }
+        
+        if (((include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && 
+              include_workflow_steps.contains("autofilter_assembly") && 
+              !exclude_workflow_steps.contains("autofilter_assembly")) ||
+             (include_workflow_steps.contains('ALL') && 
+              !exclude_workflow_steps.contains("autofilter_assembly")))) {
+            ch_autofilter_results = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+        }
+        
+        if (!exclude_workflow_steps.contains("essentials") && !exclude_workflow_steps.contains("merge")) {
+            ch_merged_table = ASCC_MERGE_TABLES.out.merged_table
+        }
+        
+        // Get the FASTA sanitation log if the filter_fasta process was run
+        if (!exclude_workflow_steps.contains("essentials")) {
+            ch_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
+            ch_fasta_length_filtering_log = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
+        } else {
+            ch_fasta_length_filtering_log = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        }
+        
+        // Create channels for the input samplesheet and YAML parameters file
+        ch_samplesheet = Channel.fromPath(params.input)
+        
+        // Handle the params_file parameter - check if it exists and create a channel
+        if (params.containsKey('params_file') && params.params_file) {
+            ch_params_file = Channel.fromPath(params.params_file)
+        } else {
+            ch_params_file = Channel.value([])
+        }
+        
+        // Add debug logging
+        log.info "HTML Report Generation - Input Channels in main workflow:"
+        log.info "ch_barcode_results: ${ch_barcode_results.dump()}"
+        log.info "ch_fcs_adaptor_euk: ${ch_fcs_adaptor_euk.dump()}"
+        log.info "ch_fcs_adaptor_prok: ${ch_fcs_adaptor_prok.dump()}"
+        log.info "ch_trim_ns_results: ${ch_trim_ns_results.dump()}"
+        log.info "ch_vecscreen_results: ${ch_vecscreen_results.dump()}"
+        log.info "ch_autofilter_results: ${ch_autofilter_results.dump()}"
+        log.info "ch_merged_table: ${ch_merged_table.dump()}"
+        log.info "ch_fasta_sanitation_log: ${ch_fasta_sanitation_log.dump()}"
+        log.info "ch_fasta_length_filtering_log: ${ch_fasta_length_filtering_log.dump()}"
+        log.info "ch_samplesheet: ${ch_samplesheet.dump()}"
+        log.info "ch_params_file: ${ch_params_file.dump()}"
+        
+        // Get the Jinja template
+        ch_jinja_template = Channel.fromPath("${baseDir}/assets/templates/ascc_report.html.jinja")
+
+        // Create a channel with the reference file
+        ch_reference_file = reference_tuple_from_GG
+
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_results,
+            ch_fcs_adaptor_euk,
+            ch_fcs_adaptor_prok,
+            ch_trim_ns_results,
+            ch_vecscreen_results,
+            ch_autofilter_results,
+            ch_merged_table,
+            GET_KMERS_PROFILE.out.kmers_results,
+            ch_reference_file,
+            ch_fasta_sanitation_log,
+            ch_fasta_length_filtering_log,
+            ch_jinja_template,
+            ch_samplesheet,
+            ch_params_file
+        )
+        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
     //

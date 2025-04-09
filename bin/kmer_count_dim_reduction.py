@@ -86,6 +86,7 @@ def print_timestamp(process_name):
 def log_message(message: str, level: str = "warning", timestamp: bool = True) -> None:
     """
     Enhanced logging function with timestamps and consistent formatting.
+    Always writes to stderr.
     """
     levels = {"info": "[INFO]", "warning": "[WARNING]", "error": "[ERROR]", "debug": "[DEBUG]"}
     prefix = levels.get(level.lower(), "[LOG]")
@@ -1428,9 +1429,20 @@ def calculate_embedding_quality(original_data, embedding, n_neighbors=15):
     return {"trustworthiness": float(trustworthiness), "continuity": float(continuity)}
 
 
-def save_embedding_results(embedding, original_data, out_folder, method_name, seq_names=None):
+def save_embedding_results(
+    embedding, original_data, out_folder, method_name, seq_names=None, save_clustering_metrics=True
+):
     """
     Save embedding results including visualisations and quality metrics.
+
+    Parameters:
+        embedding: array-like, the embedding to save
+        original_data: array-like, the original data used to create the embedding
+        out_folder: str, the directory to save results to
+        method_name: str, the name of the method used to create the embedding
+        seq_names: list, optional, the names of the sequences
+        save_clustering_metrics: bool, whether to save clustering metrics (default: True)
+                                 Set to False if clustering metrics are saved elsewhere
     """
     if not os.path.exists(out_folder):
         try:
@@ -1447,7 +1459,7 @@ def save_embedding_results(embedding, original_data, out_folder, method_name, se
     if np.all(embedding == 0):
         log_message("Embedding contains all zeros - visualisation may be uninformative", level="warning")
 
-    # Calculate quality metrics
+    # Calculate quality metrics (trustworthiness and continuity)
     try:
         quality_metrics = calculate_embedding_quality(original_data, embedding)
 
@@ -1472,8 +1484,8 @@ def save_embedding_results(embedding, original_data, out_folder, method_name, se
         except Exception as e:
             log_message(f"Failed to save embedding coordinates: {str(e)}", level="error")
 
-    # Save clustering metrics
-    if seq_names is not None:
+    # Save clustering metrics only if requested
+    if seq_names is not None and save_clustering_metrics:
         # Extract organism labels from seq_names
         labels = [name.split("_")[0] for name in seq_names]
 
@@ -1973,12 +1985,14 @@ def main(
         if embedding is not None:
             # Save additional visualisation and quality metrics only if not skipping
             if not skip_visualisation:
+                # We'll save the clustering metrics separately, so set save_clustering_metrics=False here
                 save_embedding_results(
                     embedding=embedding,
                     original_data=df,
                     out_folder=out_folder,
                     method_name=selected_method,
                     seq_names=seq_names,
+                    save_clustering_metrics=True,  # We want to save clustering metrics here
                 )
 
             # Keep original embedding export for downstream compatibility
@@ -1995,7 +2009,9 @@ def main(
         lambda left, right: pd.merge(left, right, on=["scaff"], how="outer"),  # Merge DataFrames in list
         embeddings_list,
     )
-    out_path = os.path.join(out_folder, "kmers_dim_reduction_embeddings.csv")
+    # Create method-specific output file name
+    method_name = selected_methods[0] if len(selected_methods) == 1 else "combined"
+    out_path = os.path.join(out_folder, f"{method_name}_kmers_dim_reduction_embeddings.csv")
     out_df.to_csv(out_path, index=False)
 
 

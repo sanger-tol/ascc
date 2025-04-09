@@ -72,5 +72,14 @@ workflow ESSENTIAL_JOBS {
     reference_with_seqkit               = new_input_fasta
     dot_genome                          = GENERATE_GENOME.out.dot_genome
     gc_content_txt                      = GC_CONTENT.out.txt
+    trailing_ns_report                  = TRAILINGNS_CHECK.out.trailing_ns_report
+    filter_fasta_sanitation_log         = FILTER_FASTA.out.sanitation_log.map { meta, file -> 
+        // Ensure we have a consistent structure
+        [meta, file]
+    }
+    filter_fasta_length_filtering_log   = FILTER_FASTA.out.length_filtering_log.map { meta, file -> 
+        // Ensure we have a consistent structure
+        [meta, file]
+    }
     versions                            = ch_versions
 }

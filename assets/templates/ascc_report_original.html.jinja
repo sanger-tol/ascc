@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCC run report</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  
+    <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+    
+    <style>
+        /* Base styles */
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        /* Headers */
+        h1, h2, h3 {
+            color: #2c5282; /* Dark blue */
+            margin-top: 1.5em;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.3em;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 0.5em;
+        }
+
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #edf2f7;
+            color: #2c5282;
+            font-weight: bold;
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+
+        tr:hover {
+            background-color: #ebf4ff;
+        }
+
+        /* Tabs styling */
+        #tabs {
+            background-color: #f9f9f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #tabs .ui-tabs-nav {
+            background-color: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 5px 5px 0 0;
+            padding: 0.5em 0.5em 0;
+        }
+
+        #tabs .ui-tabs-nav li {
+            margin: 0.2em 0.2em 0 0;
+            border-radius: 5px 5px 0 0;
+        }
+
+        #tabs .ui-tabs-nav li a {
+            color: #2c5282;
+            padding: 0.5em 1em;
+        }
+
+        #tabs .ui-tabs-nav li.ui-tabs-active {
+            background-color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        #tabs .ui-tabs-nav li.ui-tabs-active a {
+            color: #2c5282;
+            font-weight: bold;
+        }
+
+        #tabs .ui-tabs-panel {
+            padding: 1em;
+            background-color: #fff;
+        }
+        
+        /* Nested tabs styling for K-mer methods */
+        #kmer-methods-tabs {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav {
+            background-color: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 5px 5px 0 0;
+            padding: 0.5em 0.5em 0;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav li {
+            margin: 0.2em 0.2em 0 0;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.9em;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav li a {
+            color: #2c5282;
+            padding: 0.4em 0.8em;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav li.ui-tabs-active {
+            background-color: #fff;
+            border-bottom-color: #fff;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-panel {
+            padding: 1em;
+            background-color: #fff;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.8em;
+            color: #718096;
+        }
+
+        /* DataTables customization */
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter, 
+        .dataTables_wrapper .dataTables_info, 
+        .dataTables_wrapper .dataTables_processing, 
+        .dataTables_wrapper .dataTables_paginate {
+            color: #4a5568;
+            font-family: sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #edf2f7;
+            border-color: #e2e8f0;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e0;
+        }
+
+        /* Section anchors for navigation */
+        section {
+            scroll-margin-top: 20px;
+        }
+        
+        /* Method tabs styling */
+        .method-tab {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            background-color: #f8fafc;
+        }
+        
+        .method-header {
+            background-color: #edf2f7;
+            padding: 10px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 5px 5px 0 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .method-name {
+            color: #2c5282;
+            margin: 0;
+        }
+        
+        .result-section {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        
+        /* Visualization styling */
+        .visualization-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .visualization-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+  
+    <script>
+    $(document).ready( function () {
+        // Initialize main tabs
+        $("#tabs").tabs();
+        
+        // Initialize K-mer method tabs
+        $("#kmer-methods-tabs").tabs();
+        
+        // Initialize DataTables
+        $('#cobiont_check_merged_table').DataTable();
+        $('#autofiltering_table').DataTable();
+    } );
+    </script>
+</head>
+<body>
+    <h1>ASCC run report</h1>
+    
+    <div id="tabs">
+        <ul>
+            <li><a href="#assembly-tab">Assembly Stats</a></li>
+            <li><a href="#barcodes-tab">PacBio barcodes</a></li>
+            <li><a href="#fcs-adaptor-tab">FCS-adaptor</a></li>
+            <li><a href="#trim-ns-tab">Trailing Ns</a></li>
+            <li><a href="#vecscreen-tab">VecScreen</a></li>
+            <li><a href="#autofiltering-tab">Autofiltering</a></li>
+            <li><a href="#coverage-tab">Coverage</a></li>
+            <li><a href="#kmers-tab">K-mer Analysis</a></li>
+            <li><a href="#cobiont-tab">Cobiont check</a></li>
+        </ul>
+
+        <div id="assembly-tab">
+            <h2>Assembly Statistics</h2>
+            {% if reference_summary %}
+                <pre>{{ reference_summary }}</pre>
+            {% else %}
+                <p>No assembly statistics available.</p>
+            {% endif %}
+        </div>
+
+        <div id="barcodes-tab">
+            <h2>PacBio barcodes check</h2>
+            {{ barcodes_check_data }}
+        </div>
+        
+        <div id="fcs-adaptor-tab">
+            <h2>FCS-adaptor</h2>
+            <h3>Eukaryotic adaptors</h3>
+            {{ fcs_adaptor_euk_report_data }}
+            <h3>Prokaryotic adaptors</h3>
+            {{ fcs_adaptor_prok_report_data }}
+        </div>
+        
+        <div id="trim-ns-tab">
+            <h2>Trimming of trailing Ns</h2>
+            {{ trim_Ns_data }}
+        </div>
+        
+        <div id="vecscreen-tab">
+            <h2>VecScreen</h2>
+            {{ vecscreen_data }}
+        </div>
+        
+        <div id="autofiltering-tab">
+            <h2>Autofiltering of the assembly based on FCS-GX and Tiara results</h2>
+            {{ autofiltering_data }}
+        </div>
+        
+        <div id="coverage-tab">
+            <h2>Coverage per phylum, based on the mapping of PacBio reads to the assembly</h2>
+            {{ coverage_per_phylum_data }}
+        </div>
+        
+        <div id="cobiont-tab">
+            <h2>Cobiont check merged table</h2>
+            {{ contamination_check_merged_table_data }}
+        </div>
+        
+        <div id="kmers-tab">
+            <h2>K-mer Analysis</h2>
+
+        {% if kmers_results %}
+            <h3>Dimensionality Reduction Results</h3>
+            
+            {% set methods = {} %}
+            {% for key, value in kmers_results.items() %}
+                {% set method_name = key.split('_')[0] %}
+                {% if method_name not in methods %}
+                    {% set _ = methods.update({method_name: []}) %}
+                {% endif %}
+                {% set _ = methods[method_name].append(key) %}
+            {% endfor %}
+            
+            <div id="kmer-methods-tabs">
+                <ul>
+                    {% for method_name, keys in methods.items() %}
+                        <li><a href="#kmer-method-{{ method_name }}">{{ method_name|upper }}</a></li>
+                    {% endfor %}
+                </ul>
+                
+                {% for method_name, keys in methods.items() %}
+                    <div id="kmer-method-{{ method_name }}">
+                        <h4 class="method-name">{{ method_name|upper }} Dimensionality Reduction</h4>
+                        
+                        {# Group metrics by type #}
+                        {% set regular_metrics = [] %}
+                        {% set clustering_metrics = [] %}
+                        {% set visualizations = [] %}
+                        
+                        {% for key in keys %}
+                            {% if key.endswith('_metrics.txt') and not key.endswith('_clustering_metrics.txt') %}
+                                {% set _ = regular_metrics.append(key) %}
+                            {% elif key.endswith('_clustering_metrics.txt') %}
+                                {% set _ = clustering_metrics.append(key) %}
+                            {% elif key.endswith('_visualisation.png') %}
+                                {% set _ = visualizations.append(key) %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {# Display regular metrics #}
+                        {% if regular_metrics %}
+                            <div class="result-section">
+                                <h5>{{ method_name|upper }} Metrics</h5>
+                                {% for key in regular_metrics %}
+                                    <pre>{{ kmers_results[key] }}</pre>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        {# Display clustering metrics #}
+                        {% if clustering_metrics %}
+                            <div class="result-section">
+                                <h5>{{ method_name|upper }} Clustering Metrics</h5>
+                                {% for key in clustering_metrics %}
+                                    <pre>{{ kmers_results[key] }}</pre>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        {# Display visualizations #}
+                        {% for key in visualizations %}
+                            <div class="result-section">
+                                <h5>{{ method_name|upper }} Visualisation</h5>
+                                <div class="visualization-container">
+                                    <img class="visualization-image" src="data:image/png;base64,{{ kmers_results[key] }}" alt="{{ method_name }} Visualisation">
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No k-mer analysis results found.</p>
+        {% endif %}
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Report generated: {{ timestamp }}</p>
+        <p>ASCC Pipeline Version: {{ version }}</p>
+    </div>
+</body>
+</html>

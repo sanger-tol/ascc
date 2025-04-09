@@ -15,8 +15,9 @@ process KMER_COUNT_DIM_REDUCTION {
     val autoencoder_epochs_count
 
     output:
-    tuple val(meta), path('*_kmers_dim_reduction_embeddings.csv'),      emit: csv
-    path "versions.yml",                                                emit: versions
+    tuple val(meta), path('*_kmers_dim_reduction_dir/*'), emit: csv
+    tuple val(meta), path('*_kmers_dim_reduction_dir'), emit: results_dir
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,10 +26,10 @@ process KMER_COUNT_DIM_REDUCTION {
     def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
-
+    mkdir -p ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir
     kmer_count_dim_reduction.py \\
         $kmer_counts_file \\
-        ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_embeddings.csv \\
+        ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir \\
         --selected_methods $dimensionality_reduction_method \\
         --n_neighbors_setting $n_neighbors_setting \\
         --autoencoder_epochs_count $autoencoder_epochs_count
@@ -49,7 +50,8 @@ process KMER_COUNT_DIM_REDUCTION {
     def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}_kmers_dim_reduction_embeddings.csv
+    mkdir -p ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir
+    touch ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir/kmers_dim_reduction_embeddings.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

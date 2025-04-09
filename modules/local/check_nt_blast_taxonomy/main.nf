@@ -12,6 +12,7 @@ process CHECK_NT_BLAST_TAXONOMY {
 
     output:
     path "versions.yml", emit: versions
+    stdout emit: status  // Capture the status message from stdout
 
     script:
     """
@@ -21,6 +22,17 @@ process CHECK_NT_BLAST_TAXONOMY {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         check_nt_blast_taxonomy: \$(check_nt_blast_taxonomy.py --version | sed 's/^//')
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    echo "nt_database_taxonomy_files_found"  // Default to success in stub mode
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: 3.9.0
+        check_nt_blast_taxonomy: 1.0.0
     END_VERSIONS
     """
 }
