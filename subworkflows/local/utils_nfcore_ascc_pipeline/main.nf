@@ -126,7 +126,7 @@ workflow PIPELINE_INITIALISATION {
     unzipped_input = Channel.empty()
 
     unzipped_input
-        .mix(ch_input.unzipped, MAIN_WORKFLOW_GUNZIP.out.gunzip)
+        .mix(ch_input.unzipped, GUNZIP.out.gunzip)
         .set { standardised_unzipped_input }
 
 
