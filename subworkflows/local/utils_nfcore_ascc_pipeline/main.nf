@@ -220,7 +220,7 @@ workflow PIPELINE_INITIALISATION {
     organellar_genomes      = branched_assemblies.organellar_genome
     barcodes_file           = barcode_data_file
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
-    fcs_gx_database         = fcs_gx_database_pat
+    fcs_gx_database         = fcs_gx_database_path
     include_steps           = include_workflow_steps
     exclude_steps           = exclude_workflow_steps
     organellar_include
