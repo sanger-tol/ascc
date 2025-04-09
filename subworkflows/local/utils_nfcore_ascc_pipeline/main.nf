@@ -103,7 +103,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
-    PIPELINE_INITIALISATION.out.samplesheet
+    ch_samplesheet
         .branch { meta, file ->
             zipped: file.name.endsWith('.gz')
             unzipped: !file.name.endsWith('.gz')
