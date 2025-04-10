@@ -22,7 +22,7 @@ workflow PREPARE_BLASTDB {
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
     CHECK_BARCODE (
-        [[id: sample_id],pacbio_data],
+        [[id: sample_id], pacbio_data],
         barcodes_file,
         barcode_names
     )

@@ -36,7 +36,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
     include_steps
     exclude_steps
     fcs
-    reads
+    read_files
     scientific_name
     pacbio_db
 
@@ -51,7 +51,7 @@ workflow SANGERTOL_ASCC_GENOMIC {
         include_steps,
         exclude_steps,
         fcs,
-        reads,
+        read_files,
         scientific_name,
         pacbio_db
     )

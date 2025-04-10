@@ -44,8 +44,8 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
-    include_steps           // params.include_steps
-    exclude_steps           // params.exclude_steps
+    include_step_OBSELETE   // params.include_steps
+    exclude_steps_OBSELETE   // params.exclude_steps
     fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
@@ -57,9 +57,10 @@ workflow ASCC_GENOMIC {
     //
     // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
     //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //
-    include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
-    exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
+    //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
+    //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
+    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
 
     full_list               = [
         "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",

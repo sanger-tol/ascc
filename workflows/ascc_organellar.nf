@@ -42,8 +42,8 @@ workflow ASCC_ORGANELLAR {
 
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
-    include_steps           // params.include_steps
-    exclude_steps           // params.exclude_steps
+    include_steps_OBSELETE  // params.include_steps
+    exclude_steps_OBSELETE  // params.exclude_steps
     fcs_db                  // path(file)
     reads
     scientific_name         // val(name)
@@ -55,9 +55,10 @@ workflow ASCC_ORGANELLAR {
     //
     // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
     //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //
-    include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
-    exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
+    //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
+    //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
+    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
 
     full_list               = [
         "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond",
