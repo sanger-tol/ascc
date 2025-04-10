@@ -31,13 +31,11 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 - Patched MAKEBLAST_DB to use it's own --out flag rather that the current mkdir and mv solution.
 - Input reads now need to be specified as an array in the yaml.
 
-
 ### Parameters
 
-| Old Parameter | New Parameter                      |
-| ------------- | ---------------------------------- |
-| -             | --sample_id                        |
-
+| Old Parameter | New Parameter |
+| ------------- | ------------- |
+| -             | --sample_id   |
 
 ### Dependencies
 
@@ -48,7 +46,6 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 | BLASTN                        | 2.14.0                                                                 | 2.16.0                                                                 |
 | MAKEBLASTDB                   | 2.14.0                                                                 | 2.16.0                                                                 |
 | GENERATE_SAMPLESHEET          | 1.0.0                                                                  | 1.1.0                                                                  |
-
 
 ## v0.1.0 - Red Book [14/02/2025]
 
