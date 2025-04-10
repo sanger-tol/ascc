@@ -17,12 +17,27 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 
 ### Enhancements & Fixes
 
-- Template Updated to 3.2
+- Template Updated to 3.2 which moves us to NF-SCHEMA.
 - An update to the KMER counting scripts and related processes.
 - Re-organisation of .nf files into current standards.
 - Updates to scripts using the ncbi_rankedlineage new_taxdump.
 - Update to the GENERATE SAMPLESHEET script to convert from Python to Bash and add a counter
 - Updated GET_LARGEST_SCAFFOLD to replace shell block.
+- Update parse_fcsgx_result and autofilter python scripts to handle both the previous and new format of taxdump (format changed at the end of March, adding a new column for virus hierarchy).
+- main.nf has been cleaned so that pipeline prep code is now found in the PIPELINE_INITIALISATION subworkflow.
+- Blobtoolkit pipeline version has been updated to 0.7.1, this required changes to the input (GENERATE_SAMPLESHEET).
+- Added sample_id as an input param. Currently only used in a few places.
+- Adding contributors to the new format.
+- Patched MAKEBLAST_DB to use it's own --out flag rather that the current mkdir and mv solution.
+- Input reads now need to be specified as an array in the yaml.
+
+
+### Parameters
+
+| Old Parameter | New Parameter                      |
+| ------------- | ---------------------------------- |
+| -             | --sample_id                        |
+
 
 ### Dependencies
 
@@ -33,6 +48,7 @@ Read more here: `https://ncbiinsights.ncbi.nlm.nih.gov/2025/02/27/new-ranks-ncbi
 | BLASTN                        | 2.14.0                                                                 | 2.16.0                                                                 |
 | MAKEBLASTDB                   | 2.14.0                                                                 | 2.16.0                                                                 |
 | GENERATE_SAMPLESHEET          | 1.0.0                                                                  | 1.1.0                                                                  |
+
 
 ## v0.1.0 - Red Book [14/02/2025]
 
