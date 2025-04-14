@@ -12,9 +12,8 @@
                     },
                     "blast/makeblastdb": {
                         "branch": "master",
-                        "git_sha": "be58de79943289acb561a6246d1da5f85555a224",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/blast/makeblastdb/blast-makeblastdb.diff"
+                        "git_sha": "c7a7f06819adcf6f922e11b47f308b7c74484d67",
+                        "installed_by": ["modules"]
                     },
                     "custom/getchromsizes": {
                         "branch": "master",
