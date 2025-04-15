@@ -199,18 +199,18 @@ workflow PIPELINE_INITIALISATION {
     //
     if ( !params.organellar_include && params.include ) {
         println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_include = params.include
+        include_workflow_steps_organellar = params.include
     } else {
         println "Using ORGANELLE specific include/exclude flags"
-        organellar_include = params.organellar_include ? params.organellar_include.split(",") : "ALL"
+        include_workflow_steps_organellar = params.organellar_include ? params.organellar_include.split(",") : "ALL"
     }
 
     if ( !params.organellar_exclude && params.exclude ) {
         println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_exclude = exclude_workflow_steps_genomic
+        exclude_workflow_steps_organellar = exclude_workflow_steps_genomic
     } else {
         println "Using ORGANELLE specific include/exclude flags"
-        organellar_exclude = params.organellar_exclude ? params.organellar_exclude.split(",") : "ALL"
+        exclude_workflow_steps_organellar = params.organellar_exclude ? params.organellar_exclude.split(",") : "ALL"
     }
 
     //
