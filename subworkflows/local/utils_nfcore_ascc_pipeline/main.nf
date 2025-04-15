@@ -170,8 +170,8 @@ workflow PIPELINE_INITIALISATION {
     //
     // LOGIC: SETS THE PROCESSES THAT WILL ACTUALLY RUN
     //
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
+    include_workflow_steps_genomic  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps_genomic  = params.exclude ? params.exclude.split(",") : "NONE"
 
 
     //
@@ -179,12 +179,12 @@ workflow PIPELINE_INITIALISATION {
     //
     if (
         (
-            (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
-            (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
+            (include_workflow_steps_genomic.contains('coverage') && !exclude_workflow_steps_genomic.contains("coverage")) ||
+            (include_workflow_steps_genomic.contains('btk_busco') && !exclude_workflow_steps_genomic.contains("btk_busco"))
         ) || (
-            include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
+            include_workflow_steps_genomic.contains('ALL') && !exclude_workflow_steps_genomic.contains("btk_busco") && !exclude_workflow_steps_genomic.contains("coverage")
         ) || (
-            include_workflow_steps.contains('ALL')
+            include_workflow_steps_genomic.contains('ALL')
         )
     ) {
         ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
@@ -202,21 +202,21 @@ workflow PIPELINE_INITIALISATION {
         organellar_include = params.include
     } else {
         println "Using ORGANELLE specific include/exclude flags"
-        organellar_include = params.organellar_include
+        organellar_include = params.organellar_include ? params.organellar_include.split(",") : "ALL"
     }
 
     if ( !params.organellar_exclude && params.exclude ) {
         println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_exclude = params.exclude
+        organellar_exclude = exclude_workflow_steps_genomic
     } else {
         println "Using ORGANELLE specific include/exclude flags"
-        organellar_exclude = params.organellar_exclude
+        organellar_exclude = params.organellar_exclude ? params.organellar_exclude.split(",") : "ALL"
     }
 
     //
     // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
     //`
-    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !exclude_workflow_steps_genomic.contains("nt_blast")
+    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !include_workflow_steps_genomic.contains("nt_blast")
     run_nt_blast_organellar = (include_workflow_steps_organellar.contains('nt_blast') || include_workflow_steps_organellar.contains('ALL')) && !exclude_workflow_steps_organellar.contains("nt_blast")
 
     //
@@ -250,10 +250,10 @@ workflow PIPELINE_INITIALISATION {
     barcodes_file           = barcode_data_file
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_path
-    include_steps           = include_workflow_steps
-    exclude_steps           = exclude_workflow_steps
-    organellar_include
-    organellar_exclude
+    include_steps           = include_workflow_steps_genomic
+    exclude_steps           = exclude_workflow_steps_genomic
+    organellar_include      = include_workflow_steps_organellar
+    organellar_exclude      = exclude_workflow_steps_organellar
     collected_reads         = ch_grabbed_reads_path
     versions                = ch_versions
 }
