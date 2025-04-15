@@ -7,7 +7,7 @@ import sys
 import argparse
 import textwrap
 
-VERSION = "V1.0.0"
+VERSION = "V1.0.1"
 
 DESCRIPTION = """
 -------------------------------------
@@ -72,7 +72,7 @@ def get_domain_from_taxid(query_taxid, rankedlineage_path):
     for line in rankedlineage_data:
         split_line = line.split("|")
         split_line = [n.strip() for n in split_line]
-        assert len(split_line) == 11
+        assert len(split_line) >= 11, f"Expected at least 11 columns in rankedlineage.dmp, got {len(split_line)}" # This should no handle both new and old formats (as of April 2025)
         taxid = split_line[0]
         domain = split_line[9]
         if taxid == query_taxid:

@@ -4,32 +4,31 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
-include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
-include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
-include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
-include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
-include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
+include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
+include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
+include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
+include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 
-include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs'
-include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast'
-include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
-include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
-include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check'
-include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
-include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
-include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
-include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
-include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
-include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
+include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
+include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
+include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
+include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
+include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
+include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
+include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
+include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
+include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
+include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
+include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
+include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 
-include { paramsSummaryMap                              } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
@@ -45,22 +44,23 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
-    validate_taxid_versions // Versions channel from main.nf
-    include_steps           // params.include_steps
-    exclude_steps           // params.exclude_steps
+    include_step_OBSELETE   // params.include_steps
+    exclude_steps_OBSELETE   // params.exclude_steps
     fcs_db                  // [path(path)]
     reads
+    scientific_name         // val(name)
+    pacbio_database         // tuple [[meta.id], pacbio_database]
 
     main:
     ch_versions = Channel.empty()
-    ch_versions = ch_versions.mix(validate_taxid_versions)
 
     //
     // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
     //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //
-    include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
-    exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
+    //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
+    //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
+    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
 
     full_list               = [
         "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",
@@ -75,9 +75,6 @@ workflow ASCC_GENOMIC {
 
     log.info "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
     log.info "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
-
-
-    //reads = CollectReads(reads_list)
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -98,7 +95,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( !exclude_workflow_steps.contains("essentials")) {
+    if ( !exclude_workflow_steps.contains("essentials") && (include_workflow_steps.contains("ALL") || include_workflow_steps.contains("essentials")) ) {
 
         ESSENTIAL_JOBS(
             ch_samplesheet
@@ -141,6 +138,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
                                 .map { it ->
                                     [[id: it[0].id, process: "KMERS"], it[1]]
@@ -187,6 +188,11 @@ workflow ASCC_GENOMIC {
             params.ncbi_ranked_lineage_path
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
                                 .map { it ->
                                     [[id: it[0].id, process: "NT-BLAST"], it[1]]
@@ -223,6 +229,11 @@ workflow ASCC_GENOMIC {
             params.diamond_nr_database_path
         )
         ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         nr_full             = NR_DIAMOND.out.reformed
                                 .map { it ->
                                     [[id: it[0].id, process: "NR-FULL"], it[1]]
@@ -252,6 +263,11 @@ workflow ASCC_GENOMIC {
             params.diamond_uniprot_database_path
         )
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         un_full             = UP_DIAMOND.out.reformed
                                 .map { it ->
                                     [[id: it[0].id, process: "UN-FULL"], it[1]]
@@ -276,14 +292,12 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
         //
-        organellar_genomes
+        organellar_check = organellar_genomes
             .branch { meta, assembly ->
                 mito:       meta.assembly_type == "MITO"
                 plastid:    meta.assembly_type == "PLASTID"
                 invalid:    true    // if value but not of the above conditions
             }
-            .set { organellar_check }
-
         //
         // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
         //
@@ -303,6 +317,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report
                                 .map { it ->
                                     [[id: it[0].id, process: "MITO"], it[1]]
@@ -327,12 +345,19 @@ workflow ASCC_GENOMIC {
     if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("pacbio_barcodes")
     ) {
+        reference_tuple_from_GG
+            .combine(pacbio_database)
+            .multiMap{
+                ref_meta, ref_data, pdb_meta, pdb_data ->
+                    reference: [ref_meta, ref_data]
+                    pacbio_db: [pdb_meta, pdb_data]
+            }
+            .set { duplicated_db }
+
         PACBIO_BARCODE_CHECK (
-            reference_tuple_from_GG,
-            params.reads_path,
-            params.reads_type,
-            params.pacbio_barcode_file,
-            params.pacbio_barcode_names
+            duplicated_db.reference,
+            params.pacbio_barcode_names,
+            duplicated_db.pacbio_db
         )
 
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
@@ -350,7 +375,11 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
-        RUN_FCSADAPTOR.out.ch_euk
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
+        //
+        ch_fcsadapt = RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
@@ -361,7 +390,6 @@ workflow ASCC_GENOMIC {
                     file2
                 )
             }
-            .set{ ch_fcsadapt }
 
     } else {
         ch_fcsadapt         = Channel.of([[],[]])
@@ -375,7 +403,7 @@ workflow ASCC_GENOMIC {
             !exclude_workflow_steps.contains("fcs-gx")
     ) {
 
-        reference_tuple_from_GG
+        joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
             .combine(Channel.of(params.taxid))
             .combine(Channel.of(params.ncbi_ranked_lineage_path))
@@ -385,8 +413,6 @@ workflow ASCC_GENOMIC {
                 taxid_val: taxid
                 ncbi_tax_path: tax_path
             }
-            .set { joint_channel }
-
 
         RUN_FCSGX (
             joint_channel.reference,
@@ -394,6 +420,11 @@ workflow ASCC_GENOMIC {
             joint_channel.ncbi_tax_path
         )
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
                                 .map { it ->
                                     [[id: it[0].id, process: "FCSGX result"], it[1]]
@@ -417,6 +448,11 @@ workflow ASCC_GENOMIC {
             params.reads_type,
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
                                 .map { it ->
                                     [[id: it[0].id, process: "Coverage"], it[1]]
@@ -446,6 +482,11 @@ workflow ASCC_GENOMIC {
             params.vecscreen_database_path
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
                                 .map { it ->
                                     [[id: it[0].id, process: "Vecscreen"], it[1]]
@@ -457,7 +498,7 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // SUBWORKFLOW: Run the kraken classifier
+    // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
     if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("kraken")
@@ -470,6 +511,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_kraken1 = RUN_NT_KRAKEN.out.classified
                         .map { it ->
                             [[id: it[0].id, process: "Kraken 1"], it[1]]
@@ -504,7 +549,7 @@ workflow ASCC_GENOMIC {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        reference_tuple_from_GG
+        ch_genomic_cbtk_input = reference_tuple_from_GG
             .map{ it -> tuple([
                 id: it[0].id,
                 taxid: it[0].taxid,
@@ -535,8 +580,6 @@ workflow ASCC_GENOMIC {
             .map { id, data ->
                 [id: id, data: data]
             }
-            .set {ch_genomic_cbtk_input}
-
 
         //
         // LOGIC: LIST OF PROCESSES TO CHECK FOR
@@ -569,15 +612,20 @@ workflow ASCC_GENOMIC {
             combined_channel = combined_channel.combine(processChannels[process], by: 0)
         }
 
-
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
         //
         CREATE_BTK_DATASET (
             combined_channel,
-            Channel.fromPath(params.ncbi_taxonomy_path).first()
+            Channel.fromPath(params.ncbi_taxonomy_path).first(),
+            scientific_name
+
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+
+        create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
+    } else {
+        create_summary          = Channel.of([[],[]])
     }
 
 
@@ -598,7 +646,7 @@ workflow ASCC_GENOMIC {
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
 
-        reference_tuple_from_GG
+        autofilter_input_formatted = reference_tuple_from_GG
             .map{ it -> tuple([id: it[0].id], it[1])}
             .combine(
                 ch_tiara
@@ -623,7 +671,6 @@ workflow ASCC_GENOMIC {
                     fcs_file:   tuple(meta, fcs)
                     ncbi_rank:  ncbi
             }
-            .set{ autofilter_input_formatted}
 
         //
         // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
@@ -641,16 +688,12 @@ workflow ASCC_GENOMIC {
         // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE
         //          OUTPUT FILE.
         //
-        AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+        btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { file -> file.text.trim() }
             .branch { it ->
                 run_btk     : it.contains("YES_ABNORMAL_CONTAMINATION")
                 dont_run    : true
             }
-            .set { btk_bool }
-
-            btk_bool.run_btk.view{"BTK BOOL: $it"}
-
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
@@ -684,6 +727,7 @@ workflow ASCC_GENOMIC {
         GENERATE_SAMPLESHEET (
             reference_tuple_from_GG,
             params.reads_path,
+            Channel.of(params.reads_layout),
             AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
         )
         ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
@@ -691,24 +735,21 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
         //
-        GENERATE_SAMPLESHEET.out.csv
+        coverage_id = GENERATE_SAMPLESHEET.out.csv
             .map{ meta, csv ->
                 tuple(
                     [ id: meta.id ],
                     csv
                 )
             }
-            .set {coverage_id}
 
-        reference_tuple_from_GG
+        combined_input = reference_tuple_from_GG
             .map{ it -> tuple([id:it[0].id], it[1])}
             .combine(coverage_id, by: 0)
             .multiMap { meta_1, ref, csv ->
                 reference: [meta_1, ref]
                 samplesheet: csv
             }
-            .set { combined_input }
-
 
         //
         // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
@@ -730,15 +771,15 @@ workflow ASCC_GENOMIC {
         )
         ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
+
         //
         // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
         //
 
-        GENERATE_SAMPLESHEET.out.csv
+        new_csv = GENERATE_SAMPLESHEET.out.csv
             .map{ meta, file ->
                 tuple([id: meta.id], file)
             }
-            .set{ new_csv }
 
 
         //
@@ -787,7 +828,7 @@ workflow ASCC_GENOMIC {
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
         //
-        CREATE_BTK_DATASET.out.btk_datasets
+        merged_channel = CREATE_BTK_DATASET.out.btk_datasets
             .map { meta, file -> [meta.id, [meta, file]] }
             .join(
                 SANGER_TOL_BTK.out.dataset
@@ -795,13 +836,13 @@ workflow ASCC_GENOMIC {
                         [meta.id, [meta, file]]
                 })
             .map { id, ref, btk -> [ref[0], ref[1], btk[1]] }
-            .set { merged_channel }
 
         MERGE_BTK_DATASETS (
             merged_channel
         )
         ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+
     } else {
         busco_merge_btk         = Channel.of([[],[]])
     }
@@ -812,7 +853,7 @@ workflow ASCC_GENOMIC {
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
     if (
-        !exclude_workflow_steps.contains("essentials") && !exclude_workflow_steps.contains("merge")
+        !exclude_workflow_steps.contains("essentials") && !exclude_workflow_steps.contains("merge") && !exclude_workflow_steps.contains("ALL")
     ) {
 
 //
@@ -820,14 +861,14 @@ workflow ASCC_GENOMIC {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        ej_gc_coverage
+        ascc_merged_data = ej_gc_coverage
             .map{ it -> tuple([
                 id: it[0].id,
                 process: "GC_COV"], it[1])
             }
             .mix(
                 ej_dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
-                CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])},
+                create_summary,
                 busco_merge_btk.map{ it -> tuple([id: it[0].id, process: "BUSCO_MERGE"], it[1])},
                 ch_kmers,
                 ch_tiara,
@@ -846,7 +887,6 @@ workflow ASCC_GENOMIC {
             .map { id, data ->
                 [id: id, data: data]
             }
-            .set {ascc_merged_data}
 
         def processes = [
             'GC_COV', 'Coverage', 'TIARA',

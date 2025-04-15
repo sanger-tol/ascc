@@ -13,33 +13,33 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 ### Processes that produce the main outputs:
 
 - [Trailing Ns Check](#trailing-ns-check)
-- [Mito Organellar Blast](#mito-organellar-blast) -
-- [Plastid organellar blast](#plastid-organellar-blast) -
-- [Run FCS Adaptor](#run-fcs-adaptor) -
-- [Pacbio Barcode Check](#pacbio-barcode-check) -
-- [Run Read Coverage](#run-read-coverage) -
-- [Run VecScreen](#run-vecscreen) -
-- [Create BTK Dataset](#create-btk-dataset) -
-- [Autofilter and Check Assembly](#autofilter-and-check-assembly) -
-- [Sanger-TOL BTK](#sanger-tol-btk) -
-- [Merge BTK datasets](#merge-btk-datasets) -
-- [ASCC Merge Tables](#ascc-merge-tables) -
-- [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+- [Mito Organellar Blast](#mito-organellar-blast)
+- [Plastid organellar blast](#plastid-organellar-blast)
+- [Run FCS Adaptor](#run-fcs-adaptor)
+- [Pacbio Barcode Check](#pacbio-barcode-check)
+- [Run Read Coverage](#run-read-coverage)
+- [Run VecScreen](#run-vecscreen)
+- [Create BTK Dataset](#create-btk-dataset)
+- [Autofilter and Check Assembly](#autofilter-and-check-assembly)
+- [Sanger-TOL BTK](#sanger-tol-btk)
+- [Merge BTK datasets](#merge-btk-datasets)
+- [ASCC Merge Tables](#ascc-merge-tables)
+- [Pipeline information](#pipeline-information)
 
 ### Processes that produce intermediate outputs:
 
-- [YamlInput](#yamlinput) -
-- [Generate samplesheet](#generate-samplesheet) -
-- [Validate TaxID](#validate-taxid) -
-- [Generate Genome](#generate-genome) -
-- [Filter Fasta](#filter-fasta) -
-- [GC Content](#gc-content) -
-- [Get kmers profile](#get-kmers-profile) -
-- [Extract Tiara Hits](#extract-tiara-hits) -
-- [Run FCS-GX](#run-fcs-gx) -
-- [Run nt Kraken](#run-nt-kraken) -
-- [nr Diamond BLASTX](#nr-diamond-blastx) -
-- [Uniprot Diamond BLASTX](#uniprot-diamond-blastx) -
+- [YamlInput](#yamlinput)
+- [Generate samplesheet](#generate-samplesheet)
+- [Validate TaxID](#validate-taxid)
+- [Generate Genome](#generate-genome)
+- [Filter Fasta](#filter-fasta)
+- [GC Content](#gc-content)
+- [Get kmers profile](#get-kmers-profile)
+- [Extract Tiara Hits](#extract-tiara-hits)
+- [Run FCS-GX](#run-fcs-gx)
+- [Run nt Kraken](#run-nt-kraken)
+- [nr Diamond BLASTX](#nr-diamond-blastx)
+- [Uniprot Diamond BLASTX](#uniprot-diamond-blastx)
 
 ## Main outputs
 
@@ -55,16 +55,20 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 A text file containing a report of trailing Ns found in the genome. Trailing Ns are when a nucleotide sequence starts or ends with Ns instead of A, G, C or T nucleotides. It is advisable to trim off the trailing Ns from sequences in the assembly. If the sequence remaining after trimming is shorter than 200 bp, the script recommends removing it from the assembly.
 
+![Trailing Ns Workflow](./images/ascc-1.0.0-trailing-ns.drawio.png)
+
 ### Mito Organellar Blast
 
 <details markdown="1">
 <summary>Output files</summary>
 - `organelle/`
-  `*-mitochondrial_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected mitochondrial contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants. 
+  `*-mitochondrial_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected mitochondrial contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
 </details>
 
 This subworkflow uses BLAST against a user-provided mitochondrial sequence to detect leftover organellar sequences in the assembly file that should contain only chromosomal DNA sequences. A BLAST nucleotide database is made from the user-provided organellar sequence. BLAST with the chromosomal DNA assembly is then ran against this database with the following settings: -task megablast -word_size 28 -best_hit_overhang 0.1 -best_hit_score_edge 0.1 -dust yes -evalue 0.0001 -perc_identity 80 -soft_masking true. The BLAST results are filtered to keep only hits with alignment length that is at least 200 bp.
 Depending on the alignment length and percentage identity, the script can recommend an action for dealing with the putative organellar sequence: either "REMOVE" or "Investigate".
+
+![Organellar Blast Workflow](./images/ascc-1.0.0-organellar_blast.png)
 
 ### Plastid Organellar Blast
 
@@ -75,6 +79,8 @@ Depending on the alignment length and percentage identity, the script can recomm
 </details>
 
 This subworkflow uses BLAST against a user-provided plastid sequence to detect leftover organellar sequences in the assembly file that should contain only chromosomal sequences. The method is the same as in the Mito Organellar Blast part.
+
+![Organellar Blast Workflow](./images/ascc-1.0.0-organellar_blast.png)
 
 ### Run FCS-adaptor
 
@@ -92,6 +98,8 @@ This subworkflow uses BLAST against a user-provided plastid sequence to detect l
 
 FCS-adaptor (https://github.com/ncbi/fcs) is NCBI software for detecting adapter contamination in genome assemblies. FCS-adaptor uses a built-in database of adapter sequences, provided by NCBI. The FCS-adaptor report shows identified potential locations of retained adapter sequences from the sequencing run.
 
+![RUN FCS ADAPTOR](./images/ascc-1.0.0-fcsadaptor.drawio.png)
+
 ### Pacbio Barcode Check
 
 <details markdown="1">
@@ -104,6 +112,8 @@ FCS-adaptor (https://github.com/ncbi/fcs) is NCBI software for detecting adapter
 
 Uses BlastN to identify retained PacBio multiplexing barcode contamination in the assembly. The PacBio multiplexing barcode sequences are stored as the pacbio_adaptors.fa file in the assets directory of this pipeline.
 
+![pacbiocheck](./images/ascc-1.0.0-pacbiocheck.png)
+
 ### Run Read Coverage
 
 <details markdown="1">
@@ -114,6 +124,8 @@ Uses BlastN to identify retained PacBio multiplexing barcode contamination in th
 </details>
 
 Mapping the read data to the input genome with minimap2 (https://github.com/lh3/minimap2) and calculating the average coverage per sequence. The reads used for mapping can be PacBio HiFi reads or paired end Illumina reads.
+
+![read coverage](./images/ascc-1.0.0-readcoverage.png)
 
 ### Run VecScreen
 
@@ -126,6 +138,8 @@ Mapping the read data to the input genome with minimap2 (https://github.com/lh3/
 </details>
 
 VecScreen (https://www.ncbi.nlm.nih.gov/tools/vecscreen/) is a tool for detecting adapter and vector contamination in genome assemblies. It is an older tool than FCS-adaptor. Its advantage over FCS-adaptor is that it can use a custom database of contaminant sequences made by the user, whereas FCS-adaptor comes with its built-in database.
+
+![vecscreen](./images/ascc-1.0.0-vecscreen.png)
 
 ### Create BTK Dataset
 
@@ -192,8 +206,8 @@ This module merged the Create_btk_dataset folder with the Sanger-tol BTK dataset
 
 - `ASCC-main-output/`
 `*_contamination_check_merged_table.csv` - A CSV table that contains the results of most parts of the pipeline (GC content, coverage, Tiara, Kraken, kmers dimensionality reduction, Diamond, BLAST, FCS-GX, BlobToolKit pipeline) for each sequence in the input assembly file.
-If a set of prerequisite steps have been run (nt BLAST, nr Diamond, Uniprot Diamond, read mapping for coverage calculation, Tiara, nt Kraken and the creation of a BlobToolKit dataset), the pipeline tries to put together a phylum level combined classification of the input sequences. It first uses BlobToolKit's `bestsum_phylum`, then fills the gaps (caused by `no-hit` sequences) with results from Tiara and then the remaining gaps are filled with results from nt Kraken. The combined classification is in the `merged_classif` column. The `merged_classif_source` column says which tool's output the classification for each sequence is based on. The automated classification usually has some flaws in it but is still useful as a starting point for determining the phyla that the input sequences belong to.  
- `*_phylum_counts_and_coverage.csv` - A CSV report containing information on the hits per phylum and the average coverage per phylum. This file can only be generated if the`merged_classif` variable has been produced in the `*_contamination_check_merged_table.csv` table, as described above.
+If a set of prerequisite steps have been run (nt BLAST, nr Diamond, Uniprot Diamond, read mapping for coverage calculation, Tiara, nt Kraken and the creation of a BlobToolKit dataset), the pipeline tries to put together a phylum level combined classification of the input sequences. It first uses BlobToolKit's `bestsum_phylum`, then fills the gaps (caused by `no-hit` sequences) with results from Tiara and then the remaining gaps are filled with results from nt Kraken. The combined classification is in the `merged_classif` column. The `merged_classif_source` column says which tool's output the classification for each sequence is based on. The automated classification usually has some flaws in it but is still useful as a starting point for determining the phyla that the input sequences belong to.
+`*_phylum_counts_and_coverage.csv` - A CSV report containing information on the hits per phylum and the average coverage per phylum. This file can only be generated if the`merged_classif` variable has been produced in the `*_contamination_check_merged_table.csv` table, as described above.
 </details>
 
 Merge Tables merged the summary reports from a number of modules in order to create a single set of reports.

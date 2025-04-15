@@ -3,6 +3,44 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.0 - Red Speaker [14/04/2025]
+
+Release 2 of sanger-tol/ascc, updated with the [nf-core](https://nf-co.re/) template (v3.2).
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+### Enhancements & Fixes
+
+- Template Updated to 3.2 which moves us to NF-SCHEMA.
+- An update to the KMER counting scripts and related processes.
+- Re-organisation of .nf files into current standards.
+- Updates to scripts using the ncbi_rankedlineage new_taxdump.
+- Update to the GENERATE SAMPLESHEET script to convert from Python to Bash and add a counter
+- Updated GET_LARGEST_SCAFFOLD to replace shell block.
+- Update parse_fcsgx_result and autofilter python scripts to handle both the previous and new format of taxdump (format changed at the end of March, adding a new column for virus hierarchy).
+- main.nf has been cleaned so that pipeline prep code is now found in the PIPELINE_INITIALISATION subworkflow.
+- Blobtoolkit pipeline version has been updated to 0.7.1, this required changes to the input (GENERATE_SAMPLESHEET).
+- Added sample_id as an input param. Currently only used in a few places.
+- Adding contributors to the new format.
+- Patched MAKEBLAST_DB to use it's own --out flag rather that the current mkdir and mv solution.
+- Input reads now need to be specified as an array in the yaml.
+
+### Parameters
+
+| Old Parameter | New Parameter |
+| ------------- | ------------- |
+| -             | --sample_id   |
+
+### Dependencies
+
+| Module                        | Old Version                                                            | New Versions                                                           |
+| ----------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| PARSE_FCSGX_RESULT            | python:3.9, parse_fcsgx_result.py:1.0.0                                | python:3.9, parse_fcsgx_result.py:1.0.1                                |
+| AUTOFILTER_AND_CHECK_ASSEMBLY | python:3.9, autofilter.py:1.0.0, abnormal_contamination_check.py:1.0.0 | python:3.9, autofilter.py:1.0.0, abnormal_contamination_check.py:1.0.1 |
+| BLASTN                        | 2.14.0                                                                 | 2.16.0                                                                 |
+| MAKEBLASTDB                   | 2.14.0                                                                 | 2.16.0                                                                 |
+| GENERATE_SAMPLESHEET          | 1.0.0                                                                  | 1.1.0                                                                  |
+
 ## v0.1.0 - Red Book [14/02/2025]
 
 Initial release of sanger-tol/ascc, created with the [nf-core](https://nf-co.re/) template.

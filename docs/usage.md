@@ -6,14 +6,15 @@
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
-## YAML input
+## Input files
 
 ### Full YAML
 
 ```yaml
 scientific_name: scientific name of the assembled organism
 taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
-reads_path: path to a directory that contains gzipped reads
+reads_path:
+  - List of file paths
 reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
 pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
 pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
@@ -33,8 +34,20 @@ diamond_nr_database_path: path to a Diamond database made from NCBI nr protein s
 seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
 seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
 n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
-btk_yaml: path to a dummy YAML file that is provided with this pipeline, at "/ascc/assets/btk_draft.yaml". This is default and only serves to bypass GCA requirements of sanger-tol/blobtoolkit
 ```
+
+### Samplesheet
+
+```
+sample,assembly_type,assembly_file
+asccTinyTest_V2,PRIMARY,/path/to/primary.fa{.gz} - essential
+asccTinyTest_V2,HAPLO,/path/to/haplo.fa{.gz} - if available
+asccTinyTest_V2,MITO,/path/to/mitochondrion.fa{.gz} - if available
+asccTinyTest_V2,PLASTID,/path/to/plastid.fa{.gz} - if available
+
+```
+
+If running with no organellar files please also add the `--genomic_only` flag to your command.
 
 ## Running the pipeline
 
@@ -43,7 +56,8 @@ The typical command for running the pipeline is as follows:
 ```bash
 Usage:
 nextflow run sanger-tol/ascc \
-    --input {INPUT YAML} \
+    --input {SAMPLESHEET.CSV} \
+    -params-file {INPUT YAML}
     --outdir {OUTDIR} \
     [--include {COMMA SEPARATED LIST OF STEPS TO RUN}] \
     [--exclude {COMMA SEPARATED LIST OF STEPS TO EXCLUDE}] \
