@@ -20,6 +20,7 @@ include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipelin
 include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
 include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main'
 include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
+include { CHECK_NT_BLAST_TAXONOMY   } from '../../../modules/local/check/nt_blast_taxonomy/main'
 
 
 /*
@@ -210,6 +211,34 @@ workflow PIPELINE_INITIALISATION {
     } else {
         println "Using ORGANELLE specific include/exclude flags"
         organellar_exclude = params.organellar_exclude
+    }
+
+    //
+    // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
+    //`
+    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !exclude_workflow_steps_genomic.contains("nt_blast")
+    run_nt_blast_organellar = (include_workflow_steps_organellar.contains('nt_blast') || include_workflow_steps_organellar.contains('ALL')) && !exclude_workflow_steps_organellar.contains("nt_blast")
+
+    //
+    // MODULE: CHECK IF NT BLAST DATABASE HAS TAXONOMY INCLUDED (ONLY IF NT BLAST IS INCLUDED)
+    // This check is specifically for the nt BLAST database used in the EXTRACT_NT_BLAST subworkflow,
+    // not for other BLAST databases used elsewhere in the pipeline (VecScreen, PacBio barcodes check, etc.)
+    //
+    if (run_nt_blast_genomic || run_nt_blast_organellar) {
+        CHECK_NT_BLAST_TAXONOMY(
+            params.nt_database_path
+        )
+        ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
+
+        // Check the result and fail if needed
+        CHECK_NT_BLAST_TAXONOMY.out.status
+            .map { it.trim() }  // Trim any whitespace
+            .subscribe { status ->
+                if (status == "nt_database_taxonomy_files_not_found") {
+                    log.error "NT BLAST database taxonomy check failed"
+                    exit 1, "The NT BLAST database does not have taxonomy included. Please see the error message above for details."
+                }
+            }
     }
 
 
