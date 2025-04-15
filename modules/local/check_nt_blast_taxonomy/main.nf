@@ -27,8 +27,8 @@ process CHECK_NT_BLAST_TAXONOMY {
 
     stub:
     """
-    echo "nt_database_taxonomy_files_found"  // Default to success in stub mode
-    
+    echo "nt_database_taxonomy_files_found"
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: 3.9.0

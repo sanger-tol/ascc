@@ -1,12 +1,12 @@
 // MODULE IMPORT BLOCK
-include { BLAST_V5_DATABASE     } from '../../modules/local/blast_v5_database'
-include { BLAST_BLASTN as BLAST_BLASTN_MOD } from '../../modules/nf-core/blast/blastn'
+include { BLAST_V5_DATABASE                 } from '../../modules/local/blast_v5_database'
+include { BLAST_BLASTN as BLAST_BLASTN_MOD  } from '../../modules/nf-core/blast/blastn'
 
-include { SEQKIT_SLIDING        } from '../../modules/nf-core/seqkit/sliding/main'
-include { BLAST_CHUNK_TO_FULL   } from '../../modules/local/blast_chunk_to_full'
-include { REFORMAT_FULL_OUTFMT6 } from '../../modules/local/reformat_full_outfmt6'
-include { BLAST_GET_TOP_HITS    } from '../../modules/local/blast_get_top_hits'
-include { GET_LINEAGE_FOR_TOP   } from '../../modules/local/get_lineage_for_top'
+include { SEQKIT_SLIDING                    } from '../../modules/nf-core/seqkit/sliding/main'
+include { BLAST_CHUNK_TO_FULL               } from '../../modules/local/blast_chunk_to_full'
+include { REFORMAT_FULL_OUTFMT6             } from '../../modules/local/reformat_full_outfmt6'
+include { BLAST_GET_TOP_HITS                } from '../../modules/local/blast_get_top_hits'
+include { GET_LINEAGE_FOR_TOP               } from '../../modules/local/get_lineage_for_top'
 
 workflow EXTRACT_NT_BLAST {
     take:

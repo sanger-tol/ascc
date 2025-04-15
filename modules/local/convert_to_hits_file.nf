@@ -15,7 +15,7 @@ process CONVERT_TO_HITS_FILE {
     path "versions.yml",                emit: versions
 
     script:
-    def args    =   task.ext.args
+    def args    =   task.ext.args   ?: ""
     """
     convert_to_hits.py $blast_full $args
 
