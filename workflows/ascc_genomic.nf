@@ -204,7 +204,7 @@ workflow ASCC_GENOMIC {
                                     [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
-                                
+
         ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
                                 .map { it ->
                                     [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
