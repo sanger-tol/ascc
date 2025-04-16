@@ -25,7 +25,9 @@ def check_nt_blast_taxonomy(db_path):
     Returns True if all required taxonomy files are present, False otherwise.
     """
     taxonomy_files = ["taxdb.btd", "taxdb.bti"]
-    optional_files = ["taxonomy4blast.sqlite3"]  # This file might not be present in all installations
+    optional_files = [
+        "taxonomy4blast.sqlite3"
+    ]  # This file might not be present in all installations
 
     missing_files = []
     for file in taxonomy_files:
@@ -33,8 +35,12 @@ def check_nt_blast_taxonomy(db_path):
             missing_files.append(file)
 
     if missing_files:
-        sys.stderr.write(f"ERROR: The nt BLAST database at '{db_path}' does not have taxonomy included.\n")
-        sys.stderr.write(f"The following required taxonomy files are missing: {', '.join(missing_files)}\n")
+        sys.stderr.write(
+            f"ERROR: The nt BLAST database at '{db_path}' does not have taxonomy included.\n"
+        )
+        sys.stderr.write(
+            f"The following required taxonomy files are missing: {', '.join(missing_files)}\n"
+        )
         sys.stderr.write(
             "Please rebuild the nt BLAST database with taxonomy included using the -parse_seqids and -taxid_map options with makeblastdb,\n"
         )
@@ -60,7 +66,9 @@ def check_nt_blast_taxonomy(db_path):
             "The database may still work, but it's recommended to have all taxonomy files for optimal performance.\n"
         )
 
-    sys.stderr.write("nt BLAST database taxonomy files found. The database has taxonomy included.\n")
+    sys.stderr.write(
+        "nt BLAST database taxonomy files found. The database has taxonomy included.\n"
+    )
     return True
 
 
@@ -70,7 +78,9 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(DESCRIPTION),
     )
-    parser.add_argument("--db_path", required=True, help="Path to the nt BLAST database directory")
+    parser.add_argument(
+        "--db_path", required=True, help="Path to the nt BLAST database directory"
+    )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
 
     args = parser.parse_args()

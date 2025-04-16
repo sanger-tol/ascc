@@ -51,7 +51,9 @@ def main(args):
                 hits_to_report = "Strong"
                 continue
 
-            if args.skip_reporting_moderate_hits is False and line.startswith("Moderate"):
+            if args.skip_reporting_moderate_hits is False and line.startswith(
+                "Moderate"
+            ):
                 hits_to_report = "Moderate"
                 continue
 
@@ -82,14 +84,32 @@ if __name__ == "__main__":
         help="Path to a raw output file from NCBI VecScreen (from a run with the -f3 flag)",
         default=None,
     )
-    parser.add_argument("--skip_reporting_strong_hits", action="store_true", help="Skip reporting strong hits")
-    parser.add_argument("--skip_reporting_moderate_hits", action="store_true", help="Skip reporting moderate hits")
-    parser.add_argument("--skip_reporting_weak_hits", action="store_true", help="Skip reporting weak hits")
     parser.add_argument(
-        "--skip_reporting_suspect_hits", action="store_true", help="Skip reporting hits of suspect origin"
+        "--skip_reporting_strong_hits",
+        action="store_true",
+        help="Skip reporting strong hits",
     )
-    parser.add_argument("--skip_reporting_no_hits", action="store_true", help="Skip reporting no-hits")
-    parser.add_argument("--skip_reporting_errors", action="store_true", help="Skip reporting errors")
+    parser.add_argument(
+        "--skip_reporting_moderate_hits",
+        action="store_true",
+        help="Skip reporting moderate hits",
+    )
+    parser.add_argument(
+        "--skip_reporting_weak_hits",
+        action="store_true",
+        help="Skip reporting weak hits",
+    )
+    parser.add_argument(
+        "--skip_reporting_suspect_hits",
+        action="store_true",
+        help="Skip reporting hits of suspect origin",
+    )
+    parser.add_argument(
+        "--skip_reporting_no_hits", action="store_true", help="Skip reporting no-hits"
+    )
+    parser.add_argument(
+        "--skip_reporting_errors", action="store_true", help="Skip reporting errors"
+    )
     parser.add_argument("-v", "--version", action="version", version="1.0")
     args = parser.parse_args()
     main(args)

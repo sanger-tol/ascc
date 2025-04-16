@@ -48,7 +48,9 @@ def check_if_barcodes_exist_in_barcodes_fasta(barcodes_list, barcodes_fasta_path
     Checks if the specified barcodes exist in the barcode sequences FASTA file, exits with an error message if a barcode is not found
     """
     barcodes_fasta_data = gpf.l(barcodes_fasta_path)
-    barcode_names_in_fasta = [n.split(">")[1] for n in barcodes_fasta_data if n.startswith(">")]
+    barcode_names_in_fasta = [
+        n.split(">")[1] for n in barcodes_fasta_data if n.startswith(">")
+    ]
     for barcode in barcodes_list:
         if barcode not in barcode_names_in_fasta:
             sys.stderr.write(
@@ -65,7 +67,9 @@ def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_nam
 
     barcodes_list = []
     if len(pacbio_multiplexing_barcode_names) > 0:
-        barcodes_list = pacbio_multiplexing_barcode_names.strip("[").strip("]").split(",")
+        barcodes_list = (
+            pacbio_multiplexing_barcode_names.strip("[").strip("]").split(",")
+        )
 
     if os.path.isfile(barcodes_fasta_path) is False:
         sys.stderr.write(
@@ -74,7 +78,9 @@ def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_nam
         sys.exit(1)
 
     if len(barcodes_list) == 0:
-        barcodes_list = detect_barcodes_from_read_file_names(barcodes_fasta_path, pacbio_read_files)
+        barcodes_list = detect_barcodes_from_read_file_names(
+            barcodes_fasta_path, pacbio_read_files
+        )
 
     # Here script should break successfully
     if len(barcodes_list) == 0:
@@ -91,11 +97,17 @@ def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_nam
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-b", "--barcode_fasta", type=str, help="Pacbio Barcode FASTA file")
+    parser.add_argument(
+        "-b", "--barcode_fasta", type=str, help="Pacbio Barcode FASTA file"
+    )
 
-    parser.add_argument("-p", "--pacbio_reads", type=str, help="Pacbio Read FASTA.gz files")
+    parser.add_argument(
+        "-p", "--pacbio_reads", type=str, help="Pacbio Read FASTA.gz files"
+    )
 
-    parser.add_argument("-m", "--multiplex_name", type=str, help="Pacbio Multiplex Barcode Name")
+    parser.add_argument(
+        "-m", "--multiplex_name", type=str, help="Pacbio Multiplex Barcode Name"
+    )
 
     parser.add_argument("-v", action="version", version="1.0")
     args = parser.parse_args()

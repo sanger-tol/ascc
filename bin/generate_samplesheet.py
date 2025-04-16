@@ -21,7 +21,9 @@ def parse_args():
         type=str,
         help="Path containing the PacBio reads",
     )
-    parser.add_argument("reads_layout", type=str, help="Whether the reads are SINGLE or PAIRED end")
+    parser.add_argument(
+        "reads_layout", type=str, help="Whether the reads are SINGLE or PAIRED end"
+    )
     parser.add_argument("-v", "--version", action="version", version="1.2.0")
 
     return parser.parse_args()
@@ -35,7 +37,9 @@ def main():
     data_list.append("sample,datatype,datafile,library_layout\n")
 
     [
-        data_list.append(f"{args.sample_name},pacbio,{args.path_to_reads}{file},{args.reads_layout}\n")
+        data_list.append(
+            f"{args.sample_name},pacbio,{args.path_to_reads}{file},{args.reads_layout}\n"
+        )
         for file in os.listdir(args.path_to_reads)
         if file.endswith(".fasta.gz") or file.endswith(".fa.gz")
     ]

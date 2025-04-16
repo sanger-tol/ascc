@@ -35,7 +35,9 @@ def process_blast_results(blast_tsv, taxdump_data, output_csv, column_name_prefi
     """
     Function to parse the BLAST TSV results and combine with taxdump data
     """
-    with open(blast_tsv, "r") as blast_file, open(output_csv, "w", newline="") as output_file:
+    with open(blast_tsv, "r") as blast_file, open(
+        output_csv, "w", newline=""
+    ) as output_file:
         blast_reader = csv.reader(blast_file, delimiter="\t")
         fieldnames = [
             "scaff",
@@ -60,13 +62,26 @@ def process_blast_results(blast_tsv, taxdump_data, output_csv, column_name_prefi
             try:
                 # Actual format: qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore
                 if len(row) == 12:
-                    qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore = (
-                        row
-                    )
+                    (
+                        qseqid,
+                        sseqid,
+                        pident,
+                        length,
+                        mismatch,
+                        gapopen,
+                        qstart,
+                        qend,
+                        sstart,
+                        send,
+                        evalue,
+                        bitscore,
+                    ) = row
                     # Since taxid is missing, we'll use a placeholder
                     taxid = "0"
                 else:
-                    sys.stderr.write(f"Unexpected number of columns in row: {len(row)}\n")
+                    sys.stderr.write(
+                        f"Unexpected number of columns in row: {len(row)}\n"
+                    )
                     continue
 
                 # Create a default empty lineage with 10 elements (9 levels + empty)
@@ -111,12 +126,16 @@ if __name__ == "__main__":
     parser.add_argument("--blast_tsv", required=True, help="Input BLAST TSV file")
     parser.add_argument("--taxdump", required=True, help="Input rankedlineage.dmp file")
     parser.add_argument("--output_csv", required=True, help="Output CSV file")
-    parser.add_argument("--column_name_prefix", default="nt_", help="Column name prefix (default: nt_)")
+    parser.add_argument(
+        "--column_name_prefix", default="nt_", help="Column name prefix (default: nt_)"
+    )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
 
     args = parser.parse_args()
 
     taxdump_data = parse_taxdump(args.taxdump)
-    process_blast_results(args.blast_tsv, taxdump_data, args.output_csv, args.column_name_prefix)
+    process_blast_results(
+        args.blast_tsv, taxdump_data, args.output_csv, args.column_name_prefix
+    )
 
     sys.stderr.write(f"Output written to {args.output_csv}\n")
