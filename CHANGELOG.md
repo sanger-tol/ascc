@@ -24,12 +24,14 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 - Adding contributors to the new format.
 - Patched MAKEBLAST_DB to use it's own --out flag rather that the current mkdir and mv solution.
 - Input reads now need to be specified as an array in the yaml.
+- `ncbi_taxonomy_path` has been removed as the accession2taxid db is no longer necessary.
 
 ### Parameters
 
-| Old Parameter | New Parameter |
-| ------------- | ------------- |
-| -             | --sample_id   |
+| Old Parameter        | New Parameter |
+| -------------------- | ------------- |
+| -                    | --sample_id   |
+| --ncbi_taxonomy_path | REMOVED       |
 
 ### Dependencies
 

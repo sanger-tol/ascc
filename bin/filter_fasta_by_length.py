@@ -50,7 +50,9 @@ def main(args):
     if (
         args.cutoff == -1
     ):  # When this script is used as a part of a pipeline, -1 can be assigned as a value for the cutoff to indicate that no filtering should be done
-        sys.stderr.write(f"The input FASTA sequences ({fasta_path}) will not be filtered by length\n")
+        sys.stderr.write(
+            f"The input FASTA sequences ({fasta_path}) will not be filtered by length\n"
+        )
         # sys.exit(0)
     retained_seq_count = 0
     fasta_data = gpf.read_fasta_in_chunks(fasta_path)

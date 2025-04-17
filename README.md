@@ -53,7 +53,7 @@ There is a Biodiversity Genomics Academy video that introduces the ASCC pipeline
 
 Instructions for installing the databases can be found [here](./docs/databases.md).
 
-For testing the pipeline with tiny files, there is a script that downloads a small assembly FASTA file (a fragment of a Plasmodium genome) and small database files. The script can be found [here](./bin/download_tiny_database_test_files.sh). This is just for testing if running the pipeline works without a crash. These database files a database files are just small fragments of real databases, so they are not meant for production runs.
+For testing the pipeline with tiny files, there is a script that downloads a small assembly FASTA file (a fragment of a Plasmodium genome) and small database files. The script can be found [here](./assets/download_tiny_database_test_files.sh). This is just for testing if running the pipeline works without a crash. These database files a database files are just small fragments of real databases, so they are not meant for production runs.
 A run with these databases can be done using this test YAML file that specifies the paths to the database files: [tinytest.yaml](./assets/tinytest.yaml). Before use, you may need to edit the paths in the YAML file to replace relative paths with absolute paths.
 
 ## Usage

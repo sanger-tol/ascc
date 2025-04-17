@@ -1,5 +1,5 @@
-process REFORMAT_TO_HITS_FILE {
-    tag "$meta.id"
+process CHECK_NT_BLAST_TAXONOMY {
+    tag "${nt_blast_db_path.baseName}"
     label 'process_low'
 
     conda "conda-forge::python=3.9"
@@ -8,33 +8,31 @@ process REFORMAT_TO_HITS_FILE {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(blast_full)
+    path(nt_blast_db_path)
 
     output:
-    tuple val(meta), path("*csv"),      emit: hits_file
-    path "versions.yml",                emit: versions
+    path "versions.yml", emit: versions
+    stdout emit: status  // Capture the status message from stdout
 
     script:
-    def args    =   task.ext.args   ?: ""
     """
-    convert_to_hits.py $blast_full $args
+    check_nt_blast_taxonomy.py --db_path ${nt_blast_db_path}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        convert_to_hits: \$(convert_to_hits.py --version | cut -d' ' -f2)
+        check_nt_blast_taxonomy: \$(check_nt_blast_taxonomy.py --version | sed 's/^//')
     END_VERSIONS
     """
 
     stub:
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
-
     """
-    touch ${prefix}.csv
+    echo "nt_database_taxonomy_files_found"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        convert_to_hits: \$(convert_to_hits.py -v)
+        python: 3.9.0
+        check_nt_blast_taxonomy: 1.0.0
     END_VERSIONS
     """
 }

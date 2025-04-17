@@ -14,9 +14,8 @@ dimensionality_reduction_methods: ["pca", "random_trees"]
 nt_database_path: /lustre/scratch123/tol/teams/tola/users/ea10/pipeline_testing/20240704_blast_tiny_testdb/blastdb/
 nt_database_prefix: tiny_plasmodium_blastdb.fa
 nt_kraken_database_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/kraken2/kraken2/
-ncbi_accession_ids_folder: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/20240709_tiny_accession2taxid/
-ncbi_taxonomy_path: /lustre/scratch123/tol/resources/taxonomy/2025-03-23/new_taxdump
-ncbi_ranked_lineage_path: /lustre/scratch123/tol/resources/taxonomy/2025-03-23/new_taxdump/rankedlineage.dmp
+ncbi_taxonomy_path: /lustre/scratch123/tol/resources/taxonomy/latest/new_taxdump
+ncbi_ranked_lineage_path: /lustre/scratch123/tol/resources/taxonomy/latest/new_taxdump/rankedlineage.dmp
 busco_lineages_folder: /lustre/scratch123/tol/resources/busco/latest/
 busco_lineages: "diptera_odb10,insecta_odb10"
 fcs_gx_database_path: /lustre/scratch124/tol/projects/asg/sub_projects/ncbi_decon/0.4.0/gxdb/

@@ -36,6 +36,8 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", action="version", version="1.0")
     parser.add_argument("fasta_path", type=str, help="Path to input FASTA file")
     parser.add_argument("out_path", type=str, help="Path for output CSV file")
-    parser.add_argument("--kmer_size", type=int, help="kmer size (bp). Default: 7", default=7)
+    parser.add_argument(
+        "--kmer_size", type=int, help="kmer size (bp). Default: 7", default=7
+    )
     args = parser.parse_args()
     main(args.fasta_path, args.out_path, args.kmer_size)

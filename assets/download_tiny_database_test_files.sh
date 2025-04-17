@@ -5,7 +5,6 @@ cd ascc_tiny_test_databases
 curl https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz | tar xzf -
 curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd
 curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
-curl https://dp24.cog.sanger.ac.uk/ascc/accession2taxid.tar.gz | tar -xzf -
 mkdir ncbi_taxdump
 curl -L https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar -C ncbi_taxdump -xzf -
 mkdir FCS_gx
@@ -27,3 +26,7 @@ unzip SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip
 mv SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta pacbio_adaptors.fa
 rm -rf SMRTbell_Barcoded_Adapter_Plate_3.0_bc2001-bc2096.fasta_.zip __MACOSX
 cd ../
+mkdir diamond
+wget -c https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -O diamond/UP000000212_1234679_tax.dmnd
+mkdir vecscreen
+curl -L https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz | tar -C vecscreen -xzf -

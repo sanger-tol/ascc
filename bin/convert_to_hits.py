@@ -78,7 +78,11 @@ if __name__ == "__main__":
         description=textwrap.dedent(DESCRIPTION),
     )
     parser.add_argument("in_path", type=str, help="Path to Diamond BLASTX results")
-    parser.add_argument("diamond_database_title", type=str, help="Name of the Diamond database (e.g. nr or Uniprot)")
+    parser.add_argument(
+        "diamond_database_title",
+        type=str,
+        help="Name of the Diamond database (e.g. nr or Uniprot)",
+    )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     parser.add_argument("-o", "--out_prefix", type=str, help="Output Prefix")
     args = parser.parse_args()

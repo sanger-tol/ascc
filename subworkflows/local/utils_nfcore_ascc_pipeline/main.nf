@@ -20,6 +20,7 @@ include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipelin
 include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
 include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main'
 include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
+include { CHECK_NT_BLAST_TAXONOMY   } from '../../../modules/local/check/nt_blast_taxonomy/main'
 
 
 /*
@@ -169,8 +170,8 @@ workflow PIPELINE_INITIALISATION {
     //
     // LOGIC: SETS THE PROCESSES THAT WILL ACTUALLY RUN
     //
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
+    include_workflow_steps_genomic  = params.include ? params.include.split(",") : "ALL"
+    exclude_workflow_steps_genomic  = params.exclude ? params.exclude.split(",") : "NONE"
 
 
     //
@@ -178,12 +179,12 @@ workflow PIPELINE_INITIALISATION {
     //
     if (
         (
-            (include_workflow_steps.contains('coverage') && !exclude_workflow_steps.contains("coverage")) ||
-            (include_workflow_steps.contains('btk_busco') && !exclude_workflow_steps.contains("btk_busco"))
+            (include_workflow_steps_genomic.contains('coverage') && !exclude_workflow_steps_genomic.contains("coverage")) ||
+            (include_workflow_steps_genomic.contains('btk_busco') && !exclude_workflow_steps_genomic.contains("btk_busco"))
         ) || (
-            include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("btk_busco") && !exclude_workflow_steps.contains("coverage")
+            include_workflow_steps_genomic.contains('ALL') && !exclude_workflow_steps_genomic.contains("btk_busco") && !exclude_workflow_steps_genomic.contains("coverage")
         ) || (
-            include_workflow_steps.contains('ALL')
+            include_workflow_steps_genomic.contains('ALL')
         )
     ) {
         ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
@@ -198,18 +199,46 @@ workflow PIPELINE_INITIALISATION {
     //
     if ( !params.organellar_include && params.include ) {
         println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_include = params.include
+        include_workflow_steps_organellar = params.include
     } else {
         println "Using ORGANELLE specific include/exclude flags"
-        organellar_include = params.organellar_include
+        include_workflow_steps_organellar = params.organellar_include ? params.organellar_include.split(",") : "ALL"
     }
 
     if ( !params.organellar_exclude && params.exclude ) {
         println "Using GENOMIC specific include/exclude flags (make sure you are supposed to be!)"
-        organellar_exclude = params.exclude
+        exclude_workflow_steps_organellar = exclude_workflow_steps_genomic
     } else {
         println "Using ORGANELLE specific include/exclude flags"
-        organellar_exclude = params.organellar_exclude
+        exclude_workflow_steps_organellar = params.organellar_exclude ? params.organellar_exclude.split(",") : "ALL"
+    }
+
+    //
+    // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
+    //`
+    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !include_workflow_steps_genomic.contains("nt_blast")
+    run_nt_blast_organellar = (include_workflow_steps_organellar.contains('nt_blast') || include_workflow_steps_organellar.contains('ALL')) && !exclude_workflow_steps_organellar.contains("nt_blast")
+
+    //
+    // MODULE: CHECK IF NT BLAST DATABASE HAS TAXONOMY INCLUDED (ONLY IF NT BLAST IS INCLUDED)
+    // This check is specifically for the nt BLAST database used in the EXTRACT_NT_BLAST subworkflow,
+    // not for other BLAST databases used elsewhere in the pipeline (VecScreen, PacBio barcodes check, etc.)
+    //
+    if (run_nt_blast_genomic || run_nt_blast_organellar) {
+        CHECK_NT_BLAST_TAXONOMY(
+            params.nt_database_path
+        )
+        ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
+
+        // Check the result and fail if needed
+        CHECK_NT_BLAST_TAXONOMY.out.status
+            .map { it.trim() }  // Trim any whitespace
+            .subscribe { status ->
+                if (status == "nt_database_taxonomy_files_not_found") {
+                    log.error "NT BLAST database taxonomy check failed"
+                    exit 1, "The NT BLAST database does not have taxonomy included. Please see the error message above for details."
+                }
+            }
     }
 
 
@@ -221,10 +250,10 @@ workflow PIPELINE_INITIALISATION {
     barcodes_file           = barcode_data_file
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_path
-    include_steps           = include_workflow_steps
-    exclude_steps           = exclude_workflow_steps
-    organellar_include
-    organellar_exclude
+    include_steps           = include_workflow_steps_genomic
+    exclude_steps           = exclude_workflow_steps_genomic
+    organellar_include      = include_workflow_steps_organellar
+    organellar_exclude      = exclude_workflow_steps_organellar
     collected_reads         = ch_grabbed_reads_path
     versions                = ch_versions
 }
