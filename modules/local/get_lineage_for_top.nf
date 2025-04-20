@@ -9,7 +9,6 @@ process GET_LINEAGE_FOR_TOP {
 
     input:
     tuple val(meta), path(tophits)
-    path( accessions_folder )
     path( ncbi_lineage_path )
 
     output:
@@ -18,23 +17,23 @@ process GET_LINEAGE_FOR_TOP {
 
     script:
     """
-    get_lineage_for_top.py ${tophits} ./ ${accessions_folder} ${ncbi_lineage_path} --column_name_prefix nt
+    get_lineage_for_top.py --blast_tsv ${tophits} --taxdump ${ncbi_lineage_path} --output_csv ./${meta.id}_BLAST_results_with_lineage.csv --column_name_prefix nt_
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py -v)
+        get_lineage_for_top: \$(get_lineage_for_top.py --version | sed 's/^//')
     END_VERSIONS
     """
 
     stub:
     """
-    touch full_coords.tsv
+    touch ${meta.id}_BLAST_results_with_lineage.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        get_lineage_for_top: \$(get_lineage_for_top.py -v)
+        get_lineage_for_top: 1.0.0
     END_VERSIONS
     """
 }
