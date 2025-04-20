@@ -1,0 +1,387 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Trailing Ns Table Test</title>
+                <style>
+                    body {
+                        font-family: sans-serif;
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                        margin: 1em 0;
+                    }
+                    th {
+                        background-color: #edf2f7;
+                        color: #2c5282;
+                        font-weight: bold;
+                        text-align: left;
+                        padding: 8px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    td {
+                        padding: 8px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f7fafc;
+                    }
+                    .table-responsive {
+                        width: 100%;
+                        overflow-x: auto;
+                        display: block;
+                        margin-bottom: 1em;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 5px;
+                        padding-bottom: 15px;
+                    }
+                    h4 {
+                        color: #2c5282;
+                        margin-top: 1.5em;
+                        border-bottom: 1px solid #e2e8f0;
+                        padding-bottom: 0.3em;
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Trailing Ns Table Test</h1>
+                
+        
+        <h4>Warnings - High N Content</h4>
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    <table border="1" class="dataframe table table-striped" id="trim_ns_warnings_table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Sequence ID</th>
+      <th>Percentage of Ns</th>
+      <th>Total Length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>seq_044</td>
+      <td>86.2 %</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>seq_381</td>
+      <td>91.68 %</td>
+      <td>50000</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+            </div>
+        </div>
+        
+        <h4>Trimming Actions</h4>
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    <table border="1" class="dataframe table table-striped" id="trim_ns_table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Type</th>
+      <th>Sequence ID</th>
+      <th>Start</th>
+      <th>End</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_286</td>
+      <td>46216</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_286</td>
+      <td>46216</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_292</td>
+      <td>1</td>
+      <td>4815</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_292</td>
+      <td>1</td>
+      <td>4815</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_305</td>
+      <td>19521</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_305</td>
+      <td>19521</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_307</td>
+      <td>1</td>
+      <td>1420</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_381</td>
+      <td>4157</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_381</td>
+      <td>4157</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_382</td>
+      <td>1</td>
+      <td>13256</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_382</td>
+      <td>1</td>
+      <td>13256</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_461</td>
+      <td>43624</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_461</td>
+      <td>43624</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_462</td>
+      <td>1</td>
+      <td>18623</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_526</td>
+      <td>30822</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_526</td>
+      <td>30822</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_527</td>
+      <td>1</td>
+      <td>23221</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_527</td>
+      <td>1</td>
+      <td>23221</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_569</td>
+      <td>43739</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_569</td>
+      <td>43739</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_570</td>
+      <td>1</td>
+      <td>22538</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_570</td>
+      <td>1</td>
+      <td>22538</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_672</td>
+      <td>22984</td>
+      <td>23083</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3135</td>
+      <td>33894</td>
+      <td>33993</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_3137</td>
+      <td>14434</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3146</td>
+      <td>39421</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_3146</td>
+      <td>39421</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3149</td>
+      <td>1</td>
+      <td>10431</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_3149</td>
+      <td>1</td>
+      <td>10431</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3152</td>
+      <td>26520</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_3152</td>
+      <td>26520</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3157</td>
+      <td>1</td>
+      <td>14099</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_3157</td>
+      <td>1</td>
+      <td>14099</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3159</td>
+      <td>41510</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_3159</td>
+      <td>41510</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3162</td>
+      <td>1</td>
+      <td>12285</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_3162</td>
+      <td>1</td>
+      <td>12285</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3167</td>
+      <td>36708</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_3167</td>
+      <td>36708</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3169</td>
+      <td>1</td>
+      <td>28676</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_3169</td>
+      <td>1</td>
+      <td>28676</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3172</td>
+      <td>31597</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>REVCLIP:</td>
+      <td>seq_3172</td>
+      <td>31597</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3173</td>
+      <td>1</td>
+      <td>25285</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3173</td>
+      <td>49797</td>
+      <td>50000</td>
+    </tr>
+    <tr>
+      <td>FWDCLIP:</td>
+      <td>seq_3173</td>
+      <td>1</td>
+      <td>25285</td>
+    </tr>
+    <tr>
+      <td>TRIM:</td>
+      <td>seq_3174</td>
+      <td>1</td>
+      <td>1076</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+            </div>
+        </div>
+        
+            </body>
+            </html>
+            

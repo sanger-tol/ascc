@@ -77,6 +77,7 @@ workflow ASCC_GENOMIC {
     log.info "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
     log.info "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
+    // Removed intermediate variable definitions to avoid scope issues
 
     //reads = CollectReads(reads_list)
 
@@ -102,7 +103,8 @@ workflow ASCC_GENOMIC {
     if ( !exclude_workflow_steps.contains("essentials")) {
 
         ESSENTIAL_JOBS(
-            ch_samplesheet
+            ch_samplesheet,
+            (include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-adaptor")
         )
         ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
@@ -400,9 +402,19 @@ workflow ASCC_GENOMIC {
                                     [[id: it[0].id, process: "FCSGX result"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
+        
+        // Capture raw report files for HTML report
+        ch_fcsgx_report_txt = RUN_FCSGX.out.fcsgx_report // Corrected property name
+                                .map { meta, file -> [meta.id, file] }
+                                .ifEmpty { [[],[]] }
+        ch_fcsgx_taxonomy_rpt = RUN_FCSGX.out.taxonomy_report
+                                .map { meta, file -> [meta.id, file] }
+                                .ifEmpty { [[],[]] }
 
     } else {
         ch_fcsgx         = Channel.of( [[],[]] )
+        ch_fcsgx_report_txt = Channel.of( [[],[]] )
+        ch_fcsgx_taxonomy_rpt = Channel.of( [[],[]] )
     }
 
 
@@ -904,6 +916,7 @@ workflow ASCC_GENOMIC {
         ch_autofilter_results = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
         ch_merged_table = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
         ch_fasta_sanitation_log = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
+        ch_kmers_results = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
         
         // Only access workflow outputs if the workflow was actually run
         if ((include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
@@ -946,6 +959,12 @@ workflow ASCC_GENOMIC {
             ch_fasta_length_filtering_log = Channel.of([[id: "chlamydomonas_dataset_PRIMARY"],[]])
         }
         
+        // Get kmers results if the kmers workflow was run
+        if ((include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("kmers")) {
+            ch_kmers_results = GET_KMERS_PROFILE.out.kmers_results
+        }
+        
         // Create channels for the input samplesheet and YAML parameters file
         ch_samplesheet = Channel.fromPath(params.input)
         
@@ -967,6 +986,7 @@ workflow ASCC_GENOMIC {
         log.info "ch_merged_table: ${ch_merged_table.dump()}"
         log.info "ch_fasta_sanitation_log: ${ch_fasta_sanitation_log.dump()}"
         log.info "ch_fasta_length_filtering_log: ${ch_fasta_length_filtering_log.dump()}"
+        log.info "ch_kmers_results: ${ch_kmers_results.dump()}"
         log.info "ch_samplesheet: ${ch_samplesheet.dump()}"
         log.info "ch_params_file: ${ch_params_file.dump()}"
         
@@ -984,13 +1004,15 @@ workflow ASCC_GENOMIC {
             ch_vecscreen_results,
             ch_autofilter_results,
             ch_merged_table,
-            GET_KMERS_PROFILE.out.kmers_results,
+            ch_kmers_results,
             ch_reference_file,
             ch_fasta_sanitation_log,
             ch_fasta_length_filtering_log,
             ch_jinja_template,
             ch_samplesheet,
-            ch_params_file
+            ch_params_file,
+            ch_fcsgx_report_txt,      // Pass FCS-GX report txt
+            ch_fcsgx_taxonomy_rpt     // Pass FCS-GX taxonomy rpt
         )
         ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }

@@ -56,8 +56,16 @@ def prepare_report_data(
     coverage_per_phylum_data=None,
     kmers_results=None,
     fasta_sanitation_data=None,
+    # FCS-GX report data
+    fcs_gx_report_content=None,         # Original FCS-GX report content arg
+    fcs_gx_taxonomy_content=None,       # Original FCS-GX taxonomy content arg
+    fcs_gx_report_metadata=None,        # New FCS-GX report metadata arg
+    fcs_gx_report_table=None,           # New FCS-GX report table arg
+    fcs_gx_taxonomy_metadata=None,      # New FCS-GX taxonomy metadata arg
+    fcs_gx_taxonomy_table=None,         # New FCS-GX taxonomy table arg
     timestamp=None,
     version="1.0",
+    meta=None,                          # Meta parameter
 ):
     """Prepare data for the HTML report.
 
@@ -76,6 +84,8 @@ def prepare_report_data(
         coverage_per_phylum_data: Coverage per phylum data
         kmers_results: K-mer dimensionality reduction results
         fasta_sanitation_data: FASTA sanitation log data
+        fcs_gx_report_content: Content of the FCS-GX report text file
+        fcs_gx_taxonomy_content: Content of the FCS-GX taxonomy report file
         timestamp: Timestamp for the report
         version: Version of the pipeline
 
@@ -104,8 +114,17 @@ def prepare_report_data(
         "coverage_per_phylum_data": coverage_per_phylum_data,
         "kmers_results": kmers_results,
         "fasta_sanitation_data": fasta_sanitation_data,
+        # Original FCS-GX content (for backward compatibility)
+        "fcs_gx_report_content": fcs_gx_report_content,
+        "fcs_gx_taxonomy_content": fcs_gx_taxonomy_content,
+        # New formatted FCS-GX data
+        "fcs_gx_report_metadata": fcs_gx_report_metadata,
+        "fcs_gx_report_table": fcs_gx_report_table,
+        "fcs_gx_taxonomy_metadata": fcs_gx_taxonomy_metadata,
+        "fcs_gx_taxonomy_table": fcs_gx_taxonomy_table,
         "timestamp": timestamp,
         "version": version,
+        "meta": meta,
     }
 
     return data

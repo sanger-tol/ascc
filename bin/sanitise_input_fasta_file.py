@@ -98,12 +98,24 @@ def parse_args(argv=None):
         help="Maximum number of detailed changes to report (0 for none)",
         default=100,
     )
+    parser.add_argument(
+        "--max_header_len",
+        type=int,
+        help="Maximum allowed length for FASTA headers (excluding '>'). If exceeded, script will exit with error.",
+        default=0,  # Default 0 means no check
+    )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args(argv)
 
 
 def main(
-    fasta_path, delimiter, allow_duplicate_headers, keep_n_sequences=False, log_file=None, max_detailed_changes=100
+    fasta_path,
+    delimiter,
+    allow_duplicate_headers,
+    keep_n_sequences=False,
+    log_file=None,
+    max_detailed_changes=100,
+    max_header_len=0, 
 ):
     # Initialize log statistics
     log_stats = {
@@ -115,6 +127,7 @@ def main(
         "non_atgc_bases_replaced": 0,
         "all_n_sequences_skipped": 0,
         "duplicate_headers_detected": 0,
+        "headers_exceeding_max_length": 0,
         "has_issues": False,
         "detailed_changes": [],
     }
@@ -168,6 +181,30 @@ def main(
                     shortened_header = original_header.split()[0]
                 else:
                     shortened_header = original_header.split(delimiter)[0]
+
+                # Maximum header length check ---
+                if max_header_len > 0:
+                    header_content = shortened_header[1:] # Exclude '>'
+                    if len(header_content) > max_header_len:
+                        log_stats["headers_exceeding_max_length"] += 1
+                        log_stats["has_issues"] = True
+                        
+                        # Only log details for a limited number of headers
+                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
+                            log_stats["detailed_changes"].append({
+                                "header": header_content,
+                                "change_type": "header_too_long",
+                                "length": len(header_content),
+                                "max_allowed": max_header_len,
+                                "details": f"Header exceeds maximum allowed length of {max_header_len} characters"
+                            })
+                            
+                            # Print the first few offending headers to stderr
+                            if log_stats["headers_exceeding_max_length"] <= 5:
+                                sys.stderr.write(
+                                    f"ERROR: FASTA header exceeds maximum allowed length of {max_header_len} characters: "
+                                    f"'{header_content}' (length {len(header_content)})\n"
+                                )
 
                 # Check if header was shortened
                 if shortened_header != original_header:
@@ -230,7 +267,8 @@ def main(
                         if log_file:
                             with open(log_file, "w") as f:
                                 json.dump(log_stats, f, indent=2)
-                        sys.exit(1)
+                        # Use exit code 125 for validation failures - this will be used by Nextflow to avoid retries
+                        sys.exit(125)
                     else:
                         log_stats["duplicate_headers_detected"] += 1
                         log_stats["has_issues"] = True
@@ -292,6 +330,19 @@ def main(
                     headers_with_commas
                 )
             )
+        
+        # Check if any headers exceeded the maximum length and exit with error if so
+        if max_header_len > 0 and log_stats["headers_exceeding_max_length"] > 0:
+            error_message = f"ERROR: {log_stats['headers_exceeding_max_length']} FASTA header(s) exceed maximum allowed length of {max_header_len} characters (required for FCS-adaptor)."
+            sys.stderr.write(error_message + "\n")
+            log_stats["error"] = error_message
+            
+            # Update log file before exiting if specified
+            if log_file:
+                with open(log_file, "w") as f:
+                    json.dump(log_stats, f, indent=2)
+            # Use exit code 125 for validation failures - this will be used by Nextflow to avoid retries
+            sys.exit(125)
 
     # Add summary if we limited the detailed changes
     if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) >= max_detailed_changes:
@@ -322,4 +373,5 @@ if __name__ == "__main__":
         args.keep_n_sequences,
         args.log_file,
         args.max_detailed_changes,
+        args.max_header_len,
     )

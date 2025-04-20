@@ -8,7 +8,8 @@ include { TRAILINGNS_CHECK                              } from '../../subworkflo
 workflow ESSENTIAL_JOBS {
 
     take:
-    input_ref   // Channel [ val(meta), path(file) ]
+    input_ref               // Channel [ val(meta), path(file) ]
+    perform_fcs_header_check // Boolean flag
 
     main:
     ch_versions             = Channel.empty()
@@ -34,7 +35,8 @@ workflow ESSENTIAL_JOBS {
     // MODULE: FILTER THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A CONFIG VARIABLE
     //
     FILTER_FASTA(
-        new_input_fasta
+        new_input_fasta,
+        perform_fcs_header_check // Pass the boolean flag
     )
     ch_versions             = ch_versions.mix(FILTER_FASTA.out.versions)
 

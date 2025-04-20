@@ -45,7 +45,9 @@ workflow RUN_FCSGX {
     ch_versions     = ch_versions.mix( PARSE_FCSGX_RESULT.out.versions )
 
     emit:
-    fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
-    versions       = ch_versions.ifEmpty(null)
+    fcsgxresult     = PARSE_FCSGX_RESULT.out.fcsgxresult
+    fcsgx_report    = FCSGX_RUNGX.out.fcsgx_report      // Emit the raw report txt
+    taxonomy_report = FCSGX_RUNGX.out.taxonomy_report   // Emit the raw taxonomy rpt
+    versions        = ch_versions.ifEmpty(null)
 
 }

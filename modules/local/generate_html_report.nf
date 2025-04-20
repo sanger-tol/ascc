@@ -21,7 +21,9 @@ process GENERATE_HTML_REPORT {
           path(kmers_results, stageAs: "kmers/*"),
           path(reference_fasta),
           path(fasta_sanitation_log, stageAs: "fasta_sanitation/*"),
-          path(fasta_length_filtering_log, stageAs: "fasta_length_filtering/*")
+          path(fasta_length_filtering_log, stageAs: "fasta_length_filtering/*"),
+          path(fcs_gx_report_txt, stageAs: "fcsgx/*"),      // Add FCS-GX report txt input
+          path(fcs_gx_taxonomy_rpt, stageAs: "fcsgx/*")     // Add FCS-GX taxonomy rpt input
     path(jinja_template)
     path(samplesheet)
     path(params_file)
@@ -44,6 +46,9 @@ process GENERATE_HTML_REPORT {
     mkdir -p report/site/templates
     cp $jinja_template report/site/templates/
     
+    # Create kmers directory if it doesn't exist
+    mkdir -p kmers
+    
     # Debug: List the contents of the kmers directory
     echo "Contents of kmers directory:"
     ls -la kmers/
@@ -65,6 +70,9 @@ process GENERATE_HTML_REPORT {
         --samplesheet $samplesheet \\
         ${params_file ? "--params_file $params_file" : ""} \\
         $params_json_arg \\
+        --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt \\
+        --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt \\
+        --pipeline_version ${workflow.manifest.version} \\
         --output_prefix $prefix
     
     cat <<-END_VERSIONS > versions.yml
@@ -86,7 +94,7 @@ process GENERATE_HTML_REPORT {
 
     
     # Run the report generation script (stub mode)
-    echo "Would run python $baseDir/bin/generate_html_report.py with samplesheet $samplesheet ${params_file ? "and params file $params_file" : ""} and FASTA sanitation logs"
+    echo "Would run python $baseDir/bin/generate_html_report.py --pipeline_version ${workflow.manifest.version} --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt with samplesheet $samplesheet ${params_file ? "and params file $params_file" : ""} and FASTA sanitation logs"
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

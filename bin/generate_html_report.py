@@ -15,6 +15,8 @@ from html_report_loaders import (
     load_autofiltering_results,
     load_fasta_sanitation_log,
     load_fcsgx_results,
+    load_fcsgx_report_as_table,
+    load_fcsgx_taxonomy_as_table,
     load_kmer_dim_reduction_results,
     process_reference_file_line_by_line,
     find_files_in_dir,
@@ -39,8 +41,11 @@ def main():
     parser.add_argument("--samplesheet", help="Input samplesheet CSV file")
     parser.add_argument("--params_file", help="Input parameters YAML file")
     parser.add_argument("--params_json", help="JSON string containing the params object")
+    parser.add_argument("--fcs_gx_report_txt", help="Path to FCS-GX report text file") # Add FCS-GX report arg
+    parser.add_argument("--fcs_gx_taxonomy_rpt", help="Path to FCS-GX taxonomy report file") # Add FCS-GX taxonomy arg
     parser.add_argument("--output_prefix", default="report", help="Prefix for the output HTML file")
-    parser.add_argument("--version", action="version", version="1.0")
+    parser.add_argument("--pipeline_version", required=True, help="Version of the ASCC pipeline") # Added pipeline version arg
+    parser.add_argument("--version", action="version", version="1.0") # Kept script version arg
 
     args = parser.parse_args()
 
@@ -67,15 +72,17 @@ def main():
 
     trim_ns_file = None
     if args.trim_ns_dir and os.path.exists(args.trim_ns_dir):
-        trim_ns_files = find_files_in_dir(args.trim_ns_dir, extension=".txt")
+        # Remove extension=".txt" to find any file
+        trim_ns_files = find_files_in_dir(args.trim_ns_dir)
         if trim_ns_files:
-            trim_ns_file = trim_ns_files[0]
+            trim_ns_file = trim_ns_files[0] # Take the first file found
 
     vecscreen_file = None
     if args.vecscreen_dir and os.path.exists(args.vecscreen_dir):
-        vecscreen_files = find_files_in_dir(args.vecscreen_dir, extension=".txt")
+        # Remove extension=".txt" to find any file
+        vecscreen_files = find_files_in_dir(args.vecscreen_dir)
         if vecscreen_files:
-            vecscreen_file = vecscreen_files[0]
+            vecscreen_file = vecscreen_files[0] # Take the first file found
 
     autofilter_file = None
     if args.autofilter_dir and os.path.exists(args.autofilter_dir):
@@ -172,10 +179,60 @@ def main():
         if merged_table_file
         else "No contamination check merged table found."
     )
-    kmers_results = (
-        load_kmer_dim_reduction_results(args.kmers_dir) if args.kmers_dir and os.path.exists(args.kmers_dir) else None
-    )
+    # Handle kmers directory more robustly
+    kmers_results = None
+    if args.kmers_dir:
+        if os.path.exists(args.kmers_dir) and os.path.isdir(args.kmers_dir):
+            # Check if directory is empty
+            if os.listdir(args.kmers_dir):
+                kmers_results = load_kmer_dim_reduction_results(args.kmers_dir)
+            else:
+                print(f"Kmers directory is empty: {args.kmers_dir}", file=sys.stderr)
+        else:
+            print(f"Kmers directory not found or not a directory: {args.kmers_dir}", file=sys.stderr)
 
+    # Parse FCS-GX report files into metadata and tables
+    fcs_gx_report_metadata = None
+    fcs_gx_report_table = None
+    if args.fcs_gx_report_txt and os.path.exists(args.fcs_gx_report_txt):
+        print(f"Processing FCS-GX report file: {args.fcs_gx_report_txt}", file=sys.stderr)
+        fcs_gx_report_metadata, fcs_gx_report_table = load_fcsgx_report_as_table(args.fcs_gx_report_txt)
+        if fcs_gx_report_metadata:
+            print(f"Successfully extracted FCS-GX report metadata", file=sys.stderr)
+        if fcs_gx_report_table:
+            print(f"Successfully converted FCS-GX report to HTML table", file=sys.stderr)
+    
+    fcs_gx_taxonomy_metadata = None
+    fcs_gx_taxonomy_table = None
+    if args.fcs_gx_taxonomy_rpt and os.path.exists(args.fcs_gx_taxonomy_rpt):
+        print(f"Processing FCS-GX taxonomy file: {args.fcs_gx_taxonomy_rpt}", file=sys.stderr)
+        fcs_gx_taxonomy_metadata, fcs_gx_taxonomy_table = load_fcsgx_taxonomy_as_table(args.fcs_gx_taxonomy_rpt)
+        if fcs_gx_taxonomy_metadata:
+            print(f"Successfully extracted FCS-GX taxonomy metadata", file=sys.stderr)
+        if fcs_gx_taxonomy_table:
+            print(f"Successfully converted FCS-GX taxonomy to HTML table", file=sys.stderr)
+    
+    # For backward compatibility, also keep the raw content
+    fcs_gx_report_content = None
+    if args.fcs_gx_report_txt and os.path.exists(args.fcs_gx_report_txt):
+        try:
+            with open(args.fcs_gx_report_txt, 'r') as f:
+                fcs_gx_report_content = f.read()
+        except Exception as e:
+            print(f"Error reading FCS-GX report file {args.fcs_gx_report_txt}: {e}", file=sys.stderr)
+
+    fcs_gx_taxonomy_content = None
+    if args.fcs_gx_taxonomy_rpt and os.path.exists(args.fcs_gx_taxonomy_rpt):
+        try:
+            with open(args.fcs_gx_taxonomy_rpt, 'r') as f:
+                fcs_gx_taxonomy_content = f.read()
+        except Exception as e:
+            print(f"Error reading FCS-GX taxonomy file {args.fcs_gx_taxonomy_rpt}: {e}", file=sys.stderr)
+
+
+    # Create meta object from output_prefix
+    meta = {"id": args.output_prefix}
+    
     # Prepare data for the report
     data = prepare_report_data(
         reference_summary=reference_summary,
@@ -191,8 +248,17 @@ def main():
         contamination_check_merged_table_data=contamination_check_merged_table_data,
         kmers_results=kmers_results,
         fasta_sanitation_data=fasta_sanitation_data,
+        # Original FCS-GX content (for backward compatibility)
+        fcs_gx_report_content=fcs_gx_report_content,
+        fcs_gx_taxonomy_content=fcs_gx_taxonomy_content,
+        # New formatted FCS-GX data
+        fcs_gx_report_metadata=fcs_gx_report_metadata,
+        fcs_gx_report_table=fcs_gx_report_table,
+        fcs_gx_taxonomy_metadata=fcs_gx_taxonomy_metadata,
+        fcs_gx_taxonomy_table=fcs_gx_taxonomy_table,
         timestamp=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
-        version="1.0",
+        version=args.pipeline_version, # Use the passed pipeline version
+        meta=meta,                     # Pass meta object
     )
 
     # Render the HTML report
