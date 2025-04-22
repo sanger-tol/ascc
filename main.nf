@@ -126,9 +126,10 @@ workflow {
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
+    include_workflow_steps  = params.organellar_include ? params.organellar_include.split(",") : "ALL"
     exclude_workflow_steps  = params.organellar_exclude ? params.organellar_exclude.split(",") : "NONE"
 
-    if ( exclude_workflow_steps.contains('ALL') ) {
+    if ( exclude_workflow_steps.contains('ALL') || include_workflow_steps.contains('NONE') ) {
         log.warn "ORGANELLAR SUBWORKFLOW: HAS BEEN SKIPPED: $exclude_workflow_steps"
 
     } else {
