@@ -25,6 +25,7 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 - Patched MAKEBLAST_DB to use it's own --out flag rather that the current mkdir and mv solution.
 - Input reads now need to be specified as an array in the yaml.
 - `ncbi_taxonomy_path` has been removed as the accession2taxid db is no longer necessary.
+- `genomic_only` has been removed, functionality can be replicated with `--organellar_exclude ALL`.
 
 ### Parameters
 
@@ -32,6 +33,7 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 | -------------------- | ------------- |
 | -                    | --sample_id   |
 | --ncbi_taxonomy_path | REMOVED       |
+| --genomic_only       | REMOVED       |
 
 ### Dependencies
 

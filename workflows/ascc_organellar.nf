@@ -57,8 +57,8 @@ workflow ASCC_ORGANELLAR {
     //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
     //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
     //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
+    include_workflow_steps  = params.organellar_include ? params.organellar_include.split(",") : "ALL"
+    exclude_workflow_steps  = params.organellar_exclude ? params.organellar_exclude.split(",") : "NONE"
 
     full_list               = [
         "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond",
@@ -69,8 +69,8 @@ workflow ASCC_ORGANELLAR {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
-    log.info "ORGANELLAR RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    log.info "ORGANELLAR RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
+    log.info "ORGANELLAR SUBWORKFLOW: -- INCLUDE STEPS INC.: $include_workflow_steps"
+    log.info "ORGANELLAR SUBWORKFLOW: -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
 
     //

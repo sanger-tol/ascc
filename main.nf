@@ -111,24 +111,27 @@ workflow {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
-    SANGERTOL_ASCC_GENOMIC (
-        PIPELINE_INITIALISATION.out.main_genomes,
-        PIPELINE_INITIALISATION.out.organellar_genomes,
-        PIPELINE_INITIALISATION.out.include_steps,
-        PIPELINE_INITIALISATION.out.exclude_steps,
-        PIPELINE_INITIALISATION.out.fcs_gx_database,
-        PIPELINE_INITIALISATION.out.collected_reads,
-        Channel.of(params.scientific_name),
-        PIPELINE_INITIALISATION.out.pacbio_db,
-    )
+    // SANGERTOL_ASCC_GENOMIC (
+    //     PIPELINE_INITIALISATION.out.main_genomes,
+    //     PIPELINE_INITIALISATION.out.organellar_genomes,
+    //     PIPELINE_INITIALISATION.out.include_steps,
+    //     PIPELINE_INITIALISATION.out.exclude_steps,
+    //     PIPELINE_INITIALISATION.out.fcs_gx_database,
+    //     PIPELINE_INITIALISATION.out.collected_reads,
+    //     Channel.of(params.scientific_name),
+    //     PIPELINE_INITIALISATION.out.pacbio_db,
+    // )
 
 
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
+    exclude_workflow_steps  = params.organellar_exclude ? params.organellar_exclude.split(",") : "NONE"
 
-    if ( !params.genomic_only ) {
+    if ( exclude_workflow_steps.contains('ALL') ) {
+        log.warn "ORGANELLAR SUBWORKFLOW: HAS BEEN SKIPPED: $exclude_workflow_steps"
 
+    } else {
         SANGERTOL_ASCC_ORGANELLAR (
             PIPELINE_INITIALISATION.out.organellar_genomes,
             PIPELINE_INITIALISATION.out.organellar_include,
