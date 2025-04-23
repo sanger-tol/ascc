@@ -84,9 +84,13 @@ def parse_args(argv=None):
         help="Delimiter string for splitting FASTA headers. Default: any whitespace character",
         default="",
     )
-    parser.add_argument("--allow_duplicate_headers", dest="allow_duplicate_headers", action="store_true")
     parser.add_argument(
-        "--keep_n_sequences", action="store_true", help="Keep sequences that are all Ns (default: False)"
+        "--allow_duplicate_headers", dest="allow_duplicate_headers", action="store_true"
+    )
+    parser.add_argument(
+        "--keep_n_sequences",
+        action="store_true",
+        help="Keep sequences that are all Ns (default: False)",
     )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args(argv)
@@ -113,7 +117,11 @@ def main(fasta_path, delimiter, allow_duplicate_headers, keep_n_sequences=False)
                     print(current_header)
                     print(sequence)
                 else:
-                    sys.stderr.write("Skipping all-N sequence: {}\n".format(current_header[1:].strip()))
+                    sys.stderr.write(
+                        "Skipping all-N sequence: {}\n".format(
+                            current_header[1:].strip()
+                        )
+                    )
 
         for line in in_data:
             if line.startswith(">"):
@@ -161,4 +169,9 @@ def main(fasta_path, delimiter, allow_duplicate_headers, keep_n_sequences=False)
 
 if __name__ == "__main__":
     args = parse_args()
-    main(args.fasta_path, args.delimiter, args.allow_duplicate_headers, args.keep_n_sequences)
+    main(
+        args.fasta_path,
+        args.delimiter,
+        args.allow_duplicate_headers,
+        args.keep_n_sequences,
+    )

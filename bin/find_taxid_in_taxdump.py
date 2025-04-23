@@ -42,7 +42,11 @@ def main(query_taxid, taxdump_nodes_path):
         sys.exit(0)
     query_taxid = str(query_taxid)
     if os.path.isfile(taxdump_nodes_path) is False:
-        sys.stderr.write("The NCBI taxdump nodes file ({}) was not found\n".format(taxdump_nodes_path))
+        sys.stderr.write(
+            "The NCBI taxdump nodes file ({}) was not found\n".format(
+                taxdump_nodes_path
+            )
+        )
         sys.exit(1)
     nodes_data = gpf.ll(taxdump_nodes_path)
     taxid_found_flag = False

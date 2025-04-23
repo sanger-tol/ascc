@@ -26,12 +26,16 @@ def load_kraken_results(kraken_results_path):
                 seq_name = split_line[1]
                 taxid = gpf.spl(line, "(taxid ", ")")
                 if seq_name in kraken_dict:
-                    sys.stderr.write("Duplicate read names found in input ({})\n".format(seq_name))
+                    sys.stderr.write(
+                        "Duplicate read names found in input ({})\n".format(seq_name)
+                    )
                     os.kill(os.getpid(), signal.SIGINT)
                 else:
                     kraken_dict[seq_name] = taxid
             else:
-                sys.stderr.write("Failed to parse Kraken output file line:\n{}\n".format(line))
+                sys.stderr.write(
+                    "Failed to parse Kraken output file line:\n{}\n".format(line)
+                )
         else:
             sys.stderr.write("No taxid found in input file line:\n{}\n".format(line))
     return kraken_dict
@@ -87,7 +91,9 @@ def get_kraken_and_lineage_dict(kraken_dict, lineage_dict, kraken_db_name):
             lineage_entry[kraken_db_name + "_kraken_taxid"] = taxid
         else:
             if taxid != "0":
-                sys.stderr.write("Taxid {} was not found in the lineages dump file\n".format(taxid))
+                sys.stderr.write(
+                    "Taxid {} was not found in the lineages dump file\n".format(taxid)
+                )
         kraken_and_lineage_dict[seq_name] = lineage_entry
 
     return kraken_and_lineage_dict
@@ -96,7 +102,9 @@ def get_kraken_and_lineage_dict(kraken_dict, lineage_dict, kraken_db_name):
 def main(kraken_results_path, lineage_dump_path, kraken_db_name, out_path):
     kraken_dict = load_kraken_results(kraken_results_path)
     lineage_dict = load_lineage(lineage_dump_path, kraken_db_name)
-    kraken_and_lineage_dict = get_kraken_and_lineage_dict(kraken_dict, lineage_dict, kraken_db_name)
+    kraken_and_lineage_dict = get_kraken_and_lineage_dict(
+        kraken_dict, lineage_dict, kraken_db_name
+    )
     df = pd.DataFrame.from_dict(kraken_and_lineage_dict)
     df = df.transpose()
     df.index = df.index.rename("scaff")
@@ -106,13 +114,25 @@ def main(kraken_results_path, lineage_dump_path, kraken_db_name, out_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-v", "--version", action="version", version="1.0")
-    parser.add_argument("kraken_results_path", help="Path to output file of a Kraken run", type=str)
+    parser.add_argument(
+        "kraken_results_path", help="Path to output file of a Kraken run", type=str
+    )
     parser.add_argument(
         "lineage_dump_path",
         help="Path to an NCBI taxonomy rankedlineage.dmp file (downloaded from https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz)",
         type=str,
     )
-    parser.add_argument("kraken_db_name", help="Kraken database name", type=str, choices=["bacterial", "nt"])
+    parser.add_argument(
+        "kraken_db_name",
+        help="Kraken database name",
+        type=str,
+        choices=["bacterial", "nt"],
+    )
     parser.add_argument("out_path", help="Path for output CSV file", type=str)
     args = parser.parse_args()
-    main(args.kraken_results_path, args.lineage_dump_path, args.kraken_db_name, args.out_path)
+    main(
+        args.kraken_results_path,
+        args.lineage_dump_path,
+        args.kraken_db_name,
+        args.out_path,
+    )

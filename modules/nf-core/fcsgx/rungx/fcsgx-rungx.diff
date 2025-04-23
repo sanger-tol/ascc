@@ -1,6 +1,17 @@
-Changes in module 'nf-core/fcsgx/rungx'
+Changes in component 'nf-core/fcsgx/rungx'
+'modules/nf-core/fcsgx/rungx/meta.yml' is unchanged
+Changes in 'fcsgx/rungx/main.nf':
 --- modules/nf-core/fcsgx/rungx/main.nf
 +++ modules/nf-core/fcsgx/rungx/main.nf
+@@ -10,7 +10,7 @@
+     input:
+     tuple val(meta), val(taxid), path(fasta)
+     path gxdb
+-    val ramdisk_path
++    path ramdisk_path
+ 
+     output:
+     tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
 @@ -25,11 +25,12 @@
      script:
      def args = task.ext.args ?: ''
@@ -19,4 +30,7 @@ Changes in module 'nf-core/fcsgx/rungx'
      export GX_NUM_CORES=${task.cpus}
      run_gx.py \\
 
+'modules/nf-core/fcsgx/rungx/environment.yml' is unchanged
+'modules/nf-core/fcsgx/rungx/tests/main.nf.test' is unchanged
+'modules/nf-core/fcsgx/rungx/tests/main.nf.test.snap' is unchanged
 ************************************************************

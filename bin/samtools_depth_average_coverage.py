@@ -19,7 +19,8 @@ def process_data(in_data):
         scaff_name, coverage = split_line[0], int(split_line[2])
 
         scaffs_dict[scaff_name] = {
-            "coverage_sum": scaffs_dict.get(scaff_name, {}).get("coverage_sum", 0) + coverage,
+            "coverage_sum": scaffs_dict.get(scaff_name, {}).get("coverage_sum", 0)
+            + coverage,
             "scaff_len": scaffs_dict.get(scaff_name, {}).get("scaff_len", 0) + 1,
         }
     return scaffs_dict

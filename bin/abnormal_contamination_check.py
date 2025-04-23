@@ -59,7 +59,9 @@ def load_fcs_gx_results(seq_dict, fcs_gx_and_tiara_summary_path):
     Loads FCS-GX actions from the FCS-GX and Tiara results summary file, adds them to the dictionary that contains sequence lengths
     """
     fcs_gx_and_tiara_summary_data = gpf.l(fcs_gx_and_tiara_summary_path)
-    fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[1 : len(fcs_gx_and_tiara_summary_data)]
+    fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[
+        1 : len(fcs_gx_and_tiara_summary_data)
+    ]
     for line in fcs_gx_and_tiara_summary_data:
         split_line = line.split(",")
         assert len(split_line) == 5
@@ -78,7 +80,9 @@ def main():
         sys.exit(1)
 
     if os.path.isfile(args.assembly) is False:
-        sys.stderr.write(f"The assembly FASTA file was not found at the expected location ({args.assembly})\n")
+        sys.stderr.write(
+            f"The assembly FASTA file was not found at the expected location ({args.assembly})\n"
+        )
         sys.exit(1)
 
     seq_dict = get_sequence_lengths(args.assembly)

@@ -4,31 +4,30 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
-include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
-include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
-include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
-include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
-include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
+include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
+include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
+include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
+include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 
-include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast'
-include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
-include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
-include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check'
-include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
-include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
-include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
-include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
-include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
-include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
+include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
+include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
+include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
+include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
+include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
+include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
+include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
+include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
+include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
+include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
+include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 
-include { paramsSummaryMap                              } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
@@ -43,22 +42,23 @@ workflow ASCC_ORGANELLAR {
 
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
-    validate_taxid_versions // Versions channel from main.nf
-    include_steps           // params.include_steps
-    exclude_steps           // params.exclude_steps
+    include_steps_OBSELETE  // params.include_steps
+    exclude_steps_OBSELETE  // params.exclude_steps
     fcs_db                  // path(file)
     reads
+    scientific_name         // val(name)
+    pacbio_database         // tuple [[meta.id], pacbio_database]
 
     main:
     ch_versions = Channel.empty()
-    ch_versions = ch_versions.mix(validate_taxid_versions)
 
     //
     // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
     //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //
-    include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
-    exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
+    //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
+    //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
+    include_workflow_steps  = params.organellar_include ? params.organellar_include.split(",") : "ALL"
+    exclude_workflow_steps  = params.organellar_exclude ? params.organellar_exclude.split(",") : "NONE"
 
     full_list               = [
         "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond",
@@ -69,8 +69,8 @@ workflow ASCC_ORGANELLAR {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
     }
 
-    log.info "ORGANELLAR RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    log.info "ORGANELLAR RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
+    log.info "ORGANELLAR SUBWORKFLOW: -- INCLUDE STEPS INC.: $include_workflow_steps"
+    log.info "ORGANELLAR SUBWORKFLOW: -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
 
     //
@@ -119,12 +119,20 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
     if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("pacbio_barcodes") ) {
+
+        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+            .combine(pacbio_database)
+            .multiMap{
+                ref_meta, ref_data, pdb_meta, pdb_data ->
+                    reference: [ref_meta, ref_data]
+                    pacbio_db: [pdb_meta, pdb_data]
+            }
+            .set { duplicated_db }
+
         PACBIO_BARCODE_CHECK (
-            ESSENTIAL_JOBS.out.reference_tuple_from_GG,
-            params.reads_path,
-            params.reads_type,
-            params.pacbio_barcode_file,
-            params.pacbio_barcode_names
+            duplicated_db.reference,
+            params.pacbio_barcode_names,
+            duplicated_db.pacbio_db
         )
 
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
@@ -139,7 +147,7 @@ workflow ASCC_ORGANELLAR {
             ESSENTIAL_JOBS.out.reference_tuple_from_GG
         )
 
-        RUN_FCSADAPTOR.out.ch_euk
+        ch_fcsadapt = RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
@@ -150,7 +158,6 @@ workflow ASCC_ORGANELLAR {
                     file2
                 )
             }
-            .set{ ch_fcsadapt }
             // TODO: IS THIS AN ISSUE?
 
     } else {
@@ -163,7 +170,7 @@ workflow ASCC_ORGANELLAR {
     //
     if ( (include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("fcs-gx") ) {
 
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        joint_channel = ESSENTIAL_JOBS.out.reference_tuple_from_GG
             .combine(fcs_db)
             .combine(Channel.of(params.taxid))
             .combine(Channel.of(params.ncbi_ranked_lineage_path))
@@ -173,7 +180,6 @@ workflow ASCC_ORGANELLAR {
                 taxid_val: taxid
                 ncbi_tax_path: tax_path
             }
-            .set { joint_channel }
 
         RUN_FCSGX (
             joint_channel.reference,
@@ -281,9 +287,9 @@ workflow ASCC_ORGANELLAR {
     //
     // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
     //
-    ESSENTIAL_JOBS.out.reference_with_seqkit
+    valid_length_fasta = ESSENTIAL_JOBS.out.reference_with_seqkit
         //
-        // Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
+        // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         //
         .map{ meta, file ->
             tuple(
@@ -299,7 +305,6 @@ workflow ASCC_ORGANELLAR {
         .filter { meta, file ->
                     meta.seq_count >= params.seqkit_window
         }
-        .set{ valid_length_fasta }
 
     valid_length_fasta
         .map{ meta, file ->
@@ -315,20 +320,14 @@ workflow ASCC_ORGANELLAR {
     if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("nt_blast") && !valid_length_fasta.ifEmpty(true)
     ) {
-        //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run (This IS an expected outcome of this subworkflow)
-        //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
 
-
-        SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+        //
+        //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+        //
 
         EXTRACT_NT_BLAST (
             valid_length_fasta,
             Channel.value(params.nt_database_path),
-            Channel.value(params.ncbi_accession_ids_folder),
             Channel.value(params.ncbi_ranked_lineage_path)
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
@@ -344,9 +343,16 @@ workflow ASCC_ORGANELLAR {
                                 }
                                 .ifEmpty { [[],[]] }
 
+        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
     } else {
         ch_nt_blast         = Channel.of( [[],[]] )
         ch_blast_lineage    = Channel.of( [[],[]] )
+        ch_btk_format       = Channel.of( [[],[]] )
     }
 
 
@@ -412,12 +418,12 @@ workflow ASCC_ORGANELLAR {
             !exclude_workflow_steps.contains("create_btk_dataset")
     ) {
 
-                //
+        //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        ch_organellar_cbtk_input = ESSENTIAL_JOBS.out.reference_tuple_from_GG
             .map{ it -> tuple([
                 id: it[0].id,
                 taxid: it[0].taxid,
@@ -428,6 +434,7 @@ workflow ASCC_ORGANELLAR {
                 ESSENTIAL_JOBS.out.dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
                 ch_tiara,
                 ch_nt_blast,
+                ch_btk_format,
                 // ch_fcs
                 // ch_kmers were removed
                 ch_bam,
@@ -446,8 +453,6 @@ workflow ASCC_ORGANELLAR {
             .map { id, data ->
                 [id: id, data: data]
             }
-            .set {ch_organellar_cbtk_input}
-
 
         //
         // LOGIC: LIST OF PROCESSES TO CHECK FOR
@@ -485,7 +490,8 @@ workflow ASCC_ORGANELLAR {
         //
         CREATE_BTK_DATASET (
             combined_channel,
-            Channel.fromPath(params.ncbi_taxonomy_path).first()
+            Channel.fromPath(params.ncbi_taxonomy_path).first(),
+            scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
     }
