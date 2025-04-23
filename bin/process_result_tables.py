@@ -37,19 +37,31 @@ def generate_counts_df(df, counts_df_output_path):
 
 
 def main(output_folder, sample_id):
-    main_results_table_path = "{}/{}_contamination_check_merged_table.csv".format(output_folder, sample_id)
+    main_results_table_path = "{}/{}_contamination_check_merged_table.csv".format(
+        output_folder, sample_id
+    )
     btk_results_table_path = "{}/btk_summary_table_full.tsv".format(output_folder)
-    output_df_path = "{}/{}_contamination_check_merged_table_extended.csv".format(output_folder, sample_id)
-    counts_df_output_path = "{}/{}_phylum_counts_and_coverage.csv".format(output_folder, sample_id)
+    output_df_path = "{}/{}_contamination_check_merged_table_extended.csv".format(
+        output_folder, sample_id
+    )
+    counts_df_output_path = "{}/{}_phylum_counts_and_coverage.csv".format(
+        output_folder, sample_id
+    )
 
     if os.path.isdir(output_folder) == False:
         sys.stderr.write(
-            "The directory with the output tables of the pipeline ({}) was not found\n".format(output_folder)
+            "The directory with the output tables of the pipeline ({}) was not found\n".format(
+                output_folder
+            )
         )
         sys.exit(1)
 
     if os.path.isfile(main_results_table_path) == False:
-        sys.stderr.write("The main results table file ({}) was not found\n".format(main_results_table_path))
+        sys.stderr.write(
+            "The main results table file ({}) was not found\n".format(
+                main_results_table_path
+            )
+        )
         sys.exit(1)
 
     if os.path.isfile(btk_results_table_path) == False:
@@ -63,12 +75,18 @@ def main(output_folder, sample_id):
     main_df = None
     main_df = pd.read_csv(main_results_table_path)
     if main_df.shape[0] == 0:
-        sys.stderr.write("No rows were found in cobiont check results table ({})\n".format(main_results_table_path))
+        sys.stderr.write(
+            "No rows were found in cobiont check results table ({})\n".format(
+                main_results_table_path
+            )
+        )
         sys.exit(1)
 
     if "btk_bestsum_phylum" not in main_df.columns:
         sys.stderr.write(
-            "Column 'btk_bestsum_phylum' was not found in results table ({})\n".format(main_results_table_path)
+            "Column 'btk_bestsum_phylum' was not found in results table ({})\n".format(
+                main_results_table_path
+            )
         )
         sys.exit(1)
 
@@ -81,22 +99,32 @@ def main(output_folder, sample_id):
         ind2 = list(np.where(df["nt_kraken_phylum"].isna())[0])
         ind3 = [n for n in ind if n not in ind2]
 
-        df.iloc[ind3, df.columns.get_loc("merged_classif")] = df.iloc[ind3, df.columns.get_loc("nt_kraken_phylum")]
+        df.iloc[ind3, df.columns.get_loc("merged_classif")] = df.iloc[
+            ind3, df.columns.get_loc("nt_kraken_phylum")
+        ]
         df.iloc[ind3, df.columns.get_loc("merged_classif_source")] = "nt_kraken_phylum"
 
     if "tiara_classif" in df.columns:
         tiara_ind = list(np.where(df["merged_classif"] == "no-hit")[0])
         tiara_ind2 = list(np.where(df["tiara_classif"].isna())[0])
         tiara_ind3 = list(np.where(df["tiara_classif"] == "unknown")[0])
-        tiara_ind = [n for n in tiara_ind if n not in tiara_ind2 and n not in tiara_ind3]
+        tiara_ind = [
+            n for n in tiara_ind if n not in tiara_ind2 and n not in tiara_ind3
+        ]
         df.iloc[tiara_ind, df.columns.get_loc("merged_classif")] = df.iloc[
             tiara_ind, df.columns.get_loc("tiara_classif")
         ]
         df.iloc[tiara_ind, df.columns.get_loc("merged_classif_source")] = "tiara"
 
-        df["merged_classif"] = df["merged_classif"].replace("bacteria", "Bacteria-undef")
-        df["merged_classif"] = df["merged_classif"].replace("eukarya", "Eukaryota-undef")
-        df["merged_classif"] = df["merged_classif"].replace("prokarya", "Prokaryota-undef")
+        df["merged_classif"] = df["merged_classif"].replace(
+            "bacteria", "Bacteria-undef"
+        )
+        df["merged_classif"] = df["merged_classif"].replace(
+            "eukarya", "Eukaryota-undef"
+        )
+        df["merged_classif"] = df["merged_classif"].replace(
+            "prokarya", "Prokaryota-undef"
+        )
         df["merged_classif"] = df["merged_classif"].replace("archaea", "Archaea-undef")
 
     df.to_csv(output_df_path, index=False)
@@ -107,7 +135,11 @@ def main(output_folder, sample_id):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("output_folder", type=str, help="Path to the directory with the output tables of the pipeline")
+    parser.add_argument(
+        "output_folder",
+        type=str,
+        help="Path to the directory with the output tables of the pipeline",
+    )
     parser.add_argument("sample_id", type=str, help="ToL ID of the sample")
     args = parser.parse_args()
     main(args.output_folder, args.sample_id)

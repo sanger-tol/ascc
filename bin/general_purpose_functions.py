@@ -118,7 +118,18 @@ def reverse_complement(seq):
     """
     Returns the reverse complement of a DNA sequence
     """
-    complement = {"A": "T", "C": "G", "G": "C", "T": "A", "N": "N", "a": "t", "c": "g", "g": "c", "t": "a", "n": "n"}
+    complement = {
+        "A": "T",
+        "C": "G",
+        "G": "C",
+        "T": "A",
+        "N": "N",
+        "a": "t",
+        "c": "g",
+        "g": "c",
+        "t": "a",
+        "n": "n",
+    }
     reverse_comp = "".join(complement.get(base, base) for base in reversed(seq))
     return reverse_comp
 
@@ -161,7 +172,9 @@ def string_to_chunks(line, n):
     return [line[i : i + n] for i in range(0, len(line), n)]
 
 
-def run_system_command(system_command, verbose=True, dry_run=False, tries=1, expected_exit_code=0):
+def run_system_command(
+    system_command, verbose=True, dry_run=False, tries=1, expected_exit_code=0
+):
     """
     Executes a system command and checks its exit code
     """
@@ -179,12 +192,20 @@ def run_system_command(system_command, verbose=True, dry_run=False, tries=1, exp
                 sys.stderr.write(out_message)
             try:
                 output = subprocess.check_output(
-                    system_command, stderr=subprocess.STDOUT, shell=True, timeout=None, universal_newlines=True
+                    system_command,
+                    stderr=subprocess.STDOUT,
+                    shell=True,
+                    timeout=None,
+                    universal_newlines=True,
                 )
                 break
             except subprocess.CalledProcessError as exc:
                 out_errormessage = (
-                    "<" + triggering_script_name + "> " + " exited with error code " + str(exc.returncode)
+                    "<"
+                    + triggering_script_name
+                    + "> "
+                    + " exited with error code "
+                    + str(exc.returncode)
                 )
                 if exc.output.isspace() == False:
                     out_errormessage += ". Error message: " + exc.output
@@ -213,7 +234,11 @@ def get_file_paths(in_folder_path, extension):
     onlyfiles = list()
     selected_file_paths = list()
     if os.path.isdir(in_folder_path):
-        onlyfiles = [f for f in os.listdir(in_folder_path) if os.path.isfile(os.path.join(in_folder_path, f))]
+        onlyfiles = [
+            f
+            for f in os.listdir(in_folder_path)
+            if os.path.isfile(os.path.join(in_folder_path, f))
+        ]
         for file_item in onlyfiles:
             if "." + extension in file_item:
                 file_item_split = file_item.split(".")

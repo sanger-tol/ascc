@@ -10,6 +10,7 @@ Adapted by Damon-Lee Pointon @DLBPointon
 
 import general_purpose_functions as gpf
 import argparse
+import sys
 
 
 def process_nucleotide_blast_file(in_path):
@@ -22,20 +23,28 @@ def process_nucleotide_blast_file(in_path):
 
     in_data = gpf.l(in_path)
     for line in in_data:
-        split_line = line.split("\t")
-        field1_split = split_line[0].split("_sliding:")
-        qseqid = field1_split[0]
-        qoffset = int(field1_split[1].split("-")[0])
-        qstart = int(split_line[9])
-        qend = int(split_line[10])
-        new_qstart = qstart + qoffset
-        new_qend = qend + qoffset
-        split_line[0] = qseqid
-        split_line[3] = qseqid
-        split_line[9] = str(new_qstart)
-        split_line[10] = str(new_qend)
-        out_line = "\t".join(split_line)
-        print(out_line)
+        try:
+            split_line = line.split("\t")
+            if len(split_line) < 11:  # Skip malformed lines
+                sys.stderr.write(f"Warning: Skipping malformed line: {line}\n")
+                continue
+
+            field1_split = split_line[0].split("_sliding:")
+            qseqid = field1_split[0]
+            qoffset = int(field1_split[1].split("-")[0])
+            qstart = int(split_line[9])
+            qend = int(split_line[10])
+            new_qstart = qstart + qoffset
+            new_qend = qend + qoffset
+            split_line[0] = qseqid
+            split_line[3] = qseqid
+            split_line[9] = str(new_qstart)
+            split_line[10] = str(new_qend)
+            out_line = "\t".join(split_line)
+            print(out_line)
+        except Exception as e:
+            sys.stderr.write(f"Error processing line: {line}\nError: {str(e)}\n")
+            continue
 
 
 def process_diamond_file(in_path):
@@ -46,22 +55,30 @@ def process_diamond_file(in_path):
 
     in_data = gpf.l(in_path)
     for line in in_data:
-        split_line = line.split("\t")
-        field1_split = split_line[0].split("_sliding:")
-        qseqid = field1_split[0]
-        qoffset = int(field1_split[1].split("-")[0])
+        try:
+            split_line = line.split("\t")
+            if len(split_line) < 8:  # Skip malformed lines
+                sys.stderr.write(f"Warning: Skipping malformed line: {line}\n")
+                continue
 
-        qstart = int(split_line[6])
-        qend = int(split_line[7])
+            field1_split = split_line[0].split("_sliding:")
+            qseqid = field1_split[0]
+            qoffset = int(field1_split[1].split("-")[0])
 
-        new_qstart = qstart + qoffset
-        new_qend = qend + qoffset
+            qstart = int(split_line[6])
+            qend = int(split_line[7])
 
-        split_line[0] = qseqid
-        split_line[6] = str(new_qstart)
-        split_line[7] = str(new_qend)
-        out_line = "\t".join(split_line)
-        print(out_line)
+            new_qstart = qstart + qoffset
+            new_qend = qend + qoffset
+
+            split_line[0] = qseqid
+            split_line[6] = str(new_qstart)
+            split_line[7] = str(new_qend)
+            out_line = "\t".join(split_line)
+            print(out_line)
+        except Exception as e:
+            sys.stderr.write(f"Error processing line: {line}\nError: {str(e)}\n")
+            continue
 
 
 def main(in_path, blast_type):
@@ -76,7 +93,10 @@ if __name__ == "__main__":
     parser.add_argument("-v", action="version", version="1.0")
     parser.add_argument("in_path", type=str, help="Path to BLAST results file")
     parser.add_argument(
-        "blast_type", type=str, help="BLAST type: 'nucleotide' or 'diamond'", choices=["nucleotide", "diamond"]
+        "blast_type",
+        type=str,
+        help="BLAST type: 'nucleotide' or 'diamond'",
+        choices=["nucleotide", "diamond"],
     )
     args = parser.parse_args()
     main(args.in_path, args.blast_type)

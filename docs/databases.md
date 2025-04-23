@@ -30,25 +30,11 @@ https://busco-data.ezlab.org/v5/data/.
 
 Download and set up according to the instructions at https://blobtoolkit.genomehubs.org/install/.
 
+**Important Note**: The NCBI nt BLAST database must have built-in taxonomy for the pipeline to work correctly. When building the BLAST database, make sure to include taxonomy information using the `-parse_seqids` and `-taxid_map` options with `makeblastdb`. Alternatively, you can download the pre-built BLAST database from NCBI which already includes taxonomy information.
+
 ## NCBI nr Diamond database
 
 Download the nr database protein FASTA files from the NCBI ftp server (`wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz`) and build the database similarly to the Uniprot Diamond database, following the instructions at https://blobtoolkit.genomehubs.org/install/.
-
-## NCBI accession2taxid
-
-Download the files from the NCBI FTP server and uncompress them:
-
-```
-wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_wgs.accession2taxid.gz.md5 \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_nucl.accession2taxid.gz.md5 \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_wgs.accession2taxid.gz.md5 \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz.md5 \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_nucl.accession2taxid.gz \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_wgs.accession2taxid.gz \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz \
-&& wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_wgs.accession2taxid.gz \
-&& gunzip *accession2taxid.gz
-```
 
 ## FCS-GX database
 

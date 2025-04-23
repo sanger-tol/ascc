@@ -2,6 +2,7 @@
 """
 Script for parsing the result files of FCS-GX, originally written by Eerik Aunin (ea10)
 further refactoring/modifications by Yumi Sims (yy5)
+Updated by Damon-Lee Pointon (dp24)
 """
 
 import general_purpose_functions as gpf
@@ -16,14 +17,20 @@ def get_fcs_gx_outfile_paths(fcs_gx_reports_folder):
     Locates the FCS-GX output files in the FCS-GX output directory
     """
     if os.path.isdir(fcs_gx_reports_folder) is False:
-        sys.stderr.write("Could not find the directory with FCS-GX output files ({})\n".format(fcs_gx_reports_folder))
+        sys.stderr.write(
+            "Could not find the directory with FCS-GX output files ({})\n".format(
+                fcs_gx_reports_folder
+            )
+        )
         sys.exit(1)
 
     fcs_gx_outfiles = os.listdir(fcs_gx_reports_folder)
     taxonomy_files = [n for n in fcs_gx_outfiles if n.endswith(".taxonomy.rpt")]
     if len(taxonomy_files) != 1:
         sys.stderr.write(
-            "Error occurred when trying to find FCS-GX *.taxonomy.rpt file in {}\n".format(fcs_gx_reports_folder)
+            "Error occurred when trying to find FCS-GX *.taxonomy.rpt file in {}\n".format(
+                fcs_gx_reports_folder
+            )
         )
         sys.exit(1)
     taxonomy_file = fcs_gx_reports_folder + "/" + taxonomy_files[0]
@@ -31,7 +38,9 @@ def get_fcs_gx_outfile_paths(fcs_gx_reports_folder):
     report_files = [n for n in fcs_gx_outfiles if n.endswith(".fcs_gx_report.txt")]
     if len(report_files) != 1:
         sys.stderr.write(
-            "Error occurred when trying to find FCS-GX *.fcs_gx_report.txt file in {}\n".format(fcs_gx_reports_folder)
+            "Error occurred when trying to find FCS-GX *.fcs_gx_report.txt file in {}\n".format(
+                fcs_gx_reports_folder
+            )
         )
         sys.exit(1)
     report_file = fcs_gx_reports_folder + "/" + report_files[0]
@@ -61,7 +70,10 @@ def load_taxids_data(taxonomy_file):
             int(split_line[10]) if split_line[10] else 0,
         )
 
-        if scaff in collection_dict and collection_dict[scaff]["fcs_gx_score"] < score_1:
+        if (
+            scaff in collection_dict
+            and collection_dict[scaff]["fcs_gx_score"] < score_1
+        ):
             row_dict = {
                 "fcs_gx_top_tax_name": tax_name_1,
                 "fcs_gx_top_taxid": tax_id_1,
@@ -152,7 +164,9 @@ def get_lineages_by_taxid(taxids_list, rankedlineage_path):
     for line in rankedlineage_data:
         split_line = line.split("|")
         split_line = [n.strip() for n in split_line]
-        assert len(split_line) == 11
+        assert (
+            len(split_line) >= 11
+        ), f"Expected at least 11 columns in rankedlineage.dmp, got {len(split_line)}"  # This should no handle both new and old formats (as of April 2025)
         taxid = split_line[0]
         if taxid in taxids_list:
             current_lineage_dict = dict()
@@ -215,7 +229,11 @@ if __name__ == "__main__":
         type=str,
         help="Path to directory with FCS-GX output files (*.taxonomy.rpt and *.fcs_gx_report.txt)",
     )
-    parser.add_argument("ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy")
-    parser.add_argument("-v", action="version", version="1.0")
+    parser.add_argument(
+        "ncbi_rankedlineage_path",
+        type=str,
+        help="Path to the rankedlineage.dmp of NCBI taxonomy",
+    )
+    parser.add_argument("-v", action="version", version="1.0.1")
     args = parser.parse_args()
     main(args.fcs_gx_reports_folder, args.ncbi_rankedlineage_path)

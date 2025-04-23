@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script for reformatting output from VecScreen that has been processed using the VSlistTo1HitPerLine.awk script. 
+Script for reformatting output from VecScreen that has been processed using the VSlistTo1HitPerLine.awk script.
 This script removes no-hit entries from the report file and converts coordinates in assembly chunks to coordinates in the full assembly.
 The original script was written in Perl by James Torrance. Rewritten by Eerik Aunin.
 """
@@ -12,7 +12,9 @@ import sys
 
 def main(vecscreen_file, chunk_size):
     if os.path.isfile(vecscreen_file) is False:
-        sys.stderr.write(f"The input file for this script ({vecscreen_file}) was not found\n")
+        sys.stderr.write(
+            f"The input file for this script ({vecscreen_file}) was not found\n"
+        )
         sys.exit(1)
 
     with open(vecscreen_file) as f:
@@ -36,7 +38,9 @@ def main(vecscreen_file, chunk_size):
             chunk_suffix = int(split_seq_name[1])
             seq_start += chunk_size * (chunk_suffix - 1)
             seq_end += chunk_size * (chunk_suffix - 1)
-        corrected_line = "\t".join((vecscreen_result, seq_base_name, str(seq_start), str(seq_end)))
+        corrected_line = "\t".join(
+            (vecscreen_result, seq_base_name, str(seq_start), str(seq_end))
+        )
         if corrected_line not in output_lines:
             output_lines.append(corrected_line)
 

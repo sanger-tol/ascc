@@ -66,7 +66,11 @@ import gc  # for garbage collection
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.neighbors import NearestNeighbors
 from tensorflow.keras import backend as K
-from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from sklearn.metrics import (
+    silhouette_score,
+    calinski_harabasz_score,
+    davies_bouldin_score,
+)
 from sklearn.cluster import HDBSCAN
 from sklearn.metrics import adjusted_rand_score
 
@@ -87,9 +91,16 @@ def log_message(message: str, level: str = "warning", timestamp: bool = True) ->
     """
     Enhanced logging function with timestamps and consistent formatting.
     """
-    levels = {"info": "[INFO]", "warning": "[WARNING]", "error": "[ERROR]", "debug": "[DEBUG]"}
+    levels = {
+        "info": "[INFO]",
+        "warning": "[WARNING]",
+        "error": "[ERROR]",
+        "debug": "[DEBUG]",
+    }
     prefix = levels.get(level.lower(), "[LOG]")
-    timestamp_str = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] " if timestamp else ""
+    timestamp_str = (
+        f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] " if timestamp else ""
+    )
     sys.stderr.write(f"{timestamp_str}{prefix} {message}\n")
 
 
@@ -117,7 +128,9 @@ def load_data(kmer_counts_file):
     """
 
     if os.path.isfile(kmer_counts_file) is False:
-        sys.stderr.write("kmer counts file ({}) was not found\n".format(kmer_counts_file))
+        sys.stderr.write(
+            "kmer counts file ({}) was not found\n".format(kmer_counts_file)
+        )
         sys.exit(1)
     if os.stat(kmer_counts_file).st_size == 0:
         sys.stderr.write("kmer counts file ({}) is empty\n".format(kmer_counts_file))
@@ -130,7 +143,9 @@ def load_data(kmer_counts_file):
         sys.exit(1)
 
     if data.isnull().values.any():
-        sys.stderr.write("Warning: Input data contains NaN values. These will be handled by the preprocessing step\n")
+        sys.stderr.write(
+            "Warning: Input data contains NaN values. These will be handled by the preprocessing step\n"
+        )
 
     try:
         seq_lengths = data["seq_len"]
@@ -170,7 +185,11 @@ def remove_constant_features(df, variance_threshold=1e-5):
 
     if n_removed > 0:
         percent_removed = (n_removed / df.shape[1]) * 100
-        log_message(f"Removing {n_removed} near-constant k-mers " f"({percent_removed:.2f}% of features)", level="info")
+        log_message(
+            f"Removing {n_removed} near-constant k-mers "
+            f"({percent_removed:.2f}% of features)",
+            level="info",
+        )
         df = df.loc[:, ~near_constant]
 
     return df, n_removed
@@ -228,7 +247,9 @@ def preprocess_data(df, seq_lengths, scaling_method="log", use_tf_idf=False):
         return data_array
     else:
         # For non-TF-IDF approaches
-        df_normalised = df.div(seq_lengths.clip(lower=1e-10), axis=0)  # Prevent division by zero
+        df_normalised = df.div(
+            seq_lengths.clip(lower=1e-10), axis=0
+        )  # Prevent division by zero
         data_array = df_normalised.values
 
         # Apply scaling
@@ -303,14 +324,18 @@ def evaluate_clustering(embedding, labels):
     try:
         metrics["calinski_harabasz"] = calinski_harabasz_score(embedding, labels)
     except Exception as e:
-        log_message(f"Failed to calculate Calinski-Harabasz score: {str(e)}", level="warning")
+        log_message(
+            f"Failed to calculate Calinski-Harabasz score: {str(e)}", level="warning"
+        )
         metrics["calinski_harabasz"] = float("nan")
 
     # Davies-Bouldin Index (lower is better)
     try:
         metrics["davies_bouldin"] = davies_bouldin_score(embedding, labels)
     except Exception as e:
-        log_message(f"Failed to calculate Davies-Bouldin score: {str(e)}", level="warning")
+        log_message(
+            f"Failed to calculate Davies-Bouldin score: {str(e)}", level="warning"
+        )
         metrics["davies_bouldin"] = float("nan")
 
     # HDBSCAN clustering comparison
@@ -319,7 +344,9 @@ def evaluate_clustering(embedding, labels):
         cluster_labels = clusterer.fit_predict(embedding)
         metrics["adjusted_rand"] = adjusted_rand_score(labels, cluster_labels)
     except Exception as e:
-        log_message(f"Failed to calculate adjusted rand index: {str(e)}", level="warning")
+        log_message(
+            f"Failed to calculate adjusted rand index: {str(e)}", level="warning"
+        )
         metrics["adjusted_rand"] = float("nan")
 
     return metrics
@@ -348,7 +375,10 @@ def find_best_n_neighbors_setting(
 
     # Add validation
     if len(data) < min(n_neighbors_range):
-        log_message(f"Dataset too small for n_neighbors optimisation. Using minimum value.", level="warning")
+        log_message(
+            f"Dataset too small for n_neighbors optimisation. Using minimum value.",
+            level="warning",
+        )
         return min(n_neighbors_range), {}
 
     # Sample data if needed
@@ -366,23 +396,29 @@ def find_best_n_neighbors_setting(
         # Apply dimensionality reduction based on method
         try:
             if method_name == "umap":
-                embedding = umap.UMAP(n_neighbors=n_neighbors).fit_transform(optimisation_data)
+                embedding = umap.UMAP(n_neighbors=n_neighbors).fit_transform(
+                    optimisation_data
+                )
             elif method_name == "isomap":
-                embedding = manifold.Isomap(n_neighbors=n_neighbors).fit_transform(optimisation_data)
+                embedding = manifold.Isomap(n_neighbors=n_neighbors).fit_transform(
+                    optimisation_data
+                )
             elif method_name == "lle_standard":
-                embedding = manifold.LocallyLinearEmbedding(n_neighbors=n_neighbors, method="standard").fit_transform(
-                    optimisation_data
-                )
+                embedding = manifold.LocallyLinearEmbedding(
+                    n_neighbors=n_neighbors, method="standard"
+                ).fit_transform(optimisation_data)
             elif method_name == "lle_hessian":
-                embedding = manifold.LocallyLinearEmbedding(n_neighbors=n_neighbors, method="hessian").fit_transform(
-                    optimisation_data
-                )
+                embedding = manifold.LocallyLinearEmbedding(
+                    n_neighbors=n_neighbors, method="hessian"
+                ).fit_transform(optimisation_data)
             elif method_name == "lle_modified":
-                embedding = manifold.LocallyLinearEmbedding(n_neighbors=n_neighbors, method="modified").fit_transform(
-                    optimisation_data
-                )
+                embedding = manifold.LocallyLinearEmbedding(
+                    n_neighbors=n_neighbors, method="modified"
+                ).fit_transform(optimisation_data)
             elif method_name == "se":
-                embedding = manifold.SpectralEmbedding(n_neighbors=n_neighbors).fit_transform(optimisation_data)
+                embedding = manifold.SpectralEmbedding(
+                    n_neighbors=n_neighbors
+                ).fit_transform(optimisation_data)
             else:
                 raise ValueError(f"Unknown method: {method_name}")
 
@@ -406,7 +442,10 @@ def find_best_n_neighbors_setting(
                     best_n_neighbors = n_neighbors
 
         except Exception as e:
-            log_message(f"Error optimising {method_name} with n_neighbors={n_neighbors}: {str(e)}", level="warning")
+            log_message(
+                f"Error optimising {method_name} with n_neighbors={n_neighbors}: {str(e)}",
+                level="warning",
+            )
             continue
 
     if best_n_neighbors is None:
@@ -414,9 +453,13 @@ def find_best_n_neighbors_setting(
         n_components = min(data.shape[1], 5)  # assuming default n_components=5
 
         if method_name.startswith("lle_"):
-            lle_method = method_name.split("_")[1]  # extract 'standard', 'hessian', or 'modified'
+            lle_method = method_name.split("_")[
+                1
+            ]  # extract 'standard', 'hessian', or 'modified'
             min_neighbors = get_min_neighbors_for_lle(lle_method, n_components)
-            best_n_neighbors = max(min_neighbors, 15)  # Use 15 or minimum required, whichever is larger
+            best_n_neighbors = max(
+                min_neighbors, 15
+            )  # Use 15 or minimum required, whichever is larger
             log_message(
                 f"n_neighbors ptimisation failed for {method_name}. Using default n_neighbors={best_n_neighbors} "
                 f"(minimum required for this method: {min_neighbors})",
@@ -425,7 +468,8 @@ def find_best_n_neighbors_setting(
         else:
             best_n_neighbors = 15  # Default fallback for other methods
             log_message(
-                f"n_neighbors optimisation failed for {method_name}. Using default n_neighbors=15", level="warning"
+                f"n_neighbors optimisation failed for {method_name}. Using default n_neighbors=15",
+                level="warning",
             )
     return best_n_neighbors, results
 
@@ -443,30 +487,66 @@ def check_memory_requirements(df, selected_methods):
             10000,
             "quadratic memory scaling with the number of samples. Try reducing the number of samples or using a lower perplexity.",
         ),
-        "mds": (5000, "quadratic memory scaling with the number of samples. Consider reducing dataset size."),
+        "mds": (
+            5000,
+            "quadratic memory scaling with the number of samples. Consider reducing dataset size.",
+        ),
         "isomap": (
             10000,
             "quadratic memory scaling due to geodesic distance calculations. Consider reducing n_neighbors or dataset size.",
         ),
-        "lle_standard": (10000, "quadratic memory scaling with the number of samples. Consider reducing n_neighbors."),
-        "lle_hessian": (5000, "high memory usage due to Hessian calculations. Consider reducing n_neighbors."),
-        "lle_modified": (10000, "quadratic memory scaling with the number of samples. Consider reducing n_neighbors."),
-        "se": (10000, "quadratic memory scaling due to eigendecomposition of the similarity matrix."),
+        "lle_standard": (
+            10000,
+            "quadratic memory scaling with the number of samples. Consider reducing n_neighbors.",
+        ),
+        "lle_hessian": (
+            5000,
+            "high memory usage due to Hessian calculations. Consider reducing n_neighbors.",
+        ),
+        "lle_modified": (
+            10000,
+            "quadratic memory scaling with the number of samples. Consider reducing n_neighbors.",
+        ),
+        "se": (
+            10000,
+            "quadratic memory scaling due to eigendecomposition of the similarity matrix.",
+        ),
         # Linear methods with better memory scaling
-        "pca": (50000, "linear memory scaling but may require significant memory for very high-dimensional data."),
-        "kernel_pca": (20000, "memory usage depends on kernel type, may be significant for large datasets."),
+        "pca": (
+            50000,
+            "linear memory scaling but may require significant memory for very high-dimensional data.",
+        ),
+        "kernel_pca": (
+            20000,
+            "memory usage depends on kernel type, may be significant for large datasets.",
+        ),
         "pca_svd": (
             50000,
             "randomized solver helps with memory usage but still requires significant memory for large datasets.",
         ),
-        "nmf": (30000, "iterative nature requires storing multiple copies of the data matrix."),
+        "nmf": (
+            30000,
+            "iterative nature requires storing multiple copies of the data matrix.",
+        ),
         # Tree-based method
-        "random_trees": (100000, "memory scales with n_estimators and max_depth parameters."),
+        "random_trees": (
+            100000,
+            "memory scales with n_estimators and max_depth parameters.",
+        ),
         # UMAP is generally memory-efficient
-        "umap": (100000, "relatively memory-efficient but may require significant memory for very large datasets."),
+        "umap": (
+            100000,
+            "relatively memory-efficient but may require significant memory for very large datasets.",
+        ),
         # Autoencoder variants
-        "autoencoder_relu": (20000, "significant GPU/CPU memory required for training. Consider reducing batch size."),
-        "autoencoder_tanh": (20000, "significant GPU/CPU memory required for training. Consider reducing batch size."),
+        "autoencoder_relu": (
+            20000,
+            "significant GPU/CPU memory required for training. Consider reducing batch size.",
+        ),
+        "autoencoder_tanh": (
+            20000,
+            "significant GPU/CPU memory required for training. Consider reducing batch size.",
+        ),
         "autoencoder_sigmoid": (
             20000,
             "significant GPU/CPU memory required for training. Consider reducing batch size.",
@@ -475,13 +555,17 @@ def check_memory_requirements(df, selected_methods):
             20000,
             "significant GPU/CPU memory required for training. Consider reducing batch size.",
         ),
-        "autoencoder_selu": (20000, "significant GPU/CPU memory required for training. Consider reducing batch size."),
+        "autoencoder_selu": (
+            20000,
+            "significant GPU/CPU memory required for training. Consider reducing batch size.",
+        ),
     }
 
     # Additional warning for high-dimensional data
     if n_features > 10000:
         log_message(
-            f"Warning: Input data has {n_features} features. " "This might require significant memory for all methods.",
+            f"Warning: Input data has {n_features} features. "
+            "This might require significant memory for all methods.",
             level="warning",
         )
 
@@ -490,7 +574,9 @@ def check_memory_requirements(df, selected_methods):
             sample_threshold, warning_msg = memory_warnings[method]
             if n_samples > sample_threshold:
                 log_message(
-                    f"Warning: {method} {warning_msg} " f"Current dataset has {n_samples} samples.", level="warning"
+                    f"Warning: {method} {warning_msg} "
+                    f"Current dataset has {n_samples} samples.",
+                    level="warning",
                 )
 
 
@@ -515,18 +601,24 @@ class DataGenerator(tf.keras.utils.Sequence):
         # Calculate memory-safe batch size
         data_size_bytes = data.nbytes / len(data)  # bytes per sample
         max_memory_bytes = max_memory_gb * 1024**3
-        memory_safe_batch = int(max_memory_bytes / (data_size_bytes * 3))  # Factor of 3 for safety
+        memory_safe_batch = int(
+            max_memory_bytes / (data_size_bytes * 3)
+        )  # Factor of 3 for safety
         self.batch_size = min(batch_size, memory_safe_batch)
 
         if self.batch_size != batch_size:
             log_message(
-                f"Adjusted batch size from {batch_size} to {self.batch_size} " "to prevent memory issues", level="info"
+                f"Adjusted batch size from {batch_size} to {self.batch_size} "
+                "to prevent memory issues",
+                level="info",
             )
 
         self.on_epoch_end()
 
     def __getitem__(self, idx):
-        batch_indices = self.indices[idx * self.batch_size : (idx + 1) * self.batch_size]
+        batch_indices = self.indices[
+            idx * self.batch_size : (idx + 1) * self.batch_size
+        ]
         batch_data = self.data[batch_indices]
         # For VAE, input = target
         return batch_data, batch_data
@@ -566,15 +658,21 @@ def run_autoencoder(
     """
 
     class VAE(tf.keras.Model):
-        def __init__(self, input_dim, n_components, activation=activation_mode, **kwargs):
+        def __init__(
+            self, input_dim, n_components, activation=activation_mode, **kwargs
+        ):
             super().__init__(**kwargs)
 
             # Initialise metrics
             self.total_loss_tracker = tf.keras.metrics.Mean(name="loss")
-            self.reconstruction_loss_tracker = tf.keras.metrics.Mean(name="reconstruction_loss")
+            self.reconstruction_loss_tracker = tf.keras.metrics.Mean(
+                name="reconstruction_loss"
+            )
             self.kl_loss_tracker = tf.keras.metrics.Mean(name="kl_loss")
             self.val_total_loss_tracker = tf.keras.metrics.Mean(name="val_loss")
-            self.val_reconstruction_loss_tracker = tf.keras.metrics.Mean(name="val_reconstruction_loss")
+            self.val_reconstruction_loss_tracker = tf.keras.metrics.Mean(
+                name="val_reconstruction_loss"
+            )
             self.val_kl_loss_tracker = tf.keras.metrics.Mean(name="val_kl_loss")
 
             # Dynamic intermediate dimensions
@@ -603,7 +701,9 @@ def run_autoencoder(
 
             # Final encoder layers
             x = tf.keras.layers.Dense(
-                intermediate_dim // 4, activation=activation, activity_regularizer=tf.keras.regularizers.l1(1e-6)
+                intermediate_dim // 4,
+                activation=activation,
+                activity_regularizer=tf.keras.regularizers.l1(1e-6),
             )(x)
 
             # Latent space
@@ -638,8 +738,12 @@ def run_autoencoder(
             decoder_outputs = tf.keras.layers.Dense(input_dim, activation="sigmoid")(x)
 
             # Create encoder and decoder models
-            self.encoder = tf.keras.Model(encoder_inputs, [z_mean, z_log_var], name="encoder")
-            self.decoder = tf.keras.Model(decoder_inputs, decoder_outputs, name="decoder")
+            self.encoder = tf.keras.Model(
+                encoder_inputs, [z_mean, z_log_var], name="encoder"
+            )
+            self.decoder = tf.keras.Model(
+                decoder_inputs, decoder_outputs, name="decoder"
+            )
 
             # Initialise beta (KL weight) with a smaller value for better training stability
             self.beta = tf.Variable(0.001, trainable=False, dtype=tf.float32)
@@ -665,9 +769,13 @@ def run_autoencoder(
 
             reconstruction = self.decoder(z)
             reconstruction_loss = tf.reduce_mean(tf.square(x - reconstruction))
-            reconstruction_loss *= tf.cast(tf.shape(x)[1], tf.float32)  # Scale by input dimension
+            reconstruction_loss *= tf.cast(
+                tf.shape(x)[1], tf.float32
+            )  # Scale by input dimension
 
-            kl_loss = -0.5 * tf.reduce_mean(1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
+            kl_loss = -0.5 * tf.reduce_mean(
+                1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
+            )
 
             total_loss = reconstruction_loss + self.beta * kl_loss
 
@@ -685,12 +793,16 @@ def run_autoencoder(
             self.kl_loss_tracker.reset_states()
 
             with tf.GradientTape() as tape:
-                total_loss, reconstruction_loss, kl_loss = self.compute_loss(x, training=True)
+                total_loss, reconstruction_loss, kl_loss = self.compute_loss(
+                    x, training=True
+                )
 
             # Compute and clip gradients
             trainable_vars = self.trainable_variables
             gradients = tape.gradient(total_loss, trainable_vars)
-            gradients = [tf.clip_by_norm(g, 1.0) if g is not None else g for g in gradients]
+            gradients = [
+                tf.clip_by_norm(g, 1.0) if g is not None else g for g in gradients
+            ]
 
             # Update weights
             self.optimizer.apply_gradients(zip(gradients, trainable_vars))
@@ -717,7 +829,9 @@ def run_autoencoder(
             self.val_reconstruction_loss_tracker.reset_states()
             self.val_kl_loss_tracker.reset_states()
 
-            total_loss, reconstruction_loss, kl_loss = self.compute_loss(x, training=False)
+            total_loss, reconstruction_loss, kl_loss = self.compute_loss(
+                x, training=False
+            )
 
             # Update validation metrics
             self.val_total_loss_tracker.update_state(total_loss)
@@ -753,7 +867,10 @@ def run_autoencoder(
         val_size = int(dataset_size * validation_split)
         if val_size < min_val_samples:
             val_size = min(min_val_samples, dataset_size // 2)
-            log_message(f"Adjusted validation size to {val_size} samples to ensure reliable validation", level="info")
+            log_message(
+                f"Adjusted validation size to {val_size} samples to ensure reliable validation",
+                level="info",
+            )
 
         # Create indices for split
         indices = np.random.permutation(dataset_size)
@@ -799,7 +916,10 @@ def run_autoencoder(
                 level="warning",
             )
         if n_components < 2:
-            log_message("Warning: Latent dimension less than 2 may be too restrictive.", level="warning")
+            log_message(
+                "Warning: Latent dimension less than 2 may be too restrictive.",
+                level="warning",
+            )
 
     # -------------------------
     # Before starting: GPU availability check
@@ -816,7 +936,9 @@ def run_autoencoder(
     # 1. Scaling and setting up a generator
     # -------------------------
 
-    data_array = preprocess_data(df, seq_lengths, scaling_method=scaling_method, use_tf_idf=True)
+    data_array = preprocess_data(
+        df, seq_lengths, scaling_method=scaling_method, use_tf_idf=True
+    )
     if np.any(np.isnan(data_array)) or np.any(np.isinf(data_array)):
         raise ValueError("Input data contains NaN or infinite values.")
 
@@ -835,8 +957,12 @@ def run_autoencoder(
     MEMORY_THRESHOLD = 1 * 1024**3  # 1GB
     if data_array.nbytes > MEMORY_THRESHOLD:
         log_message("Using memory-efficient data generator due to large dataset size")
-        train_data = DataGenerator(data_array[train_idx], batch_size=batch_size, shuffle=True)
-        val_data = DataGenerator(data_array[val_idx], batch_size=batch_size, shuffle=False)
+        train_data = DataGenerator(
+            data_array[train_idx], batch_size=batch_size, shuffle=True
+        )
+        val_data = DataGenerator(
+            data_array[val_idx], batch_size=batch_size, shuffle=False
+        )
         steps_per_epoch = len(train_data)
         validation_steps = len(val_data)
         validation_data = val_data
@@ -863,12 +989,16 @@ def run_autoencoder(
     check_model_architecture(input_dim, n_components)
 
     if nr_of_epochs < 1:
-        sys.stderr.write("Warning: Invalid number of epochs. Setting to default of 100.\n")
+        sys.stderr.write(
+            "Warning: Invalid number of epochs. Setting to default of 100.\n"
+        )
         nr_of_epochs = 100
 
     valid_activations = ["relu", "tanh", "sigmoid", "linear", "selu"]
     if activation_mode not in valid_activations:
-        sys.stderr.write(f"Warning: Invalid activation mode '{activation_mode}'. Using 'relu'\n")
+        sys.stderr.write(
+            f"Warning: Invalid activation mode '{activation_mode}'. Using 'relu'\n"
+        )
         activation_mode = "relu"
 
     # -------------------------
@@ -883,7 +1013,9 @@ def run_autoencoder(
 
         # Compile model
         vae.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0)  # Add gradient norm clipping
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=learning_rate, clipnorm=1.0
+            )  # Add gradient norm clipping
         )
 
     except Exception as e:
@@ -900,7 +1032,10 @@ def run_autoencoder(
             self.total_epochs = total_epochs
 
         def on_train_begin(self, logs=None):
-            log_message(f"Starting autoencoder training for {self.total_epochs} epochs", level="info")
+            log_message(
+                f"Starting autoencoder training for {self.total_epochs} epochs",
+                level="info",
+            )
 
         def on_epoch_end(self, epoch, logs=None):
             if epoch % 5 == 0:  # Report every 5 epochs
@@ -914,7 +1049,9 @@ def run_autoencoder(
                 )
 
         def on_train_end(self, logs=None):
-            log_message(f"Training completed. Final loss: {logs['loss']:.4f}", level="info")
+            log_message(
+                f"Training completed. Final loss: {logs['loss']:.4f}", level="info"
+            )
 
     # -------------------------
     # 5. Warm-up callback
@@ -939,7 +1076,9 @@ def run_autoencoder(
                 cycle = (epoch - self.warmup_epochs) // self.cycle_length
                 cycle_epoch = (epoch - self.warmup_epochs) % self.cycle_length
                 progress = cycle_epoch / self.cycle_length
-                lr = self.min_lr + 0.5 * (self.base_lr - self.min_lr) * (1 + np.cos(np.pi * progress)) * (
+                lr = self.min_lr + 0.5 * (self.base_lr - self.min_lr) * (
+                    1 + np.cos(np.pi * progress)
+                ) * (
                     0.9**cycle
                 )  # Changed from 0.8
 
@@ -950,7 +1089,9 @@ def run_autoencoder(
     # -------------------------
 
     class BetaScheduler(tf.keras.callbacks.Callback):
-        def __init__(self, beta_final=0.0005, ramp_start=20, ramp_length=40):  # Modified values
+        def __init__(
+            self, beta_final=0.0005, ramp_start=20, ramp_length=40
+        ):  # Modified values
             super().__init__()
             self.beta_final = beta_final
             self.ramp_start = ramp_start
@@ -962,7 +1103,9 @@ def run_autoencoder(
             elif epoch < (self.ramp_start + self.ramp_length):
                 # More gradual sigmoid ramp
                 progress = (epoch - self.ramp_start) / self.ramp_length
-                beta = self.beta_final / (1 + np.exp(-5 * (progress - 0.5)))  # Reduced slope
+                beta = self.beta_final / (
+                    1 + np.exp(-5 * (progress - 0.5))
+                )  # Reduced slope
             else:
                 beta = self.beta_final
             self.model.beta.assign(beta)
@@ -1003,7 +1146,9 @@ def run_autoencoder(
             # Monitor training metrics
             if len(self.reconstruction_losses) > 1:
                 # Check for stuck reconstruction
-                rec_diff = abs(self.reconstruction_losses[-1] - self.reconstruction_losses[-2])
+                rec_diff = abs(
+                    self.reconstruction_losses[-1] - self.reconstruction_losses[-2]
+                )
                 if rec_diff < 1e-7:
                     log_message(
                         "Warning: Reconstruction loss has stagnated "
@@ -1043,7 +1188,9 @@ def run_autoencoder(
                         total_loss, _, _ = self.model.compute_loss(batch)
 
                     # Get gradients
-                    gradients = tape.gradient(total_loss, self.model.trainable_variables)
+                    gradients = tape.gradient(
+                        total_loss, self.model.trainable_variables
+                    )
                     grad_norm = tf.linalg.global_norm(gradients)
                     self.grad_norms.append(grad_norm.numpy())
 
@@ -1062,7 +1209,10 @@ def run_autoencoder(
                         )
 
                 except Exception as e:
-                    log_message(f"Note: Could not compute gradient metrics: {str(e)}", level="info")
+                    log_message(
+                        f"Note: Could not compute gradient metrics: {str(e)}",
+                        level="info",
+                    )
 
             # Log current state
             log_message(
@@ -1088,7 +1238,12 @@ def run_autoencoder(
 
     # Update the callbacks list:
     callbacks = [
-        WarmUpCosineDecay(total_epochs=nr_of_epochs, warmup_epochs=10, base_lr=learning_rate, min_lr=1e-5),
+        WarmUpCosineDecay(
+            total_epochs=nr_of_epochs,
+            warmup_epochs=10,
+            base_lr=learning_rate,
+            min_lr=1e-5,
+        ),
         BetaScheduler(
             beta_final=0.0005,  # Match class default
             ramp_start=20,  # Match class default
@@ -1096,7 +1251,11 @@ def run_autoencoder(
         ),
         ProgressCallback(nr_of_epochs),
         tf.keras.callbacks.EarlyStopping(
-            monitor="val_loss", patience=30, restore_best_weights=True, verbose=1, min_delta=1e-4  # Increased patience
+            monitor="val_loss",
+            patience=30,
+            restore_best_weights=True,
+            verbose=1,
+            min_delta=1e-4,  # Increased patience
         ),
         tf.keras.callbacks.ReduceLROnPlateau(
             monitor="val_loss",
@@ -1109,14 +1268,17 @@ def run_autoencoder(
         tf.keras.callbacks.LambdaCallback(
             on_epoch_end=lambda epoch, logs: (
                 log_message(
-                    f"Epoch {epoch + 1}: learning rate = {K.get_value(vae.optimizer.learning_rate):.6f}", level="info"
+                    f"Epoch {epoch + 1}: learning rate = {K.get_value(vae.optimizer.learning_rate):.6f}",
+                    level="info",
                 )
                 if epoch % 5 == 0
                 else None
             )
         ),
         ModelPerformanceMonitor(check_frequency=5),
-        tf.keras.callbacks.CSVLogger(os.path.join(out_folder, "training_log.csv"), separator=",", append=False),
+        tf.keras.callbacks.CSVLogger(
+            os.path.join(out_folder, "training_log.csv"), separator=",", append=False
+        ),
     ]
 
     # Modified training data handling
@@ -1195,21 +1357,34 @@ def run_autoencoder(
 
         # UMAP visualisation of the latent space
         if optimise_n_neighbors:
-            log_message("Optimising UMAP parameters for latent space visualisation...", level="info")
+            log_message(
+                "Optimising UMAP parameters for latent space visualisation...",
+                level="info",
+            )
             best_n_neighbors, opt_results = find_best_n_neighbors_setting(
-                embedding, method_name="umap", n_neighbors_range=[5, 10, 15, 20, 30], min_cluster_sizes=[5, 10, 15]
+                embedding,
+                method_name="umap",
+                n_neighbors_range=[5, 10, 15, 20, 30],
+                min_cluster_sizes=[5, 10, 15],
             )
 
             # Save optimisation results
             if out_folder:
-                results_path = os.path.join(out_folder, "autoencoder_umap_optimisation.txt")
+                results_path = os.path.join(
+                    out_folder, "autoencoder_umap_optimisation.txt"
+                )
                 with open(results_path, "w") as f:
                     f.write("n_neighbors,score\n")
                     for n, score in opt_results.items():
                         f.write(f"{n},{score:.4f}\n")
 
-            log_message(f"Best n_neighbors for UMAP visualisation: {best_n_neighbors}", level="info")
-            umap_embedding = umap.UMAP(n_neighbors=best_n_neighbors, n_components=5).fit_transform(embedding)
+            log_message(
+                f"Best n_neighbors for UMAP visualisation: {best_n_neighbors}",
+                level="info",
+            )
+            umap_embedding = umap.UMAP(
+                n_neighbors=best_n_neighbors, n_components=5
+            ).fit_transform(embedding)
         else:
             # Use default UMAP parameters
             umap_embedding = umap.UMAP(n_components=5).fit_transform(embedding)
@@ -1276,7 +1451,9 @@ def monitor_vae_training(history, out_folder):
     plt.close()
 
 
-def visualise_embedding(embedding, metric_values=None, out_folder=None, title="Embedding"):
+def visualise_embedding(
+    embedding, metric_values=None, out_folder=None, title="Embedding"
+):
     """
     Create comprehensive visualisation of embedding results with robust error handling.
     """
@@ -1289,7 +1466,9 @@ def visualise_embedding(embedding, metric_values=None, out_folder=None, title="E
     # Main scatter plot
     plt.subplot(2, 2, 1)
     if metric_values is not None and len(metric_values) == embedding.shape[0]:
-        scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=metric_values, cmap="viridis", alpha=0.6)
+        scatter = plt.scatter(
+            embedding[:, 0], embedding[:, 1], c=metric_values, cmap="viridis", alpha=0.6
+        )
         plt.colorbar(scatter, label="Quality score")
     else:
         plt.scatter(embedding[:, 0], embedding[:, 1], alpha=0.6)
@@ -1323,15 +1502,22 @@ def visualise_embedding(embedding, metric_values=None, out_folder=None, title="E
                 from scipy.stats import gaussian_kde
 
                 # Add small noise to prevent singular matrix
-                data = embedding[:, idx] + np.random.normal(0, 1e-10, embedding[:, idx].shape)
+                data = embedding[:, idx] + np.random.normal(
+                    0, 1e-10, embedding[:, idx].shape
+                )
                 kde = gaussian_kde(data, bw_method="silverman")
                 x_range = np.linspace(data.min(), data.max(), 200)
                 plt.plot(x_range, kde(x_range))
             except Exception as e:
-                log_message(f"KDE failed for component {idx+1}: {str(e)}", level="warning")
+                log_message(
+                    f"KDE failed for component {idx+1}: {str(e)}", level="warning"
+                )
                 # Continue without KDE line
         except Exception as e:
-            log_message(f"Could not create distribution plot for component {idx+1}: {str(e)}", level="warning")
+            log_message(
+                f"Could not create distribution plot for component {idx+1}: {str(e)}",
+                level="warning",
+            )
             plt.text(0.5, 0.5, "Distribution unavailable", ha="center", va="center")
 
         plt.title(f"Distribution of Component {idx+1}")
@@ -1343,7 +1529,9 @@ def visualise_embedding(embedding, metric_values=None, out_folder=None, title="E
     if out_folder:
         try:
             plt.savefig(
-                os.path.join(out_folder, f"{title.lower().replace(' ', '_')}_visualisation.png"),
+                os.path.join(
+                    out_folder, f"{title.lower().replace(' ', '_')}_visualisation.png"
+                ),
                 bbox_inches="tight",
                 dpi=300,
             )
@@ -1368,7 +1556,9 @@ def calculate_embedding_quality(original_data, embedding, n_neighbors=15):
     Returns:
         dict with trustworthiness and continuity scores
     """
-    if original_data.shape[0] < 3:  # Absolute minimum for meaningful neighborhood analysis
+    if (
+        original_data.shape[0] < 3
+    ):  # Absolute minimum for meaningful neighborhood analysis
         log_message("Dataset too small for meaningful quality metrics", level="warning")
         return {"trustworthiness": float("nan"), "continuity": float("nan")}
 
@@ -1403,7 +1593,11 @@ def calculate_embedding_quality(original_data, embedding, n_neighbors=15):
         if new_neighs:
             # Find rank in original space
             for j in new_neighs:
-                rank = np.where(orig_ind[i] == j)[0][0] + 1 if j in orig_ind[i] else n_neighbors + 1
+                rank = (
+                    np.where(orig_ind[i] == j)[0][0] + 1
+                    if j in orig_ind[i]
+                    else n_neighbors + 1
+                )
                 trustworthiness += rank - n_neighbors
 
     # Calculate continuity
@@ -1417,7 +1611,11 @@ def calculate_embedding_quality(original_data, embedding, n_neighbors=15):
         if lost_neighs:
             # Find rank in embedding space
             for j in lost_neighs:
-                rank = np.where(emb_ind[i] == j)[0][0] + 1 if j in emb_ind[i] else n_neighbors + 1
+                rank = (
+                    np.where(emb_ind[i] == j)[0][0] + 1
+                    if j in emb_ind[i]
+                    else n_neighbors + 1
+                )
                 continuity += rank - n_neighbors
 
     # Normalise
@@ -1428,7 +1626,9 @@ def calculate_embedding_quality(original_data, embedding, n_neighbors=15):
     return {"trustworthiness": float(trustworthiness), "continuity": float(continuity)}
 
 
-def save_embedding_results(embedding, original_data, out_folder, method_name, seq_names=None):
+def save_embedding_results(
+    embedding, original_data, out_folder, method_name, seq_names=None
+):
     """
     Save embedding results including visualisations and quality metrics.
     """
@@ -1441,11 +1641,16 @@ def save_embedding_results(embedding, original_data, out_folder, method_name, se
 
     # Check embedding quality
     if np.any(np.isnan(embedding)):
-        log_message("Embedding contains NaN values - saving will be limited", level="warning")
+        log_message(
+            "Embedding contains NaN values - saving will be limited", level="warning"
+        )
         return
 
     if np.all(embedding == 0):
-        log_message("Embedding contains all zeros - visualisation may be uninformative", level="warning")
+        log_message(
+            "Embedding contains all zeros - visualisation may be uninformative",
+            level="warning",
+        )
 
     # Calculate quality metrics
     try:
@@ -1460,7 +1665,9 @@ def save_embedding_results(embedding, original_data, out_folder, method_name, se
 
     # Create visualisation with error handling
     try:
-        visualise_embedding(embedding, metric_values=None, out_folder=out_folder, title=method_name)
+        visualise_embedding(
+            embedding, metric_values=None, out_folder=out_folder, title=method_name
+        )
     except Exception as e:
         log_message(f"Failed to create visualisation: {str(e)}", level="error")
 
@@ -1468,9 +1675,13 @@ def save_embedding_results(embedding, original_data, out_folder, method_name, se
     if seq_names is not None and "_raw" in method_name:
         try:
             embedding_df = embedding_to_dataframe(embedding, seq_names, method_name)
-            embedding_df.to_csv(os.path.join(out_folder, f"{method_name}_coordinates.csv"), index=False)
+            embedding_df.to_csv(
+                os.path.join(out_folder, f"{method_name}_coordinates.csv"), index=False
+            )
         except Exception as e:
-            log_message(f"Failed to save embedding coordinates: {str(e)}", level="error")
+            log_message(
+                f"Failed to save embedding coordinates: {str(e)}", level="error"
+            )
 
     # Save clustering metrics
     if seq_names is not None:
@@ -1481,7 +1692,9 @@ def save_embedding_results(embedding, original_data, out_folder, method_name, se
         metrics = evaluate_clustering(embedding, labels)
 
         # Save metrics
-        with open(os.path.join(out_folder, f"{method_name}_clustering_metrics.txt"), "w") as f:
+        with open(
+            os.path.join(out_folder, f"{method_name}_clustering_metrics.txt"), "w"
+        ) as f:
             for metric, value in metrics.items():
                 f.write(f"{metric}: {value:.4f}\n")
 
@@ -1494,7 +1707,9 @@ def run_tsne(df, n_components, n_neighbors):
     df_row_count = df.shape[0]
     if df_row_count < 2:
         log_message(
-            "Cannot run t-SNE because the kmer counts dataframe has only {} rows\n".format(df_row_count),
+            "Cannot run t-SNE because the kmer counts dataframe has only {} rows\n".format(
+                df_row_count
+            ),
             level="warning",
         )
         return None
@@ -1512,7 +1727,9 @@ def run_tsne(df, n_components, n_neighbors):
         return None
 
     # Use n_neighbors_setting as perplexity, but ensure it's valid
-    perplexity = min(n_neighbors, df_row_count / 3)  # t-SNE typically expects perplexity < N/3
+    perplexity = min(
+        n_neighbors, df_row_count / 3
+    )  # t-SNE typically expects perplexity < N/3
     if perplexity < 1:
         perplexity = 1
     log_message(f"Using t-SNE perplexity value of {perplexity}", level="warning")
@@ -1526,7 +1743,9 @@ def run_tsne(df, n_components, n_neighbors):
         )
         return None
 
-    embedding = manifold.TSNE(n_components=n_components, perplexity=perplexity).fit_transform(df)
+    embedding = manifold.TSNE(
+        n_components=n_components, perplexity=perplexity
+    ).fit_transform(df)
     return embedding
 
 
@@ -1536,7 +1755,9 @@ def get_min_neighbors_for_lle(method, n_components):
     """
     try:
         if method == "hessian":
-            return max(int((n_components * (n_components + 3) / 2) + 1), n_components + 1)
+            return max(
+                int((n_components * (n_components + 3) / 2) + 1), n_components + 1
+            )
         elif method == "standard":
             return max(n_components + 1, 2)  # At least 2 neighbors
         elif method == "modified":
@@ -1552,13 +1773,18 @@ def run_lle(df_preprocessed, method, n_neighbors_setting, n_components):
     """
     Run LLE with proper error handling for all variants
     """
-    method_names = {"standard": "LLE standard", "hessian": "LLE hessian", "modified": "LLE modified"}
+    method_names = {
+        "standard": "LLE standard",
+        "hessian": "LLE hessian",
+        "modified": "LLE modified",
+    }
 
     #
     if n_neighbors_setting is None:
         n_neighbors_setting = n_components + 2  # Safe default
         log_message(
-            f"No valid n_neighbors setting provided for {method} LLE. " f"Using default value: {n_neighbors_setting}",
+            f"No valid n_neighbors setting provided for {method} LLE. "
+            f"Using default value: {n_neighbors_setting}",
             level="warning",
         )
 
@@ -1571,24 +1797,32 @@ def run_lle(df_preprocessed, method, n_neighbors_setting, n_components):
     if n_neighbors_setting < min_neighbors:
         n_neighbors_setting = min_neighbors
         log_message(
-            f"Adjusted n_neighbors to minimum required value ({min_neighbors}) " f"for {embedding_title}",
+            f"Adjusted n_neighbors to minimum required value ({min_neighbors}) "
+            f"for {embedding_title}",
             level="warning",
         )
 
     try:
         # Try with dense solver first
         embedding = manifold.LocallyLinearEmbedding(
-            n_neighbors=n_neighbors_setting, n_components=n_components, eigen_solver="dense", method=method
+            n_neighbors=n_neighbors_setting,
+            n_components=n_components,
+            eigen_solver="dense",
+            method=method,
         ).fit_transform(df_preprocessed)
     except Exception as e:
         log_message(
-            f"Error running {embedding_title} with dense solver: {str(e)}. " "Trying with arpack solver...",
+            f"Error running {embedding_title} with dense solver: {str(e)}. "
+            "Trying with arpack solver...",
             level="warning",
         )
         try:
             # Try with arpack solver as fallback
             embedding = manifold.LocallyLinearEmbedding(
-                n_neighbors=n_neighbors_setting, n_components=n_components, eigen_solver="arpack", method=method
+                n_neighbors=n_neighbors_setting,
+                n_components=n_components,
+                eigen_solver="arpack",
+                method=method,
             ).fit_transform(df_preprocessed)
         except Exception as e:
             log_message(
@@ -1609,8 +1843,14 @@ def check_minimum_samples(n_samples, n_features, method, n_components):
 
     method_requirements = {
         "pca": {"min_samples": 2, "message": "PCA requires at least 2 samples"},
-        "random_trees": {"min_samples": 2, "message": "Random Trees embedding requires at least 2 samples"},
-        "umap": {"min_samples": 10, "message": "UMAP works best with at least 10 samples"},
+        "random_trees": {
+            "min_samples": 2,
+            "message": "Random Trees embedding requires at least 2 samples",
+        },
+        "umap": {
+            "min_samples": 10,
+            "message": "UMAP works best with at least 10 samples",
+        },
         "t-sne": {"min_samples": 5, "message": "t-SNE requires at least 5 samples"},
         "isomap": {"min_samples": 5, "message": "Isomap requires at least 5 samples"},
         "lle_standard": {
@@ -1626,9 +1866,18 @@ def check_minimum_samples(n_samples, n_features, method, n_components):
             "message": f"Modified LLE requires at least {max(n_components + 2, 5)} samples",
         },
         "mds": {"min_samples": 4, "message": "MDS requires at least 4 samples"},
-        "se": {"min_samples": 4, "message": "Spectral Embedding requires at least 4 samples"},
-        "kernel_pca": {"min_samples": 2, "message": "Kernel PCA requires at least 2 samples"},
-        "pca_svd": {"min_samples": 2, "message": "PCA with SVD requires at least 2 samples"},
+        "se": {
+            "min_samples": 4,
+            "message": "Spectral Embedding requires at least 4 samples",
+        },
+        "kernel_pca": {
+            "min_samples": 2,
+            "message": "Kernel PCA requires at least 2 samples",
+        },
+        "pca_svd": {
+            "min_samples": 2,
+            "message": "PCA with SVD requires at least 2 samples",
+        },
         "nmf": {"min_samples": 2, "message": "NMF requires at least 2 samples"},
         "autoencoder_relu": {
             "min_samples": 10,
@@ -1652,7 +1901,9 @@ def check_minimum_samples(n_samples, n_features, method, n_components):
     # Additional check for n_components
     if is_valid and n_components >= n_samples:
         is_valid = False
-        req["message"] = f"Number of components ({n_components}) must be less than number of samples ({n_samples})"
+        req["message"] = (
+            f"Number of components ({n_components}) must be less than number of samples ({n_samples})"
+        )
 
     # Check for feature count
     if is_valid and n_features < 2:
@@ -1689,13 +1940,22 @@ def run_dim_reduction(
         )
 
     # Check if we have enough samples for the selected method
-    is_valid, message, _ = check_minimum_samples(n_samples, n_features, selected_method, n_components)
+    is_valid, message, _ = check_minimum_samples(
+        n_samples, n_features, selected_method, n_components
+    )
 
     if not is_valid:
         log_message(f"Skipping {selected_method}: {message}", level="warning")
         return None, None, False
 
-    methods_with_neighbors = {"umap", "isomap", "lle_standard", "lle_hessian", "lle_modified", "se"}
+    methods_with_neighbors = {
+        "umap",
+        "isomap",
+        "lle_standard",
+        "lle_hessian",
+        "lle_modified",
+        "se",
+    }
 
     # Validate n_components at the start
     n_samples, n_features = df.shape
@@ -1707,11 +1967,15 @@ def run_dim_reduction(
     if optimise_n_neighbors and selected_method in methods_with_neighbors:
         log_message(f"Optimising parameters for {selected_method}...", level="info")
         try:
-            best_n_neighbors, opt_results = find_best_n_neighbors_setting(df.values, selected_method)
+            best_n_neighbors, opt_results = find_best_n_neighbors_setting(
+                df.values, selected_method
+            )
 
             # Save optimisation results
             if out_folder:
-                results_path = os.path.join(out_folder, f"{selected_method}_n_neighbors_optimisation.txt")
+                results_path = os.path.join(
+                    out_folder, f"{selected_method}_n_neighbors_optimisation.txt"
+                )
                 with open(results_path, "w") as f:
                     f.write("n_neighbors,score\n")
                     for n, score in opt_results.items():
@@ -1719,7 +1983,10 @@ def run_dim_reduction(
 
             if best_n_neighbors is not None:
                 n_neighbors_setting = best_n_neighbors
-                log_message(f"Best n_neighbors for {selected_method}: {best_n_neighbors}", level="info")
+                log_message(
+                    f"Best n_neighbors for {selected_method}: {best_n_neighbors}",
+                    level="info",
+                )
             else:
                 # Use default or provided n_neighbors if optimisation fails
                 log_message(
@@ -1738,20 +2005,37 @@ def run_dim_reduction(
         if n_neighbors_setting is None or n_neighbors_setting < 1:
             n_neighbors_setting = n_components + 2  # Safe default
             log_message(
-                f"Invalid n_neighbors setting for {selected_method}. " f"Using default value: {n_neighbors_setting}",
+                f"Invalid n_neighbors setting for {selected_method}. "
+                f"Using default value: {n_neighbors_setting}",
                 level="warning",
             )
-        n_neighbors_setting = validate_n_neighbors(n_neighbors_setting, n_samples, selected_method)
+        n_neighbors_setting = validate_n_neighbors(
+            n_neighbors_setting, n_samples, selected_method
+        )
 
     # Preprocessing based on the method
-    if selected_method in ["pca", "lle_standard", "lle_hessian", "lle_modified", "kernel_pca", "pca_svd", "se"]:
+    if selected_method in [
+        "pca",
+        "lle_standard",
+        "lle_hessian",
+        "lle_modified",
+        "kernel_pca",
+        "pca_svd",
+        "se",
+    ]:
         # Standard scaling ensures features contribute equally in PCA/LLE
-        df_preprocessed = preprocess_data(df, seq_lengths, scaling_method="standard", use_tf_idf=False)
+        df_preprocessed = preprocess_data(
+            df, seq_lengths, scaling_method="standard", use_tf_idf=False
+        )
     elif selected_method in ["umap", "t-sne", "isomap", "mds"]:
-        df_preprocessed = preprocess_data(df, seq_lengths, scaling_method="log", use_tf_idf=False)
+        df_preprocessed = preprocess_data(
+            df, seq_lengths, scaling_method="log", use_tf_idf=False
+        )
     elif selected_method in ["random_trees", "nmf"]:
         # df_preprocessed = df.values  # Pass raw values because these methods don't require scaling
-        df_preprocessed = preprocess_data(df, seq_lengths, scaling_method="log", use_tf_idf=False)
+        df_preprocessed = preprocess_data(
+            df, seq_lengths, scaling_method="log", use_tf_idf=False
+        )
     elif selected_method in [
         "autoencoder_sigmoid",
         "autoencoder_linear",
@@ -1783,21 +2067,29 @@ def run_dim_reduction(
 
     elif selected_method == "t-sne":
         embedding_title = "t-SNE"
-        embedding = run_tsne(df_preprocessed, n_neighbors=n_neighbors_setting, n_components=n_components)
+        embedding = run_tsne(
+            df_preprocessed, n_neighbors=n_neighbors_setting, n_components=n_components
+        )
 
     elif selected_method == "isomap":
         embedding_title = "isomap"
         print_timestamp(embedding_title)
-        embedding = manifold.Isomap(n_neighbors=n_neighbors_setting, n_components=n_components).fit_transform(
-            df_preprocessed
-        )
+        embedding = manifold.Isomap(
+            n_neighbors=n_neighbors_setting, n_components=n_components
+        ).fit_transform(df_preprocessed)
 
     elif selected_method == "lle_standard":
-        embedding, embedding_title = run_lle(df_preprocessed, "standard", n_neighbors_setting, n_components)
+        embedding, embedding_title = run_lle(
+            df_preprocessed, "standard", n_neighbors_setting, n_components
+        )
     elif selected_method == "lle_hessian":
-        embedding, embedding_title = run_lle(df_preprocessed, "hessian", n_neighbors_setting, n_components)
+        embedding, embedding_title = run_lle(
+            df_preprocessed, "hessian", n_neighbors_setting, n_components
+        )
     elif selected_method == "lle_modified":
-        embedding, embedding_title = run_lle(df_preprocessed, "modified", n_neighbors_setting, n_components)
+        embedding, embedding_title = run_lle(
+            df_preprocessed, "modified", n_neighbors_setting, n_components
+        )
 
     elif selected_method == "mds":
         embedding_title = "MDS"
@@ -1810,7 +2102,9 @@ def run_dim_reduction(
                 level="warning",
             )
             n_components = max_possible_components
-        embedding = manifold.MDS(max_iter=100, n_init=1, n_components=n_components).fit_transform(df_preprocessed)
+        embedding = manifold.MDS(
+            max_iter=100, n_init=1, n_components=n_components
+        ).fit_transform(df_preprocessed)
 
     elif selected_method == "se":
         embedding_title = "SE"
@@ -1823,7 +2117,9 @@ def run_dim_reduction(
         # https://scikit-learn.org/stable/auto_examples/manifold/plot_lle_digits.html#sphx-glr-auto-examples-manifold-plot-lle-digits-py
         embedding_title = "random_trees"
         print_timestamp(embedding_title)
-        hasher = ensemble.RandomTreesEmbedding(n_estimators=200, random_state=0, max_depth=5)
+        hasher = ensemble.RandomTreesEmbedding(
+            n_estimators=200, random_state=0, max_depth=5
+        )
         x_transformed = hasher.fit_transform(df_preprocessed)
         pca = decomposition.TruncatedSVD(n_components=n_components)
         embedding = pca.fit_transform(x_transformed)
@@ -1832,7 +2128,9 @@ def run_dim_reduction(
         # https://www.tutorialspoint.com/scikit_learn/scikit_learn_dimensionality_reduction_using_pca.htm
         embedding_title = "KernelPCA"
         print_timestamp(embedding_title)
-        kernel_pca = decomposition.KernelPCA(n_components=n_components, kernel="sigmoid")
+        kernel_pca = decomposition.KernelPCA(
+            n_components=n_components, kernel="sigmoid"
+        )
         embedding = kernel_pca.fit_transform(df_preprocessed)
 
     elif selected_method == "pca_svd":
@@ -1846,7 +2144,9 @@ def run_dim_reduction(
         # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html
         embedding_title = "Non-Negative Matrix Factorization"
         print_timestamp(embedding_title)
-        nmf_model = decomposition.NMF(n_components=n_components, init="random", random_state=0)
+        nmf_model = decomposition.NMF(
+            n_components=n_components, init="random", random_state=0
+        )
         embedding = nmf_model.fit_transform(df_preprocessed)
 
     elif selected_method.startswith("autoencoder"):
@@ -1907,7 +2207,8 @@ def main(
         )
     else:
         log_message(
-            f"n_neighbors optimisation disabled, using provided/default value: {n_neighbors_setting}", level="info"
+            f"n_neighbors optimisation disabled, using provided/default value: {n_neighbors_setting}",
+            level="info",
         )
 
     df, seq_names, seq_lengths = load_data(kmer_counts_file)
@@ -1935,7 +2236,11 @@ def main(
         )
         # Generate an empty file to satisfy nextflow expecting a file from script finishing with no file with small output
         with open(
-            os.path.join(os.getcwd(), f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv"), "w"
+            os.path.join(
+                os.getcwd(),
+                f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv",
+            ),
+            "w",
         ) as empty_file:
             empty_file.write("The kmer counts file is too small for analysis")
         sys.exit(0)
@@ -1986,13 +2291,20 @@ def main(
             embeddings_list.append(embedding_df)
 
     if not embeddings_list:
-        log_message("No valid embeddings were generated. Check the warnings above.", level="error")
-        with open(f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv", "w") as empty_file:
+        log_message(
+            "No valid embeddings were generated. Check the warnings above.",
+            level="error",
+        )
+        with open(
+            f"EMPTY_{selected_methods}_kmers_dim_reduction_embeddings.csv", "w"
+        ) as empty_file:
             empty_file.write("NO VALID EMBEDDINGS GENERATED")
         sys.exit(1)
 
     out_df = reduce(
-        lambda left, right: pd.merge(left, right, on=["scaff"], how="outer"),  # Merge DataFrames in list
+        lambda left, right: pd.merge(
+            left, right, on=["scaff"], how="outer"
+        ),  # Merge DataFrames in list
         embeddings_list,
     )
     out_path = os.path.join(out_folder, "kmers_dim_reduction_embeddings.csv")
@@ -2002,8 +2314,12 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-v", "--version", action="version", version="1.0")
-    parser.add_argument("kmer_counts_file", type=str, help="Path to input CSV file with kmer counts")
-    parser.add_argument("out_folder", type=str, help="Path to folder where output files will be written")
+    parser.add_argument(
+        "kmer_counts_file", type=str, help="Path to input CSV file with kmer counts"
+    )
+    parser.add_argument(
+        "out_folder", type=str, help="Path to folder where output files will be written"
+    )
     parser.add_argument(
         "--selected_methods",
         type=str,

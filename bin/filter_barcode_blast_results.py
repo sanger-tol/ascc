@@ -45,7 +45,9 @@ def main():
         n_iterator = re.finditer("[Nn]+", str(record.seq))
         for n_instance in n_iterator:
             # barcode_location_handle.write(record.id + '\t' + str(n_instance.start(0)+1) + '\t' + str(n_instance.end(0)) + '\n')
-            n_regions_for_record[record.id].append([n_instance.start(0) + 1, n_instance.end(0)])
+            n_regions_for_record[record.id].append(
+                [n_instance.start(0) + 1, n_instance.end(0)]
+            )
 
     fasta_input_handle.close()
 
@@ -80,9 +82,19 @@ def main():
                         if blast_end <= end and end - blast_end <= threshold:
                             terminal_flag = True
                             blast_end = end
-                    if terminal_flag or (blast_length >= 17 and blast_percentage >= 100):
+                    if terminal_flag or (
+                        blast_length >= 17 and blast_percentage >= 100
+                    ):
                         barcode_location_handle.write(
-                            "\t".join(["CONTAMINANT", blast_id, str(blast_start), str(blast_end)]) + "\n"
+                            "\t".join(
+                                [
+                                    "CONTAMINANT",
+                                    blast_id,
+                                    str(blast_start),
+                                    str(blast_end),
+                                ]
+                            )
+                            + "\n"
                         )
 
     barcode_location_handle.close()
