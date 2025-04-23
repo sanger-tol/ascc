@@ -15,6 +15,7 @@ scientific_name: scientific name of the assembled organism
 taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
 reads_path:
   - List of file paths
+reads_layout: Layout of the reads included in this run (SINGLE or PAIRED) this value should represent all input reads.
 reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
 pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
 pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
@@ -23,7 +24,6 @@ dimensionality_reduction_methods: a comma separated list of methods for the dime
 nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database MUST have built-in taxonomy (this is a requirement since the pipeline no longer uses accession2taxid files). Should end with a trailing slash
 nt_database_prefix: prefix for the NCBI nt database. Default: "nt"
 nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
-ncbi_taxonomy_path: path to NCBI taxdump directory (e.g. "/taxdump/"). Should end with a trailing slash
 ncbi_ranked_lineage_path: path to NCBI ranked lineage file (e.g. "/taxdump/rankedlineage.dmp")
 busco_lineages_folder: path to BUSCO 5 lineages directory. Should end with a trailing slash
 busco_lineages: a comma separated list of BUSCO lineages that will be used in the sanger-tol/blobtoolkit pipeline run. For example: "diptera_odb10,insecta_odb10". Available lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/

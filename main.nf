@@ -111,16 +111,16 @@ workflow {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
-    // SANGERTOL_ASCC_GENOMIC (
-    //     PIPELINE_INITIALISATION.out.main_genomes,
-    //     PIPELINE_INITIALISATION.out.organellar_genomes,
-    //     PIPELINE_INITIALISATION.out.include_steps,
-    //     PIPELINE_INITIALISATION.out.exclude_steps,
-    //     PIPELINE_INITIALISATION.out.fcs_gx_database,
-    //     PIPELINE_INITIALISATION.out.collected_reads,
-    //     Channel.of(params.scientific_name),
-    //     PIPELINE_INITIALISATION.out.pacbio_db,
-    // )
+    SANGERTOL_ASCC_GENOMIC (
+        PIPELINE_INITIALISATION.out.main_genomes,
+        PIPELINE_INITIALISATION.out.organellar_genomes,
+        PIPELINE_INITIALISATION.out.include_steps,
+        PIPELINE_INITIALISATION.out.exclude_steps,
+        PIPELINE_INITIALISATION.out.fcs_gx_database,
+        PIPELINE_INITIALISATION.out.collected_reads,
+        Channel.of(params.scientific_name),
+        PIPELINE_INITIALISATION.out.pacbio_db,
+    )
 
 
     //
