@@ -216,7 +216,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // LOGIC: CHECK IF NT BLAST IS INCLUDED IN EITHER GENOMIC OR ORGANELLAR WORKFLOW
     //`
-    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !include_workflow_steps_genomic.contains("nt_blast")
+    run_nt_blast_genomic = (include_workflow_steps_genomic.contains('nt_blast') || include_workflow_steps_genomic.contains('ALL')) && !exclude_workflow_steps_genomic.contains("nt_blast")
     run_nt_blast_organellar = (include_workflow_steps_organellar.contains('nt_blast') || include_workflow_steps_organellar.contains('ALL')) && !exclude_workflow_steps_organellar.contains("nt_blast")
 
     //
