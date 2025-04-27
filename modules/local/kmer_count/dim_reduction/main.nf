@@ -16,6 +16,7 @@ process KMER_COUNT_DIM_REDUCTION {
 
     output:
     tuple val(meta), path('*_kmers_dim_reduction_embeddings.csv'),      emit: csv
+    tuple val(meta), path('./'),                                        emit: results_dir
     path "versions.yml",                                                emit: versions
 
     when:

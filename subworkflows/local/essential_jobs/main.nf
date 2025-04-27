@@ -33,8 +33,34 @@ workflow ESSENTIAL_JOBS {
     //
     // MODULE: FILTER/BREAK THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A 1.9Gb THRESHOLD, MORE THAN THIS WILL BREAK SOME TOOLS
     //
+    // Determine if FCS-adaptor will be run based on global params
+    def run_fcs_adaptor = false
+    if (params.containsKey('include') && params.include) {
+        def include_steps = params.include.split(",")
+        run_fcs_adaptor = (include_steps.contains('fcs-adaptor') || include_steps.contains('ALL'))
+    }
+    if (params.containsKey('exclude') && params.exclude) {
+        def exclude_steps = params.exclude.split(",")
+        if (exclude_steps.contains("fcs-adaptor")) {
+            run_fcs_adaptor = false
+        }
+    }
+    
+    // For organellar workflow
+    if (params.containsKey('organellar_include') && params.organellar_include) {
+        def include_steps = params.organellar_include.split(",")
+        run_fcs_adaptor = run_fcs_adaptor || (include_steps.contains('fcs-adaptor') || include_steps.contains('ALL'))
+    }
+    if (params.containsKey('organellar_exclude') && params.organellar_exclude) {
+        def exclude_steps = params.organellar_exclude.split(",")
+        if (exclude_steps.contains("fcs-adaptor")) {
+            run_fcs_adaptor = false
+        }
+    }
+    
     FILTER_FASTA(
-        new_input_fasta
+        new_input_fasta,
+        run_fcs_adaptor
     )
     ch_versions             = ch_versions.mix(FILTER_FASTA.out.versions)
 
@@ -72,5 +98,14 @@ workflow ESSENTIAL_JOBS {
     reference_with_seqkit               = new_input_fasta
     dot_genome                          = GENERATE_GENOME.out.dot_genome
     gc_content_txt                      = GC_CONTENT.out.txt
+    trailing_ns_report                  = TRAILINGNS_CHECK.out.trailing_ns_report
+    filter_fasta_sanitation_log         = FILTER_FASTA.out.sanitation_log.map { meta, file -> 
+        // Ensure we have a consistent structure
+        [meta, file]
+    }
+    filter_fasta_length_filtering_log   = FILTER_FASTA.out.length_filtering_log.map { meta, file -> 
+        // Ensure we have a consistent structure
+        [meta, file]
+    }
     versions                            = ch_versions
 }

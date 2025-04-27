@@ -1,0 +1,314 @@
+#!/usr/bin/env python3
+"""
+Table loaders for ASCC HTML report generation.
+
+This module contains functions for loading and formatting tabular data
+into HTML tables for the report.
+"""
+
+import os
+import sys
+import pandas as pd
+import io
+
+
+def load_contamination_check_merged_table(file_path):
+    """Load contamination check merged table."""
+    if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+        return None
+    try:
+        df = pd.read_csv(file_path, sep=",")
+        # Add column width styles to make the table wider
+        table_html = df.to_html(classes="table table-striped", index=False, table_id="cobiont_check_merged_table")
+
+        # Wrap the table in multiple container layers for better scrolling
+        return f"""
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    {table_html}
+                </div>
+            </div>
+        </div>
+        """
+    except Exception as e:
+        print(f"Error loading contamination check merged table: {e}", file=sys.stderr)
+        return None
+
+
+def load_trim_Ns_results(file_path):
+    """Load trim Ns results and format as an HTML table."""
+    if not os.path.exists(file_path):
+        print(f"Trailing Ns file does not exist: {file_path}", file=sys.stderr)
+        return "Trailing Ns check was not run."
+    if os.path.getsize(file_path) == 0:
+        print(f"Trailing Ns file is empty: {file_path}", file=sys.stderr)
+        return "Trailing Ns check was run, but no issues were found."
+
+    data_rows = []
+    comments = []
+    headers = ["Type", "Sequence ID", "Start", "End"] # Define expected headers
+
+    try:
+        with open(file_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith("#"):
+                    comments.append(line[1:].strip()) # Store comment without '#'
+                else:
+                    # Split by whitespace, handle potential extra spaces
+                    parts = line.split(None)
+                    if len(parts) >= 3: # Need at least Type, ID, Start
+                        row_dict = {
+                            headers[0]: parts[0],
+                            headers[1]: parts[1],
+                            headers[2]: parts[2],
+                            headers[3]: parts[3] if len(parts) > 3 else "" # Handle optional End column
+                        }
+                        data_rows.append(row_dict)
+                    else:
+                        # Handle lines that don't fit the expected format, maybe log them
+                        print(f"Skipping malformed line in {file_path}: {line}", file=sys.stderr)
+    except Exception as e:
+        print(f"Error reading trim Ns file: {e}", file=sys.stderr)
+        return "Error loading or parsing Trailing Ns check results."
+
+    # If no data rows were parsed (only comments or empty lines), return "no issues"
+    if not data_rows:
+        print(f"Trailing Ns file contains no data rows: {file_path}", file=sys.stderr)
+        # Optionally return comments if they exist
+        if comments:
+            # Parse warning comments into a table
+            warning_rows = parse_trim_ns_warnings(comments)
+            if warning_rows:
+                warnings_table = format_trim_ns_warnings_table(warning_rows)
+                return f"<p>Trailing Ns check was run, but no issues requiring trimming were found.</p>{warnings_table}"
+            else:
+                return "<p>Trailing Ns check was run, but no issues requiring trimming were found.</p><pre><code>" + "\n".join(comments) + "</code></pre>"
+        return "Trailing Ns check was run, but no issues were found."
+
+    try:
+        # Create DataFrame and HTML table for actions
+        df = pd.DataFrame(data_rows, columns=headers) # Ensure column order
+        table_html = df.to_html(classes="table table-striped", index=False, na_rep='', table_id="trim_ns_table")
+        
+        # Parse warning comments into a table
+        warning_rows = parse_trim_ns_warnings(comments)
+        
+        # Generate HTML for comments/warnings
+        comments_html = ""
+        if warning_rows:
+            # Format warnings as a table
+            comments_html = format_trim_ns_warnings_table(warning_rows)
+            
+            # Add any non-warning comments as plain text
+            non_warning_comments = [c for c in comments if not c.startswith("WARNING:")]
+            if non_warning_comments:
+                comments_html += "<p><strong>Other Comments:</strong></p><pre><code>" + "\n".join(non_warning_comments) + "</code></pre>"
+        elif comments:
+            # If no warnings were parsed but there are comments, show them as plain text
+            comments_html = "<p><strong>Comments/Warnings:</strong></p><pre><code>" + "\n".join(comments) + "</code></pre>"
+
+        # Wrap the actions table for scrolling
+        wrapped_table = f"""
+        {comments_html}
+        <h4>Trimming Actions</h4>
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    {table_html}
+                </div>
+            </div>
+        </div>
+        """
+        print(f"Successfully loaded and formatted Trailing Ns data from {file_path}", file=sys.stderr)
+        return wrapped_table
+    except Exception as e:
+        print(f"Error formatting trim Ns results: {e}", file=sys.stderr)
+        return "Error formatting Trailing Ns check results."
+
+
+def parse_trim_ns_warnings(comments):
+    """Parse warning comments from trim Ns results into structured data.
+    
+    Args:
+        comments (list): List of comment strings (without the leading '#')
+        
+    Returns:
+        list: List of dictionaries with parsed warning data
+    """
+    warning_rows = []
+    warning_headers = ["Sequence ID", "Percentage of Ns", "Total Length"]
+    
+    for comment in comments:
+        if comment.startswith("WARNING:"):
+            # Parse the comment line
+            parts = comment.replace("WARNING:", "").strip().split()
+            if len(parts) >= 5 and "Ns of total" in comment:
+                try:
+                    seq_id = parts[0]
+                    percentage = parts[1] + " " + parts[2]  # e.g., "86.2 %"
+                    total_length = parts[-1]  # Last part is the total length
+                    
+                    warning_rows.append({
+                        warning_headers[0]: seq_id,
+                        warning_headers[1]: percentage,
+                        warning_headers[2]: total_length
+                    })
+                except Exception as e:
+                    print(f"Error parsing warning comment: {comment} - {e}", file=sys.stderr)
+    
+    return warning_rows
+
+
+def format_trim_ns_warnings_table(warning_rows):
+    """Format warning rows as an HTML table.
+    
+    Args:
+        warning_rows (list): List of dictionaries with warning data
+        
+    Returns:
+        str: HTML string with formatted table
+    """
+    warning_headers = ["Sequence ID", "Percentage of Ns", "Total Length"]
+    
+    try:
+        # Create DataFrame and HTML table
+        warning_df = pd.DataFrame(warning_rows, columns=warning_headers)
+        warning_table_html = warning_df.to_html(classes="table table-striped", 
+                                               index=False, 
+                                               table_id="trim_ns_warnings_table")
+        
+        # Wrap the table for responsive display
+        warnings_html = f"""
+        <h4>Warnings - High N Content</h4>
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    {warning_table_html}
+                </div>
+            </div>
+        </div>
+        """
+        return warnings_html
+    except Exception as e:
+        print(f"Error formatting warnings table: {e}", file=sys.stderr)
+        # Fall back to plain text if table formatting fails
+        warnings_text = "\n".join([f"{row['Sequence ID']}: {row['Percentage of Ns']} of {row['Total Length']}" 
+                                 for row in warning_rows])
+        return f"<p><strong>Warnings:</strong></p><pre><code>{warnings_text}</code></pre>"
+
+
+def load_vecscreen_results_as_table(file_path):
+    """Load vecscreen results and format as an HTML table."""
+    if not os.path.exists(file_path):
+        print(f"VecScreen file does not exist: {file_path}", file=sys.stderr)
+        return "VecScreen check was not run."
+    if os.path.getsize(file_path) == 0:
+        print(f"VecScreen file is empty: {file_path}", file=sys.stderr)
+        return "VecScreen check was run, but no vector contamination was detected."
+    
+    try:
+        # Read the file content
+        with open(file_path, 'r') as f:
+            content = f.read().strip()
+        
+        # If the file is empty or contains only whitespace, return the "No data" message
+        if not content:
+            print(f"VecScreen file contains no data: {file_path}", file=sys.stderr)
+            return "VecScreen check was run, but no vector contamination was detected."
+        
+        # Parse the space-separated data into a list of dictionaries
+        data_rows = []
+        for line in content.split('\n'):
+            if not line.strip():
+                continue
+                
+            # Split by whitespace
+            parts = line.strip().split()
+            if len(parts) >= 4:
+                # The format is: Match_Type Sequence_ID Start End
+                data_rows.append({
+                    "Match Type": parts[0],
+                    "Sequence ID": parts[1],
+                    "Start": parts[2],
+                    "End": parts[3]
+                })
+        
+        # If no data rows were parsed, return the "No data" message
+        if not data_rows:
+            print(f"VecScreen file contains no valid data rows: {file_path}", file=sys.stderr)
+            return "VecScreen check was run, but no vector contamination was detected."
+        
+        # Convert to DataFrame
+        df = pd.DataFrame(data_rows)
+        
+        # Convert DataFrame to HTML table with styling
+        table_html = df.to_html(classes="table table-striped", index=False, 
+                                table_id="vecscreen_table")
+        
+        # Wrap the table for responsive display
+        wrapped_table = f"""
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    {table_html}
+                </div>
+            </div>
+        </div>
+        """
+        
+        print(f"Successfully loaded and formatted VecScreen data from {file_path} with {len(data_rows)} rows", file=sys.stderr)
+        return wrapped_table
+    except Exception as e:
+        print(f"Error loading or formatting vecscreen results: {e}", file=sys.stderr)
+        # Fall back to displaying the raw content
+        try:
+            with open(file_path, 'r') as f:
+                content = f.read()
+            return f"<pre><code>{content}</code></pre>"
+        except:
+            return "Error loading VecScreen check results."
+
+
+def load_fcs_adaptor_results_as_table(file_path):
+    """Load FCS adaptor results and format as an HTML table."""
+    if not os.path.exists(file_path):
+        print(f"FCS-Adaptor file does not exist: {file_path}", file=sys.stderr)
+        return "FCS-Adaptor check was not run."
+    if os.path.getsize(file_path) == 0:
+        print(f"FCS-Adaptor file is empty: {file_path}", file=sys.stderr)
+        return "FCS-Adaptor check was run, but no adaptor contamination was detected."
+    
+    try:
+        # Read the tab-separated file into a DataFrame, skipping the header line
+        df = pd.read_csv(file_path, sep='\t', comment='#', 
+                         names=["accession", "length", "action", "range", "name"])
+        
+        # If the DataFrame is empty, return the "No data" message
+        if df.empty:
+            print(f"FCS-Adaptor file contains no data: {file_path}", file=sys.stderr)
+            return "FCS-Adaptor check was run, but no adaptor contamination was detected."
+        
+        # Convert DataFrame to HTML table with styling
+        table_html = df.to_html(classes="table table-striped", index=False, 
+                                table_id="fcs_adaptor_table")
+        
+        # Wrap the table for responsive display
+        wrapped_table = f"""
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    {table_html}
+                </div>
+            </div>
+        </div>
+        """
+        
+        print(f"Successfully loaded and formatted FCS-Adaptor data from {file_path}", file=sys.stderr)
+        return wrapped_table
+    except Exception as e:
+        print(f"Error loading or formatting FCS-Adaptor results: {e}", file=sys.stderr)
+        return "Error loading FCS-Adaptor check results."

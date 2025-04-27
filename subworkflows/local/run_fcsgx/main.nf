@@ -46,6 +46,8 @@ workflow RUN_FCSGX {
 
     emit:
     fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
-    versions       = ch_versions
+    fcsgx_report   = FCSGX_RUNGX.out.fcsgx_report
+    taxonomy_report = FCSGX_RUNGX.out.taxonomy_report
+    versions       = ch_versions.ifEmpty(null)
 
 }

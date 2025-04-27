@@ -27,6 +27,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -63,7 +64,8 @@ workflow ASCC_ORGANELLAR {
     full_list               = [
         "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond",
         "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
-        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset", "ALL", "NONE"]
+        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset", 
+        "html_report", "ALL", "NONE"]
 
     if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
         exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
@@ -496,6 +498,109 @@ workflow ASCC_ORGANELLAR {
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
     }
 
+    //
+    // SUBWORKFLOW: GENERATE HTML REPORT
+    //
+    if ( (include_workflow_steps.contains('html_report') || include_workflow_steps.contains('ALL')) &&
+            !exclude_workflow_steps.contains("html_report")
+    ) {
+        // Create channels for HTML report inputs
+        // Initialize all channels as empty by default
+        ch_barcode_results = Channel.of([[id: "empty"],[]])
+        ch_fcs_adaptor_euk = Channel.of([[id: "empty"],[]])
+        ch_fcs_adaptor_prok = Channel.of([[id: "empty"],[]])
+        ch_trim_ns_results = Channel.of([[id: "empty"],[]])
+        ch_vecscreen_results = Channel.of([[id: "empty"],[]])
+        ch_autofilter_results = Channel.of([[id: "empty"],[]])
+        ch_merged_table = Channel.of([[id: "empty"],[]])
+        ch_kmers_results = Channel.of([[id: "empty"],[]])
+        ch_fasta_sanitation_log = Channel.of([[id: "empty"],[]])
+        ch_fasta_length_filtering_log = Channel.of([[id: "empty"],[]])
+        ch_fcsgx_report_txt = Channel.of([[id: "empty"],[]])
+        ch_fcsgx_taxonomy_rpt = Channel.of([[id: "empty"],[]])
+        
+        // Only access workflow outputs if the workflow was actually run
+        if ((include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("pacbio_barcodes")) {
+            ch_barcode_results = PACBIO_BARCODE_CHECK.out.filtered
+        }
+        
+        if ((include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("fcs-adaptor")) {
+            ch_fcs_adaptor_euk = RUN_FCSADAPTOR.out.ch_euk
+            ch_fcs_adaptor_prok = RUN_FCSADAPTOR.out.ch_prok
+        }
+        
+        ch_trim_ns_results = ESSENTIAL_JOBS.out.trailing_ns_report
+        
+        if ((include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("vecscreen")) {
+            ch_vecscreen_results = RUN_VECSCREEN.out.vecscreen_contam
+        }
+        
+        // Get the FASTA sanitation log if the filter_fasta process was run
+        ch_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
+        ch_fasta_length_filtering_log = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
+        
+        // Capture FCS-GX report files if available
+        if ((include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("fcs-gx")) {
+            ch_fcsgx_report_txt = RUN_FCSGX.out.fcsgx_report
+                                    .map { meta, file -> [meta.id, file] }
+                                    .ifEmpty { [[],[]] }
+            ch_fcsgx_taxonomy_rpt = RUN_FCSGX.out.taxonomy_report
+                                    .map { meta, file -> [meta.id, file] }
+                                    .ifEmpty { [[],[]] }
+        }
+        
+        // Create channels for the input samplesheet and YAML parameters file
+        ch_samplesheet_path = Channel.fromPath(params.input)
+        
+        // Handle the params_file parameter - check if it exists and create a channel
+        if (params.containsKey('params_file') && params.params_file) {
+            ch_params_file = Channel.fromPath(params.params_file)
+        } else {
+            ch_params_file = Channel.value([])
+        }
+        
+        // Add debug logging
+        log.info "HTML Report Generation - Input Channels in organellar workflow:"
+        log.info "ch_barcode_results: ${ch_barcode_results.dump()}"
+        log.info "ch_fcs_adaptor_euk: ${ch_fcs_adaptor_euk.dump()}"
+        log.info "ch_fcs_adaptor_prok: ${ch_fcs_adaptor_prok.dump()}"
+        log.info "ch_trim_ns_results: ${ch_trim_ns_results.dump()}"
+        log.info "ch_vecscreen_results: ${ch_vecscreen_results.dump()}"
+        log.info "ch_fasta_sanitation_log: ${ch_fasta_sanitation_log.dump()}"
+        log.info "ch_fasta_length_filtering_log: ${ch_fasta_length_filtering_log.dump()}"
+        log.info "ch_samplesheet_path: ${ch_samplesheet_path.dump()}"
+        log.info "ch_params_file: ${ch_params_file.dump()}"
+        
+        // Get the Jinja template
+        ch_jinja_template = Channel.fromPath("${baseDir}/assets/templates/ascc_report.html.jinja")
+
+        // Create a channel with the reference file
+        ch_reference_file = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_results,
+            ch_fcs_adaptor_euk,
+            ch_fcs_adaptor_prok,
+            ch_trim_ns_results,
+            ch_vecscreen_results,
+            ch_autofilter_results,
+            ch_merged_table,
+            ch_kmers_results,
+            ch_reference_file,
+            ch_fasta_sanitation_log,
+            ch_fasta_length_filtering_log,
+            ch_jinja_template,
+            ch_samplesheet_path,
+            ch_params_file,
+            ch_fcsgx_report_txt,      // Pass FCS-GX report txt
+            ch_fcsgx_taxonomy_rpt     // Pass FCS-GX taxonomy rpt
+        )
+        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+    }
 
     //
     // Collate and save software versions
