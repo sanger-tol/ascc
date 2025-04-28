@@ -3,7 +3,6 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## v0.2.1 - Red Speaker [25/04/2025]
 
 Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
@@ -15,6 +14,9 @@ Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
 - Updating the test profiles.
 - Minor update to the base.config - 100.h was too much!
   - At sanger too many jobs were heads to the week queue, when they simply didn't need to!
+- Remove unnecessary module files, they are no longer used and are replaced by NF_Core blast modules. #104
+  - BLAST_V5_DATABASE -> BLAST_BLASTN
+  - BLAST_MAKEBLASTDB_BARCODES -> BLAST_MAKEBLASTDB
 
 ## v0.2.0 - Red Speaker [14/04/2025]
 
