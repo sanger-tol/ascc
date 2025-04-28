@@ -687,7 +687,7 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE
         //          OUTPUT FILE.
-        //
+        //          CHANGE OUTPUT NAME TO BE REFERENCE NAME AND THEN ALARM FILE
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { file -> file.text.trim() }
             .branch { it ->
