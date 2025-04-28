@@ -1,5 +1,4 @@
 // MODULE IMPORT BLOCK
-include { BLAST_V5_DATABASE                 } from '../../../modules/local/blast/v5_database/main'
 include { BLAST_BLASTN as BLAST_BLASTN_MOD  } from '../../../modules/nf-core/blast/blastn/main'
 
 include { SEQKIT_SLIDING                    } from '../../../modules/nf-core/seqkit/sliding/main'
