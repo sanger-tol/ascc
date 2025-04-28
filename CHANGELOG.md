@@ -10,7 +10,9 @@ Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
 
 ### Enhancements & Fixes
 
-- Testing profile was not properly upto date leading to multiple errors with the GENERATE_SAMPLESHEET module.
+- Updating GENERATE_SAMPLESHEET module.
+  - Caused by issues with test profiles.
+- Updating the test profiles.
 - Minor update to the base.config - 100.h was too much!
   - At sanger too many jobs were heads to the week queue, when they simply didn't need to!
 
