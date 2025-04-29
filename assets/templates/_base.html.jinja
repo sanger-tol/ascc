@@ -12,6 +12,13 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
     
     <style>
+        /* Ensure Cobiont header always visible */
+        #cobiont_check_merged_table thead {
+            display: table-header-group !important;
+        }
+        #cobiont_check_merged_table {
+            table-layout: auto !important;
+        }
         /* Base styles */
         body {
             font-family: sans-serif;
@@ -202,6 +209,28 @@
         .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
             background: #e2e8f0;
             border-color: #cbd5e0;
+        }
+        
+        /* Fix for table header alignment issues */
+        .dataTables_wrapper table.dataTable {
+            table-layout: fixed;
+            width: 100% !important;
+        }
+        
+        /* Ensure consistent styling for header and body cells */
+        .dataTables_wrapper table.dataTable thead th,
+        .dataTables_wrapper table.dataTable tbody td {
+            box-sizing: border-box;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Ensure header and body cells align properly */
+        .dataTables_wrapper table.dataTable thead th {
+            width: auto !important;
+            white-space: nowrap;
         }
 
         /* Section anchors for navigation */
@@ -405,54 +434,96 @@
             }
         }
         
+        // Common DataTable options for consistent behavior
+        var dataTableOptions = {
+            scrollX: true,
+            autoWidth: false,
+            responsive: false,
+            columnDefs: [
+                { targets: '_all', width: 'auto' }
+            ],
+            // Enhanced column width calculation with delay
+            initComplete: function(settings, json) {
+                var api = this.api();
+                // Trigger resize to adjust columns
+                $(window).trigger('resize');
+                
+                // Add multiple delays to ensure proper rendering
+                setTimeout(function() {
+                    api.columns.adjust();
+                }, 200);
+                setTimeout(function() {
+                    api.columns.adjust();
+                }, 500);
+                setTimeout(function() {
+                    api.columns.adjust();
+                }, 1000);
+            }
+        };
+        
         // Initialize DataTables with horizontal scrolling enabled
         if ($('#cobiont_check_merged_table').length) {
-            $('#cobiont_check_merged_table').DataTable({
-                scrollX: true,        // Enable horizontal scrolling
-                autoWidth: false,     // Prevent DataTables from setting widths
-                responsive: false     // Disable DataTables responsive behavior
-            });
+            $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, {
+                scrollX: false,
+                scrollCollapse: true,
+                autoWidth: true,
+                // Additional configuration for Cobiont Check Merged Table to fix header alignment
+                drawCallback: function(settings) {
+                    var api = this.api();
+                    api.columns.adjust();
+                }
+            }));
         }
         
         if ($('#autofiltering_table').length) {
-            $('#autofiltering_table').DataTable();
+            $('#autofiltering_table').DataTable($.extend({}, dataTableOptions));
         }
         
         // Initialize DataTables for FCS-GX tables if they exist
         if ($('#fcsgx_report_table').length) {
-            $('#fcsgx_report_table').DataTable({
-                scrollX: true,
-                autoWidth: false,
-                responsive: false,
+            $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, {
                 pageLength: 25    // Show more rows by default
-            });
+            }));
         }
         
         if ($('#fcsgx_taxonomy_table').length) {
-            $('#fcsgx_taxonomy_table').DataTable({
-                scrollX: true,
-                autoWidth: false,
-                responsive: false,
+            $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, {
                 pageLength: 25    // Show more rows by default
-            });
+            }));
         }
         
         // Add initialization for other potential tables if needed
-        if ($('#trim_ns_table').length) {
-            $('#trim_ns_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
-        }
-        if ($('#trim_ns_warnings_table').length) {
-            $('#trim_ns_warnings_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
-        }
         if ($('#vecscreen_table').length) {
-            $('#vecscreen_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+            $('#vecscreen_table').DataTable($.extend({}, dataTableOptions));
         }
-        if ($('#fcs_adaptor_table').length) { // Assuming a table ID like this might exist
-            $('#fcs_adaptor_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        if ($('#fcs_adaptor_table').length) {
+            $('#fcs_adaptor_table').DataTable($.extend({}, dataTableOptions));
         }
-        if ($('#barcodes_table').length) { // Assuming a table ID like this might exist
-            $('#barcodes_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        if ($('#barcodes_table').length) {
+            $('#barcodes_table').DataTable($.extend({}, dataTableOptions));
         }
+        
+        // Function to adjust all DataTables columns
+        function adjustAllTables() {
+            $('.dataTable').each(function() {
+                try {
+                    $(this).DataTable().columns.adjust();
+                } catch(e) {
+                    console.log("Error adjusting table:", e);
+                }
+            });
+        }
+        
+        // Adjust column widths on window resize - using standard DataTables API
+        $(window).on('resize', function() {
+            adjustAllTables();
+        });
+        
+        // Force adjustment after a delay to ensure proper initial rendering
+        setTimeout(function() {
+            adjustAllTables();
+        }, 500);
+        
         // Add more table initializations here as needed, checking for existence first
     } );
     </script>

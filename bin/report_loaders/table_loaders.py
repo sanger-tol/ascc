@@ -21,16 +21,8 @@ def load_contamination_check_merged_table(file_path):
         # Add column width styles to make the table wider
         table_html = df.to_html(classes="table table-striped", index=False, table_id="cobiont_check_merged_table")
 
-        # Wrap the table in multiple container layers for better scrolling
-        return f"""
-        <div class="outer-container">
-            <div class="table-responsive">
-                <div class="table-wrapper">
-                    {table_html}
-                </div>
-            </div>
-        </div>
-        """
+        # Return raw table HTML for DataTables to handle
+        return table_html
     except Exception as e:
         print(f"Error loading contamination check merged table: {e}", file=sys.stderr)
         return None
