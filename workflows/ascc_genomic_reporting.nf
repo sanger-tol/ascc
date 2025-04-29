@@ -44,6 +44,7 @@ workflow ASCC_GENOMIC_REPORTING {
     pacbio_barcode_check_filtered // Channel: filtered from PACBIO_BARCODE_CHECK
     fcsgx_report                 // Channel: fcsgx_report from RUN_FCSGX
     fcsgx_taxonomy_report        // Channel: taxonomy_report from RUN_FCSGX
+    ch_kmers_results             // Channel: kmers_results from ASCC_GENOMIC_ANALYSIS
 
     main:
     ch_versions = Channel.empty()
@@ -377,7 +378,7 @@ workflow ASCC_GENOMIC_REPORTING {
         ch_vecscreen_results = Channel.of([[id: "empty"],[]])
         ch_autofilter_results = Channel.of([[id: "empty"],[]])
         ch_merged_table = Channel.of([[id: "empty"],[]])
-        ch_kmers_results = Channel.of([[id: "empty"],[]])
+        local_empty_kmers_channel = Channel.of([[id: "empty"],[]]) // Renamed for clarity
         ch_fasta_sanitation_log = Channel.of([[id: "empty"],[]])
         ch_fasta_length_filtering_log = Channel.of([[id: "empty"],[]])
         ch_fcsgx_report_txt = Channel.of([[id: "empty"],[]])
@@ -405,7 +406,19 @@ workflow ASCC_GENOMIC_REPORTING {
         // Get the kmers results if the kmers workflow was run
         if ((include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) &&
                 !exclude_workflow_steps.contains("kmers")) {
-            ch_kmers_results = ch_kmers
+            // Use the kmers_results channel that contains the results directories with PNG files and metrics
+            // The channel passed in via 'take' will be used if this condition is true
+        }
+
+        // Determine which kmer channel to pass based on the condition
+        def final_kmers_channel_for_report
+        if ((include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("kmers")) {
+            // If kmers step included, use the channel passed via the 'take:' block
+            final_kmers_channel_for_report = ch_kmers_results // This refers to the input channel from 'take:'
+        } else {
+            // Otherwise, use the initialized empty channel
+            final_kmers_channel_for_report = local_empty_kmers_channel
         }
         
         // Get the merged table if the merge workflow was run
@@ -460,7 +473,7 @@ workflow ASCC_GENOMIC_REPORTING {
             ch_vecscreen_results,
             ch_autofilter_results,
             ch_merged_table,
-            ch_kmers_results,
+            final_kmers_channel_for_report, // Pass the determined channel here
             ch_reference_file,
             ch_fasta_sanitation_log,
             ch_fasta_length_filtering_log,

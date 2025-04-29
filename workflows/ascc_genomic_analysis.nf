@@ -87,6 +87,12 @@ workflow ASCC_GENOMIC_ANALYSIS {
                                     [[id: it[0].id, process: "KMERS"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
+                                
+        ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
+                                .map { meta, dirs ->
+                                    [[id: meta.id, process: "KMERS_RESULTS"], dirs]
+                                }
+                                .ifEmpty { [[],[]] }
     }
 
     //
@@ -432,6 +438,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
 
     emit:
     kmers = ch_kmers
+    kmers_results = ch_kmers_results
     tiara = ch_tiara
     nt_blast = ch_nt_blast
     blast_lineage = ch_blast_lineage

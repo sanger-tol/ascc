@@ -89,6 +89,7 @@ process GENERATE_HTML_REPORT {
     """
     mkdir -p report/site/templates
     mkdir -p report/site/kmers
+    cp -r kmers/* report/site/kmers
     touch report/site/${prefix}.html
 
     

@@ -167,7 +167,8 @@ workflow ASCC_GENOMIC {
         filter_fasta_length_filtering_log,
         pacbio_barcode_check_filtered,
         fcsgx_report,
-        fcsgx_taxonomy_report
+        fcsgx_taxonomy_report,
+        ASCC_GENOMIC_ANALYSIS.out.kmers_results
     )
     ch_versions = ch_versions.mix(ASCC_GENOMIC_REPORTING.out.versions)
 
