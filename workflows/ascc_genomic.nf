@@ -123,8 +123,7 @@ workflow ASCC_GENOMIC {
     // Get PACBIO_BARCODE_CHECK outputs if the workflow was run
     if ((include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
             !exclude_workflow_steps.contains("pacbio_barcodes")) {
-        // This would need to be properly connected to the actual output
-        // For now, we'll use an empty channel
+        pacbio_barcode_check_filtered = ASCC_GENOMIC_ANALYSIS.out.barcode_check_filtered
     }
 
     // Get RUN_FCSGX outputs if the workflow was run

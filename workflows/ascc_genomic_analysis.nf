@@ -455,6 +455,8 @@ workflow ASCC_GENOMIC_ANALYSIS {
                         RUN_FCSGX.out.fcsgx_report : Channel.of([[],[]])
     fcsgx_taxonomy_rpt = include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ? 
                         RUN_FCSGX.out.taxonomy_report : Channel.of([[],[]])
+    barcode_check_filtered = include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ? 
+                        PACBIO_BARCODE_CHECK.out.filtered : Channel.of([[],[]])
     coverage = ch_coverage
     bam = ch_bam
     vecscreen = ch_vecscreen

@@ -371,7 +371,7 @@ workflow ASCC_GENOMIC_REPORTING {
     ) {
         // Create channels for HTML report inputs
         // Initialize all channels as empty by default
-        ch_barcode_results = Channel.of([[id: "empty"],[]])
+        local_empty_barcode_channel = Channel.of([[id: "empty"],[]])  // Renamed for clarity
         ch_fcs_adaptor_euk = Channel.of([[id: "empty"],[]])
         ch_fcs_adaptor_prok = Channel.of([[id: "empty"],[]])
         ch_trim_ns_results = Channel.of([[id: "empty"],[]])
@@ -384,10 +384,15 @@ workflow ASCC_GENOMIC_REPORTING {
         ch_fcsgx_report_txt = Channel.of([[id: "empty"],[]])
         ch_fcsgx_taxonomy_rpt = Channel.of([[id: "empty"],[]])
         
-        // Only access workflow outputs if the workflow was actually run
+        // Determine which barcode channel to pass based on the condition
+        def final_barcode_channel_for_report
         if ((include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
                 !exclude_workflow_steps.contains("pacbio_barcodes")) {
-            ch_barcode_results = pacbio_barcode_check_filtered
+            // If pacbio_barcodes step included, use the channel from the input
+            final_barcode_channel_for_report = pacbio_barcode_check_filtered
+        } else {
+            // Otherwise, use the initialized empty channel
+            final_barcode_channel_for_report = local_empty_barcode_channel
         }
         
         if ((include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) &&
@@ -449,7 +454,7 @@ workflow ASCC_GENOMIC_REPORTING {
         
         // Add debug logging
         log.info "HTML Report Generation - Input Channels in genomic workflow:"
-        log.info "ch_barcode_results: ${ch_barcode_results.dump()}"
+        log.info "final_barcode_channel_for_report: ${final_barcode_channel_for_report.dump()}"
         log.info "ch_fcs_adaptor_euk: ${ch_fcs_adaptor_euk.dump()}"
         log.info "ch_fcs_adaptor_prok: ${ch_fcs_adaptor_prok.dump()}"
         log.info "ch_trim_ns_results: ${ch_trim_ns_results.dump()}"
@@ -466,7 +471,7 @@ workflow ASCC_GENOMIC_REPORTING {
         ch_reference_file = reference_tuple_from_GG
 
         GENERATE_HTML_REPORT_WORKFLOW (
-            ch_barcode_results,
+            final_barcode_channel_for_report,  // Pass the determined channel here
             ch_fcs_adaptor_euk,
             ch_fcs_adaptor_prok,
             ch_trim_ns_results,
