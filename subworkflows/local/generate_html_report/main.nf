@@ -14,7 +14,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     reference_fasta            // channel: [ val(meta), [ reference_fasta ] ]
     fasta_sanitation_log       // channel: [ val(meta), [ fasta_sanitation_log ] ]
     fasta_length_filtering_log // channel: [ val(meta), [ fasta_length_filtering_log ] ]
-    jinja_template             // channel: [ jinja_template ]
+    jinja_templates_list       // channel: [ jinja_templates_list ] // Updated to accept a list
     samplesheet                // channel: [ samplesheet ]
     params_file                // channel: [ params_file ]
     fcsgx_report_txt           // channel: [ val(meta), [ fcsgx_report_txt ] ]
@@ -34,7 +34,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     log.info "merged_table: ${merged_table.dump()}"
     log.info "fasta_sanitation_log: ${fasta_sanitation_log.dump()}"
     log.info "fasta_length_filtering_log: ${fasta_length_filtering_log.dump()}"
-    log.info "jinja_template: ${jinja_template.dump()}"
+    log.info "jinja_templates_list: ${jinja_templates_list.dump()}" // Updated logging
     log.info "fcsgx_report_txt: ${fcsgx_report_txt.dump()}"
     log.info "fcsgx_taxonomy_rpt: ${fcsgx_taxonomy_rpt.dump()}"
 
@@ -143,7 +143,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     // Generate HTML report
     GENERATE_HTML_REPORT (
         combined_inputs,
-        jinja_template,
+        jinja_templates_list, // Pass the list of Jinja templates
         samplesheet,
         params_file,
         paramsJson // Note: combined_inputs now contains the fcsgx file paths

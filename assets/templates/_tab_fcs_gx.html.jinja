@@ -1,0 +1,44 @@
+<h2>FCS-GX Reports</h2>
+<p>FCS-GX (Foreign Contamination Screen with cross-species aligner) is NCBI software that detects contaminants in genome assemblies using cross-species alignment. It uses its own database provided by NCBI to identify sequences that may originate from species other than the target organism. The reports show potential contaminant locations and their taxonomic classification.</p>
+
+{# FCS-GX Report Section #}
+<h3>FCS-GX Report ({{ sample_name }}{% if assembly_component %}_{{ assembly_component }}{% endif %}.fcs_gx_report.txt)</h3>
+
+{% if fcs_gx_report_metadata %}
+    <h4>Metadata</h4>
+    <div class="table-responsive">
+        {{ fcs_gx_report_metadata|safe }}
+    </div>
+{% endif %}
+
+{% if fcs_gx_report_table %}
+    <h4>Data</h4>
+    {{ fcs_gx_report_table|safe }}
+{% elif fcs_gx_report_content and not fcs_gx_report_metadata %}
+    {# Fallback to original content if table is not available and metadata is not separately extracted #}
+    <pre><code>{{ fcs_gx_report_content }}</code></pre>
+{% elif not fcs_gx_report_content and not fcs_gx_report_table %}
+    <p>FCS-GX Report (.fcs_gx_report.txt) not available.</p>
+{% else %}
+    <p>No data rows found in the FCS-GX report file.</p>
+{% endif %}
+
+{# FCS-GX Taxonomy Report Section #}
+<h3>FCS-GX Taxonomy Report ({{ sample_name }}{% if assembly_component %}_{{ assembly_component }}{% endif %}.taxonomy.rpt)</h3>
+
+{% if fcs_gx_taxonomy_metadata %}
+    <h4>Metadata</h4>
+    <div class="table-responsive">
+        {{ fcs_gx_taxonomy_metadata|safe }}
+    </div>
+{% endif %}
+
+{% if fcs_gx_taxonomy_table %}
+    <h4>Data</h4>
+    {{ fcs_gx_taxonomy_table }}
+{% elif fcs_gx_taxonomy_content %}
+    {# Fallback to original content if table is not available #}
+    <pre><code>{{ fcs_gx_taxonomy_content }}</code></pre>
+{% else %}
+    <p>FCS-GX Taxonomy Report (.taxonomy.rpt) not available.</p>
+{% endif %}

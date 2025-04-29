@@ -24,7 +24,7 @@ process GENERATE_HTML_REPORT {
           path(fasta_length_filtering_log, stageAs: "fasta_length_filtering/*"),
           path(fcs_gx_report_txt, stageAs: "fcsgx/*"),      // Add FCS-GX report txt input
           path(fcs_gx_taxonomy_rpt, stageAs: "fcsgx/*")     // Add FCS-GX taxonomy rpt input
-    path(jinja_template)
+    path(jinja_templates_list, stageAs: "templates/*") // Updated to accept a list and stage them
     path(samplesheet)
     path(params_file)
     val(params_json)
@@ -44,7 +44,7 @@ process GENERATE_HTML_REPORT {
     def params_json_arg = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
     """
     mkdir -p report/site/templates
-    cp $jinja_template report/site/templates/
+    cp templates/*.jinja report/site/templates/
     
     # Create kmers directory if it doesn't exist
     mkdir -p kmers

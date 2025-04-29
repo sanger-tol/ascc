@@ -476,8 +476,8 @@ workflow ASCC_GENOMIC_REPORTING {
         log.info "ch_samplesheet_path: ${ch_samplesheet_path.dump()}"
         log.info "ch_params_file: ${ch_params_file.dump()}"
         
-        // Get the Jinja template
-        ch_jinja_template = Channel.fromPath("${baseDir}/assets/templates/ascc_report.html.jinja")
+        // Get all Jinja templates
+        ch_jinja_templates_list = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
 
         // Create a channel with the reference file
         ch_reference_file = reference_tuple_from_GG
@@ -494,7 +494,7 @@ workflow ASCC_GENOMIC_REPORTING {
             ch_reference_file,
             ch_fasta_sanitation_log,
             ch_fasta_length_filtering_log,
-            ch_jinja_template,
+            ch_jinja_templates_list, // Pass the list of Jinja templates
             ch_samplesheet_path,
             ch_params_file,
             ch_fcsgx_report_txt,      // Pass FCS-GX report txt

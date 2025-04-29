@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ASCC run report{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  
+    <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+    
+    <style>
+        /* Base styles */
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        /* Headers */
+        h1, h2, h3 {
+            color: #2c5282; /* Dark blue */
+            margin-top: 1.5em;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.3em;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 0.5em;
+            margin-bottom: 0.2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 1.5em;
+            border-bottom: none;
+            color: #4a5568;
+        }
+
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #edf2f7;
+            color: #2c5282;
+            font-weight: bold;
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+
+        tr:hover {
+            background-color: #ebf4ff;
+        }
+
+        /* Tabs styling */
+        #tabs {
+            background-color: #f9f9f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #tabs .ui-tabs-nav {
+            background-color: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 5px 5px 0 0;
+            padding: 0.5em 0.5em 0;
+        }
+
+        #tabs .ui-tabs-nav li {
+            margin: 0.2em 0.2em 0 0;
+            border-radius: 5px 5px 0 0;
+        }
+
+        #tabs .ui-tabs-nav li a {
+            color: #2c5282;
+            padding: 0.5em 1em;
+        }
+
+        #tabs .ui-tabs-nav li.ui-tabs-active {
+            background-color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        #tabs .ui-tabs-nav li.ui-tabs-active a {
+            color: #2c5282;
+            font-weight: bold;
+        }
+
+        #tabs .ui-tabs-panel {
+            padding: 1em;
+            background-color: #fff;
+        }
+        
+        /* Nested tabs styling for K-mer methods */
+        #kmer-methods-tabs {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav {
+            background-color: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 5px 5px 0 0;
+            padding: 0.5em 0.5em 0;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav li {
+            margin: 0.2em 0.2em 0 0;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.9em;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav li a {
+            color: #2c5282;
+            padding: 0.4em 0.8em;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-nav li.ui-tabs-active {
+            background-color: #fff;
+            border-bottom-color: #fff;
+        }
+        
+        #kmer-methods-tabs .ui-tabs-panel {
+            padding: 1em;
+            background-color: #fff;
+        }
+        
+        /* Disabled tab styling */
+        #tabs .ui-tabs-nav li.ui-state-disabled {
+            opacity: 0.6;
+            background-color: #f0f0f0;
+        }
+
+        #tabs .ui-tabs-nav li.ui-state-disabled a {
+            color: #8898aa !important; /* Lighter color for disabled tabs */
+            cursor: not-allowed;
+        }
+
+        /* Add a visual indicator that the tab is disabled */
+        #tabs .ui-tabs-nav li.ui-state-disabled:after {
+            content: " (no data)";
+            font-size: 0.8em;
+            color: #8898aa;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.8em;
+            color: #718096;
+        }
+
+        /* DataTables customization */
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter, 
+        .dataTables_wrapper .dataTables_info, 
+        .dataTables_wrapper .dataTables_processing, 
+        .dataTables_wrapper .dataTables_paginate {
+            color: #4a5568;
+            font-family: sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #edf2f7;
+            border-color: #e2e8f0;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e0;
+        }
+
+        /* Section anchors for navigation */
+        section {
+            scroll-margin-top: 20px;
+        }
+        
+        /* Method tabs styling */
+        .method-tab {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            background-color: #f8fafc;
+        }
+        
+        .method-header {
+            background-color: #edf2f7;
+            padding: 10px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 5px 5px 0 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .method-name {
+            color: #2c5282;
+            margin: 0;
+        }
+        
+        .result-section {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        
+        /* Force horizontal scrolling for tables that need it */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto; /* Use auto instead of scroll to only show scrollbar when needed */
+            display: block;
+            margin-bottom: 1em;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding-bottom: 15px; /* Space for scrollbar */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
+        }
+
+        /* Make table wider than container to force scrolling for specific tables */
+        .table-responsive table {
+            width: 100%; /* Default to 100% width */
+            margin-bottom: 0;
+        }
+        
+        /* Special styling for FASTA sanitation tables */
+        .fasta-sanitation-table {
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        
+        .fasta-sanitation-table table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        /* Alert styling */
+        .alert-danger, .alert-success {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .alert-danger {
+            background-color: #fed7d7;
+            color: #9b2c2c;
+            border: 1px solid #f56565;
+        }
+        
+        .alert-success {
+            background-color: #c6f6d5;
+            color: #276749;
+            border: 1px solid #48bb78;
+        }
+
+        /* Outer container for additional structure */
+        .outer-container {
+            width: 100%;
+            position: relative;
+        }
+
+        /* Table wrapper for proper overflow handling */
+        .table-wrapper {
+            overflow-x: visible;
+            min-width: 100%;
+        }
+
+        /* Ensure DataTables doesn't break the container */
+        .dataTables_wrapper {
+            width: 100%;
+            overflow: visible;
+        }
+        
+        /* Explicit striped rows styling */
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #f7fafc;
+        }
+
+        .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: #ffffff;
+        }
+
+        /* Ensure DataTables doesn't override our striping */
+        .dataTables_wrapper .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #f7fafc !important;
+        }
+
+        .dataTables_wrapper .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: #ffffff !important;
+        }
+        
+        /* Visualization styling */
+        .visualization-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .visualization-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        /* Pre tag styling for code blocks */
+        pre {
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            overflow-x: auto;            /* Add horizontal scrollbar if needed */
+            max-width: 100%;             /* Ensure it doesn't exceed container width */
+            background-color: #f8f8f8;   /* Light gray background */
+            padding: 10px;               /* Add some padding */
+            border-radius: 4px;          /* Rounded corners */
+            border: 1px solid #e2e8f0;   /* Light border */
+        }
+        
+        code {
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+    
+    {# Determine which sections have content #}
+    {% set has_input_content = (samplesheet_data is defined and samplesheet_data) or (yaml_params_data is defined and yaml_params_data) or (reference_summary is defined and reference_summary) %}
+    {% set has_assembly_content = reference_summary is defined and reference_summary %}
+    {% set has_barcodes_content = barcodes_check_data is defined and barcodes_check_data and barcodes_check_data != "No barcode check results found." and barcodes_check_data != "PacBio barcode check was not run." %}
+    {% set has_fcs_adaptor_content = (fcs_adaptor_euk_report_data is defined and fcs_adaptor_euk_report_data and fcs_adaptor_euk_report_data != "No FCS-Adaptor eukaryotic results found." and fcs_adaptor_euk_report_data != "FCS-Adaptor check was not run." and fcs_adaptor_euk_report_data != "FCS-Adaptor check was run, but no adaptor contamination was detected.") or (fcs_adaptor_prok_report_data is defined and fcs_adaptor_prok_report_data and fcs_adaptor_prok_report_data != "No FCS-Adaptor prokaryotic results found." and fcs_adaptor_prok_report_data != "FCS-Adaptor check was not run." and fcs_adaptor_prok_report_data != "FCS-Adaptor check was run, but no adaptor contamination was detected.") %}
+    {% set has_trim_ns_content = trim_Ns_data is defined and trim_Ns_data and trim_Ns_data != "No trim Ns results found." and trim_Ns_data != "Trailing Ns check was not run." and trim_Ns_data != "Trailing Ns check was run, but no issues were found." %}
+    {% set has_vecscreen_content = vecscreen_data is defined and vecscreen_data and vecscreen_data != "No vecscreen results found." and vecscreen_data != "VecScreen check was not run." and vecscreen_data != "VecScreen check was run, but no vector contamination was detected." %}
+    {% set has_autofiltering_content = autofiltering_data is defined and autofiltering_data and autofiltering_data != "No autofiltering results found." and autofiltering_data != "Autofiltering check was not run." and autofiltering_data != "Autofiltering check was run, but no filtering was performed." %}
+    {% set has_coverage_content = coverage_per_phylum_data is defined and coverage_per_phylum_data %}
+    {% set has_cobiont_content = contamination_check_merged_table_data is defined and contamination_check_merged_table_data and contamination_check_merged_table_data != "No contamination check merged table found." %}
+    {% set has_kmers_content = kmers_results is defined and kmers_results %}
+    {% set has_fasta_sanitation_content = fasta_sanitation_data is defined and fasta_sanitation_data %}
+    {# Determine if FCS-GX tab should be enabled #}
+    {% set has_fcs_gx_content = (fcs_gx_report_content or fcs_gx_taxonomy_content or fcs_gx_report_metadata or fcs_gx_report_table or fcs_gx_taxonomy_metadata or fcs_gx_taxonomy_table) %}
+
+    <script>
+        // Array to track which tabs should be disabled (empty tabs)
+        var emptyTabs = [];
+        {% if not has_input_content %}emptyTabs.push(0);{% endif %}
+        {% if not has_barcodes_content %}emptyTabs.push(1);{% endif %}
+        {% if not has_fcs_adaptor_content %}emptyTabs.push(2);{% endif %}
+        {% if not has_fcs_gx_content %}emptyTabs.push(3);{% endif %}
+        {% if not has_trim_ns_content %}emptyTabs.push(4);{% endif %}
+        {% if not has_vecscreen_content %}emptyTabs.push(5);{% endif %}
+        {% if not has_autofiltering_content %}emptyTabs.push(6);{% endif %}
+        {% if not has_coverage_content %}emptyTabs.push(7);{% endif %}
+        {% if not has_kmers_content %}emptyTabs.push(8);{% endif %}
+        {% if not has_cobiont_content %}emptyTabs.push(9);{% endif %}
+    </script>
+  
+    <script>
+    $(document).ready( function () {
+        // Initialize main tabs
+        $("#tabs").tabs();
+        
+        // Disable empty tabs
+        for (var i = 0; i < emptyTabs.length; i++) {
+            $("#tabs").tabs("disable", emptyTabs[i]);
+        }
+        
+        // Initialize K-mer method tabs (if K-mer tab is not disabled)
+        if (!emptyTabs.includes(8)) { // Check if K-mer tab (index 8) is enabled
+             if ($("#kmer-methods-tabs").length) { // Check if the element exists
+                $("#kmer-methods-tabs").tabs();
+            }
+        }
+        
+        // Initialize DataTables with horizontal scrolling enabled
+        if ($('#cobiont_check_merged_table').length) {
+            $('#cobiont_check_merged_table').DataTable({
+                scrollX: true,        // Enable horizontal scrolling
+                autoWidth: false,     // Prevent DataTables from setting widths
+                responsive: false     // Disable DataTables responsive behavior
+            });
+        }
+        
+        if ($('#autofiltering_table').length) {
+            $('#autofiltering_table').DataTable();
+        }
+        
+        // Initialize DataTables for FCS-GX tables if they exist
+        if ($('#fcsgx_report_table').length) {
+            $('#fcsgx_report_table').DataTable({
+                scrollX: true,
+                autoWidth: false,
+                responsive: false,
+                pageLength: 25    // Show more rows by default
+            });
+        }
+        
+        if ($('#fcsgx_taxonomy_table').length) {
+            $('#fcsgx_taxonomy_table').DataTable({
+                scrollX: true,
+                autoWidth: false,
+                responsive: false,
+                pageLength: 25    // Show more rows by default
+            });
+        }
+        
+        // Add initialization for other potential tables if needed
+        if ($('#trim_ns_table').length) {
+            $('#trim_ns_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        }
+        if ($('#trim_ns_warnings_table').length) {
+            $('#trim_ns_warnings_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        }
+        if ($('#vecscreen_table').length) {
+            $('#vecscreen_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        }
+        if ($('#fcs_adaptor_table').length) { // Assuming a table ID like this might exist
+            $('#fcs_adaptor_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        }
+        if ($('#barcodes_table').length) { // Assuming a table ID like this might exist
+            $('#barcodes_table').DataTable({ scrollX: true, autoWidth: false, responsive: false });
+        }
+        // Add more table initializations here as needed, checking for existence first
+    } );
+    </script>
+</head>
+<body>
+    {% block page_header %}
+        {# Child template can override this to add specific headers if needed #}
+    {% endblock %}
+
+    <div id="tabs">
+        {% block tab_list %}
+            {# Tab list (ul) from child template will go here #}
+        {% endblock %}
+        
+        {% block tab_panels %}
+            {# Tab panels (divs with includes) from child template will go here #}
+        {% endblock %}
+    </div>
+
+    <div class="footer">
+        <p>Report generated: {{ timestamp }}</p>
+        <p>ASCC Pipeline Version: {{ version }}</p>
+    </div>
+    
+    {# Optional block for additional scripts if needed later, though primary scripts are in head #}
+    {% block body_scripts %}{% endblock %}
+</body>
+</html>
