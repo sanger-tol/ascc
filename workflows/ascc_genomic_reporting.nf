@@ -376,7 +376,7 @@ workflow ASCC_GENOMIC_REPORTING {
         ch_fcs_adaptor_prok = Channel.of([[id: "empty"],[]])
         ch_trim_ns_results = Channel.of([[id: "empty"],[]])
         ch_vecscreen_results = Channel.of([[id: "empty"],[]])
-        ch_autofilter_results = Channel.of([[id: "empty"],[]])
+        local_empty_autofilter_channel = Channel.of([[id: "empty"],[]])  // Renamed for clarity
         ch_merged_table = Channel.of([[id: "empty"],[]])
         local_empty_kmers_channel = Channel.of([[id: "empty"],[]]) // Renamed for clarity
         ch_fasta_sanitation_log = Channel.of([[id: "empty"],[]])
@@ -406,6 +406,17 @@ workflow ASCC_GENOMIC_REPORTING {
         if ((include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) &&
                 !exclude_workflow_steps.contains("vecscreen")) {
             ch_vecscreen_results = ch_vecscreen
+        }
+        
+        // Determine which autofilter channel to pass based on the condition
+        def final_autofilter_channel_for_report
+        if ((include_workflow_steps.contains('autofilter_assembly') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("autofilter_assembly")) {
+            // If autofilter step included, use the indicator file from the process
+            final_autofilter_channel_for_report = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
+        } else {
+            // Otherwise, use the initialized empty channel
+            final_autofilter_channel_for_report = local_empty_autofilter_channel
         }
         
         // Get the kmers results if the kmers workflow was run
@@ -459,6 +470,7 @@ workflow ASCC_GENOMIC_REPORTING {
         log.info "ch_fcs_adaptor_prok: ${ch_fcs_adaptor_prok.dump()}"
         log.info "ch_trim_ns_results: ${ch_trim_ns_results.dump()}"
         log.info "ch_vecscreen_results: ${ch_vecscreen_results.dump()}"
+        log.info "final_autofilter_channel_for_report: ${final_autofilter_channel_for_report.dump()}"
         log.info "ch_fasta_sanitation_log: ${ch_fasta_sanitation_log.dump()}"
         log.info "ch_fasta_length_filtering_log: ${ch_fasta_length_filtering_log.dump()}"
         log.info "ch_samplesheet_path: ${ch_samplesheet_path.dump()}"
@@ -476,7 +488,7 @@ workflow ASCC_GENOMIC_REPORTING {
             ch_fcs_adaptor_prok,
             ch_trim_ns_results,
             ch_vecscreen_results,
-            ch_autofilter_results,
+            final_autofilter_channel_for_report,  // Pass the determined channel here
             ch_merged_table,
             final_kmers_channel_for_report, // Pass the determined channel here
             ch_reference_file,
