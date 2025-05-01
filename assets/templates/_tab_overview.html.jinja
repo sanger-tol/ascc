@@ -10,12 +10,12 @@
     {# FASTA header sanitation & length filtering #}
     {% if fasta_sanitation_data %}
       {% if fasta_sanitation_data.has_issues %}
-        {% set fs_color = '#fed7d7' %} {# red #}
+        {% set fs_color = '#ef4444' %} {# vibrant red #}
       {% else %}
-        {% set fs_color = '#c6f6d5' %} {# green #}
+        {% set fs_color = '#22c55e' %} {# vibrant green #}
       {% endif %}
     {% else %}
-      {% set fs_color = '#e2e8f0' %} {# gray #}
+      {% set fs_color = '#94a3b8' %} {# darker gray #}
     {% endif %}
     <tr>
       <td>FASTA header sanitation & length filtering</td>
@@ -24,12 +24,12 @@
 
     {# PacBio barcodes #}
     {% set no_barcode_msg = "The check for retained PacBio multiplexing barcode contamination was run. No contamination was found." %}
-    {% if not barcodes_check_data %}
-      {% set bc_color = '#e2e8f0' %}
-    {% elif barcodes_check_data == no_barcode_msg %}
-      {% set bc_color = '#c6f6d5' %}
+    {% if not barcodes_check_data or "not run" in (barcodes_check_data | lower) %}
+      {% set bc_color = '#94a3b8' %}
+    {% elif barcodes_check_data == no_barcode_msg or "no contamination was found" in (barcodes_check_data | lower) %}
+      {% set bc_color = '#22c55e' %}
     {% else %}
-      {% set bc_color = '#fed7d7' %}
+      {% set bc_color = '#ef4444' %}
     {% endif %}
     <tr>
       <td>PacBio barcodes</td>
@@ -37,12 +37,13 @@
     </tr>
 
     {# FCS-Adaptor #}
-    {% if not fcs_adaptor_euk_report_data and not fcs_adaptor_prok_report_data %}
-      {% set fa_color = '#e2e8f0' %}
-    {% elif ("no adaptor contamination" in (fcs_adaptor_euk_report_data | lower)) and ("no adaptor contamination" in (fcs_adaptor_prok_report_data | lower)) %}
-      {% set fa_color = '#c6f6d5' %}
+    {% if "no fcs-adaptor eukaryotic results found" in (fcs_adaptor_euk_report_data | lower) or
+          "not run" in (fcs_adaptor_euk_report_data | lower) %}
+      {% set fa_color = '#94a3b8' %}
+    {% elif "no adaptor contamination was detected" in (fcs_adaptor_euk_report_data | lower) %}
+      {% set fa_color = '#22c55e' %}
     {% else %}
-      {% set fa_color = '#fed7d7' %}
+      {% set fa_color = '#ef4444' %}
     {% endif %}
     <tr>
       <td>FCS-Adaptor</td>
@@ -50,12 +51,13 @@
     </tr>
 
     {# VecScreen #}
-    {% if not vecscreen_data %}
-      {% set vs_color = '#e2e8f0' %}
-    {% elif "no vector contamination" in (vecscreen_data | lower) %}
-      {% set vs_color = '#c6f6d5' %}
+    {% if "no vecscreen results found" in (vecscreen_data | lower) or
+          "not run" in (vecscreen_data | lower) %}
+      {% set vs_color = '#94a3b8' %}
+    {% elif "no vector contamination was detected" in (vecscreen_data | lower) %}
+      {% set vs_color = '#22c55e' %}
     {% else %}
-      {% set vs_color = '#fed7d7' %}
+      {% set vs_color = '#ef4444' %}
     {% endif %}
     <tr>
       <td>VecScreen</td>
@@ -63,12 +65,13 @@
     </tr>
 
     {# Autofiltering #}
-    {% if not autofiltering_data %}
-      {% set af_color = '#e2e8f0' %}
+    {% if "no autofiltering results found" in (autofiltering_data | lower) or
+          "not run" in (autofiltering_data | lower) %}
+      {% set af_color = '#94a3b8' %}
     {% elif "no filtering was performed" in (autofiltering_data | lower) %}
-      {% set af_color = '#c6f6d5' %}
+      {% set af_color = '#22c55e' %}
     {% else %}
-      {% set af_color = '#fed7d7' %}
+      {% set af_color = '#ef4444' %}
     {% endif %}
     <tr>
       <td>Autofiltering</td>
@@ -76,14 +79,14 @@
     </tr>
 
     {# FCS-GX #}
-    {% if not fcs_gx_report_content %}
-      {% set gx_color = '#e2e8f0' %}
+    {% if not fcs_gx_report_content or fcs_gx_report_content == "FCS-GX check was not run." %}
+      {% set gx_color = '#94a3b8' %}
     {% elif 'EXCLUDE' in fcs_gx_report_content %}
-      {% set gx_color = '#fed7d7' %}
+      {% set gx_color = '#ef4444' %}
     {% elif 'TRIM' in fcs_gx_report_content or 'FIX' in fcs_gx_report_content or 'REVIEW' in fcs_gx_report_content or 'REVIEW_RARE' in fcs_gx_report_content or 'INFO' in fcs_gx_report_content %}
-      {% set gx_color = '#faf089' %} {# yellow #}
+      {% set gx_color = '#eab308' %} {# vibrant yellow #}
     {% else %}
-      {% set gx_color = '#c6f6d5' %}
+      {% set gx_color = '#22c55e' %}
     {% endif %}
     <tr>
       <td>FCS-GX</td>
@@ -94,16 +97,31 @@
 
 <h3>Legend</h3>
 <ul>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#c6f6d5;margin-right:0.5em;"></span>No issues (green)</li>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#faf089;margin-right:0.5em;"></span>Warning (yellow)</li>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#fed7d7;margin-right:0.5em;"></span>Issue detected (red)</li>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#e2e8f0;margin-right:0.5em;"></span>Not run (gray)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#22c55e;margin-right:0.5em;"></span>No issues (green)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#eab308;margin-right:0.5em;"></span>Warning (yellow)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#ef4444;margin-right:0.5em;"></span>Issue detected (red)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#94a3b8;margin-right:0.5em;"></span>Not run (gray)</li>
 </ul>
 
 <h3>Additional analyses</h3>
 <ul>
-  <li><a href="#coverage-tab">Coverage</a></li>
-  <li><a href="#kmers-tab">K-mer analysis</a></li>
-  <li><a href="#cobiont-tab">Cobiont Check Merged Table</a></li>
+  {% if has_coverage_content %}
+    <li><a href="#coverage-tab">Coverage</a></li>
+  {% else %}
+    <li>Coverage (not run)</li>
+  {% endif %}
+  
+  {% if has_kmers_content %}
+    <li><a href="#kmers-tab">K-mer analysis</a></li>
+  {% else %}
+    <li>K-mer analysis (not run)</li>
+  {% endif %}
+  
+  {% if has_cobiont_content %}
+    <li><a href="#cobiont-tab">Cobiont Check Merged Table</a></li>
+  {% else %}
+    <li>Cobiont Check Merged Table (not run)</li>
+  {% endif %}
+  
   {# BlobToolKit dataset link not implemented #}
 </ul>

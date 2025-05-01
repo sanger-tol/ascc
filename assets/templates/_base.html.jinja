@@ -405,16 +405,17 @@
     <script>
         // Array to track which tabs should be disabled (empty tabs)
         var emptyTabs = [];
-        {% if not has_input_content %}emptyTabs.push(0);{% endif %}
-        {% if not has_barcodes_content %}emptyTabs.push(1);{% endif %}
-        {% if not has_fcs_adaptor_content %}emptyTabs.push(2);{% endif %}
-        {% if not has_fcs_gx_content %}emptyTabs.push(3);{% endif %}
-        {% if not has_trim_ns_content %}emptyTabs.push(4);{% endif %}
-        {% if not has_vecscreen_content %}emptyTabs.push(5);{% endif %}
-        {% if not has_autofiltering_content %}emptyTabs.push(6);{% endif %}
-        {% if not has_coverage_content %}emptyTabs.push(7);{% endif %}
-        {% if not has_kmers_content %}emptyTabs.push(8);{% endif %}
-        {% if not has_cobiont_content %}emptyTabs.push(9);{% endif %}
+        // Overview tab is always enabled (index 0)
+        {% if not has_input_content %}emptyTabs.push(1);{% endif %}
+        {% if not has_barcodes_content %}emptyTabs.push(2);{% endif %}
+        {% if not has_fcs_adaptor_content %}emptyTabs.push(3);{% endif %}
+        {% if not has_fcs_gx_content %}emptyTabs.push(4);{% endif %}
+        {% if not has_trim_ns_content %}emptyTabs.push(5);{% endif %}
+        {% if not has_vecscreen_content %}emptyTabs.push(6);{% endif %}
+        {% if not has_autofiltering_content %}emptyTabs.push(7);{% endif %}
+        {% if not has_coverage_content %}emptyTabs.push(8);{% endif %}
+        {% if not has_kmers_content %}emptyTabs.push(9);{% endif %}
+        {% if not has_cobiont_content %}emptyTabs.push(10);{% endif %}
     </script>
   
     <script>
@@ -428,7 +429,7 @@
         }
         
         // Initialize K-mer method tabs (if K-mer tab is not disabled)
-        if (!emptyTabs.includes(8)) { // Check if K-mer tab (index 8) is enabled
+        if (!emptyTabs.includes(9)) { // Check if K-mer tab (index 9) is enabled
              if ($("#kmer-methods-tabs").length) { // Check if the element exists
                 $("#kmer-methods-tabs").tabs();
             }
@@ -523,6 +524,16 @@
         setTimeout(function() {
             adjustAllTables();
         }, 500);
+        
+        // Add tab navigation for anchor links
+        $(document).on('click', 'a[href^="#"][href$="-tab"]', function(e) {
+            e.preventDefault();
+            var tabId = $(this).attr('href');
+            var tabIndex = $('#tabs ul li a[href="' + tabId + '"]').parent().index();
+            if (tabIndex >= 0) {
+                $("#tabs").tabs("option", "active", tabIndex);
+            }
+        });
         
         // Add more table initializations here as needed, checking for existence first
     } );
