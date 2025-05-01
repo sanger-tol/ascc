@@ -50,6 +50,22 @@
       <td style="background-color: {{ fa_color }};"></td>
     </tr>
 
+    {# Trailing Ns #}
+    {% if "no trim ns results found" in (trim_Ns_data | lower) or
+          "not run" in (trim_Ns_data | lower) %}
+      {% set tn_color = '#94a3b8' %} {# darker gray - not run #}
+    {% elif "no issues were found" in (trim_Ns_data | lower) %}
+      {% set tn_color = '#22c55e' %} {# vibrant green - no issues #}
+    {% elif "warnings - high n content" in (trim_Ns_data | lower) and "trimming actions" not in (trim_Ns_data | lower) %}
+      {% set tn_color = '#eab308' %} {# vibrant yellow - warnings only #}
+    {% else %}
+      {% set tn_color = '#ef4444' %} {# vibrant red - trimming actions needed #}
+    {% endif %}
+    <tr>
+      <td>Trailing Ns</td>
+      <td style="background-color: {{ tn_color }};"></td>
+    </tr>
+
     {# VecScreen #}
     {% if "no vecscreen results found" in (vecscreen_data | lower) or
           "not run" in (vecscreen_data | lower) %}
