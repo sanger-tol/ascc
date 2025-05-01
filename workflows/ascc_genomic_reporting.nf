@@ -482,6 +482,17 @@ workflow ASCC_GENOMIC_REPORTING {
         // Create a channel with the reference file
         ch_reference_file = reference_tuple_from_GG
 
+        // Determine which BTK dataset channel to pass based on the condition
+        def final_btk_dataset_channel_for_report
+        if ((include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
+                !exclude_workflow_steps.contains("create_btk_dataset")) {
+            // If create_btk_dataset step included, use the channel from CREATE_BTK_DATASET
+            final_btk_dataset_channel_for_report = CREATE_BTK_DATASET.out.btk_datasets
+        } else {
+            // Otherwise, use an empty channel
+            final_btk_dataset_channel_for_report = Channel.of([[id: "empty"],[]])
+        }
+
         GENERATE_HTML_REPORT_WORKFLOW (
             final_barcode_channel_for_report,  // Pass the determined channel here
             ch_fcs_adaptor_euk,
@@ -498,7 +509,8 @@ workflow ASCC_GENOMIC_REPORTING {
             ch_samplesheet_path,
             ch_params_file,
             ch_fcsgx_report_txt,      // Pass FCS-GX report txt
-            ch_fcsgx_taxonomy_rpt     // Pass FCS-GX taxonomy rpt
+            ch_fcsgx_taxonomy_rpt,    // Pass FCS-GX taxonomy rpt
+            final_btk_dataset_channel_for_report // Pass BTK dataset
         )
         ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }

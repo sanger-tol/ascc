@@ -67,6 +67,10 @@ def prepare_report_data(
     version="1.0",
     meta=None,                          # Meta parameter
     kmer_length=None,                   # K-mer length parameter
+    btk_dataset_path=None,              # BlobToolKit dataset path parameter
+    btk_included=None,                  # Whether BlobToolKit dataset creation was included in the run
+    btk_published_path=None,            # Path being checked for the BlobToolKit dataset
+    launch_dir=None,                    # Directory from which the workflow was launched
 ):
     """Prepare data for the HTML report.
 
@@ -127,6 +131,10 @@ def prepare_report_data(
         "version": version,
         "meta": meta,
         "kmer_length": kmer_length,  # Add k-mer length to the data dictionary
+        "btk_dataset_path": btk_dataset_path,  # Add BlobToolKit dataset path to the data dictionary
+        "btk_included": btk_included,  # Add BlobToolKit included flag to the data dictionary
+        "btk_published_path": btk_published_path,  # Add BlobToolKit published path for debugging
+        "launch_dir": launch_dir,  # Add launch directory for debugging
     }
 
     return data

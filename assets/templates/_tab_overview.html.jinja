@@ -139,5 +139,11 @@
     <li>Cobiont Check Merged Table (not run)</li>
   {% endif %}
   
-  {# BlobToolKit dataset link not implemented #}
+  {% if btk_dataset_path %}
+    <li>BlobToolKit dataset: {{ btk_dataset_path }}</li>
+  {% elif btk_included == "false" %}
+    <li>BlobToolKit dataset creation was not included in the run</li>
+  {% else %}
+    <li>BlobToolKit dataset (not run)</li>
+  {% endif %}
 </ul>

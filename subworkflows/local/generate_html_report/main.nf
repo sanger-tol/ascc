@@ -19,6 +19,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     params_file                // channel: [ params_file ]
     fcsgx_report_txt           // channel: [ val(meta), [ fcsgx_report_txt ] ]
     fcsgx_taxonomy_rpt         // channel: [ val(meta), [ fcsgx_taxonomy_rpt ] ]
+    btk_dataset                // channel: [ val(meta), [ btk_dataset ] ]
 
     main:
     ch_versions = Channel.empty()
@@ -114,8 +115,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                 return true
             }
         }.ifEmpty { [null, []] })
+        .combine(btk_dataset.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
          // The map closure now receives id, meta, then pairs of id_dup, files for each combined channel
-        .map { id, meta, barcode_id_dup, barcode, fcs_euk_id_dup, fcs_euk, fcs_prok_id_dup, fcs_prok, trim_ns_id_dup, trim_ns, vecscreen_id_dup, vecscreen, autofilter_id_dup, autofilter, merged_id_dup, merged, kmers_id_dup, kmers, ref_id_dup, ref, sanitation_id_dup, sanitation, length_filtering_id_dup, length_filtering, fcsgx_report_id_dup, fcsgx_report, fcsgx_tax_id_dup, fcsgx_tax ->
+        .map { id, meta, barcode_id_dup, barcode, fcs_euk_id_dup, fcs_euk, fcs_prok_id_dup, fcs_prok, trim_ns_id_dup, trim_ns, vecscreen_id_dup, vecscreen, autofilter_id_dup, autofilter, merged_id_dup, merged, kmers_id_dup, kmers, ref_id_dup, ref, sanitation_id_dup, sanitation, length_filtering_id_dup, length_filtering, fcsgx_report_id_dup, fcsgx_report, fcsgx_tax_id_dup, fcsgx_tax, btk_id_dup, btk ->
             // Ensure we handle potential nulls from ifEmpty
             def final_barcode = barcode ?: []
             def final_fcs_euk = fcs_euk ?: []
@@ -130,8 +132,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
             def final_length_filtering = length_filtering ?: []
             def final_fcsgx_report = fcsgx_report ?: []
             def final_fcsgx_tax = fcsgx_tax ?: []
+            def final_btk = btk ?: []
             // We only need the original meta map and the actual file data for the output tuple
-            tuple(meta, final_barcode, final_fcs_euk, final_fcs_prok, final_trim_ns, final_vecscreen, final_autofilter, final_merged, final_kmers, final_ref, final_sanitation, final_length_filtering, final_fcsgx_report, final_fcsgx_tax)
+            tuple(meta, final_barcode, final_fcs_euk, final_fcs_prok, final_trim_ns, final_vecscreen, final_autofilter, final_merged, final_kmers, final_ref, final_sanitation, final_length_filtering, final_fcsgx_report, final_fcsgx_tax, final_btk)
         }
         .set { combined_inputs }
 

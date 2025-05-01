@@ -23,7 +23,8 @@ process GENERATE_HTML_REPORT {
           path(fasta_sanitation_log, stageAs: "fasta_sanitation/*"),
           path(fasta_length_filtering_log, stageAs: "fasta_length_filtering/*"),
           path(fcs_gx_report_txt, stageAs: "fcsgx/*"),      // Add FCS-GX report txt input
-          path(fcs_gx_taxonomy_rpt, stageAs: "fcsgx/*")     // Add FCS-GX taxonomy rpt input
+          path(fcs_gx_taxonomy_rpt, stageAs: "fcsgx/*"),    // Add FCS-GX taxonomy rpt input
+          path(btk_output_dir, stageAs: "btk/*")            // Add BTK output dir input
     path(jinja_templates_list, stageAs: "templates/*") // Updated to accept a list and stage them
     path(samplesheet)
     path(params_file)
@@ -72,6 +73,10 @@ process GENERATE_HTML_REPORT {
         $params_json_arg \\
         --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt \\
         --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt \\
+        --btk_output_dir btk \\
+        --btk_published_path "${params.outdir}/${meta.id}/create_btk_dataset/btk_datasets_CBD" \\
+        --btk_included "${params.include.contains('create_btk_dataset') || params.include.contains('ALL')}" \\
+        --launch_dir "${workflow.launchDir}" \\
         --pipeline_version ${workflow.manifest.version} \\
         --output_prefix $prefix
     

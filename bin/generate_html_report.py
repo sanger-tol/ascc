@@ -43,6 +43,10 @@ def main():
     parser.add_argument("--params_json", help="JSON string containing the params object")
     parser.add_argument("--fcs_gx_report_txt", help="Path to FCS-GX report text file") # Add FCS-GX report arg
     parser.add_argument("--fcs_gx_taxonomy_rpt", help="Path to FCS-GX taxonomy report file") # Add FCS-GX taxonomy arg
+    parser.add_argument("--btk_output_dir", help="Directory containing BlobToolKit dataset output") # Add BTK output dir arg
+    parser.add_argument("--btk_published_path", help="Path to the published BlobToolKit dataset in the output directory") # Add BTK published path arg
+    parser.add_argument("--btk_included", help="Whether BlobToolKit dataset creation was included in the run") # Add BTK included flag
+    parser.add_argument("--launch_dir", help="Directory from which the workflow was launched") # Add launch_dir arg
     parser.add_argument("--output_prefix", default="report", help="Prefix for the output HTML file")
     parser.add_argument("--pipeline_version", required=True, help="Version of the ASCC pipeline") # Added pipeline version arg
     parser.add_argument("--version", action="version", version="1.0") # Kept script version arg
@@ -236,6 +240,35 @@ def main():
         except Exception as e:
             print(f"Error reading FCS-GX taxonomy file {args.fcs_gx_taxonomy_rpt}: {e}", file=sys.stderr)
 
+    # Check for BTK Dataset
+    btk_dataset_path = None
+    btk_included = args.btk_included if args.btk_included else "true"  # Default to true if not provided
+    
+    # Store the published path and launch directory for debugging
+    btk_published_path = args.btk_published_path if args.btk_published_path else "Not provided"
+    launch_dir = args.launch_dir if args.launch_dir else "Not provided"
+    print(f"Launch directory: {launch_dir}", file=sys.stderr)
+    
+    # Resolve the path using the launch directory if it's a relative path
+    full_btk_path = None
+    if args.btk_published_path:
+        if not os.path.isabs(args.btk_published_path) and args.launch_dir:
+            full_btk_path = os.path.join(args.launch_dir, args.btk_published_path)
+            print(f"Resolving relative path '{args.btk_published_path}' using launch directory '{args.launch_dir}' to '{full_btk_path}'", file=sys.stderr)
+        else:
+            full_btk_path = args.btk_published_path
+            print(f"Using path as is: {full_btk_path}", file=sys.stderr)
+        
+        # Check if the resolved path exists
+        if os.path.exists(full_btk_path) and os.path.isdir(full_btk_path):
+            btk_dataset_path = full_btk_path
+            print(f"Found BTK dataset at: {btk_dataset_path}", file=sys.stderr)
+        else:
+            btk_dataset_path = None
+            print(f"BTK dataset not found at: {full_btk_path}", file=sys.stderr)
+    else:
+        btk_dataset_path = None
+        print("BTK published path not provided.", file=sys.stderr)
 
     # Create meta object from output_prefix
     meta = {"id": args.output_prefix}
@@ -267,6 +300,10 @@ def main():
         version=args.pipeline_version, # Use the passed pipeline version
         meta=meta,                     # Pass meta object
         kmer_length=kmer_length,       # Pass k-mer length
+        btk_dataset_path=btk_dataset_path, # Pass BlobToolKit dataset path
+        btk_included=btk_included,     # Pass BlobToolKit included flag
+        btk_published_path=btk_published_path, # Pass BlobToolKit published path for debugging
+        launch_dir=launch_dir,         # Pass launch directory for debugging
     )
 
     # Render the HTML report
