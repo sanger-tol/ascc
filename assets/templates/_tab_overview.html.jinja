@@ -1,0 +1,109 @@
+<h2>Overview</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {# FASTA header sanitation & length filtering #}
+    {% if fasta_sanitation_data %}
+      {% if fasta_sanitation_data.has_issues %}
+        {% set fs_color = '#fed7d7' %} {# red #}
+      {% else %}
+        {% set fs_color = '#c6f6d5' %} {# green #}
+      {% endif %}
+    {% else %}
+      {% set fs_color = '#e2e8f0' %} {# gray #}
+    {% endif %}
+    <tr>
+      <td>FASTA header sanitation & length filtering</td>
+      <td style="background-color: {{ fs_color }};"></td>
+    </tr>
+
+    {# PacBio barcodes #}
+    {% set no_barcode_msg = "The check for retained PacBio multiplexing barcode contamination was run. No contamination was found." %}
+    {% if not barcodes_check_data %}
+      {% set bc_color = '#e2e8f0' %}
+    {% elif barcodes_check_data == no_barcode_msg %}
+      {% set bc_color = '#c6f6d5' %}
+    {% else %}
+      {% set bc_color = '#fed7d7' %}
+    {% endif %}
+    <tr>
+      <td>PacBio barcodes</td>
+      <td style="background-color: {{ bc_color }};"></td>
+    </tr>
+
+    {# FCS-Adaptor #}
+    {% if not fcs_adaptor_euk_report_data and not fcs_adaptor_prok_report_data %}
+      {% set fa_color = '#e2e8f0' %}
+    {% elif ("no adaptor contamination" in (fcs_adaptor_euk_report_data | lower)) and ("no adaptor contamination" in (fcs_adaptor_prok_report_data | lower)) %}
+      {% set fa_color = '#c6f6d5' %}
+    {% else %}
+      {% set fa_color = '#fed7d7' %}
+    {% endif %}
+    <tr>
+      <td>FCS-Adaptor</td>
+      <td style="background-color: {{ fa_color }};"></td>
+    </tr>
+
+    {# VecScreen #}
+    {% if not vecscreen_data %}
+      {% set vs_color = '#e2e8f0' %}
+    {% elif "no vector contamination" in (vecscreen_data | lower) %}
+      {% set vs_color = '#c6f6d5' %}
+    {% else %}
+      {% set vs_color = '#fed7d7' %}
+    {% endif %}
+    <tr>
+      <td>VecScreen</td>
+      <td style="background-color: {{ vs_color }};"></td>
+    </tr>
+
+    {# Autofiltering #}
+    {% if not autofiltering_data %}
+      {% set af_color = '#e2e8f0' %}
+    {% elif "no filtering was performed" in (autofiltering_data | lower) %}
+      {% set af_color = '#c6f6d5' %}
+    {% else %}
+      {% set af_color = '#fed7d7' %}
+    {% endif %}
+    <tr>
+      <td>Autofiltering</td>
+      <td style="background-color: {{ af_color }};"></td>
+    </tr>
+
+    {# FCS-GX #}
+    {% if not fcs_gx_report_content %}
+      {% set gx_color = '#e2e8f0' %}
+    {% elif 'EXCLUDE' in fcs_gx_report_content %}
+      {% set gx_color = '#fed7d7' %}
+    {% elif 'TRIM' in fcs_gx_report_content or 'FIX' in fcs_gx_report_content or 'REVIEW' in fcs_gx_report_content or 'REVIEW_RARE' in fcs_gx_report_content or 'INFO' in fcs_gx_report_content %}
+      {% set gx_color = '#faf089' %} {# yellow #}
+    {% else %}
+      {% set gx_color = '#c6f6d5' %}
+    {% endif %}
+    <tr>
+      <td>FCS-GX</td>
+      <td style="background-color: {{ gx_color }};"></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Legend</h3>
+<ul>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#c6f6d5;margin-right:0.5em;"></span>No issues (green)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#faf089;margin-right:0.5em;"></span>Warning (yellow)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#fed7d7;margin-right:0.5em;"></span>Issue detected (red)</li>
+  <li><span style="display:inline-block;width:1em;height:1em;background-color:#e2e8f0;margin-right:0.5em;"></span>Not run (gray)</li>
+</ul>
+
+<h3>Additional analyses</h3>
+<ul>
+  <li><a href="#coverage-tab">Coverage</a></li>
+  <li><a href="#kmers-tab">K-mer analysis</a></li>
+  <li><a href="#cobiont-tab">Cobiont Check Merged Table</a></li>
+  {# BlobToolKit dataset link not implemented #}
+</ul>
