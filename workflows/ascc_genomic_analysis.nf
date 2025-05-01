@@ -51,6 +51,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     ch_kraken1 = Channel.of([[],[]])
     ch_kraken2 = Channel.of([[],[]])
     ch_kraken3 = Channel.of([[],[]])
+    ch_kmers_results = Channel.of([[],[]])
 
     //
     // KMERS ANALYSIS

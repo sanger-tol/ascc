@@ -99,11 +99,16 @@
             border-bottom: 1px solid #e2e8f0;
             border-radius: 5px 5px 0 0;
             padding: 0.5em 0.5em 0;
+            display: flex;         /* Use Flexbox */
+            flex-wrap: wrap;       /* Allow wrapping */
+            justify-content: flex-start; /* Align items to the start (left) */
+            list-style: none;      /* Ensure no list bullets */
         }
 
         #tabs .ui-tabs-nav li {
-            margin: 0.2em 0.2em 0 0;
+            margin: 0.2em 0.2em 0 0; 
             border-radius: 5px 5px 0 0;
+            /* display: inline-block; /* No longer needed with flex */ */
         }
 
         #tabs .ui-tabs-nav li a {
