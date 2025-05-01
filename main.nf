@@ -33,8 +33,6 @@ workflow SANGERTOL_ASCC_GENOMIC {
     take:
     samplesheet // channel: samplesheet read in from --input
     organelles
-    include_steps
-    exclude_steps
     fcs
     read_files
     scientific_name
@@ -48,8 +46,6 @@ workflow SANGERTOL_ASCC_GENOMIC {
     ASCC_GENOMIC (
         samplesheet,
         organelles,
-        include_steps,
-        exclude_steps,
         fcs,
         read_files,
         scientific_name,
@@ -64,8 +60,6 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
 
     take:
     samplesheet // channel: samplesheet read in from --input
-    include_steps
-    exclude_steps
     fcs
     reads
     scientific_name
@@ -78,8 +72,6 @@ workflow SANGERTOL_ASCC_ORGANELLAR {
     //
     ASCC_ORGANELLAR (
         samplesheet,
-        include_steps,
-        exclude_steps,
         fcs,
         reads,
         scientific_name,
@@ -114,8 +106,6 @@ workflow {
     SANGERTOL_ASCC_GENOMIC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
-        PIPELINE_INITIALISATION.out.include_steps,
-        PIPELINE_INITIALISATION.out.exclude_steps,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
         PIPELINE_INITIALISATION.out.collected_reads,
         Channel.of(params.scientific_name),
@@ -126,23 +116,13 @@ workflow {
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
-    include_workflow_steps  = params.organellar_include ? params.organellar_include.split(",") : "ALL"
-    exclude_workflow_steps  = params.organellar_exclude ? params.organellar_exclude.split(",") : "NONE"
-
-    if ( exclude_workflow_steps.contains('ALL') || include_workflow_steps.contains('NONE') ) {
-        log.warn "ORGANELLAR SUBWORKFLOW: HAS BEEN SKIPPED: $exclude_workflow_steps"
-
-    } else {
-        SANGERTOL_ASCC_ORGANELLAR (
-            PIPELINE_INITIALISATION.out.organellar_genomes,
-            PIPELINE_INITIALISATION.out.organellar_include,
-            PIPELINE_INITIALISATION.out.organellar_exclude,
-            PIPELINE_INITIALISATION.out.fcs_gx_database,
-            PIPELINE_INITIALISATION.out.collected_reads,
-            Channel.of(params.scientific_name),
-            PIPELINE_INITIALISATION.out.pacbio_db,
-        )
-    }
+    SANGERTOL_ASCC_ORGANELLAR (
+        PIPELINE_INITIALISATION.out.organellar_genomes,
+        PIPELINE_INITIALISATION.out.fcs_gx_database,
+        PIPELINE_INITIALISATION.out.collected_reads,
+        Channel.of(params.scientific_name),
+        PIPELINE_INITIALISATION.out.pacbio_db,
+    )
 
 
     //
@@ -157,19 +137,6 @@ workflow {
         params.hook_url,
         []
     )
-}
-
-process MAIN_WORKFLOW_GrabFiles {
-    tag "Grab PacBio Data"
-    executor 'local'
-
-    input:
-    path("in")
-
-    output:
-    path("in/*.{fa,fasta,fna}.{gz}")
-
-    "true"
 }
 
 

@@ -16,6 +16,15 @@ workflow EXTRACT_NT_BLAST {
     main:
     ch_versions             = Channel.empty()
 
+    Channel.of( blastn_db_path )
+        .map { it ->
+            [
+                [id: "db"],
+                it
+            ]
+        }
+        .set { ch_blast }
+
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
     //
@@ -27,7 +36,7 @@ workflow EXTRACT_NT_BLAST {
     //
     BLAST_BLASTN_MOD (
         SEQKIT_SLIDING.out.fastx,
-        [[id: "db"], blastn_db_path]
+        ch_blast
     )
     ch_versions             = ch_versions.mix(BLAST_BLASTN_MOD.out.versions)
 
@@ -44,7 +53,10 @@ workflow EXTRACT_NT_BLAST {
         .map { meta, files ->
             files
         }
-        .collectFile( name: 'FULL_blast_results.txt', newLine: false)
+        .collectFile(
+            name: 'FULL_blast_results.txt',
+            newLine: false
+        )
         .combine( id )
         .map { file, identity ->
             tuple(  [   id: identity    ],
@@ -104,17 +116,4 @@ workflow EXTRACT_NT_BLAST {
     ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full  // Format for BTK - full coordinates file
     versions                = ch_versions
 
-}
-
-process get_string {
-    input:
-    val(nin)
-
-    output:
-    stdout
-
-    script:
-    """
-    echo $nin
-    """
 }

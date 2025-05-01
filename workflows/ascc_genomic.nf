@@ -44,8 +44,6 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
-    include_step_OBSELETE   // params.include_steps
-    exclude_steps_OBSELETE   // params.exclude_steps
     fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
@@ -53,28 +51,6 @@ workflow ASCC_GENOMIC {
 
     main:
     ch_versions = Channel.empty()
-
-    //
-    // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
-    //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
-    //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
-
-    full_list               = [
-        "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",
-        "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
-        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset",
-        "merge", "ALL", "NONE"
-    ]
-
-    if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
-        exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
-    }
-
-    log.info "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    log.info "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -95,8 +71,8 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( !exclude_workflow_steps.contains("essentials") && (include_workflow_steps.contains("ALL") || include_workflow_steps.contains("essentials")) ) {
 
+    if ( params.essentials.contains("both") || params.essentials.contains("genomic") ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
@@ -111,13 +87,14 @@ workflow ASCC_GENOMIC {
     } else {
         log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
-        reference_tuple_from_GG = ch_samplesheet // This is the reference genome input channel
+        reference_tuple_from_GG = ch_samplesheet
+        ej_dot_genome           = Channel.of([[],[]])
+        ej_gc_coverage          = Channel.of([[],[]])
+        reference_tuple_w_seqkt = Channel.of([[],[]])
     }
 
 
-    if ( (include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("kmers")
-    ) {
+    if ( params.kmers.contains("both") || params.kmers.contains("genomic") ) {
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
         //
@@ -155,9 +132,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( (include_workflow_steps.contains('tiara') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("tiara")
-    ) {
+    if ( params.tiara.contains("both") || params.tiara.contains("genomic") ) {
         EXTRACT_TIARA_HITS (
             reference_tuple_from_GG
         )
@@ -175,9 +150,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( (include_workflow_steps.contains('nt_blast') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("nt_blast")
-    ) {
+    if ( params.nt_blast.contains("both") || params.nt_blast.contains("genomic") ) {
         //
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
@@ -221,9 +194,8 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( (include_workflow_steps.contains('nr_diamond') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("nr_diamond")
-    ) {
+    if ( params.nr_diamond.contains("both") || params.nr_diamond.contains("genomic") ) {
+
         NR_DIAMOND (
             reference_tuple_from_GG,
             params.diamond_nr_database_path
@@ -255,9 +227,8 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("uniprot_diamond")
-    ) {
+    if ( params.uniprot_diamond.contains("both") || params.uniprot_diamond.contains("genomic") ) {
+
         UP_DIAMOND (
             reference_tuple_from_GG,
             params.diamond_uniprot_database_path
@@ -285,10 +256,7 @@ workflow ASCC_GENOMIC {
     }
 
 
-    if ( (include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("organellar_blast")
-    ) {
-
+    if ( params.organellar_blast.contains("both") || params.organellar_blast.contains("genomic") ) {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
         //
@@ -298,6 +266,8 @@ workflow ASCC_GENOMIC {
                 plastid:    meta.assembly_type == "PLASTID"
                 invalid:    true    // if value but not of the above conditions
             }
+
+
         //
         // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
         //
@@ -316,6 +286,7 @@ workflow ASCC_GENOMIC {
             organellar_check.plastid
         )
         ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+
 
         //
         // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
@@ -342,9 +313,8 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( (include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("pacbio_barcodes")
-    ) {
+    if ( params.pacbio_barcodes.contains("both") || params.pacbio_barcodes.contains("genomic") ) {
+
         reference_tuple_from_GG
             .combine(pacbio_database)
             .multiMap{
@@ -367,9 +337,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( (include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("fcs-adaptor")
-    ) {
+    if ( params.fcs_adaptor.contains("both") || params.fcs_adaptor.contains("genomic") ) {
         RUN_FCSADAPTOR (
             reference_tuple_from_GG
         )
@@ -399,9 +367,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( (include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("fcs-gx")
-    ) {
+    if ( params.fcsgx.contains("both") || params.fcsgx.contains("genomic") ) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
@@ -439,9 +405,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( (include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("coverage")
-    ) {
+    if ( params.coverage.contains("both") || params.coverage.contains("genomic") ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
             reads,
@@ -474,9 +438,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( (include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("vecscreen")
-    ) {
+    if ( params.vecscreen.contains("both") || params.vecscreen.contains("genomic") ) {
         RUN_VECSCREEN (
             reference_tuple_from_GG,
             params.vecscreen_database_path
@@ -500,9 +462,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( (include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("kraken")
-    ) {
+    if ( params.kraken.contains("both") || params.kraken.contains("genomic") ) {
 
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
@@ -540,9 +500,7 @@ workflow ASCC_GENOMIC {
     }
 
 
-    if ( (include_workflow_steps.contains('create_btk_dataset') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("create_btk_dataset")
-    ) {
+    if ( params.create_btk_dataset.contains("both") || params.create_btk_dataset.contains("genomic") ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
@@ -634,8 +592,9 @@ workflow ASCC_GENOMIC {
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
     if (
-        ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") && !exclude_workflow_steps.contains("autofilter_assembly") ) ||
-        ( include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("autofilter_assembly") )
+        ( params.tiara.contains("both") || params.tiara.contains("genomic") ) &&
+        ( params.fcsgx.contains("both") || params.fcsgx.contains("genomic") ) &&
+        ( params.autofilter_assembly.contains("both") || params.autofilter_assembly.contains("genomic") )
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
@@ -709,14 +668,12 @@ workflow ASCC_GENOMIC {
     //
     if (
         (
-            !exclude_workflow_steps.contains("btk_busco") &&
-            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly")) || include_workflow_steps.contains('ALL')) &&
+            ( params.btk_busco.contains("both") || params.btk_busco.contains("genomic") ) &&
             btk_busco_run_mode == "conditional" &&
             btk_bool.run_btk
         ) ||
         (
-            !exclude_workflow_steps.contains("btk_busco") &&
-            ((include_workflow_steps.contains('btk_busco') && include_workflow_steps.contains("autofilter_assembly") && include_workflow_steps.contains("create_btk_dataset")) || include_workflow_steps.contains('ALL')) &&
+            ( params.btk_busco.contains("both") || params.btk_busco.contains("genomic") ) &&
             btk_busco_run_mode == "mandatory"
         )
     ) {
@@ -853,10 +810,11 @@ workflow ASCC_GENOMIC {
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
     if (
-        !exclude_workflow_steps.contains("essentials") && !exclude_workflow_steps.contains("merge") && !exclude_workflow_steps.contains("ALL")
+        ( params.essentials.contains("both") || params.essentials.contains("genomic") ) &&
+        ( params.merge_datasets.contains("both") || params.merge_datasets.contains("genomic") )
     ) {
 
-//
+        //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
@@ -924,7 +882,7 @@ workflow ASCC_GENOMIC {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            name: 'ascc_software_versions.yml',
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
