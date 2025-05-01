@@ -253,7 +253,7 @@
                     "type": "string",
                     "description": "Run btk_busco jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
-                    "default": "both"
+                    "default": "genomic"
                 },
                 "pacbio_barcodes": {
                     "type": "string",
@@ -265,13 +265,13 @@
                     "type": "string",
                     "description": "Run organellar_blast jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
-                    "default": "both"
+                    "default": "genomic"
                 },
                 "autofilter_assembly": {
                     "type": "string",
                     "description": "Run autofilter_assembly jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
-                    "default": "both"
+                    "default": "genomic"
                 },
                 "create_btk_dataset": {
                     "type": "string",
@@ -283,7 +283,7 @@
                     "type": "string",
                     "description": "Run merge_datasets jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
-                    "default": "both"
+                    "default": "genomic"
                 },
                 "btk_busco_run_mode": {
                     "type": "string",
