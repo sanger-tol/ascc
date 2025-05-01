@@ -93,7 +93,7 @@ Now, you can run the pipeline using:
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
-nextflow run sanger-tol/ascc \
+nextflow run nf-core/ascc \
    -profile <docker/singularity/.../institute> \
    --input samplesheet \
    --params-input YAML \
@@ -116,6 +116,8 @@ We thank [Michael Paulini](https://github.com/epaule), Camilla Santos, [Noah Get
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
+
+For further information or help, don't hesitate to get in touch on the [Slack `#ascc` channel](https://nfcore.slack.com/channels/ascc) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
 

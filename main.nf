@@ -1,9 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    sanger-tol/ascc
+    nf-core/ascc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/sanger-tol/ascc
+    Github : https://github.com/nf-core/ascc
+    Website: https://nf-co.re/ascc
+    Slack  : https://nfcore.slack.com/channels/ascc
 ----------------------------------------------------------------------------------------
 */
 

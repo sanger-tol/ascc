@@ -13,12 +13,7 @@
 <img src="cid:nfcorepipelinelogo">
 
 <h1>sanger-tol/ascc ${version}</h1>
-<h2>Run Name: $runName</h2>
-
-<% if (!success){
-    out << """
-    <div style="color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        <h4 style="margin-top:0; color: inherit;">sanger-tol/ascc execution completed unsuccessfully!</h4>
+        <h4 style="margin-top:0; color: inherit;">nf-core/ascc execution completed unsuccessfully!</h4>
         <p>The exit status of the task that caused the workflow execution to fail was: <code>$exitStatus</code>.</p>
         <p>The full error message was:</p>
         <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${errorReport}</pre>
@@ -27,7 +22,7 @@
 } else {
     out << """
     <div style="color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        sanger-tol/ascc execution completed successfully!
+        nf-core/ascc execution completed successfully!
     </div>
     """
 }
@@ -44,8 +39,8 @@
     </tbody>
 </table>
 
-<p>sanger-tol/ascc</p>
-<p><a href="https://github.com/sanger-tol/ascc">https://github.com/sanger-tol/ascc</a></p>
+<p>nf-core/ascc</p>
+<p><a href="https://github.com/nf-core/ascc">https://github.com/nf-core/ascc</a></p>
 
 </div>
 
