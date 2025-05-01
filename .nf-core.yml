@@ -1,22 +1,32 @@
-repository_type: pipeline
 lint:
   files_exist:
-  - CODE_OF_CONDUCT.md
-  - assets/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_dark.png
-  - .github/ISSUE_TEMPLATE/config.yml
-  - .github/workflows/awstest.yml
-  - .github/workflows/awsfulltest.yml
-  - conf/igenomes.config
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - conf/igenomes.config
   files_unchanged:
-  - CODE_OF_CONDUCT.md
-  - assets/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_light.png
-  - docs/images/nf-core-ascc_logo_dark.png
-  - .github/ISSUE_TEMPLATE/bug_report.yml
-  nextflow_config:
-  - manifest.name
-  - manifest.homePage
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_light.png
+    - docs/images/nf-core-ascc_logo_dark.png
+    - .github/ISSUE_TEMPLATE/bug_report.yml
   multiqc_config:
-  - report_comment
+    - report_comment
+  nextflow_config:
+    - manifest.name
+    - manifest.homePage
+nf_core_version: 3.2.0
+repository_type: pipeline
+template:
+  author: eeaunin
+  description: Pipeline for detecting cobionts and contaminants in genome assemblies
+  force: false
+  is_nfcore: true
+  name: ascc
+  org: nf-core
+  outdir: .
+  version: 1.0dev
