@@ -46,7 +46,7 @@ workflow ASCC {
     //
     // WORKFLOW: Run main workflow for ORGANELLAR samples
     //
-    if ( params.genomic_only ) {
+    if ( !params.genomic_only ) {
         ORGANELLAR (
             organellar_genomes,
             fcs_db,

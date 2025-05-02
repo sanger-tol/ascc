@@ -26,6 +26,7 @@ lint:
     - assets/nf-core-ascc_logo_light.png
     - assets/email_template.html
     - assets/email_template.txt
+    - assets/sendmail_template.txt
     - docs/README.md
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
