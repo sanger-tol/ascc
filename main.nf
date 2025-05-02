@@ -3,9 +3,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nf-core/ascc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/ascc
-    Website: https://nf-co.re/ascc
-    Slack  : https://nfcore.slack.com/channels/ascc
+    Github : https://github.com/sanger-tol/ascc
+    Website: https://pipelines.tol.sanger.ac.uk/ascc
 ----------------------------------------------------------------------------------------
 */
 
@@ -39,6 +38,18 @@ workflow SANGERTOL_ASCC {
     scientific_name     // Scientific name
     pacbio_db           // Pacbio database
     ncbi_taxonomy_path  // NCBI taxonomy path
+    ncbi_ranked_lineage_path
+    nt_database_path
+    diamond_nr_db_path
+    diamond_uniprot_db_path
+    taxid
+    nt_kraken_db_path
+    vecscreen_database_path
+    reads_path
+    reads_layout
+    reads_type
+    btk_lineages
+    btk_lineages_path
 
     main:
 
@@ -52,7 +63,19 @@ workflow SANGERTOL_ASCC {
         read_files,
         scientific_name,
         pacbio_db,
-        ncbi_taxonomy_path
+        ncbi_taxonomy_path,
+        ncbi_ranked_lineage_path,
+        nt_database_path,
+        diamond_nr_db_path,
+        diamond_uniprot_db_path,
+        taxid,
+        nt_kraken_db_path,
+        vecscreen_database_path,
+        reads_path,
+        reads_layout,
+        reads_type,
+        btk_lineages,
+        btk_lineages_path
     )
 }
 
@@ -88,7 +111,19 @@ workflow {
         PIPELINE_INITIALISATION.out.collected_reads,
         Channel.of(params.scientific_name),
         PIPELINE_INITIALISATION.out.pacbio_db,
-        Channel.fromPath(params.ncbi_taxonomy_path)
+        Channel.fromPath(params.ncbi_taxonomy_path),
+        Channel.fromPath(params.ncbi_ranked_lineage_path),
+        Channel.fromPath(params.nt_database_path),
+        Channel.fromPath(params.diamond_nr_database_path),
+        Channel.fromPath(params.diamond_uniprot_database_path),
+        Channel.of(params.taxid),
+        Channel.fromPath(params.nt_kraken_database_path),
+        Channel.fromPath(params.vecscreen_database_path),
+        Channel.from(params.reads_path),
+        Channel.of(params.reads_layout),
+        Channel.of(params.reads_type),
+        Channel.of(params.busco_lineages),
+        Channel.fromPath(params.busco_lineages_folder)
     )
 
 

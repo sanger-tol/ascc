@@ -5,12 +5,6 @@
 */
 
 include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
-include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
-include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
-include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
-include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
-include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
-include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
@@ -42,6 +36,15 @@ workflow ASCC_ORGANELLAR {
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
     ncbi_taxonomy_path
+    ncbi_ranked_lineage_path
+    nt_database_path
+    diamond_nr_db_path
+    diamond_uniprot_db_path
+    taxid
+    nt_kraken_db_path
+    vecscreen_database_path
+    reads_path
+    reads_type
 
     main:
     ch_versions = Channel.empty()
@@ -160,12 +163,12 @@ workflow ASCC_ORGANELLAR {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
-            .combine(Channel.of(params.taxid))
-            .combine(Channel.of(params.ncbi_ranked_lineage_path))
-            .multiMap { meta, ref, db, taxid, tax_path ->
-                reference: [meta, taxid, ref]
+            .combine(taxid)
+            .combine(ncbi_ranked_lineage_path)
+            .multiMap { meta, ref, db, tax_id, tax_path ->
+                reference: [meta, tax_id, ref]
                 fcs_db_path: db
-                taxid_val: taxid
+                taxid_val: tax_id
                 ncbi_tax_path: tax_path
             }
 
@@ -193,8 +196,8 @@ workflow ASCC_ORGANELLAR {
 
         RUN_READ_COVERAGE (
             reference_tuple_from_GG, // Again should this be the validated fasta?
-            reads,
-            params.reads_type,
+            reads.first(),
+            reads_type.first(),
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
@@ -222,7 +225,7 @@ workflow ASCC_ORGANELLAR {
 
         RUN_VECSCREEN (
             reference_tuple_from_GG, // Again should this be the validated fasta?
-            params.vecscreen_database_path
+            vecscreen_database_path.first()
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
@@ -241,8 +244,8 @@ workflow ASCC_ORGANELLAR {
 
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
-            params.nt_kraken_database_path,
-            params.ncbi_ranked_lineage_path
+            nt_kraken_db_path.first(),
+            ncbi_ranked_lineage_path.first()
         )
         ch_kraken1 = RUN_NT_KRAKEN.out.classified
                         .map { it ->
@@ -310,8 +313,8 @@ workflow ASCC_ORGANELLAR {
 
         EXTRACT_NT_BLAST (
             valid_length_fasta,
-            params.nt_database_path,
-            params.ncbi_ranked_lineage_path
+            nt_database_path.first(),
+            ncbi_ranked_lineage_path.first()
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
         ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
@@ -346,7 +349,7 @@ workflow ASCC_ORGANELLAR {
 
         NR_DIAMOND (
             valid_length_fasta,
-            params.diamond_nr_database_path
+            diamond_nr_db_path.first()
         )
         ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
         nr_full             = NR_DIAMOND.out.reformed
@@ -375,7 +378,7 @@ workflow ASCC_ORGANELLAR {
 
         UP_DIAMOND (
             valid_length_fasta,
-            params.diamond_uniprot_database_path
+            diamond_uniprot_db_path.first()
         )
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
         un_full             = UP_DIAMOND.out.reformed
@@ -433,6 +436,8 @@ workflow ASCC_ORGANELLAR {
                 [id: id, data: data]
             }
 
+        ch_organellar_cbtk_input.view{"DATA: $it"}
+
         //
         // LOGIC: LIST OF PROCESSES TO CHECK FOR
         //
@@ -463,6 +468,7 @@ workflow ASCC_ORGANELLAR {
             combined_channel = combined_channel.combine(processChannels[process], by: 0)
         }
 
+        combined_channel.view{"COMBINED: $it"}
 
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
@@ -470,7 +476,7 @@ workflow ASCC_ORGANELLAR {
         CREATE_BTK_DATASET (
             combined_channel,
             ncbi_taxonomy_path.first(),
-            scientific_name
+            scientific_name.first()
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
     }

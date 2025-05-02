@@ -23,7 +23,19 @@ workflow ASCC {
     collected_reads         //
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
-    ncbi_lineage_path
+    ncbi_taxonomy_path
+    ncbi_ranked_lineage_path
+    nt_database_path
+    diamond_nr_db_path
+    diamond_uniprot_db_path
+    taxid                   // val(taxid)
+    nt_kraken_db_path
+    vecscreen_database_path
+    reads_path
+    reads_layout
+    reads_type
+    btk_lineages
+    btk_lineages_path
 
     main:
     ch_versions     = Channel.empty()
@@ -38,7 +50,19 @@ workflow ASCC {
         collected_reads,
         scientific_name,
         pacbio_database,
-        ncbi_lineage_path
+        ncbi_taxonomy_path,
+        ncbi_ranked_lineage_path,
+        nt_database_path,
+        diamond_nr_db_path,
+        diamond_uniprot_db_path,
+        taxid,
+        nt_kraken_db_path,
+        vecscreen_database_path,
+        reads_path,
+        reads_layout,
+        reads_type,
+        btk_lineages,
+        btk_lineages_path
     )
     ch_versions         = ch_versions.mix(GENOMIC.out.versions)
 
@@ -53,7 +77,16 @@ workflow ASCC {
             collected_reads,
             scientific_name,
             pacbio_database,
-            ncbi_lineage_path
+            ncbi_taxonomy_path,
+            ncbi_ranked_lineage_path,
+            nt_database_path,
+            diamond_nr_db_path,
+            diamond_uniprot_db_path,
+            taxid,
+            nt_kraken_db_path,
+            vecscreen_database_path,
+            reads_path,
+            reads_type
         )
         ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
     }

@@ -44,6 +44,18 @@ workflow ASCC_GENOMIC {
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
     ncbi_taxonomy_path
+    ncbi_ranked_lineage_path
+    nt_database_path
+    diamond_nr_db_path
+    diamond_uniprot_db_path
+    taxid
+    nt_kraken_db_path
+    vecscreen_database_path
+    reads_path
+    reads_layout
+    reads_type
+    btk_lineages
+    btk_lineages_path
 
     main:
     ch_versions = Channel.empty()
@@ -153,8 +165,8 @@ workflow ASCC_GENOMIC {
         //
         EXTRACT_NT_BLAST (
             reference_tuple_from_GG,
-            params.nt_database_path,
-            params.ncbi_ranked_lineage_path
+            nt_database_path.first(),
+            ncbi_ranked_lineage_path.first()
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
@@ -194,7 +206,7 @@ workflow ASCC_GENOMIC {
 
         NR_DIAMOND (
             reference_tuple_from_GG,
-            params.diamond_nr_database_path
+            diamond_nr_db_path.first()
         )
         ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
 
@@ -227,7 +239,7 @@ workflow ASCC_GENOMIC {
 
         UP_DIAMOND (
             reference_tuple_from_GG,
-            params.diamond_uniprot_database_path
+            diamond_uniprot_db_path.first()
         )
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
 
@@ -367,12 +379,12 @@ workflow ASCC_GENOMIC {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
-            .combine(Channel.of(params.taxid))
-            .combine(Channel.of(params.ncbi_ranked_lineage_path))
-            .multiMap { meta, ref, db, taxid, tax_path ->
-                reference: [meta, taxid, ref]
+            .combine(taxid)
+            .combine(ncbi_ranked_lineage_path)
+            .multiMap { meta, ref, db, tax_id, tax_path ->
+                reference: [meta, tax_id, ref]
                 fcs_db_path: db
-                taxid_val: taxid
+                taxid_val: tax_id
                 ncbi_tax_path: tax_path
             }
 
@@ -404,8 +416,8 @@ workflow ASCC_GENOMIC {
     if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            reads,
-            params.reads_type,
+            reads.first(),
+            reads_type.first(),
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
@@ -437,7 +449,7 @@ workflow ASCC_GENOMIC {
     if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
         RUN_VECSCREEN (
             reference_tuple_from_GG,
-            params.vecscreen_database_path
+            vecscreen_database_path.first()
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
 
@@ -462,8 +474,8 @@ workflow ASCC_GENOMIC {
 
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
-            params.nt_kraken_database_path,
-            params.ncbi_ranked_lineage_path
+            nt_kraken_db_path.first(),
+            ncbi_ranked_lineage_path.first()
         )
         ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
@@ -557,6 +569,7 @@ workflow ASCC_GENOMIC {
             ]
         }
 
+        ch_genomic_cbtk_input.view{"GENOMICS DATA: $it"}
 
         //
         // LOGIC: Combine all channels using a series of combine operations
@@ -566,13 +579,15 @@ workflow ASCC_GENOMIC {
             combined_channel = combined_channel.combine(processChannels[process], by: 0)
         }
 
+        combined_channel.view{"GENOMIC COMBINED: $it"}
+
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
         //
         CREATE_BTK_DATASET (
             combined_channel,
             ncbi_taxonomy_path.first(),
-            scientific_name
+            scientific_name.first()
 
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
@@ -614,10 +629,10 @@ workflow ASCC_GENOMIC {
                 by: 0
             )
             .combine(
-                Channel.fromPath(params.ncbi_ranked_lineage_path)
+                ncbi_ranked_lineage_path
             )
             .combine(
-                Channel.of(params.taxid)
+                taxid
             )
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
@@ -679,8 +694,8 @@ workflow ASCC_GENOMIC {
         //
         GENERATE_SAMPLESHEET (
             reference_tuple_from_GG,
-            params.reads_path,
-            Channel.of(params.reads_layout),
+            reads_path.first(),
+            reads_layout.first(),
             AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
         )
         ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
@@ -713,14 +728,14 @@ workflow ASCC_GENOMIC {
         SANGER_TOL_BTK (
             combined_input.reference,
             combined_input.samplesheet,
-            params.diamond_uniprot_database_path,
-            params.nt_database_path,
-            params.diamond_uniprot_database_path,
+            diamond_uniprot_db_path.first(),
+            nt_database_path.first(),
+            diamond_uniprot_db_path.first(),
             ncbi_taxonomy_path.first(),
-            params.reads_path,
-            params.busco_lineages_folder,
-            params.busco_lineages,
-            params.taxid,
+            reads_path.first(),
+            btk_lineages_path.first(),
+            btk_lineages.first(),
+            taxid.first(),
         )
         ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
