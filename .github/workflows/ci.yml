@@ -141,7 +141,7 @@ jobs:
 
       - name: Run FULL pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,${matrix.profile}
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.test_name }},${{ matrix.profile }}
 
       - name: Upload Nextflow log
         uses: actions/upload-artifact@v4
