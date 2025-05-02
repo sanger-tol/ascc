@@ -12,7 +12,6 @@ include { SANGER_TOL_BTK                                } from '../modules/local
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
-
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
@@ -28,10 +27,6 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 
-include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -46,6 +41,7 @@ workflow ASCC_ORGANELLAR {
     reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
+    ncbi_taxonomy_path
 
     main:
     ch_versions = Channel.empty()
@@ -69,7 +65,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
-    if ( params.essentials.contains("both") || params.essentials.contains("organellar") ) {
+    if ( params.run_essentials == "both" || params.run_essentials == "organellar" ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
@@ -84,16 +80,16 @@ workflow ASCC_ORGANELLAR {
         log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         reference_tuple_from_GG = ch_samplesheet
-        ej_dot_genome           = Channel.of([[],[]])
-        ej_gc_coverage          = Channel.of([[],[]])
-        reference_tuple_w_seqkt = Channel.of([[],[]])
+        ej_dot_genome           = Channel.empty()
+        ej_gc_coverage          = Channel.empty()
+        reference_tuple_w_seqkt = Channel.empty()
     }
 
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( params.tiara.contains("both") || params.tiara.contains("organellar") ) {
+    if ( params.run_tiara == "both" || params.run_tiara == "organellar" ) {
         EXTRACT_TIARA_HITS (
             reference_tuple_from_GG
         )
@@ -111,7 +107,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.pacbio_barcodes.contains("both") || params.pacbio_barcodes.contains("organellar") ) {
+    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar" ) {
 
         reference_tuple_from_GG
             .combine(pacbio_database)
@@ -135,7 +131,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.fcs_adaptor.contains("both") || params.fcs_adaptor.contains("organellar") ) {
+    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar" ) {
         RUN_FCSADAPTOR (
             reference_tuple_from_GG
         )
@@ -153,14 +149,14 @@ workflow ASCC_ORGANELLAR {
             }
 
     } else {
-        ch_fcsadapt         = Channel.of([[],[]])
+        ch_fcsadapt         = Channel.empty()
     }
 
 
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( params.fcsgx.contains("both") || params.fcsgx.contains("organellar") ) {
+    if ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
@@ -193,7 +189,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.coverage.contains("both") || params.coverage.contains("genomic") ) {
+    if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
 
         RUN_READ_COVERAGE (
             reference_tuple_from_GG, // Again should this be the validated fasta?
@@ -222,7 +218,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( params.vecscreen.contains("both") || params.vecscreen.contains("genomic") ) {
+    if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
 
         RUN_VECSCREEN (
             reference_tuple_from_GG, // Again should this be the validated fasta?
@@ -235,13 +231,13 @@ workflow ASCC_ORGANELLAR {
                                 }
                                 .ifEmpty { [[],[]] }
     } else {
-        ch_vecscreen        = Channel.of([[],[]])
+        ch_vecscreen        = Channel.empty()
     }
 
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( params.kraken.contains("both") || params.kraken.contains("genomic") ) {
+    if ( params.run_kraken == "both" || params.run_kraken == "genomic" ) {
 
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
@@ -266,9 +262,9 @@ workflow ASCC_ORGANELLAR {
                         }
                     .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1 = Channel.of([[],[]])
-        ch_kraken2 = Channel.of([[],[]])
-        ch_kraken3 = Channel.of([[],[]])
+        ch_kraken1 = Channel.empty()
+        ch_kraken2 = Channel.empty()
+        ch_kraken3 = Channel.empty()
 
     }
 
@@ -306,7 +302,7 @@ workflow ASCC_ORGANELLAR {
     //              _AS WELL AS_
     //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
     //
-    if ( params.nt_blast.contains("both") || params.nt_blast.contains("genomic") ) {
+    if ( params.run_nt_blast == "both" || params.run_nt_blast == "genomic" ) {
 
         //
         //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
@@ -346,7 +342,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( params.nr_diamond.contains("both") || params.nr_diamond.contains("genomic") ) {
+    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "genomic" ) {
 
         NR_DIAMOND (
             valid_length_fasta,
@@ -375,7 +371,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( params.uniprot_diamond.contains("both") || params.uniprot_diamond.contains("genomic") ) {
+    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "genomic" ) {
 
         UP_DIAMOND (
             valid_length_fasta,
@@ -399,7 +395,7 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    if ( params.create_btk_dataset.contains("both") || params.create_btk_dataset.contains("genomic") ) {
+    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic" ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
@@ -473,23 +469,14 @@ workflow ASCC_ORGANELLAR {
         //
         CREATE_BTK_DATASET (
             combined_channel,
-            Channel.fromPath(params.ncbi_taxonomy_path).first(),
+            ncbi_taxonomy_path.first(),
             scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
     }
 
-
-    //
-    // Collate and save software versions
-    //
-    softwareVersionsToYAML(ch_versions)
-        .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
-            name: 'ascc_software_versions.yml',
-            sort: true,
-            newLine: true
-        ).set { ch_collated_versions }
+    emit:
+    versions                    = ch_versions
 
 }
 

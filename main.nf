@@ -15,11 +15,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ASCC_GENOMIC                                      } from './workflows/ascc_genomic'
-include { ASCC_ORGANELLAR                                   } from './workflows/ascc_organellar'
+include { ASCC                      } from './workflows/ascc'
 
-include { PIPELINE_INITIALISATION                           } from './subworkflows/local/utils_nfcore_ascc_pipeline'
-include { PIPELINE_COMPLETION                               } from './subworkflows/local/utils_nfcore_ascc_pipeline'
+include { PIPELINE_INITIALISATION   } from './subworkflows/local/utils_nfcore_ascc_pipeline'
+include { PIPELINE_COMPLETION       } from './subworkflows/local/utils_nfcore_ascc_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,56 +29,33 @@ include { PIPELINE_COMPLETION                               } from './subworkflo
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow SANGERTOL_ASCC_GENOMIC {
+workflow SANGERTOL_ASCC {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
-    organelles
-    fcs
-    read_files
-    scientific_name
-    pacbio_db
+    genomic             // Genomic fasta tuples
+    organelles          // Organellar fasta tuples
+    fcs                 // fcs db
+    read_files          // Read files
+    scientific_name     // Scientific name
+    pacbio_db           // Pacbio database
+    ncbi_taxonomy_path  // NCBI taxonomy path
 
     main:
 
     //
     // WORKFLOW: Run pipeline
     //
-    ASCC_GENOMIC (
-        samplesheet,
+    ASCC (
+        genomic,
         organelles,
         fcs,
         read_files,
         scientific_name,
-        pacbio_db
+        pacbio_db,
+        ncbi_taxonomy_path
     )
 }
 
-//
-// WORKFLOW: Run main analysis pipeline depending on type of input
-//
-workflow SANGERTOL_ASCC_ORGANELLAR {
-
-    take:
-    samplesheet // channel: samplesheet read in from --input
-    fcs
-    reads
-    scientific_name
-    pacbio_db
-
-    main:
-
-    //
-    // WORKFLOW: Run pipeline
-    //
-    ASCC_ORGANELLAR (
-        samplesheet,
-        fcs,
-        reads,
-        scientific_name,
-        pacbio_db
-    )
-}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -103,27 +79,16 @@ workflow {
 
 
     //
-    // WORKFLOW: Run main workflow for GENOMIC samples
+    // WORKFLOW: MAIN ASCC WORKFLOW FILE THAT SEPERATES INTO GENOMIC AND ORGANELLAR
     //
-    SANGERTOL_ASCC_GENOMIC (
+    SANGERTOL_ASCC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
         PIPELINE_INITIALISATION.out.collected_reads,
         Channel.of(params.scientific_name),
         PIPELINE_INITIALISATION.out.pacbio_db,
-    )
-
-
-    //
-    // WORKFLOW: Run main workflow for ORGANELLAR samples
-    //
-    SANGERTOL_ASCC_ORGANELLAR (
-        PIPELINE_INITIALISATION.out.organellar_genomes,
-        PIPELINE_INITIALISATION.out.fcs_gx_database,
-        PIPELINE_INITIALISATION.out.collected_reads,
-        Channel.of(params.scientific_name),
-        PIPELINE_INITIALISATION.out.pacbio_db,
+        Channel.fromPath(params.ncbi_taxonomy_path)
     )
 
 

@@ -25,6 +25,7 @@ lint:
     - gitignore
     - assets/nf-core-ascc_logo_light.png
     - assets/email_template.html
+    - docs/README
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
     - .prettierignore
@@ -49,4 +50,6 @@ template:
   outdir: .
   skip_features:
     - igenomes
+    - fastqc
+    - multiqc
   version: 0.3.0

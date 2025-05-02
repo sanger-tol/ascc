@@ -183,103 +183,103 @@
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
                 },
-                "essentials": {
+                "run_essentials": {
                     "type": "string",
                     "description": "Run essential jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "kmers": {
+                "run_kmers": {
                     "type": "string",
                     "description": "Run kmer jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
-                "tiara": {
+                "run_tiara": {
                     "type": "string",
                     "description": "Run tiara jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "coverage": {
+                "run_coverage": {
                     "type": "string",
                     "description": "Run coverage jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "nt_blast": {
+                "run_nt_blast": {
                     "type": "string",
                     "description": "Run nt_blast jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "nr_diamond": {
+                "run_nr_diamond": {
                     "type": "string",
                     "description": "Run nr_diamond jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "uniprot_diamond": {
+                "run_uniprot_diamond": {
                     "type": "string",
                     "description": "Run uniprot_diamond jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "kraken": {
+                "run_kraken": {
                     "type": "string",
                     "description": "Run kraken jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "fcsgx": {
+                "run_fcsgx": {
                     "type": "string",
                     "description": "Run fcsgx jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "fcs_adaptor": {
+                "run_fcs_adaptor": {
                     "type": "string",
                     "description": "Run fcs_adaptor jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "vecscreen": {
+                "run_vecscreen": {
                     "type": "string",
                     "description": "Run vecscreen jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "btk_busco": {
+                "run_btk_busco": {
                     "type": "string",
                     "description": "Run btk_busco jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
-                "pacbio_barcodes": {
+                "run_pacbio_barcodes": {
                     "type": "string",
                     "description": "Run pacbio_barcodes jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "organellar_blast": {
+                "run_organellar_blast": {
                     "type": "string",
                     "description": "Run organellar_blast jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
-                "autofilter_assembly": {
+                "run_autofilter_assembly": {
                     "type": "string",
                     "description": "Run autofilter_assembly jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
-                "create_btk_dataset": {
+                "run_create_btk_dataset": {
                     "type": "string",
                     "description": "Run create_btk_dataset jobs on assebmlies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
-                "merge_datasets": {
+                "run_merge_datasets": {
                     "type": "string",
                     "description": "Run merge_datasets jobs on assebmlies",
                     "enum": ["genomic", "both", "off"],
@@ -288,7 +288,15 @@
                 "btk_busco_run_mode": {
                     "type": "string",
                     "description": "Should btk be run as mandatory or conditional on levels of contamination.",
-                    "fa_icon": "fas fa-file-lines"
+                    "fa_icon": "fas fa-file-lines",
+                    "enum": ["mandatory", "conditional"],
+                    "Default": "conditional"
+                },
+                "genomic_only": {
+                    "type": "boolean",
+                    "description": "Switch off the organellar workflow",
+                    "fa_icon": "fas fa-file-lines",
+                    "default": false
                 }
             }
         },

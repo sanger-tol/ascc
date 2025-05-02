@@ -12,7 +12,6 @@ include { SANGER_TOL_BTK                                } from '../modules/local
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
-
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
@@ -29,10 +28,6 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 
-include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -48,6 +43,7 @@ workflow ASCC_GENOMIC {
     reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
+    ncbi_taxonomy_path
 
     main:
     ch_versions = Channel.empty()
@@ -72,7 +68,7 @@ workflow ASCC_GENOMIC {
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
 
-    if ( params.essentials.contains("both") || params.essentials.contains("genomic") ) {
+    if ( params.run_essentials == "both" || params.run_essentials == "genomic" ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
@@ -88,13 +84,13 @@ workflow ASCC_GENOMIC {
         log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         reference_tuple_from_GG = ch_samplesheet
-        ej_dot_genome           = Channel.of([[],[]])
-        ej_gc_coverage          = Channel.of([[],[]])
-        reference_tuple_w_seqkt = Channel.of([[],[]])
+        ej_dot_genome           = Channel.empty()
+        ej_gc_coverage          = Channel.empty()
+        reference_tuple_w_seqkt = Channel.empty()
     }
 
 
-    if ( params.kmers.contains("both") || params.kmers.contains("genomic") ) {
+    if ( params.run_kmers == "both" || params.run_kmers == "genomic" ) {
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
         //
@@ -132,7 +128,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( params.tiara.contains("both") || params.tiara.contains("genomic") ) {
+    if ( params.run_tiara == "both" || params.run_tiara == "genomic" ) {
         EXTRACT_TIARA_HITS (
             reference_tuple_from_GG
         )
@@ -150,7 +146,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( params.nt_blast.contains("both") || params.nt_blast.contains("genomic") ) {
+    if ( params.run_nt_blast == "both" || params.run_nt_blast == "genomic" ) {
         //
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
@@ -194,7 +190,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( params.nr_diamond.contains("both") || params.nr_diamond.contains("genomic") ) {
+    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "genomic" ) {
 
         NR_DIAMOND (
             reference_tuple_from_GG,
@@ -227,7 +223,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( params.uniprot_diamond.contains("both") || params.uniprot_diamond.contains("genomic") ) {
+    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "genomic" ) {
 
         UP_DIAMOND (
             reference_tuple_from_GG,
@@ -256,7 +252,7 @@ workflow ASCC_GENOMIC {
     }
 
 
-    if ( params.organellar_blast.contains("both") || params.organellar_blast.contains("genomic") ) {
+    if ( params.run_organellar_blast == "both" || params.run_organellar_blast == "genomic" ) {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
         //
@@ -313,7 +309,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.pacbio_barcodes.contains("both") || params.pacbio_barcodes.contains("genomic") ) {
+    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "genomic" ) {
 
         reference_tuple_from_GG
             .combine(pacbio_database)
@@ -337,7 +333,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.fcs_adaptor.contains("both") || params.fcs_adaptor.contains("genomic") ) {
+    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic" ) {
         RUN_FCSADAPTOR (
             reference_tuple_from_GG
         )
@@ -360,14 +356,14 @@ workflow ASCC_GENOMIC {
             }
 
     } else {
-        ch_fcsadapt         = Channel.of([[],[]])
+        ch_fcsadapt         = Channel.empty()
     }
 
 
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( params.fcsgx.contains("both") || params.fcsgx.contains("genomic") ) {
+    if ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
@@ -405,7 +401,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.coverage.contains("both") || params.coverage.contains("genomic") ) {
+    if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
             reads,
@@ -438,7 +434,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( params.vecscreen.contains("both") || params.vecscreen.contains("genomic") ) {
+    if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
         RUN_VECSCREEN (
             reference_tuple_from_GG,
             params.vecscreen_database_path
@@ -455,14 +451,14 @@ workflow ASCC_GENOMIC {
                                 }
                                 .ifEmpty { [[],[]] }
     } else {
-        ch_vecscreen        = Channel.of([[],[]])
+        ch_vecscreen        = Channel.empty()
     }
 
 
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( params.kraken.contains("both") || params.kraken.contains("genomic") ) {
+    if ( params.run_kraken == "both" || params.run_kraken == "genomic" ) {
 
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
@@ -493,14 +489,14 @@ workflow ASCC_GENOMIC {
                         }
                     .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1 = Channel.of([[],[]])
-        ch_kraken2 = Channel.of([[],[]])
-        ch_kraken3 = Channel.of([[],[]])
+        ch_kraken1 = Channel.empty()
+        ch_kraken2 = Channel.empty()
+        ch_kraken3 = Channel.empty()
 
     }
 
 
-    if ( params.create_btk_dataset.contains("both") || params.create_btk_dataset.contains("genomic") ) {
+    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic" ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
@@ -575,7 +571,7 @@ workflow ASCC_GENOMIC {
         //
         CREATE_BTK_DATASET (
             combined_channel,
-            Channel.fromPath(params.ncbi_taxonomy_path).first(),
+            ncbi_taxonomy_path.first(),
             scientific_name
 
         )
@@ -583,7 +579,7 @@ workflow ASCC_GENOMIC {
 
         create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
     } else {
-        create_summary          = Channel.of([[],[]])
+        create_summary          = Channel.empty()
     }
 
 
@@ -592,9 +588,9 @@ workflow ASCC_GENOMIC {
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
     if (
-        ( params.tiara.contains("both") || params.tiara.contains("genomic") ) &&
-        ( params.fcsgx.contains("both") || params.fcsgx.contains("genomic") ) &&
-        ( params.autofilter_assembly.contains("both") || params.autofilter_assembly.contains("genomic") )
+        ( params.run_tiara == "both" || params.run_tiara == "genomic" ) &&
+        ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) &&
+        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic" )
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
@@ -656,8 +652,8 @@ workflow ASCC_GENOMIC {
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_assem       = Channel.of([])
-        ch_autofilt_indicator   = Channel.of([])
+        ch_autofilt_assem       = Channel.empty()
+        ch_autofilt_indicator   = Channel.empty()
     }
 
 
@@ -668,12 +664,12 @@ workflow ASCC_GENOMIC {
     //
     if (
         (
-            ( params.btk_busco.contains("both") || params.btk_busco.contains("genomic") ) &&
+            ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" ) &&
             btk_busco_run_mode == "conditional" &&
             btk_bool.run_btk
         ) ||
         (
-            ( params.btk_busco.contains("both") || params.btk_busco.contains("genomic") ) &&
+            ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" ) &&
             btk_busco_run_mode == "mandatory"
         )
     ) {
@@ -720,7 +716,7 @@ workflow ASCC_GENOMIC {
             params.diamond_uniprot_database_path,
             params.nt_database_path,
             params.diamond_uniprot_database_path,
-            params.ncbi_taxonomy_path,
+            ncbi_taxonomy_path.first(),
             params.reads_path,
             params.busco_lineages_folder,
             params.busco_lineages,
@@ -801,7 +797,7 @@ workflow ASCC_GENOMIC {
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
 
     } else {
-        busco_merge_btk         = Channel.of([[],[]])
+        busco_merge_btk         = Channel.empty()
     }
 
 
@@ -810,8 +806,8 @@ workflow ASCC_GENOMIC {
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
     if (
-        ( params.essentials.contains("both") || params.essentials.contains("genomic") ) &&
-        ( params.merge_datasets.contains("both") || params.merge_datasets.contains("genomic") )
+        ( params.run_essentials == "both" || params.run_essentials == "genomic" ) &&
+        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" )
     ) {
 
         //
@@ -876,18 +872,9 @@ workflow ASCC_GENOMIC {
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
     }
 
-    //
-    // Collate and save software versions
-    //
-    softwareVersionsToYAML(ch_versions)
-        .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
-            name: 'ascc_software_versions.yml',
-            sort: true,
-            newLine: true
-        ).set { ch_collated_versions }
+    emit:
+    versions                    = ch_versions
 }
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

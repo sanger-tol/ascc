@@ -3,6 +3,51 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.0 - Red Lamp [02/05/2025]
+
+Release 4 of sanger-toll/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
+
+### Enhancements & Fixes
+
+- Re-added the ascc.nf.
+  - This corrects an issue with version generation.
+- Corrected incorrect file output
+  - publishDir does not take a list of file extensions, only positive globs.
+    - This has meant some modules have more patterns to match than previously.
+- Corrected issue with channel generation being tempermental in some cases.
+- Added per-process enums rather than the use of a csv list to control process execution.
+  - Significantly easier to maintain conditionals for process execution.
+  - Each unique process now has a flag such as `run_{process}` which accepts a value of `genomic`,`organellar`,`both`,`off`.
+  - For some processes the options are `genomic`,`both`,`off` as they arte not useful for organellar assemblies.
+  - Implemented due to feedback from users.
+  - This method is now significantly easier to control and understand.
+  - Due to this update we are re-introducing the `genomic_only` flag.
+- Update to CI and test files.
+
+### Parameters
+
+| Old Parameter        | New Parameter  |
+| -------------------- | -------------- |
+| -                    | --genomic_only |
+| -                    | --run_essentials |
+| -                    | --run_kmers |
+| -                    | --run_tiara |
+| -                    | --run_coverage |
+| -                    | --run_nt_blast |
+| -                    | --run_nr_diamond |
+| -                    | --run_uniprot_diamond |
+| -                    | --run_kraken |
+| -                    | --run_fcsgx |
+| -                    | --run_fcs_adaptor |
+| -                    | --run_vecscreen |
+| -                    | --run_btk_busco |
+| -                    | --run_pacbio_barcodes |
+| -                    | --run_organellar_blast |
+| -                    | --run_autofilter_assembly |
+| -                    | --run_create_btk_dataset |
+| -                    | --run_merge_datasets |
+
+
 ## v0.2.1 - Red Speaker [25/04/2025]
 
 Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
