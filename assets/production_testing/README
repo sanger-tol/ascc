@@ -1,0 +1,4 @@
+## README for production use
+
+```
+nextflow run {main.nf|sanger-tol/ascc} -profile sanger,production,
