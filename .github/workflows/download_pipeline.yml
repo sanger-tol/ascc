@@ -1,4 +1,4 @@
-name: Test successful pipeline download with 'sanger-tol pipelines download'
+name: Test successful pipeline download with 'nf-core pipelines download'
 
 # Run the workflow when:
 #  - dispatched manually
