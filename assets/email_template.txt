@@ -4,15 +4,15 @@
   |\\ | |__  __ /  ` /  \\ |__) |__         }  {
   | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                         `._,._,'
-  nf-core/ascc ${version}
+  sanger-tol/ascc ${version}
 ----------------------------------------------------
 Run Name: $runName
 
 <% if (success){
-    out << "## nf-core/ascc execution completed successfully! ##"
+    out << "## sanger-tol/ascc execution completed successfully! ##"
 } else {
     out << """####################################################
-## nf-core/ascc execution completed unsuccessfully! ##
+## sanger-tol/ascc execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -35,5 +35,5 @@ Pipeline Configuration:
 <% out << summary.collect{ k,v -> " - $k: $v" }.join("\n") %>
 
 --
-nf-core/ascc
-https://github.com/nf-core/ascc
+sanger-tol/ascc
+https://github.com/sanger-tol/ascc

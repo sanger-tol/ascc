@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       testbranch:
-        description: "The specific branch you wish to utilize for the test execution of sanger-tol pipelines download."
+        description: "The specific branch you wish to utilize for the test execution of nf-core pipelines download."
         required: true
         default: "dev"
   pull_request:
