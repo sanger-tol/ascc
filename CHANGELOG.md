@@ -9,13 +9,15 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 
 ### Enhancements & Fixes
 
-- Re-added the ascc.nf.
+- Re-added the ascc.nf=.
   - This corrects an issue with version generation.
+- Remove unnecessary modules which have been replaced by NF-core modules [#104](https://github.com/sanger-tol/ascc/issues/104) .
 - Corrected incorrect file output
   - publishDir does not take a list of file extensions, only positive globs.
     - This has meant some modules have more patterns to match than previously.
+    - Update modules which were outputting versions to the output dir unnecessarily.
 - Corrected issue with channel generation being tempermental in some cases.
-- Added per-process enums rather than the use of a csv list to control process execution.
+- Added per-process enums rather than the use of a csv list to control process execution [#107](https://github.com/sanger-tol/ascc/issues/107).
   - Significantly easier to maintain conditionals for process execution.
   - Each unique process now has a flag such as `run_{process}` which accepts a value of `genomic`,`organellar`,`both`,`off`.
   - For some processes the options are `genomic`,`both`,`off` as they arte not useful for organellar assemblies.
@@ -25,7 +27,9 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Update to CI and test files.
 - Downgrading NF-Schema to 2.2.0.
   - This is a temporary change!
-- Added a production profile - intended to simplify production needs in Sanger ToL.
+- Added a production profile - intended to simplify production needs in Sanger ToL [#106](https://github.com/sanger-tol/ascc/issues/106).
+- Updates test profiles.
+- Update modules which were requesting 100.h.
 
 ### Parameters
 
