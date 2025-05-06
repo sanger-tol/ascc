@@ -46,7 +46,8 @@
                 "reads_type": {
                     "type": "string",
                     "description": "Type of read (hifi)",
-                    "fa_icon": "fas fa-input-text"
+                    "fa_icon": "fas fa-input-text",
+                    "default": "hifi"
                 },
                 "reads_layout": {
                     "type": "string",
@@ -71,7 +72,8 @@
                 "kmer_length": {
                     "type": "number",
                     "description": "Length of kmer to use in run",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 7
                 },
                 "dimensionality_reduction_methods": {
                     "type": "array",
@@ -145,17 +147,20 @@
                 "seqkit_sliding": {
                     "type": "number",
                     "description": "Length of slide for Seqkit",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 100000
                 },
                 "seqkit_window": {
                     "type": "number",
                     "description": "Length of the window for Seqkit",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 6000
                 },
                 "n_neighbours": {
                     "type": "number",
                     "description": "Nearest Neighbour value - This is for the dimensional reduction of kmer counts (UMAP and t-SNE).",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 13
                 },
                 "btk_yaml": {
                     "type": "string",
@@ -290,7 +295,7 @@
                     "description": "Should btk be run as mandatory or conditional on levels of contamination.",
                     "fa_icon": "fas fa-file-lines",
                     "enum": ["mandatory", "conditional"],
-                    "Default": "conditional"
+                    "default": "conditional"
                 },
                 "genomic_only": {
                     "type": "boolean",
