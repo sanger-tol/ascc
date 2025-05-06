@@ -141,12 +141,9 @@ jobs:
 
       - name: Run FULL pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} \
-            -profile test,docker \
-            -params-file ${GITHUB_WORKSPACE}/assets/github_testing/github_test.yaml \
-            --input ${GITHUB_WORKSPACE}/assets/github_testing/samplesheet.csv \
-            --exclude btk_busco \
-            --organellar_exclude btk_busco
+          df -h --total
+
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.test_name }},${{ matrix.profile }}
 
       - name: Upload Nextflow log
         uses: actions/upload-artifact@v4
