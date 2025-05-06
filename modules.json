@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/ascc",
-    "homePage": "https://github.com/nf-core/ascc",
+    "name": "sanger-tol/ascc",
+    "homePage": "https://github.com/sanger-tol/ascc",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

@@ -1,6 +1,6 @@
-# nf-core/ascc: Documentation
+# sanger-tol/ascc: Documentation
 
-The nf-core/ascc documentation is split into the following pages:
+The sanger-tol/ascc documentation is split into the following pages:
 
 - [Usage](usage.md)
   - An overview of how the pipeline works, how to run it and a description of all of the different command-line flags.

@@ -1,4 +1,4 @@
-# nf-core/ascc: Citations
+# sanger-tol/ascc: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 

@@ -1,23 +1,23 @@
 # `sanger-tol/ascc`: Contributing Guidelines
 
 Hi there!
-Many thanks for taking an interest in improving nf-core/ascc.
+Many thanks for taking an interest in improving sanger-tol/ascc.
 
-We try to manage the required tasks for nf-core/ascc using GitHub issues, you probably came to this page when creating one.
+We try to manage the required tasks for sanger-tol/ascc using GitHub issues, you probably came to this page when creating one.
 Please use the pre-filled template to save time.
 
 However, don't be put off by this template - other more general issues and suggestions are welcome!
 Contributions to the code are even more welcome ;)
 
 > [!NOTE]
-> If you need help using or modifying nf-core/ascc then the best place to ask is on the nf-core Slack [#ascc](https://nfcore.slack.com/channels/ascc) channel ([join our Slack here](https://nf-co.re/join/slack)).
+> If you need help using or modifying sanger-tol/ascc then the best place to ask is on the GitHub issues!
 
 ## Contribution workflow
 
-If you'd like to write some code for nf-core/ascc, the standard workflow is as follows:
+If you'd like to write some code for sanger-tol/ascc, the standard workflow is as follows:
 
-1. Check that there isn't already an issue about your idea in the [nf-core/ascc issues](https://github.com/nf-core/ascc/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
-2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [nf-core/ascc repository](https://github.com/nf-core/ascc) to your GitHub account
+1. Check that there isn't already an issue about your idea in the [sanger-tol/ascc issues](https://github.com/sanger-tol/ascc/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
+2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [sanger-tol/ascc repository](https://github.com/sanger-tol/ascc) to your GitHub account
 3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
 4. Use `nf-core pipelines schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
 5. Submit a Pull Request against the `dev` branch and wait for the code to be reviewed and merged
@@ -111,7 +111,7 @@ This repo includes a devcontainer configuration which will create a GitHub Codes
 
 To get started:
 
-- Open the repo in [Codespaces](https://github.com/nf-core/ascc/codespaces)
+- Open the repo in [Codespaces](https://github.com/sanger-tol/ascc/codespaces)
 - Tools installed
   - nf-core
   - Nextflow

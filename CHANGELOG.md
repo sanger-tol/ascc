@@ -1,4 +1,4 @@
-# nf-core/ascc: Changelog
+# sanger-tol/ascc: Changelog
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -30,6 +30,7 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Added a production profile - intended to simplify production needs in Sanger ToL [#106](https://github.com/sanger-tol/ascc/issues/106).
 - Updates test profiles.
 - Update modules which were requesting 100.h.
+- Template has been updated to 3.2.1.
 
 ### Parameters
 
@@ -113,7 +114,7 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
 ## v0.1.0 - Red Book [14/02/2025]
 
-Initial release of nf-core/ascc, created with the [nf-core](https://nf-co.re/) template.
+Initial release of sanger-tol/ascc, created with the [nf-core](https://nf-co.re/) template.
 
 THIS IS STILL AN IN DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 

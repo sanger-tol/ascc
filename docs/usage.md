@@ -1,6 +1,6 @@
-# nf-core/ascc: Usage
+# sanger-tol/ascc: Usage
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/ascc/usage](https://nf-co.re/ascc/usage)
+## :warning: Please read this documentation on the sanger-tol website: [https://pipelines.tol.sanger.ac.uk/ascc/](https://pipelines.tol.sanger.ac.uk/ascc/)
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
@@ -139,14 +139,14 @@ work                # Directory containing the nextflow working files
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull nf-core/ascc
+nextflow pull sanger-tol/ascc
 ```
 
 ### Reproducibility
 
 It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/ascc releases page](https://github.com/nf-core/ascc/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [sanger-tol/ascc releases page](https://github.com/sanger-tol/ascc/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 

@@ -1,4 +1,4 @@
-# nf-core/ascc: Output
+# sanger-tol/ascc: Output
 
 ## Introduction
 
