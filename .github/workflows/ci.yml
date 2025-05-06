@@ -141,6 +141,8 @@ jobs:
 
       - name: Run FULL pipeline with test data
         run: |
+          df -h --total
+
           nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.test_name }},${{ matrix.profile }}
 
       - name: Upload Nextflow log
