@@ -569,7 +569,6 @@ workflow ASCC_GENOMIC {
             ]
         }
 
-        ch_genomic_cbtk_input.view{"GENOMICS DATA: $it"}
 
         //
         // LOGIC: Combine all channels using a series of combine operations
@@ -579,7 +578,6 @@ workflow ASCC_GENOMIC {
             combined_channel = combined_channel.combine(processChannels[process], by: 0)
         }
 
-        combined_channel.view{"GENOMIC COMBINED: $it"}
 
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA

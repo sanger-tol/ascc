@@ -23,6 +23,9 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
   - This method is now significantly easier to control and understand.
   - Due to this update we are re-introducing the `genomic_only` flag.
 - Update to CI and test files.
+- Downgrading NF-Schema to 2.2.0.
+  - This is a temporary change!
+- Added a production profile - intended to simplify production needs in Sanger ToL.
 
 ### Parameters
 
