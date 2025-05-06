@@ -3,6 +3,7 @@
 You need to have generated files like those in this directory, the params.yaml and samplesheet.csv.
 
 You can call the pipeline with:
+
 ```
 nextflow run {main.nf|sanger-tol/ascc} -profile sanger,production,singularity -params-file params.yaml
 ```
