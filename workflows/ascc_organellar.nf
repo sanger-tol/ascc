@@ -436,7 +436,6 @@ workflow ASCC_ORGANELLAR {
                 [id: id, data: data]
             }
 
-        ch_organellar_cbtk_input.view{"DATA: $it"}
 
         //
         // LOGIC: LIST OF PROCESSES TO CHECK FOR
@@ -468,7 +467,6 @@ workflow ASCC_ORGANELLAR {
             combined_channel = combined_channel.combine(processChannels[process], by: 0)
         }
 
-        combined_channel.view{"COMBINED: $it"}
 
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
