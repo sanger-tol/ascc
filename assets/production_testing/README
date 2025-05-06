@@ -1,4 +1,28 @@
 ## README for production use
 
+You need to have generated files like those in this directory, the params.yaml and samplesheet.csv.
+
+You can call the pipeline with:
 ```
-nextflow run {main.nf|sanger-tol/ascc} -profile sanger,production,
+nextflow run {main.nf|sanger-tol/ascc} -profile sanger,production,singularity -params-file params.yaml
+```
+
+params.yaml contains a reference to samplesheet.csv so you don't need to explicitly declare it on the CLI.
+
+Seeing as this file only contains 12 values you could also declare them explicitly like:
+
+```
+nextflow run {main.nf|sanger-tol/ascc}\
+    -profile sanger,production,singularity
+    --input /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/production_testing/samplesheet.csv\
+    --outdir OUTPUT-results\
+    --reads_path ["/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz"]\
+    --reads_type hifi\
+    --reads_layout SINGLE\
+    --pacbio_barcode_names "bc2001,bc2009"\
+    --busco_lineages "diptera_odb10,insecta_odb10"\
+    --sample_id Pyoeliiyoelii17XNL
+    --scientific_name "Plasmodium yoelii yoelii 17XNL"\
+    --taxid 352914\
+    --dimensionality_reduction_methods ["pca", "random_trees"]
+```

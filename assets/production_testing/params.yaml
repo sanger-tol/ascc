@@ -1,4 +1,5 @@
 input: "/nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/production_testing/samplesheet.csv"
+outdir: "./OUTPUT-results"
 reads_path:
   - "/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz"
 reads_type: "hifi"
