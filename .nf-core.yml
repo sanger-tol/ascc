@@ -6,6 +6,7 @@ lint:
     - docs/images/nf-core-ascc_logo_dark.png
     - .github/workflows/awstest.yml
     - .github/workflows/awsfulltest.yml
+    - .github/ISSUE_TEMPLATE/config.yml
     - conf/igenomes.config
     - lib/nfcore_external_java_deps.jar
     - lib/NfcoreSchema.groovy
