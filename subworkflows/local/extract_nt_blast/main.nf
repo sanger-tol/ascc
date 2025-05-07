@@ -1,5 +1,4 @@
 // MODULE IMPORT BLOCK
-include { BLAST_V5_DATABASE                 } from '../../../modules/local/blast/v5_database/main'
 include { BLAST_BLASTN as BLAST_BLASTN_MOD  } from '../../../modules/nf-core/blast/blastn/main'
 
 include { SEQKIT_SLIDING                    } from '../../../modules/nf-core/seqkit/sliding/main'
@@ -11,11 +10,20 @@ include { GET_LINEAGE_FOR_TOP               } from '../../../modules/local/get/l
 workflow EXTRACT_NT_BLAST {
     take:
     input_genome            // Channel.of([ [ id: sample_id ], fasta ])
-    blastn_db_path          // Channel.of( path )
-    ncbi_lineage_path       // Channel.of( path )
+    blastn_db_path          // Channel.fromPath( db )
+    ncbi_lineage_path       // Channel.fromPath( lineage_path )
 
     main:
     ch_versions             = Channel.empty()
+
+    blastn_db_path
+        .map { it ->
+            [
+                [id: "db"],
+                it
+            ]
+        }
+        .set { ch_blast }
 
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
@@ -28,7 +36,7 @@ workflow EXTRACT_NT_BLAST {
     //
     BLAST_BLASTN_MOD (
         SEQKIT_SLIDING.out.fastx,
-        [[id: "db"], blastn_db_path]
+        ch_blast
     )
     ch_versions             = ch_versions.mix(BLAST_BLASTN_MOD.out.versions)
 
@@ -45,7 +53,10 @@ workflow EXTRACT_NT_BLAST {
         .map { meta, files ->
             files
         }
-        .collectFile( name: 'FULL_blast_results.txt', newLine: false)
+        .collectFile(
+            name: 'FULL_blast_results.txt',
+            newLine: false
+        )
         .combine( id )
         .map { file, identity ->
             tuple(  [   id: identity    ],
@@ -105,17 +116,4 @@ workflow EXTRACT_NT_BLAST {
     ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full  // Format for BTK - full coordinates file
     versions                = ch_versions
 
-}
-
-process get_string {
-    input:
-    val(nin)
-
-    output:
-    stdout
-
-    script:
-    """
-    echo $nin
-    """
 }

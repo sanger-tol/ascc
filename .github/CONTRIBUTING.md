@@ -9,6 +9,9 @@ Please use the pre-filled template to save time.
 However, don't be put off by this template - other more general issues and suggestions are welcome!
 Contributions to the code are even more welcome ;)
 
+> [!NOTE]
+> If you need help using or modifying sanger-tol/ascc then the best place to ask is on the GitHub issues!
+
 ## Contribution workflow
 
 If you'd like to write some code for sanger-tol/ascc, the standard workflow is as follows:

@@ -1,5 +1,6 @@
 reads_path:
   - /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz
+  - /nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/reads_copy.fa.gz
 reads_type: "hifi"
 reads_layout: "SINGLE"
 pacbio_barcode_file: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa

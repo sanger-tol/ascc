@@ -20,7 +20,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://pipelines.tol.sanger.ac.uk/ascc/0.3.0/usage).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "scientific_name": {
@@ -46,7 +46,8 @@
                 "reads_type": {
                     "type": "string",
                     "description": "Type of read (hifi)",
-                    "fa_icon": "fas fa-input-text"
+                    "fa_icon": "fas fa-input-text",
+                    "default": "hifi"
                 },
                 "reads_layout": {
                     "type": "string",
@@ -71,7 +72,8 @@
                 "kmer_length": {
                     "type": "number",
                     "description": "Length of kmer to use in run",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 7
                 },
                 "dimensionality_reduction_methods": {
                     "type": "array",
@@ -145,17 +147,20 @@
                 "seqkit_sliding": {
                     "type": "number",
                     "description": "Length of slide for Seqkit",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 100000
                 },
                 "seqkit_window": {
                     "type": "number",
                     "description": "Length of the window for Seqkit",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 6000
                 },
                 "n_neighbours": {
                     "type": "number",
                     "description": "Nearest Neighbour value - This is for the dimensional reduction of kmer counts (UMAP and t-SNE).",
-                    "fa_icon": "fas fa-hashtag"
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 13
                 },
                 "btk_yaml": {
                     "type": "string",
@@ -183,30 +188,120 @@
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
                 },
-                "include": {
+                "run_essentials": {
                     "type": "string",
-                    "description": "Select steps to run.",
-                    "fa_icon": "fas fa-file-lines"
+                    "description": "Run essential jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
                 },
-                "exclude": {
+                "run_kmers": {
                     "type": "string",
-                    "description": "Deselect steps to run.",
-                    "fa_icon": "fas fa-file-lines"
+                    "description": "Run kmer jobs on assebmlies",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "genomic"
                 },
-                "organellar_include": {
+                "run_tiara": {
                     "type": "string",
-                    "description": "Select steps to run - specific to the organallar workflow.",
-                    "fa_icon": "fas fa-file-lines"
+                    "description": "Run tiara jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
                 },
-                "organellar_exclude": {
+                "run_coverage": {
                     "type": "string",
-                    "description": "Deselect steps to run - specific to the organallar workflow.",
-                    "fa_icon": "fas fa-file-lines"
+                    "description": "Run coverage jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_nt_blast": {
+                    "type": "string",
+                    "description": "Run nt_blast jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_nr_diamond": {
+                    "type": "string",
+                    "description": "Run nr_diamond jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_uniprot_diamond": {
+                    "type": "string",
+                    "description": "Run uniprot_diamond jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_kraken": {
+                    "type": "string",
+                    "description": "Run kraken jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_fcsgx": {
+                    "type": "string",
+                    "description": "Run fcsgx jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_fcs_adaptor": {
+                    "type": "string",
+                    "description": "Run fcs_adaptor jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_vecscreen": {
+                    "type": "string",
+                    "description": "Run vecscreen jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_btk_busco": {
+                    "type": "string",
+                    "description": "Run btk_busco jobs on assebmlies",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "genomic"
+                },
+                "run_pacbio_barcodes": {
+                    "type": "string",
+                    "description": "Run pacbio_barcodes jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_organellar_blast": {
+                    "type": "string",
+                    "description": "Run organellar_blast jobs on assebmlies",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "genomic"
+                },
+                "run_autofilter_assembly": {
+                    "type": "string",
+                    "description": "Run autofilter_assembly jobs on assebmlies",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "genomic"
+                },
+                "run_create_btk_dataset": {
+                    "type": "string",
+                    "description": "Run create_btk_dataset jobs on assebmlies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_merge_datasets": {
+                    "type": "string",
+                    "description": "Run merge_datasets jobs on assebmlies",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "genomic"
                 },
                 "btk_busco_run_mode": {
                     "type": "string",
                     "description": "Should btk be run as mandatory or conditional on levels of contamination.",
-                    "fa_icon": "fas fa-file-lines"
+                    "fa_icon": "fas fa-file-lines",
+                    "enum": ["mandatory", "conditional"],
+                    "default": "conditional"
+                },
+                "genomic_only": {
+                    "type": "boolean",
+                    "description": "Switch off the organellar workflow",
+                    "fa_icon": "fas fa-file-lines",
+                    "default": false
                 }
             }
         },

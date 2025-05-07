@@ -80,10 +80,6 @@ workflow ORGANELLAR_BLAST {
     //
     // LOGIC: IF FILTER_COMMENTS RETURNS FILE WITH NO LINES THEN SUBWORKFLOWS STOPS
     //
-
-    //
-    // CHANNELS NEED MATCHING UP
-    //
     FILTER_COMMENTS.out.txt
         .branch { meta, file ->
             valid: file.countLines() >= 1
