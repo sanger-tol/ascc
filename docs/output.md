@@ -61,7 +61,7 @@ A text file containing a report of trailing Ns found in the genome. Trailing Ns 
 
 <details markdown="1">
 <summary>Output files</summary>
-- `organellar_blast/`
+- `mito_organellar_blast/`
   `*-mitochondrial_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected mitochondrial contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
 </details>
 
@@ -73,7 +73,7 @@ Depending on the alignment length and percentage identity, the script can recomm
 ### Plastid Organellar Blast
 
 <details markdown="1">
-- `organellar_blast/`
+- `plastid_organellar_blast/`
   `*-plastid_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected plastid contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
 
 </details>

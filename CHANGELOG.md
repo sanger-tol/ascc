@@ -31,6 +31,8 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Updates test profiles.
 - Update modules which were requesting 100.h.
 - Template has been updated to 3.2.1.
+- Updated Documentation.
+- Updated modules.config to output more files.
 
 ### Parameters
 
