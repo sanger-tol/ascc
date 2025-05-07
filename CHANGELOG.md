@@ -33,6 +33,7 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Template has been updated to 3.2.1.
 - Updated Documentation.
 - Updated modules.config to output more files.
+- Update blobtoolkit to be using the dev branch - essential update before btk releases.
 
 ### Parameters
 
@@ -56,6 +57,12 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 | -             | --run_autofilter_assembly |
 | -             | --run_create_btk_dataset  |
 | -             | --run_merge_datasets      |
+
+### Dependencies
+
+| Module         | Old Version | New Versions |
+| -------------- | ----------- | ------------ |
+| SANGER_TOL_BTK | 0.7.1       | dev          |
 
 ## v0.2.1 - Red Speaker [25/04/2025]
 
