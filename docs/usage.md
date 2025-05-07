@@ -12,7 +12,7 @@
 
 ### Full YAML
 
-At this time, the *full* yaml can look quite daunting, for example:
+At this time, the _full_ yaml can look quite daunting, for example:
 
 ```yaml
 scientific_name: scientific name of the assembled organism
@@ -73,7 +73,7 @@ asccTinyTest_V2,PLASTID,/path/to/plastid.fa{.gz} - if available
 
 ```
 
-If you don't want to run any organellar jobs at all, rather than change all run_{process} flags, you can use `--genomic_only`.
+If you don't want to run any organellar jobs at all, rather than change all run\_{process} flags, you can use `--genomic_only`.
 
 ## Running the pipeline
 
@@ -132,6 +132,7 @@ These flags can be used in the config.yaml to simplify the CLI.
 ```
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --run_vecscreen off --run_pacbio_barcodes off -profile singularity
 ```
+
 These flags can be used in the config.yaml to simplify the CLI.
 
 ### Simple output

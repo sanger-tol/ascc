@@ -331,7 +331,7 @@ Kraken (https://github.com/DerrickWood/kraken2) assigns taxonomic labels to inpu
 <details markdown="1">
 <summary>Output files</summary>
 
-  - `nr_diamond/`
+- `nr_diamond/`
   `*.txt` - A tabular text file containing the raw output of running Diamond BLASTX with sampled chunks of the assembly. The file contains BLASTX hits and scores/ Format: outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
   `full_coords.tsv`: A tabular text file containing the results from Diamond BLASTX where the coordinates of the BLASTX of chunks of assembly have been converted to coordinates in the full sequences of the assembly.
   `*_diamond_blastx_top_hits.csv` - A file containing Diamond BLASTX top hits for each sequence in the input assembly file.
@@ -346,7 +346,7 @@ Diamond (https://github.com/bbuchfink/diamond) is a sequence aligner for protein
 <details markdown="1">
 <summary>Output files</summary>
 
-  - `up_diamond/`
+- `up_diamond/`
   `*.txt` - A tabular text file containing the raw output of running Diamond BLASTX with sampled chunks of the assembly. The file contains BLASTX hits and scores/ Format: outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
   `full_coords.tsv`: A tabular text file containing the results from Diamond BLASTX where the coordinates of the BLASTX of chunks of assembly have been converted to coordinates in the full sequences of the assembly.
   `*_diamond_blastx_top_hits.csv` - A file containing Diamond BLASTX top hits for each sequence in the input assembly file.
