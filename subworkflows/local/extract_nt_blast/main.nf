@@ -1,5 +1,5 @@
 // MODULE IMPORT BLOCK
-include { BLAST_BLASTN as BLAST_BLASTN_MOD  } from '../../../modules/nf-core/blast/blastn/main'
+include { BLAST_BLASTN                      } from '../../../modules/nf-core/blast/blastn/main'
 
 include { SEQKIT_SLIDING                    } from '../../../modules/nf-core/seqkit/sliding/main'
 include { BLAST_CHUNK_TO_FULL               } from '../../../modules/local/blast/chunk_to_full/main'
@@ -34,11 +34,11 @@ workflow EXTRACT_NT_BLAST {
     //
     // MODULE: BLASTS THE INPUT GENOME AGAINST A LOCAL NCBI DATABASE
     //
-    BLAST_BLASTN_MOD (
+    BLAST_BLASTN (
         SEQKIT_SLIDING.out.fastx,
         ch_blast
     )
-    ch_versions             = ch_versions.mix(BLAST_BLASTN_MOD.out.versions)
+    ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     input_genome
         .map{ meta, file ->
@@ -49,7 +49,7 @@ workflow EXTRACT_NT_BLAST {
     //
     // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
     //
-    BLAST_BLASTN_MOD.out.txt
+    BLAST_BLASTN.out.txt
         .map { meta, files ->
             files
         }
@@ -111,6 +111,8 @@ workflow EXTRACT_NT_BLAST {
     // No conversion needed - BLAST results are already in the format expected by BlobToolKit
 
     emit:
+    ch_blast_results        = BLAST_BLASTN.out.txt
+    ch_formatted_results    = REFORMAT_FULL_OUTFMT6.out.full
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
     ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
     ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full  // Format for BTK - full coordinates file

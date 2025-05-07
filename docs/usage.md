@@ -12,6 +12,8 @@
 
 ### Full YAML
 
+At this time, the _full_ yaml can look quite daunting, for example:
+
 ```yaml
 scientific_name: scientific name of the assembled organism
 taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
@@ -36,7 +38,29 @@ diamond_nr_database_path: path to a Diamond database made from NCBI nr protein s
 seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
 seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
 n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
+
+// The below params can have values of ['both','genomic','organellar','off'] unless the default value here is 'genomic', in that case their values are ONLY ['genomic','off']
+// These flags control which proccesses are run in any particular run of the pipeline.
+run_essentials: "both"
+run_kmers: "genomic"
+run_tiara: "both"
+run_coverage: "both"
+run_nt_blast: "both"
+run_nr_diamond: "both"
+run_uniprot_diamond: "both"
+run_kraken: "both"
+run_fcsgx: "both"
+run_fcs_adaptor: "both"
+run_vecscreen: "both"
+run_btk_busco: "genomic"
+run_pacbio_barcodes: "both"
+run_organellar_blast: "genomic"
+run_autofilter_assembly: "genomic"
+run_create_btk_dataset: "both"
+run_merge_datasets: "genomic"
 ```
+
+When running the pipeline in a production environment, consider addopting a profile like system such as shown in `assets/production/*` and `conf/production.config`. This will mean adding a profile to the nextflowl.config file of the pipeline, if you have questions please open an issue on GitHub.
 
 ### Samplesheet
 
@@ -49,7 +73,7 @@ asccTinyTest_V2,PLASTID,/path/to/plastid.fa{.gz} - if available
 
 ```
 
-If running with no organellar files please also add the `--genomic_only` flag to your command.
+If you don't want to run any organellar jobs at all, rather than change all run\_{process} flags, you can use `--genomic_only`.
 
 ## Running the pipeline
 
@@ -58,26 +82,14 @@ The typical command for running the pipeline is as follows:
 ```bash
 Usage:
 nextflow run sanger-tol/ascc \
-    --input {SAMPLESHEET.CSV} \
-    -params-file {INPUT YAML}
+    -params-file {INPUT YAML} \
     --outdir {OUTDIR} \
-    [--include {COMMA SEPARATED LIST OF STEPS TO RUN}] \
-    [--exclude {COMMA SEPARATED LIST OF STEPS TO EXCLUDE}] \
-    [--organellar_include {COMMA SEPARATED LIST OF STEPS TO RUN}] \
-    [--organellar_exclude {COMMA SEPARATED LIST OF STEPS TO EXCLUDE}] \
     -profile singularity
 ```
 
 This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
 
-Pipeline component options:
-
-`--include`: comma-separated list of pipeline components to run on chromosomal DNA sequences (primary and haplotigs).<br>
-`--exclude`: comma-separated list of pipeline components to exclude from running on chromosomal DNA sequences.<br>
-`--organellar_include`: comma-separated list of pipeline components to run on organellar DNA sequences (mitochondrial and plastid).<br>
-`--organellar_exclude`: comma-separated list of pipeline components to exclude from running on organellar DNA sequences.
-
-Available pipeline components:
+Main pipeline components:
 
 - `kmers` : K-mer counting and dimensionality reduction analysis using kcounter, scikit-learn, and TensorFlow
 - `tiara` : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin using Tiara
@@ -107,29 +119,42 @@ Outputs:
 
 ### Example usage
 
-#### Basic run with essential components
-
-```
-nextflow run sanger-tol/ascc --input config.yaml --outdir results --include tiara,coverage,nt_blast --organellar_include nt_blast,coverage -profile singularity
-```
-
 #### Comprehensive analysis
 
 ```
-nextflow run sanger-tol/ascc --input config.yaml --outdir results --include kmers,tiara,coverage,nt_blast,nr_diamond,kraken,fcs-gx,btk_busco --organellar_include nt_blast,coverage -profile singularity
+nextflow run sanger-tol/ascc -params-file config.yaml --outdir results --run_kmers genomic --run_tiara genomic --run_nr_diamond genomic --run_kraken genomic --run_fcsgx genomic --run_btk_busco genomic --run_nt_blast both --run_coverage both -profile singularity
 ```
+
+These flags can be used in the config.yaml to simplify the CLI.
 
 #### Run everything except specific components
 
 ```
-nextflow run sanger-tol/ascc --input config.yaml --outdir results --include ALL --exclude vecscreen,pacbio_barcodes --organellar_include ALL -profile singularity
+nextflow run sanger-tol/ascc --input config.yaml --outdir results --run_vecscreen off --run_pacbio_barcodes off -profile singularity
 ```
+
+These flags can be used in the config.yaml to simplify the CLI.
+
+### Simple output
 
 Note that the pipeline will create the following files in your working directory:
 
 ```bash
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
+  - sample_{ASSEMBLY_TYPE}
+    - average_coverage/
+    - fcs_adaptor/
+    - filter-barcode/
+    - kraken2_data/
+    - sorted_mapped_bam/
+    - summarise_vecscreen_output/
+    - tiara_raw_output/
+    - merged_tables/
+    - sanger-tol-btk/
+    - autofilter/
+    - ascc_main_output/
+    - autofiltering_done_indicator_file.txt
 .nextflow_log       # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
