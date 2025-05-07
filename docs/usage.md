@@ -143,17 +143,17 @@ Note that the pipeline will create the following files in your working directory
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
   - sample_{ASSEMBLY_TYPE}
-    - AVG_COVERAGE/
-    - FCS-Adaptor/
+    - average_coverage/
+    - fcs_adaptor/
     - filter-barcode/
-    - KRAKEN2/
-    - SORTED_MAPPED_BAM/
+    - kraken2_data/
+    - sorted_mapped_bam/
     - summarise_vecscreen_output/
-    - TIARA-RAW/
+    - tiara_raw_output/
     - merged_tables/
     - sanger-tol-btk/
     - autofilter/
-    - ASCC-main-output/
+    - ascc_main_output/
     - autofiltering_done_indicator_file.txt
 .nextflow_log       # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
