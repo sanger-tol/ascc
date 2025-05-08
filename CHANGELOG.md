@@ -25,6 +25,8 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
   - This method is now significantly easier to control and understand.
   - Due to this update we are re-introducing the `genomic_only` flag.
 - Update to CI and test files.
+  - Includes the temporary deletion of the download_pipelines.yaml
+  - This will require addition of databases and data to be downloaded and set up for that runner.
 - Downgrading NF-Schema to 2.2.0.
   - This is a temporary change!
 - Added a production profile - intended to simplify production needs in Sanger ToL [#106](https://github.com/sanger-tol/ascc/issues/106).
@@ -34,6 +36,7 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Updated Documentation.
 - Updated modules.config to output more files.
 - Update blobtoolkit to be using the dev branch - essential update before btk releases.
+- Updated FCSGX/RUNGX to version 5.5.0
 
 ### Parameters
 
@@ -63,6 +66,8 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 | Module         | Old Version | New Versions |
 | -------------- | ----------- | ------------ |
 | SANGER_TOL_BTK | 0.7.1       | dev          |
+| FCSGX_RUNGX    | 0.5.4       | 0.5.5        |
+
 
 ## v0.2.1 - Red Speaker [25/04/2025]
 
