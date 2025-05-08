@@ -39,6 +39,7 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Updated FCSGX/RUNGX to version 5.5.0 [#52](https://github.com/sanger-tol/ascc/issues/52)
 - Updated the conditional logic for Blobtoolkit [#123](https://github.com/sanger-tol/ascc/issues/123)
 - Updates description to some fields - @prototaxites [#121](https://github.com/sanger-tol/ascc/pull/121)
+- Added @prototaxites as a contributor.
 
 ### Parameters
 
