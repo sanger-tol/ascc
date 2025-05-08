@@ -40,7 +40,7 @@
                 },
                 "reads_path": {
                     "type": "array",
-                    "description": "folder containing long read data files in FASTA.GZ format",
+                    "description": "Array of files containing long read data in gzipped FASTA format.",
                     "fa_icon": "fas fa-file-lines"
                 },
                 "reads_type": {
@@ -66,7 +66,7 @@
                 },
                 "pacbio_barcode_names": {
                     "type": "string",
-                    "description": "barcodes to use in run",
+                    "description": "Comma-separated list of multiplexing barcodes used across the sequencing runs that generated the assembly.",
                     "fa_icon": "fas fa-input-text"
                 },
                 "kmer_length": {
