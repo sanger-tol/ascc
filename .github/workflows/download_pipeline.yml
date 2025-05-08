@@ -10,7 +10,9 @@ on:
       testbranch:
         description: "The specific branch you wish to utilize for the test execution of nf-core pipelines download."
         required: true
-        default: "dev"
+        default:
+          - "dev"
+          - dp24_blobtoolkit
   pull_request:
     types:
       - opened
@@ -19,10 +21,10 @@ on:
     branches:
       - main
       - master
-  # pull_request_target:
-  #   branches:
-  #     - main
-  #     - master
+  pull_request_target:
+    branches:
+      - main
+      - master
 
 env:
   NXF_ANSI_LOG: false
