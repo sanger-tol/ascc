@@ -68,7 +68,6 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 | SANGER_TOL_BTK | 0.7.1       | dev          |
 | FCSGX_RUNGX    | 0.5.4       | 0.5.5        |
 
-
 ## v0.2.1 - Red Speaker [25/04/2025]
 
 Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
