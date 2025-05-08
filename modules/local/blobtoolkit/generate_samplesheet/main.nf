@@ -11,7 +11,6 @@ process GENERATE_SAMPLESHEET {
     tuple val(meta), path(reference)
     path(pacbio_path)
     val(reads_layout)
-    path(alarm_file)
 
     output:
     tuple val(meta),    path("samplesheet.csv"),    emit: csv
@@ -21,7 +20,6 @@ process GENERATE_SAMPLESHEET {
     def args    = task.ext.args     ?: ""
     def VERSION = "1.1.0"
     """
-    echo "Alarm_file exists : $alarm_file"
     echo "Run BTK"
     echo "sample,datatype,datafile,library_layout" > pre_samplesheet.csv
 
