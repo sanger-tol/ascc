@@ -671,147 +671,101 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // LOGIC: IF NOT IN EXCLUDE STEPS AND ( BTK_BUSCO AND AUTOFILTER IN INCLUDE STEPS _OR_ ALL STEPS ARE ACTIVE) AND MODE IS CONDITIONAL AND ABNORMAL CONTAMINATION HAS BEEN FOUND
-    //              OR
-    //        IF NOT IN EXCLUDE STEPS AND ( BTK_BUSCO AND AUTOFILTER IN INCLUDE STEPS _OR_ ALL STEPS ARE ACTIVE) AND MODE IS MANDATORY
-    //
-    if (
-        (
-            ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" ) &&
-            btk_busco_run_mode == "conditional" &&
-            btk_bool.run_btk
-        ) ||
-        (
-            ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" ) &&
-            btk_busco_run_mode == "mandatory"
-        )
-    ) {
-        //
-        // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
-        //          USE IN THE BTK PIPELINE
-        //
-        GENERATE_SAMPLESHEET (
-            reference_tuple_from_GG,
-            reads_path.first(),
-            reads_layout.first(),
-            AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-        )
-        ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+    // LOGIC: DETERMINE WHETHER BLOBTOOLKIT SHOULD RUN BASED ON CONDITIONALS
+    //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
-        //
-        // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
-        //
-        coverage_id = GENERATE_SAMPLESHEET.out.csv
-            .map{ meta, csv ->
-                tuple(
-                    [ id: meta.id ],
-                    csv
-                )
-            }
+    run_btk_conditional = reference_tuple_from_GG
+        | branch { meta, assembly ->
+            def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
+            def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
-        combined_input = reference_tuple_from_GG
-            .map{ it -> tuple([id:it[0].id], it[1])}
-            .combine(coverage_id, by: 0)
-            .multiMap { meta_1, ref, csv ->
-                reference: [meta_1, ref]
-                samplesheet: csv
-            }
+            def ignore_autofilter       = params.btk_busco_run_mode == "mandatory" && btk_requested
+            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && btk_bool.run_btk
 
-        //
-        // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
-        //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
-        //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
-        //              This will also eventually check for the above run_btk boolean from
-        //              autofilter
-        SANGER_TOL_BTK (
-            combined_input.reference,
-            combined_input.samplesheet,
-            diamond_uniprot_db_path.first(),
-            nt_database_path.first(),
-            diamond_uniprot_db_path.first(),
-            ncbi_taxonomy_path.first(),
-            reads_path.first(),
-            btk_lineages_path.first(),
-            btk_lineages.first(),
-            taxid.first(),
-        )
-        ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+            run_btk: (ignore_autofilter || not_mandatory_btk)
+            skip_btk: true
+        }
 
+    run_btk_conditional.skip_btk
+        .map { meta, file ->
+            log.warn "BLOBTOOLKIT: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]"
+        }
 
-        //
-        // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
-        //
-
-        new_csv = GENERATE_SAMPLESHEET.out.csv
-            .map{ meta, file ->
-                tuple([id: meta.id], file)
-            }
-
-
-        //
-        // LOGIC: COMBINE ALL THE REQUIRED CHANNELS TOGETHER INTO A MAP FOR NF-CASCADE VERSION
-        //          OF SANGER_TOL_BTK TO PARSE INTO THE INPUT PARAMS
-        //
-        //ch_reference
-        //    .combine(new_csv, by: 0)
-        //    .combine(Channel.of(params.diamond_uniprot_database_path))
-        //    .combine(Channel.of(params.nt_database_path))
-        //    .combine(Channel.of(params.diamond_uniprot_database_path))
-        //    .combine(Channel.of(params.ncbi_taxonomy_path))
-        //    .combine(Channel.of(params.busco_lineages_folder))
-        //    .combine(Channel.of(params.busco_lineages))
-        //    .combine(Channel.of(params.taxid))
-        //    .map{
-        //        meta, reference, samplesheet, prot_db, nt_db, x_db, ncbi_taxdump, busco_folder, busco_lineage_vals, taxid ->
-        //        [
-        //            input: samplesheet,
-        //            fasta: reference,
-        //            blastp: prot_db,
-        //            blastn: nt_db,
-        //            blastx: x_db,
-        //            taxdump: ncbi_taxdump,
-        //            busco: busco_folder,
-        //            busco_lineages: busco_lineage_vals,
-        //            taxon: taxid,
-        //            blastx_outext: "txt",
-        //            use_work_dir_as_temp: true
-        //
-        //        ]
-        //    }
-        //    .set{ pipeline_input }
-
-        //
-        // PIPELINE: SANGER_TOL_BTK_CASCADE USES NF-CASCADE WRITTEN BY MAHESH
-        //
-        //SANGER_TOL_BTK_CASCADE(
-        //    "sanger-tol/blobtoolkit",
-        //    "-r 0.6.0 -profile sanger,singularity",
-        //    [],
-        //    pipeline_input,
-        //    []
-        //)
-
-        //
-        // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
-        //
-        merged_channel = CREATE_BTK_DATASET.out.btk_datasets
-            .map { meta, file -> [meta.id, [meta, file]] }
-            .join(
-                SANGER_TOL_BTK.out.dataset
-                    .map { meta, file ->
-                        [meta.id, [meta, file]]
-                })
-            .map { id, ref, btk -> [ref[0], ref[1], btk[1]] }
-
-        MERGE_BTK_DATASETS (
-            merged_channel
-        )
-        ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-        busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
-
-    } else {
-        busco_merge_btk         = Channel.empty()
+    if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
+        log.info "run_autofilter_assembly is off, but run_btk_busco != off"
+        log.info "This will stop blobtoolkit from running unless you restart with:"
+        log.info "    `--btk_busco_run_mode mandatory`"
     }
+
+
+    //
+    // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
+    //          USE IN THE BTK PIPELINE
+    //
+    GENERATE_SAMPLESHEET (
+        run_btk_conditional.run_btk,
+        reads_path.first(),
+        reads_layout.first()
+    )
+    ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
+
+    //
+    // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
+    //
+    btk_samplesheet = GENERATE_SAMPLESHEET.out.csv
+        .map{ meta, csv ->
+            tuple(
+                [ id: meta.id ],
+                csv
+            )
+        }
+
+    combined_input = run_btk_conditional.run_btk
+        .map{ it -> tuple([id:it[0].id], it[1])}
+        .combine(btk_samplesheet, by: 0)
+        .multiMap { meta_1, ref, csv ->
+            reference: [meta_1, ref]
+            samplesheet: csv
+        }
+
+    //
+    // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
+    //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
+    //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
+    //              This will also eventually check for the above run_btk boolean from
+    //              autofilter
+    SANGER_TOL_BTK (
+        combined_input.reference,
+        combined_input.samplesheet,
+        diamond_uniprot_db_path.first(),
+        nt_database_path.first(),
+        diamond_uniprot_db_path.first(),
+        ncbi_taxonomy_path.first(),
+        reads_path.first(),
+        btk_lineages_path.first(),
+        btk_lineages.first(),
+        taxid.first(),
+    )
+    ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+
+
+    //
+    // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
+    //
+    merged_channel = CREATE_BTK_DATASET.out.btk_datasets
+        .map { meta, file -> [meta.id, [meta, file]] }
+        .join(
+            SANGER_TOL_BTK.out.dataset
+                .map { meta, file ->
+                    [meta.id, [meta, file]]
+            })
+        .map { id, ref, btk -> [ref[0], ref[1], btk[1]] }
+
+    MERGE_BTK_DATASETS (
+        merged_channel
+    )
+    ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+    busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
 
 
     //
