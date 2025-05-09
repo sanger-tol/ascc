@@ -27,8 +27,7 @@ workflow RUN_DIAMOND {
     //
     // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
     //
-    Channel
-        .of(diamond_db)
+    diamond_db
         .map{ it ->
             tuple(
                 [id: "db"],

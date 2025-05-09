@@ -38,7 +38,7 @@
                     },
                     "fcsgx/rungx": {
                         "branch": "master",
-                        "git_sha": "ca0b47f14ab29d460e269fc41973bf85e063391b",
+                        "git_sha": "3ff31d30117edcbdae4b4a540abc20cbeb6a52d9",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/fcsgx/rungx/fcsgx-rungx.diff"
                     },

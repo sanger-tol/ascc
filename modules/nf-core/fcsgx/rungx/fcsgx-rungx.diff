@@ -1,4 +1,5 @@
 Changes in component 'nf-core/fcsgx/rungx'
+'modules/nf-core/fcsgx/rungx/environment.yml' is unchanged
 'modules/nf-core/fcsgx/rungx/meta.yml' is unchanged
 Changes in 'fcsgx/rungx/main.nf':
 --- modules/nf-core/fcsgx/rungx/main.nf
@@ -30,7 +31,6 @@ Changes in 'fcsgx/rungx/main.nf':
      export GX_NUM_CORES=${task.cpus}
      run_gx.py \\
 
-'modules/nf-core/fcsgx/rungx/environment.yml' is unchanged
-'modules/nf-core/fcsgx/rungx/tests/main.nf.test' is unchanged
 'modules/nf-core/fcsgx/rungx/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/fcsgx/rungx/tests/main.nf.test' is unchanged
 ************************************************************

@@ -3,6 +3,91 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.0 - Red Lamp [02/05/2025]
+
+Release 4 of sanger-toll/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
+
+### Enhancements & Fixes
+
+- Re-added the ascc.nf=.
+  - This corrects an issue with version generation.
+- Remove unnecessary modules which have been replaced by NF-core modules [#104](https://github.com/sanger-tol/ascc/issues/104) .
+- Corrected incorrect file output
+  - publishDir does not take a list of file extensions, only positive globs.
+    - This has meant some modules have more patterns to match than previously.
+    - Update modules which were outputting versions to the output dir unnecessarily.
+- Corrected issue with channel generation being tempermental in some cases.
+- Added per-process enums rather than the use of a csv list to control process execution [#107](https://github.com/sanger-tol/ascc/issues/107).
+  - Significantly easier to maintain conditionals for process execution.
+  - Each unique process now has a flag such as `run_{process}` which accepts a value of `genomic`,`organellar`,`both`,`off`.
+  - For some processes the options are `genomic`,`both`,`off` as they arte not useful for organellar assemblies.
+  - Implemented due to feedback from users.
+  - This method is now significantly easier to control and understand.
+  - Due to this update we are re-introducing the `genomic_only` flag.
+- Update to CI and test files.
+  - Includes the temporary deletion of the download_pipelines.yaml [#118](https://github.com/sanger-tol/ascc/pull/118)
+  - This will require addition of databases and data to be downloaded and set up for that runner.
+- Added a production profile - intended to simplify production needs in Sanger ToL [#106](https://github.com/sanger-tol/ascc/issues/106).
+  - Updates configs for test and tol_assembly.
+- Update modules which were requesting 100.h.
+- Template has been updated to 3.2.1.
+- Updated Documentation.
+- Updated modules.config to output more files.
+- Update blobtoolkit to be using the dev branch - essential update before btk releases. [#114](https://github.com/sanger-tol/ascc/pull/114)
+- Updated FCSGX/RUNGX to version 0.5.5 [#52](https://github.com/sanger-tol/ascc/issues/52)
+- Updated the conditional logic for Blobtoolkit [#123](https://github.com/sanger-tol/ascc/issues/123)
+- Updates description to some fields - @prototaxites [#121](https://github.com/sanger-tol/ascc/pull/121)
+- Added @prototaxites as a contributor.
+
+### Parameters
+
+| Old Parameter        | New Parameter             |
+| -------------------- | ------------------------- |
+| -                    | --genomic_only            |
+| --inlcude            | REMOVED                   |
+| --exclude            | REMOVED                   |
+| --organellar_include | REMOVED                   |
+| --organellar_exclude | REMOVED                   |
+| -                    | --run_essentials          |
+| -                    | --run_kmers               |
+| -                    | --run_tiara               |
+| -                    | --run_coverage            |
+| -                    | --run_nt_blast            |
+| -                    | --run_nr_diamond          |
+| -                    | --run_uniprot_diamond     |
+| -                    | --run_kraken              |
+| -                    | --run_fcsgx               |
+| -                    | --run_fcs_adaptor         |
+| -                    | --run_vecscreen           |
+| -                    | --run_btk_busco           |
+| -                    | --run_pacbio_barcodes     |
+| -                    | --run_organellar_blast    |
+| -                    | --run_autofilter_assembly |
+| -                    | --run_create_btk_dataset  |
+| -                    | --run_merge_datasets      |
+
+### Dependencies
+
+| Module         | Old Version | New Versions |
+| -------------- | ----------- | ------------ |
+| SANGER_TOL_BTK | 0.7.1       | dev          |
+| FCSGX_RUNGX    | 0.5.4       | 0.5.5        |
+
+## v0.2.1 - Red Speaker [25/04/2025]
+
+Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
+
+### Enhancements & Fixes
+
+- Updating GENERATE_SAMPLESHEET module.
+  - Caused by issues with test profiles.
+- Updating the test profiles.
+- Minor update to the base.config - 100.h was too much!
+  - At sanger too many jobs were heads to the week queue, when they simply didn't need to!
+- Remove unnecessary module files, they are no longer used and are replaced by NF_Core blast modules. #104
+  - BLAST_V5_DATABASE -> BLAST_BLASTN
+  - BLAST_MAKEBLASTDB_BARCODES -> BLAST_MAKEBLASTDB
+
 ## v0.2.0 - Red Speaker [14/04/2025]
 
 Release 2 of sanger-tol/ascc, updated with the [nf-core](https://nf-co.re/) template (v3.2).

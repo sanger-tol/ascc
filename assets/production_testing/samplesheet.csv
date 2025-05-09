@@ -1,0 +1,4 @@
+sample,assembly_type,assembly_file
+odCymConc1,PRIMARY,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/test_files/odCymConc1/primary.fa
+odCymConc1,HAPLO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/test_files/odCymConc1/hap.fa
+odCymConc1,MITO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/test_files/odCymConc1/mito.fa
