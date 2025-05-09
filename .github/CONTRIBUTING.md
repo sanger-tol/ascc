@@ -10,7 +10,7 @@ However, don't be put off by this template - other more general issues and sugge
 Contributions to the code are even more welcome ;)
 
 > [!NOTE]
-> If you need help using or modifying sanger-tol/ascc then the best place to ask is on the GitHub issues!
+> If you need help using or modifying sanger-tol/ascc then the best place to ask is in the GitHub issues!
 
 ## Contribution workflow
 
