@@ -27,8 +27,6 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 - Update to CI and test files.
   - Includes the temporary deletion of the download_pipelines.yaml [#118](https://github.com/sanger-tol/ascc/pull/118)
   - This will require addition of databases and data to be downloaded and set up for that runner.
-- Downgrading NF-Schema to 2.2.0.
-  - This is a temporary change!
 - Added a production profile - intended to simplify production needs in Sanger ToL [#106](https://github.com/sanger-tol/ascc/issues/106).
   - Updates configs for test and tol_assembly.
 - Update modules which were requesting 100.h.
@@ -43,26 +41,30 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 
 ### Parameters
 
-| Old Parameter | New Parameter             |
-| ------------- | ------------------------- |
-| -             | --genomic_only            |
-| -             | --run_essentials          |
-| -             | --run_kmers               |
-| -             | --run_tiara               |
-| -             | --run_coverage            |
-| -             | --run_nt_blast            |
-| -             | --run_nr_diamond          |
-| -             | --run_uniprot_diamond     |
-| -             | --run_kraken              |
-| -             | --run_fcsgx               |
-| -             | --run_fcs_adaptor         |
-| -             | --run_vecscreen           |
-| -             | --run_btk_busco           |
-| -             | --run_pacbio_barcodes     |
-| -             | --run_organellar_blast    |
-| -             | --run_autofilter_assembly |
-| -             | --run_create_btk_dataset  |
-| -             | --run_merge_datasets      |
+| Old Parameter        | New Parameter             |
+| -------------------- | ------------------------- |
+| -                    | --genomic_only            |
+| --inlcude            | REMOVED                   |
+| --exclude            | REMOVED                   |
+| --organellar_include | REMOVED                   |
+| --organellar_exclude | REMOVED                   |
+| -                    | --run_essentials          |
+| -                    | --run_kmers               |
+| -                    | --run_tiara               |
+| -                    | --run_coverage            |
+| -                    | --run_nt_blast            |
+| -                    | --run_nr_diamond          |
+| -                    | --run_uniprot_diamond     |
+| -                    | --run_kraken              |
+| -                    | --run_fcsgx               |
+| -                    | --run_fcs_adaptor         |
+| -                    | --run_vecscreen           |
+| -                    | --run_btk_busco           |
+| -                    | --run_pacbio_barcodes     |
+| -                    | --run_organellar_blast    |
+| -                    | --run_autofilter_assembly |
+| -                    | --run_create_btk_dataset  |
+| -                    | --run_merge_datasets      |
 
 ### Dependencies
 
