@@ -18,6 +18,7 @@ from report_loaders import (
     
     # Table loaders
     load_contamination_check_merged_table,
+    load_phylum_coverage_data,
     load_trim_Ns_results,
     
     # Text loaders
@@ -60,6 +61,7 @@ __all__ = [
     
     # Table loaders
     'load_contamination_check_merged_table',
+    'load_phylum_coverage_data',
     'load_trim_Ns_results',
     
     # Text loaders

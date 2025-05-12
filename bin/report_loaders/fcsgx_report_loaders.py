@@ -123,21 +123,18 @@ def load_fcsgx_report_as_table(file_path):
                 if len(df) > 0:
                     print(f"Successfully loaded FCS-GX report data with {len(df)} rows", file=sys.stderr)
                     
+                    # Remove separator columns (sep1, sep2, sep3, sep4, sep5) that only contain pipe symbols
+                    separator_columns = [col for col in df.columns if col.startswith('sep')]
+                    if separator_columns:
+                        print(f"Removing separator columns: {separator_columns}", file=sys.stderr)
+                        df = df.drop(columns=separator_columns)
+                    
                     # Convert DataFrame to HTML table
                     table_html = df.to_html(classes="table table-striped", 
                                            index=False, 
                                            table_id="fcsgx_report_table")
                     
-                    # Wrap table for responsive display
-                    table_html = f"""
-                    <div class="outer-container">
-                        <div class="table-responsive">
-                            <div class="table-wrapper">
-                                {table_html}
-                            </div>
-                        </div>
-                    </div>
-                    """
+                    # No longer wrapping the table here, as it will be wrapped in the template
                 else:
                     print(f"No data rows found in FCS-GX report", file=sys.stderr)
                     table_html = "<p>No data rows found in the FCS-GX report file.</p>"

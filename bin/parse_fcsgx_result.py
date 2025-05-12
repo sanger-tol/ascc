@@ -143,36 +143,51 @@ def get_lineages_by_taxid(taxids_list, rankedlineage_path):
     Takes a list of taxIDs and the path to the NCBI rankedlineage.dmp file as the input. Returns the lineage corresponding to each taxID
     """
     lineages_dict = dict()
-    rankedlineage_col_names = (
-        "taxid",
-        "fcs_gx_name",
-        "fcs_gx_species",
-        "fcs_gx_genus",
-        "fcs_gx_family",
-        "fcs_gx_order",
-        "fcs_gx_class",
-        "fcs_gx_phylum",
-        "fcs_gx_kingdom",
-        "fcs_gx_domain",
-    )
+    # The columns in rankedlineage.dmp are: tax_id, tax_name, species, genus, family, order, class, phylum, kingdom, realm, domain
     if os.path.isfile(rankedlineage_path) is False:
         sys.stderr.write(
             f"The NCBI rankedlineage.dmp file was not found at the expected location ({rankedlineage_path})\n"
         )
         sys.exit(1)
-    rankedlineage_data = gpf.ll(rankedlineage_path)
-    for line in rankedlineage_data:
+    
+    # Log the number of taxids we're looking for
+    sys.stderr.write(f"Looking for {len(taxids_list)} taxids in rankedlineage.dmp\n")
+    if len(taxids_list) > 0:
+        sys.stderr.write(f"First few taxids: {', '.join(taxids_list[:5])}\n")
+    
+    line_count = 0
+    found_taxids = 0
+    
+    for line in gpf.ll(rankedlineage_path):
+        line_count += 1
         split_line = line.split("|")
         split_line = [n.strip() for n in split_line]
-        assert (
-            len(split_line) >= 11
-        ), f"Expected at least 11 columns in rankedlineage.dmp, got {len(split_line)}"  # This should no handle both new and old formats (as of April 2025)
+        if len(split_line) < 11:
+            sys.stderr.write(f"Warning: Not enough columns in rankedlineage.dmp line, got {len(split_line)}, expected at least 11. Skipping line.\n")
+            continue
+        
         taxid = split_line[0]
         if taxid in taxids_list:
+            found_taxids += 1
             current_lineage_dict = dict()
-            for i in range(1, 10):
-                current_lineage_dict[rankedlineage_col_names[i]] = split_line[i]
+            current_lineage_dict["taxid"] = split_line[0]
+            current_lineage_dict["fcs_gx_name"] = split_line[1] if len(split_line) > 1 else ""
+            current_lineage_dict["fcs_gx_species"] = split_line[2] if len(split_line) > 2 else ""
+            current_lineage_dict["fcs_gx_genus"] = split_line[3] if len(split_line) > 3 else ""
+            current_lineage_dict["fcs_gx_family"] = split_line[4] if len(split_line) > 4 else ""
+            current_lineage_dict["fcs_gx_order"] = split_line[5] if len(split_line) > 5 else ""
+            current_lineage_dict["fcs_gx_class"] = split_line[6] if len(split_line) > 6 else ""
+            current_lineage_dict["fcs_gx_phylum"] = split_line[7] if len(split_line) > 7 else ""
+            current_lineage_dict["fcs_gx_kingdom"] = split_line[8] if len(split_line) > 8 else ""
+            current_lineage_dict["fcs_gx_realm"] = split_line[9] if len(split_line) > 9 else ""
+            current_lineage_dict["fcs_gx_domain"] = split_line[10] if len(split_line) > 10 else ""
+
             lineages_dict[taxid] = current_lineage_dict
+    
+    # Log how many taxids we found and total lines processed
+    sys.stderr.write(f"Processed {line_count} lines from rankedlineage.dmp\n")
+    sys.stderr.write(f"Found {found_taxids} out of {len(taxids_list)} taxids in rankedlineage.dmp\n")
+    
     return lineages_dict
 
 
@@ -182,6 +197,7 @@ def main(fcs_gx_reports_folder, ncbi_rankedlineage_path):
     collection_dict = load_report_data(report_file, collection_dict)
     taxids_list = get_taxids_list(taxonomy_file)
     lineages_dict = get_lineages_by_taxid(taxids_list, ncbi_rankedlineage_path)
+    # The columns in rankedlineage.dmp are: tax_id, tax_name, species, genus, family, order, class, phylum, kingdom, realm, domain
     rankedlineage_col_names = (
         "taxid",
         "fcs_gx_name",
@@ -192,12 +208,26 @@ def main(fcs_gx_reports_folder, ncbi_rankedlineage_path):
         "fcs_gx_class",
         "fcs_gx_phylum",
         "fcs_gx_kingdom",
+        "fcs_gx_realm",
         "fcs_gx_domain",
     )
 
+    # Log the number of scaffolds and taxids
+    sys.stderr.write(f"Processing {len(collection_dict)} scaffolds\n")
+    sys.stderr.write(f"Found {len(lineages_dict)} taxids with lineage information\n")
+    
+    # Check if any taxids have empty strings
+    empty_taxids = [taxid for taxid in taxids_list if not taxid]
+    if empty_taxids:
+        sys.stderr.write(f"Warning: Found {len(empty_taxids)} empty taxids\n")
+    
     out_header = "scaff,fcs_gx_top_tax_name,fcs_gx_top_taxid,fcs_gx_div,fcs_gx_coverage_by_div,fcs_gx_coverage_by_tax,fcs_gx_score,fcs_gx_multiple_divs_per_scaff,fcs_gx_action"
     out_header += "," + ",".join(rankedlineage_col_names)
     print(out_header)
+    
+    # Count how many scaffolds have lineage information
+    scaffolds_with_lineage = 0
+    
     for scaff, row_dict in collection_dict.items():
         out_line = "{},{},{},{},{},{},{},{},{}".format(
             scaff,
@@ -211,15 +241,25 @@ def main(fcs_gx_reports_folder, ncbi_rankedlineage_path):
             row_dict["fcs_gx_action"],
         )
         row_top_taxid = row_dict["fcs_gx_top_taxid"]
-        if row_top_taxid in lineages_dict:
+        
+        # Log if the taxid is empty
+        if not row_top_taxid:
+            sys.stderr.write(f"Warning: Empty taxid for scaffold {scaff}\n")
+        
+        if row_top_taxid and row_top_taxid in lineages_dict:
+            scaffolds_with_lineage += 1
             current_lineage_dict = lineages_dict[row_dict["fcs_gx_top_taxid"]]
-            for i in range(1, 10):
-                out_line += f",{current_lineage_dict[rankedlineage_col_names[i]]}"
-                # current_lineage_dict[rankedlineage_col_names[i]] = split_line[i]
+            # Iterate through the rankedlineage_col_names to get values from the dictionary
+            for col_name in rankedlineage_col_names:
+                out_line += f",{current_lineage_dict.get(col_name, '')}" # Use .get to handle missing realms/domains gracefully
         else:
-            for i in range(1, 10):
+            # Add empty columns for all rankedlineage_col_names if taxid not found
+            for _ in rankedlineage_col_names:
                 out_line += ","
         print(out_line)
+    
+    # Log how many scaffolds have lineage information
+    sys.stderr.write(f"Found lineage information for {scaffolds_with_lineage} out of {len(collection_dict)} scaffolds\n")
 
 
 if __name__ == "__main__":

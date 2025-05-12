@@ -103,6 +103,19 @@ def prepare_report_data(
 
         timestamp = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Set flags for tab content availability
+    has_coverage_content = coverage_per_phylum_data is not None and not isinstance(coverage_per_phylum_data, str) or \
+                          (isinstance(coverage_per_phylum_data, str) and 
+                           not any(msg in coverage_per_phylum_data.lower() for msg in 
+                                  ["no phylum coverage data available", "not run", "no data"]))
+    
+    has_kmers_content = kmers_results is not None
+    
+    has_cobiont_content = contamination_check_merged_table_data is not None and \
+                         not isinstance(contamination_check_merged_table_data, str) or \
+                         (isinstance(contamination_check_merged_table_data, str) and 
+                          "no contamination check merged table found" not in contamination_check_merged_table_data.lower())
+    
     # Prepare data dictionary
     data = {
         "reference_summary": reference_summary,
@@ -135,6 +148,10 @@ def prepare_report_data(
         "btk_included": btk_included,  # Add BlobToolKit included flag to the data dictionary
         "btk_published_path": btk_published_path,  # Add BlobToolKit published path for debugging
         "launch_dir": launch_dir,  # Add launch directory for debugging
+        # Add flags for tab content availability
+        "has_coverage_content": has_coverage_content,
+        "has_kmers_content": has_kmers_content,
+        "has_cobiont_content": has_cobiont_content,
     }
 
     return data

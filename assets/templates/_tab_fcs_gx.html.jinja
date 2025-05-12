@@ -13,7 +13,9 @@
 
 {% if fcs_gx_report_table %}
     <h4>Data</h4>
-    {{ fcs_gx_report_table|safe }}
+    <div class="table-responsive">
+        {{ fcs_gx_report_table|safe }}
+    </div>
 {% elif fcs_gx_report_content and not fcs_gx_report_metadata %}
     {# Fallback to original content if table is not available and metadata is not separately extracted #}
     <pre><code>{{ fcs_gx_report_content }}</code></pre>
@@ -35,7 +37,9 @@
 
 {% if fcs_gx_taxonomy_table %}
     <h4>Data</h4>
-    {{ fcs_gx_taxonomy_table }}
+    <div class="table-responsive">
+        {{ fcs_gx_taxonomy_table }}
+    </div>
 {% elif fcs_gx_taxonomy_content %}
     {# Fallback to original content if table is not available #}
     <pre><code>{{ fcs_gx_taxonomy_content }}</code></pre>

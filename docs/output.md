@@ -206,8 +206,17 @@ This module merged the Create_btk_dataset folder with the Sanger-tol BTK dataset
 
 - `ASCC-main-output/`
 `*_contamination_check_merged_table.csv` - A CSV table that contains the results of most parts of the pipeline (GC content, coverage, Tiara, Kraken, kmers dimensionality reduction, Diamond, BLAST, FCS-GX, BlobToolKit pipeline) for each sequence in the input assembly file.
-If a set of prerequisite steps have been run (nt BLAST, nr Diamond, Uniprot Diamond, read mapping for coverage calculation, Tiara, nt Kraken and the creation of a BlobToolKit dataset), the pipeline tries to put together a phylum level combined classification of the input sequences. It first uses BlobToolKit's `bestsum_phylum`, then fills the gaps (caused by `no-hit` sequences) with results from Tiara and then the remaining gaps are filled with results from nt Kraken. The combined classification is in the `merged_classif` column. The `merged_classif_source` column says which tool's output the classification for each sequence is based on. The automated classification usually has some flaws in it but is still useful as a starting point for determining the phyla that the input sequences belong to.
-`*_phylum_counts_and_coverage.csv` - A CSV report containing information on the hits per phylum and the average coverage per phylum. This file can only be generated if the`merged_classif` variable has been produced in the `*_contamination_check_merged_table.csv` table, as described above.
+If a set of prerequisite steps have been run, the pipeline puts together a phylum-level combined classification of the input sequences. It uses taxonomy columns in the following order of preference:
+1. BlobToolKit's `buscoregions_phylum` (if available)
+2. BlobToolKit's `buscogenes_phylum` (if available)
+3. BlobToolKit's `bestsum_phylum` (if available)
+4. FCS-GX's `fcs_gx_phylum` (if available)
+5. Kraken's `nt_kraken_phylum` (if available)
+6. Tiara's `tiara_classif` (if available)
+
+The combined classification is in the `merged_classif` column, while the `merged_classif_source` column indicates which tool provided the classification for each sequence. The automated classification usually has some flaws in it but is still useful as a starting point for determining the phyla that the input sequences belong to.
+
+`*_phylum_counts_and_coverage.csv` - A CSV report containing information on the number of sequences, mean coverage, and sequence span per phylum, grouped by both the phylum classification and the source of that classification. This file can only be generated if the`merged_classif` variable has been produced in the `*_contamination_check_merged_table.csv` table, as described above.
 </details>
 
 Merge Tables merged the summary reports from a number of modules in order to create a single set of reports.

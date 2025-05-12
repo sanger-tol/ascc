@@ -18,6 +18,7 @@ process GENERATE_HTML_REPORT {
           path(vecscreen_results, stageAs: "vecscreen/*"),
           path(autofilter_results, stageAs: "autofilter/*"),
           path(merged_table, stageAs: "merged/*"),
+          path(phylum_counts, stageAs: "coverage/*"),       // Add phylum coverage data input
           path(kmers_results, stageAs: "kmers/**"),
           path(reference_fasta),
           path(fasta_sanitation_log, stageAs: "fasta_sanitation/*"),
@@ -64,6 +65,7 @@ process GENERATE_HTML_REPORT {
         --vecscreen_dir vecscreen \\
         --autofilter_dir autofilter \\
         --merged_dir merged \\
+        --coverage_dir coverage \\
         --kmers_dir kmers \\
         $reference_file \\
         --fasta_sanitation_log fasta_sanitation/fasta_sanitation.json \\

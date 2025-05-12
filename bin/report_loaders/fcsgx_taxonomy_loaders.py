@@ -97,6 +97,12 @@ def load_fcsgx_taxonomy_as_table(file_path):
             
             print(f"Successfully loaded taxonomy data with {len(df)} rows", file=sys.stderr)
             
+            # Remove separator columns (sep1, sep2, sep3, sep4, sep5) that only contain pipe symbols
+            separator_columns = [col for col in df.columns if col.startswith('sep')]
+            if separator_columns:
+                print(f"Removing separator columns: {separator_columns}", file=sys.stderr)
+                df = df.drop(columns=separator_columns)
+            
             # Convert DataFrame to HTML table
             table_html = df.to_html(classes="table table-striped", 
                                     index=False, 

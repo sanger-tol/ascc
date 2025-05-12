@@ -19,6 +19,7 @@ from .basic_loaders import (
 # Table loaders
 from .table_loaders import (
     load_contamination_check_merged_table,
+    load_phylum_coverage_data,
     load_trim_Ns_results,
 )
 
@@ -78,6 +79,7 @@ __all__ = [
     
     # Table loaders
     'load_contamination_check_merged_table',
+    'load_phylum_coverage_data',
     'load_trim_Ns_results',
     
     # Text loaders

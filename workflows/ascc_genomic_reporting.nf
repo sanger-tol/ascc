@@ -378,6 +378,7 @@ workflow ASCC_GENOMIC_REPORTING {
         ch_vecscreen_results = Channel.of([[id: "empty"],[]])
         local_empty_autofilter_channel = Channel.of([[id: "empty"],[]])  // Renamed for clarity
         ch_merged_table = Channel.of([[id: "empty"],[]])
+        ch_phylum_counts = Channel.of([[id: "empty"],[]])  // Initialize phylum counts channel
         local_empty_kmers_channel = Channel.of([[id: "empty"],[]]) // Renamed for clarity
         ch_fasta_sanitation_log = Channel.of([[id: "empty"],[]])
         ch_fasta_length_filtering_log = Channel.of([[id: "empty"],[]])
@@ -437,9 +438,10 @@ workflow ASCC_GENOMIC_REPORTING {
             final_kmers_channel_for_report = local_empty_kmers_channel
         }
         
-        // Get the merged table if the merge workflow was run
+        // Get the merged table and phylum counts if the merge workflow was run
         if (!exclude_workflow_steps.contains("essentials") && !exclude_workflow_steps.contains("merge")) {
             ch_merged_table = ASCC_MERGE_TABLES.out.merged_table
+            ch_phylum_counts = ASCC_MERGE_TABLES.out.phylum_counts
         }
         
         // Get the FASTA sanitation log if the filter_fasta process was run
@@ -473,6 +475,7 @@ workflow ASCC_GENOMIC_REPORTING {
         log.info "final_autofilter_channel_for_report: ${final_autofilter_channel_for_report.dump()}"
         log.info "ch_fasta_sanitation_log: ${ch_fasta_sanitation_log.dump()}"
         log.info "ch_fasta_length_filtering_log: ${ch_fasta_length_filtering_log.dump()}"
+        log.info "ch_phylum_counts: ${ch_phylum_counts.dump()}"
         log.info "ch_samplesheet_path: ${ch_samplesheet_path.dump()}"
         log.info "ch_params_file: ${ch_params_file.dump()}"
         
@@ -501,6 +504,7 @@ workflow ASCC_GENOMIC_REPORTING {
             ch_vecscreen_results,
             final_autofilter_channel_for_report,  // Pass the determined channel here
             ch_merged_table,
+            ch_phylum_counts,         // Pass the phylum counts channel
             final_kmers_channel_for_report, // Pass the determined channel here
             ch_reference_file,
             ch_fasta_sanitation_log,

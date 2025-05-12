@@ -9,12 +9,12 @@ from html_report_loaders import (
     load_yaml_params,
     load_barcode_check_results,
     load_contamination_check_merged_table,
+    load_phylum_coverage_data,
     load_fcs_adaptor_results,
     load_trim_Ns_results,
     load_vecscreen_results,
     load_autofiltering_results,
     load_fasta_sanitation_log,
-    load_fcsgx_results,
     load_fcsgx_report_as_table,
     load_fcsgx_taxonomy_as_table,
     load_kmer_dim_reduction_results,
@@ -35,6 +35,7 @@ def main():
     parser.add_argument("--vecscreen_dir", help="Directory containing vecscreen results")
     parser.add_argument("--autofilter_dir", help="Directory containing autofiltering results")
     parser.add_argument("--merged_dir", help="Directory containing merged table results")
+    parser.add_argument("--coverage_dir", help="Directory containing phylum coverage data")
     parser.add_argument("--kmers_dir", help="Directory containing k-mer profile results")
     parser.add_argument("--fasta_sanitation_log", help="FASTA sanitation log file")
     parser.add_argument("--fasta_length_filtering_log", help="FASTA length filtering log file")
@@ -138,6 +139,40 @@ def main():
             print(f"Extracted sample name from samplesheet: {sample_name}", file=sys.stderr)
         else:
             print("Could not extract sample name from samplesheet", file=sys.stderr)
+    
+    # Look for phylum coverage data file after sample_name is set
+    phylum_coverage_file = None
+    # First check the coverage_dir if it exists
+    if args.coverage_dir and os.path.exists(args.coverage_dir) and sample_name:
+        phylum_coverage_pattern = f"{sample_name}_phylum_counts_and_coverage.csv"
+        # First try to find a file specific to this sample
+        phylum_coverage_files = [f for f in find_files_in_dir(args.coverage_dir, extension=".csv") 
+                                if os.path.basename(f) == phylum_coverage_pattern]
+        
+        # If not found, fall back to any phylum coverage file
+        if not phylum_coverage_files:
+            phylum_coverage_files = [f for f in find_files_in_dir(args.coverage_dir, extension=".csv") 
+                                    if os.path.basename(f).endswith("_phylum_counts_and_coverage.csv")]
+        
+        if phylum_coverage_files:
+            phylum_coverage_file = phylum_coverage_files[0]
+            print(f"Found phylum coverage file in coverage_dir: {phylum_coverage_file}", file=sys.stderr)
+    
+    # If not found in coverage_dir, fall back to merged_dir for backward compatibility
+    if not phylum_coverage_file and args.merged_dir and os.path.exists(args.merged_dir) and sample_name:
+        phylum_coverage_pattern = f"{sample_name}_phylum_counts_and_coverage.csv"
+        # First try to find a file specific to this sample
+        phylum_coverage_files = [f for f in find_files_in_dir(args.merged_dir, extension=".csv") 
+                                if os.path.basename(f) == phylum_coverage_pattern]
+        
+        # If not found, fall back to any phylum coverage file
+        if not phylum_coverage_files:
+            phylum_coverage_files = [f for f in find_files_in_dir(args.merged_dir, extension=".csv") 
+                                    if os.path.basename(f).endswith("_phylum_counts_and_coverage.csv")]
+        
+        if phylum_coverage_files:
+            phylum_coverage_file = phylum_coverage_files[0]
+            print(f"Found phylum coverage file in merged_dir: {phylum_coverage_file}", file=sys.stderr)
 
     # Load parameters from either JSON or YAML file
     yaml_params_data = None
@@ -273,6 +308,12 @@ def main():
     # Create meta object from output_prefix
     meta = {"id": args.output_prefix}
     
+    # Load phylum coverage data if available
+    phylum_coverage_data = None
+    if phylum_coverage_file:
+        print(f"Loading phylum coverage data from: {phylum_coverage_file}", file=sys.stderr)
+        phylum_coverage_data = load_phylum_coverage_data(phylum_coverage_file)
+    
     # Prepare data for the report
     data = prepare_report_data(
         reference_summary=reference_summary,
@@ -286,6 +327,7 @@ def main():
         vecscreen_data=vecscreen_data,
         autofiltering_data=autofiltering_data,
         contamination_check_merged_table_data=contamination_check_merged_table_data,
+        coverage_per_phylum_data=phylum_coverage_data,
         kmers_results=kmers_results,
         fasta_sanitation_data=fasta_sanitation_data,
         # Original FCS-GX content (for backward compatibility)
