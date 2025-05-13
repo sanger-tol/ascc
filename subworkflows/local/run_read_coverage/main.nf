@@ -28,16 +28,13 @@ workflow RUN_READ_COVERAGE {
                                 .combine(collection_of_reads)
 
 
-
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM
     // THEN RUN MINIMAP
     // - Removed the mix function from this as it is not needed, there shouldn't be multiple read
     // types
     //
-
     if ( platform == "hifi" || platform == "clr" || platform == "ont" ) {
-
         //
         // MODULE: RUN SINGLE END MAPPING ON THE REFERENCE AND LONGREAD DATA
         //

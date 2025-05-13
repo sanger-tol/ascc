@@ -3,9 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.1 - Red Lamp (H1) [12/05/2025]
+
+Release 5 of sanger-tol/ascc, correcting environments and updating module structure.
+
+### Enhancements & Fixes
+- Testing for conda revealed a few incorrect conda channels.
+- Updating module structure to be more similar to NF-Core modules.
+- RUN_READS_COVERAGE has stopped running due to conditionals becoming channels
+  - channels cannot be compared
+  - Removed channel.of(params....) to remedy this.
+
+
 ## v0.3.0 - Red Lamp [02/05/2025]
 
-Release 4 of sanger-toll/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
+Release 4 of sanger-tol/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
 
 ### Enhancements & Fixes
 

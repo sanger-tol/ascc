@@ -7,16 +7,20 @@ Developed by Eerik Aunin (eeaunin@gmail.com)
 
 Modified by Damon-Lee Pointon (dp24)
 
-The autoencoder part is partially based on "Disentangling cobionts and contamination in long-read genomic data using sequence composition", Claudia C Weber, G3 Genes|Genomes|Genetics, 2024.
+The autoencoder part is partially based on:
+    "Disentangling cobionts and contamination in long-read genomic data using sequence composition",
+        Claudia C Weber,
+        G3 Genes|Genomes|Genetics,
+        2024.
 
 
 The preprocessing pipeline includes:
 1. Normalisation by sequence length (using the 'seq_len' column if present).
 2. Scaling based on the selected method:
-   - PCA, LLE, Kernel PCA: Standard scaling (mean=0, std=1).
-   - UMAP, t-SNE, Isomap: Log scaling for skewed distributions.
-   - Random Trees, NMF: No scaling (raw data is used).
-   - Autoencoder: tf-idf scaling
+    - PCA, LLE, Kernel PCA: Standard scaling (mean=0, std=1).
+    - UMAP, t-SNE, Isomap: Log scaling for skewed distributions.
+    - Random Trees, NMF: No scaling (raw data is used).
+    - Autoencoder: tf-idf scaling
 
 """
 
