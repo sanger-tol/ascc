@@ -585,7 +585,7 @@ workflow ASCC_GENOMIC {
         CREATE_BTK_DATASET (
             combined_channel,
             ncbi_taxonomy_path.first(),
-            scientific_name.first()
+            scientific_name
 
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
