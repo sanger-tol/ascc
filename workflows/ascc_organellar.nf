@@ -196,8 +196,8 @@ workflow ASCC_ORGANELLAR {
 
         RUN_READ_COVERAGE (
             reference_tuple_from_GG, // Again should this be the validated fasta?
-            reads.first(),
-            reads_type.first(),
+            reads,
+            reads_type,
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
@@ -474,7 +474,7 @@ workflow ASCC_ORGANELLAR {
         CREATE_BTK_DATASET (
             combined_channel,
             ncbi_taxonomy_path.first(),
-            scientific_name.first()
+            scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
     }

@@ -416,8 +416,8 @@ workflow ASCC_GENOMIC {
     if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            reads.first(),
-            reads_type.first(),
+            reads,
+            reads_type,
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
@@ -585,7 +585,7 @@ workflow ASCC_GENOMIC {
         CREATE_BTK_DATASET (
             combined_channel,
             ncbi_taxonomy_path.first(),
-            scientific_name.first()
+            scientific_name
 
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
@@ -704,8 +704,8 @@ workflow ASCC_GENOMIC {
     //
     GENERATE_SAMPLESHEET (
         run_btk_conditional.run_btk,
-        reads_path.first(),
-        reads_layout.first()
+        reads_path,
+        reads_layout
     )
     ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
@@ -741,31 +741,38 @@ workflow ASCC_GENOMIC {
         nt_database_path.first(),
         diamond_uniprot_db_path.first(),
         ncbi_taxonomy_path.first(),
-        reads_path.first(),
+        reads_path,
         btk_lineages_path.first(),
-        btk_lineages.first(),
-        taxid.first(),
+        btk_lineages,
+        taxid,
     )
     ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
-    //
-    // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
-    //
-    merged_channel = CREATE_BTK_DATASET.out.btk_datasets
-        .map { meta, file -> [meta.id, [meta, file]] }
-        .join(
-            SANGER_TOL_BTK.out.dataset
-                .map { meta, file ->
-                    [meta.id, [meta, file]]
-            })
-        .map { id, ref, btk -> [ref[0], ref[1], btk[1]] }
+if (
+        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" ) &&
+        ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" )
+    ) {
+        //
+        // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
+        //
+        merged_channel = CREATE_BTK_DATASET.out.btk_datasets
+            .map { meta, file -> [meta.id, [meta, file]] }
+            .join(
+                SANGER_TOL_BTK.out.dataset
+                    .map { meta, file ->
+                        [meta.id, [meta, file]]
+                })
+            .map { id, ref, btk -> [ref[0], ref[1], btk[1]] }
 
-    MERGE_BTK_DATASETS (
-        merged_channel
-    )
-    ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-    busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+        MERGE_BTK_DATASETS (
+            merged_channel
+        )
+        ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+    } else {
+        busco_merge_btk         = Channel.empty()
+    }
 
 
     //

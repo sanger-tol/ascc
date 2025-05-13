@@ -109,7 +109,7 @@ workflow {
         PIPELINE_INITIALISATION.out.organellar_genomes,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
         PIPELINE_INITIALISATION.out.collected_reads,
-        Channel.of(params.scientific_name),
+        params.scientific_name,
         PIPELINE_INITIALISATION.out.pacbio_db,
         Channel.fromPath(params.ncbi_taxonomy_path),
         Channel.fromPath(params.ncbi_ranked_lineage_path),
@@ -120,9 +120,9 @@ workflow {
         Channel.fromPath(params.nt_kraken_database_path),
         Channel.fromPath(params.vecscreen_database_path),
         Channel.from(params.reads_path),
-        Channel.of(params.reads_layout),
-        Channel.of(params.reads_type),
-        Channel.of(params.busco_lineages),
+        params.reads_layout,
+        params.reads_type,
+        params.busco_lineages,
         Channel.fromPath(params.busco_lineages_folder)
     )
 
