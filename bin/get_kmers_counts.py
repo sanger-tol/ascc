@@ -13,9 +13,9 @@ import pandas as pd
 
 
 def main(fasta_path, out_path, kmer_size):
-
     fasta_data = gpf.read_fasta_in_chunks(fasta_path)
     nucleotides_collection = list()
+
     for header, seq in fasta_data:
         seq = seq.upper()
         seq_len = len(seq)
@@ -25,7 +25,8 @@ def main(fasta_path, out_path, kmer_size):
         counts_dict["seq_len"] = seq_len
         for kmer in nucleotides_dict:
             counts_dict[kmer] = nucleotides_dict[kmer]
-        nucleotides_collection.append(counts_dict)
+            nucleotides_collection.append(counts_dict)
+
     df = pd.DataFrame(nucleotides_collection)
     df = df.fillna(0)
     df.to_csv(out_path, index=False)

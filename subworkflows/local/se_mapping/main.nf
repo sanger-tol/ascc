@@ -4,7 +4,7 @@ include { SAMTOOLS_MERGE                             } from '../../../modules/nf
 workflow SE_MAPPING {
 
     take:
-    reference_data_tuple     // Channel [ val(meta), path(file), path(file) ]
+    reference_data_tuple     // Channel [ val(meta), path(file), path(file)* ]
 
     main:
     ch_versions     = Channel.empty()
@@ -64,6 +64,7 @@ workflow SE_MAPPING {
         }
         .set { collected_files_for_merge }
 
+    collected_files_for_merge.view{"all files: $it"}
 
     //
     // MODULE: MERGE ALL OUTPUT BAM
