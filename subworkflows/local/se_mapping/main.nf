@@ -64,7 +64,6 @@ workflow SE_MAPPING {
         }
         .set { collected_files_for_merge }
 
-    collected_files_for_merge.view{"all files: $it"}
 
     //
     // MODULE: MERGE ALL OUTPUT BAM

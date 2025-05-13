@@ -25,7 +25,8 @@ def main(fasta_path, out_path, kmer_size):
         counts_dict["seq_len"] = seq_len
         for kmer in nucleotides_dict:
             counts_dict[kmer] = nucleotides_dict[kmer]
-            nucleotides_collection.append(counts_dict)
+
+        nucleotides_collection.append(counts_dict)
 
     df = pd.DataFrame(nucleotides_collection)
     df = df.fillna(0)
