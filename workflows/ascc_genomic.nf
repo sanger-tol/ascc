@@ -770,6 +770,8 @@ if (
         )
         ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+    } else {
+        busco_merge_btk         = Channel.empty()
     }
 
 
