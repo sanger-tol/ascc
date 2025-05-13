@@ -116,7 +116,7 @@ workflow {
         Channel.fromPath(params.nt_database_path),
         Channel.fromPath(params.diamond_nr_database_path),
         Channel.fromPath(params.diamond_uniprot_database_path),
-        params.taxid,
+        Channel.of(params.taxid),
         Channel.fromPath(params.nt_kraken_database_path),
         Channel.fromPath(params.vecscreen_database_path),
         Channel.from(params.reads_path),
