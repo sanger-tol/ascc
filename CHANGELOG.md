@@ -17,7 +17,7 @@ Release 5 of sanger-tol/ascc, correcting environments and updating module struct
 
 ## v0.3.0 - Red Lamp [02/05/2025]
 
-Release 4 of sanger-toll/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
+Release 4 of sanger-tol/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
 
 ### Enhancements & Fixes
 
