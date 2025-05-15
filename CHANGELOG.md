@@ -15,6 +15,12 @@ Release 5 of sanger-tol/ascc, correcting environments and updating module struct
   - channels cannot be compared
   - Removed channel.of(params....) to remedy this.
 - Added a missing process conditional.
+- Changed the GETS_KMER_COUNTS python script for a rust based alternative
+  - kmer-counter - Claudia Webber
+    - !!!EXECUTABLE IS TEMPORARILY IN THE BIN!!!
+  - For now this requires the addition of REFORMAT_NPY_2_CSV
+    - Downstream processes require a specific csv format
+- Update tests
 
 ## v0.3.0 - Red Lamp [02/05/2025]
 
