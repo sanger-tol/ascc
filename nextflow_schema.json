@@ -52,8 +52,9 @@
                 "reads_layout": {
                     "type": "string",
                     "description": "Specify whether all reads are SINGLE or PAIRED end reads",
-                    "pattern": "^(SINGLE|PAIRED)$",
-                    "fa_icon": "fas fa-input-text"
+                    "enum": ["SINGLE", "PAIRED", "both", "off"],
+                    "fa_icon": "fas fa-input-text",
+                    "default": "SINGLE"
                 },
                 "pacbio_barcode_file": {
                     "type": "string",
