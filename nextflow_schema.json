@@ -52,7 +52,7 @@
                 "reads_layout": {
                     "type": "string",
                     "description": "Specify whether all reads are SINGLE or PAIRED end reads",
-                    "enum": ["SINGLE", "PAIRED", "both", "off"],
+                    "enum": ["SINGLE", "PAIRED"],
                     "fa_icon": "fas fa-input-text",
                     "default": "SINGLE"
                 },
