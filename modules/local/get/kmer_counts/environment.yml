@@ -4,6 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - conda-forge::python=3.9
-  - conda-forge::kcounter=0.1.1
-# This env file is wrong!
+  - conda-forge::coreutils=9.1
