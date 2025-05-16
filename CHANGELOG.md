@@ -21,6 +21,10 @@ Release 5 of sanger-tol/ascc, correcting environments and updating module struct
   - For now this requires the addition of REFORMAT_NPY_2_CSV
     - Downstream processes require a specific csv format
 - Update tests
+- KMER Analysis is now switched off in production.config
+  - This primarily effects only SANGER-TOLA production
+- Added new output from EXTRACT_CONTAMINANTS for parity with cobiontcheck (unreleased pre-nf_core ASCC pipeline).
+  - Output will be added to `organellar_contamination_recomendations`
 
 ## v0.3.0 - Red Lamp [02/05/2025]
 
