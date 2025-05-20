@@ -21,6 +21,14 @@ Release 5 of sanger-tol/ascc, correcting environments and updating module struct
   - This primarily effects only SANGER-TOLA production
 - Added new output from EXTRACT_CONTAMINANTS for parity with cobiontcheck (unreleased pre-nf_core ASCC pipeline).
   - Output will be added to `organellar_contamination_recomendations`
+- Update sanger-tol/blobtoolkit to [v0.8.0 - Sprigatito](https://github.com/sanger-tol/blobtoolkit/releases/tag/0.8.0)
+  - We will also be using the `miniprot` gene predictor.
+
+### Dependencies
+
+| Module         | Old Version | New Versions |
+| -------------- | ----------- | ------------ |
+| SANGER_TOL_BTK | dev         | 0.8.0        |
 
 ## v0.3.0 - Red Lamp [02/05/2025]
 
