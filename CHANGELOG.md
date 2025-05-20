@@ -9,8 +9,10 @@ Release 5 of sanger-tol/ascc, correcting environments and updating module struct
 
 ### Enhancements & Fixes
 
-- Testing for conda revealed a few incorrect conda channels.
+- Testing for conda revealed multiple incorrect conda channels.
+  - Leading to version inconsistancy between singularity/docker and conda.
 - Updating module structure to be more similar to NF-Core modules.
+  - All local modules now have a `environment.yml` for conda env control.
 - RUN_READS_COVERAGE has stopped running due to conditionals becoming channels
   - channels cannot be compared
   - Removed channel.of(params....) to remedy this.
