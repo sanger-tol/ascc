@@ -2,9 +2,7 @@ process MERGE_BTK_DATASETS {
     tag "$meta.id"
     label 'process_low'
 
-    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        exit 1, "ASCC_MERGE_TABLES module does not support Conda. Please use Docker / Singularity / Podman instead."
-    }
+    conda "${moduleDir}/environment.yml"
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
