@@ -2,7 +2,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tag "$meta.id"
     label "process_medium"
 
-    conda "conda-forge::python=3.9"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.9' :
         'biocontainers/python:3.9' }"

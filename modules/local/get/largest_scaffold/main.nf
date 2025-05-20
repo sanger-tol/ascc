@@ -3,7 +3,7 @@ process GET_LARGEST_SCAFFOLD {
     tag "$meta.id"
     label 'process_low'
 
-    conda "conda-forge::coreutils=9.1"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
         'docker.io/ubuntu:20.04' }"

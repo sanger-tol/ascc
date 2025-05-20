@@ -2,7 +2,7 @@ process EXTRACT_CONTAMINANTS {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "conda-forge::python=3.9 conda-forge::biopython=1.78 conda-forge::pybedtools=0.9.0"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-7fa7184beddbf01b0b0ae64ed643f6c05f12cbcc:337918d8410b938b17fd4beb45024a78ffa6b0d3-0' :
         'biocontainers/mulled-v2-7fa7184beddbf01b0b0ae64ed643f6c05f12cbcc:337918d8410b938b17fd4beb45024a78ffa6b0d3-0' }"
