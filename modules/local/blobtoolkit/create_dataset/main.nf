@@ -2,9 +2,7 @@ process CREATE_BTK_DATASET {
     tag "$meta.id"
     label 'process_medium'
 
-    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        exit 1, "CREATE_BTK_DATASET module does not support Conda. Please use Docker / Singularity / Podman instead."
-    }
+    conda "${moduleDir}/environment.yml"
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
