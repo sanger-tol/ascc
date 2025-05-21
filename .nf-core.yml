@@ -38,6 +38,8 @@ lint:
     - params.show_hidden_params
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
+  merge_markers:
+    - bin/kmer-counter
   multiqc_config: False
   actions_awsfulltest: False
   template_strings: False

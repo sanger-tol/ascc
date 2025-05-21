@@ -1,4 +1,4 @@
 sample,assembly_type,assembly_file
-odCymConc1,PRIMARY,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/test_files/odCymConc1/primary.fa
-odCymConc1,HAPLO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/test_files/odCymConc1/hap.fa
-odCymConc1,MITO,/nfs/treeoflife-01/teams/tola/users/dp24/ascc/test_files/odCymConc1/mito.fa
+odCymConc1,PRIMARY,/lustre/scratch124/tol/projects/asg/data/sponges/Cymbastela_concentrica/assembly/draft/odCymConc1.20241101/odCymConc1.20241101.fa.gz
+odCymConc1,HAPLO,/lustre/scratch124/tol/projects/asg/data/sponges/Cymbastela_concentrica/assembly/draft/odCymConc1.20241101/odCymConc1.20241101.haplotigs.fa.gz
+odCymConc1,MITO,/lustre/scratch124/tol/projects/asg/data/sponges/Cymbastela_concentrica/assembly/draft/odCymConc1.20241101/odCymConc1-MT.fa.gz

@@ -3,6 +3,7 @@
 //
 include { GET_KMER_COUNTS                       } from '../../../modules/local/get/kmer_counts/main'
 include { KMER_COUNT_DIM_REDUCTION              } from '../../../modules/local/kmer_count/dim_reduction/main'
+include { REFORMAT_NPY_2_CSV                    } from '../../../modules/local/reformat/npy_2_csv/main'
 include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../../modules/local/kmer_count/dim_reduction_combine_csv/main'
 
 workflow GET_KMERS_PROFILE {
@@ -37,6 +38,16 @@ workflow GET_KMERS_PROFILE {
     ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
 
     //
+    // MODULE: CONVERT THE NPY FILE INTO A CSV FOR DOWNSTREAM USE
+    //
+    REFORMAT_NPY_2_CSV (
+        GET_KMER_COUNTS.out.npy,
+        kmer_size
+    )
+    ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)
+
+
+    //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
     //
     Channel.fromList(params.dimensionality_reduction_methods)
@@ -46,7 +57,7 @@ workflow GET_KMERS_PROFILE {
         .set{hey_neighbour}
 
     dim_methods
-        .combine(GET_KMER_COUNTS.out.csv)
+        .combine(REFORMAT_NPY_2_CSV.out.csv)
         .combine(autoencoder_epochs_count.first())
         .combine(hey_neighbour)
         .multiMap { dr_method, csv_meta, csv_file, epochs, n_neighbours ->

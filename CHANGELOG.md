@@ -17,6 +17,12 @@ Release 5 of sanger-tol/ascc, correcting environments and updating module struct
   - channels cannot be compared
   - Removed channel.of(params....) to remedy this.
 - Added a missing process conditional.
+- Changed the GETS_KMER_COUNTS python script for a rust based alternative
+  - kmer-counter - Claudia Webber
+    - !!!EXECUTABLE IS TEMPORARILY IN THE BIN!!!
+  - For now this requires the addition of REFORMAT_NPY_2_CSV
+    - Downstream processes require a specific csv format
+- Update tests
 - KMER Analysis is now switched off in production.config
   - This primarily effects only SANGER-TOLA production
 - Added new output from EXTRACT_CONTAMINANTS for parity with cobiontcheck (unreleased pre-nf_core ASCC pipeline).
