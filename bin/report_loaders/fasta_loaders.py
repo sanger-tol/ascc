@@ -22,17 +22,31 @@ def load_fasta_length_filtering_log(file_path):
 
         # Create a summary table from the log data
         summary_data = [
-            {"Metric": "Total sequences processed", "Value": f"{data.get('total_sequences', 0):,}"},
-            {"Metric": "Sequences retained", "Value": f"{data.get('sequences_retained', 0):,}"},
-            {"Metric": "Sequences filtered", "Value": f"{data.get('sequences_filtered', 0):,}"},
-            {"Metric": "Filter mode", "Value": data.get("filter_mode", "unknown").replace("_", " ").title()},
+            {
+                "Metric": "Total sequences processed",
+                "Value": f"{data.get('total_sequences', 0):,}",
+            },
+            {
+                "Metric": "Sequences retained",
+                "Value": f"{data.get('sequences_retained', 0):,}",
+            },
+            {
+                "Metric": "Sequences filtered",
+                "Value": f"{data.get('sequences_filtered', 0):,}",
+            },
+            {
+                "Metric": "Filter mode",
+                "Value": data.get("filter_mode", "unknown").replace("_", " ").title(),
+            },
             {"Metric": "Cutoff value", "Value": f"{data.get('cutoff_value', 0):,}"},
         ]
 
         # Convert to HTML table
         df = pd.DataFrame(summary_data)
         summary_table = df.to_html(
-            classes="table table-striped", index=False, table_id="fasta_length_filtering_summary_table"
+            classes="table table-striped",
+            index=False,
+            table_id="fasta_length_filtering_summary_table",
         )
 
         # Create a detailed changes table if there are any changes
@@ -43,7 +57,9 @@ def load_fasta_length_filtering_log(file_path):
             for change in data.get("detailed_changes", []):
                 row = {
                     "Header": change.get("header", ""),
-                    "Change Type": change.get("change_type", "").replace("_", " ").title(),
+                    "Change Type": change.get("change_type", "")
+                    .replace("_", " ")
+                    .title(),
                 }
 
                 if "length" in change:
@@ -60,7 +76,9 @@ def load_fasta_length_filtering_log(file_path):
             # Convert to HTML table
             detailed_df = pd.DataFrame(detailed_data)
             detailed_table = detailed_df.to_html(
-                classes="table table-striped", index=False, table_id="fasta_length_filtering_detailed_table"
+                classes="table table-striped",
+                index=False,
+                table_id="fasta_length_filtering_detailed_table",
             )
 
         # Create a more compact table without forcing horizontal scrolling
@@ -81,7 +99,11 @@ def load_fasta_length_filtering_log(file_path):
 
         # Combine the tables with a status indicator
         has_filtering = data.get("has_filtering", False)
-        status_class = "notice-container notice-error" if has_filtering else "notice-container notice-success"
+        status_class = (
+            "notice-container notice-error"
+            if has_filtering
+            else "notice-container notice-success"
+        )
         status_message = (
             f"{data.get('sequences_filtered', 0):,} sequences were filtered by length."
             if has_filtering
@@ -116,23 +138,46 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
 
             # Create a summary table from the log data
             summary_data = [
-                {"Metric": "Total sequences processed", "Value": f"{data.get('total_sequences', 0):,}"},
-                {"Metric": "Headers shortened", "Value": f"{data.get('headers_shortened', 0):,}"},
+                {
+                    "Metric": "Total sequences processed",
+                    "Value": f"{data.get('total_sequences', 0):,}",
+                },
+                {
+                    "Metric": "Headers shortened",
+                    "Value": f"{data.get('headers_shortened', 0):,}",
+                },
                 {
                     "Metric": "Headers with problematic characters",
                     "Value": f"{data.get('headers_with_problematic_chars', 0):,}",
                 },
-                {"Metric": "Headers with commas", "Value": f"{data.get('headers_with_commas', 0):,}"},
-                {"Metric": "Sequences with non-ATGC bases", "Value": f"{data.get('sequences_with_non_atgc', 0):,}"},
-                {"Metric": "Non-ATGC bases replaced", "Value": f"{data.get('non_atgc_bases_replaced', 0):,}"},
-                {"Metric": "All-N sequences skipped", "Value": f"{data.get('all_n_sequences_skipped', 0):,}"},
-                {"Metric": "Duplicate headers detected", "Value": f"{data.get('duplicate_headers_detected', 0):,}"},
+                {
+                    "Metric": "Headers with commas",
+                    "Value": f"{data.get('headers_with_commas', 0):,}",
+                },
+                {
+                    "Metric": "Sequences with non-ATGC bases",
+                    "Value": f"{data.get('sequences_with_non_atgc', 0):,}",
+                },
+                {
+                    "Metric": "Non-ATGC bases replaced",
+                    "Value": f"{data.get('non_atgc_bases_replaced', 0):,}",
+                },
+                {
+                    "Metric": "All-N sequences skipped",
+                    "Value": f"{data.get('all_n_sequences_skipped', 0):,}",
+                },
+                {
+                    "Metric": "Duplicate headers detected",
+                    "Value": f"{data.get('duplicate_headers_detected', 0):,}",
+                },
             ]
 
             # Convert to HTML table
             df = pd.DataFrame(summary_data)
             summary_table = df.to_html(
-                classes="table table-striped", index=False, table_id="fasta_sanitation_summary_table"
+                classes="table table-striped",
+                index=False,
+                table_id="fasta_sanitation_summary_table",
             )
 
             # Create a detailed changes table if there are any changes
@@ -143,7 +188,9 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
                 for change in data.get("detailed_changes", []):
                     row = {
                         "Header": change.get("header", ""),
-                        "Change Type": change.get("change_type", "").replace("_", " ").title(),
+                        "Change Type": change.get("change_type", "")
+                        .replace("_", " ")
+                        .title(),
                     }
 
                     if "original" in change and "modified" in change:
@@ -160,7 +207,9 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
                 # Convert to HTML table
                 detailed_df = pd.DataFrame(detailed_data)
                 detailed_table = detailed_df.to_html(
-                    classes="table table-striped", index=False, table_id="fasta_sanitation_detailed_table"
+                    classes="table table-striped",
+                    index=False,
+                    table_id="fasta_sanitation_detailed_table",
                 )
 
             # Create a more compact table without forcing horisontal scrolling
@@ -181,7 +230,11 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
 
             # Combine the tables with a status indicator
             has_issues = data.get("has_issues", False)
-            status_class = "notice-container notice-error" if has_issues else "notice-container notice-success"
+            status_class = (
+                "notice-container notice-error"
+                if has_issues
+                else "notice-container notice-success"
+            )
             status_message = (
                 "Issues with the input FASTA file headers were detected."
                 if has_issues
@@ -207,7 +260,9 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
         and os.path.exists(length_filtering_file_path)
         and os.path.getsize(length_filtering_file_path) > 0
     ):
-        length_filtering_data = load_fasta_length_filtering_log(length_filtering_file_path)
+        length_filtering_data = load_fasta_length_filtering_log(
+            length_filtering_file_path
+        )
 
     # Combine the results
     if sanitation_data and length_filtering_data:
@@ -220,7 +275,8 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
 
         return {
             "html": combined_html,
-            "has_issues": sanitation_data["has_issues"] or length_filtering_data["has_filtering"],
+            "has_issues": sanitation_data["has_issues"]
+            or length_filtering_data["has_filtering"],
         }
     elif sanitation_data:
         return sanitation_data

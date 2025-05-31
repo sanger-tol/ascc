@@ -327,19 +327,23 @@ def main(args):
         has_taxonomy = True
     elif "tiara_classif" in df.columns:
         has_taxonomy = True
-    
+
     has_coverage = "coverage" in df.columns
-    
+
     if has_taxonomy and has_coverage:
-        process_results_tables_command = f"process_result_tables.py . {args.sample_name}"
+        process_results_tables_command = (
+            f"process_result_tables.py . {args.sample_name}"
+        )
         gpf.run_system_command(process_results_tables_command)
     else:
         missing_data = []
         if not has_taxonomy:
-            missing_data.append("taxonomy data (btk_bestsum_phylum, fcs_gx_phylum, nt_kraken_phylum, or tiara_classif)")
+            missing_data.append(
+                "taxonomy data (btk_bestsum_phylum, fcs_gx_phylum, nt_kraken_phylum, or tiara_classif)"
+            )
         if not has_coverage:
             missing_data.append("coverage data")
-        
+
         sys.stderr.write(
             f"Skipping generating the {args.sample_name}_phylum_counts_and_coverage.csv file, as the variables used in this run do not include all the required variables for this: {', '.join(missing_data)}\n"
         )

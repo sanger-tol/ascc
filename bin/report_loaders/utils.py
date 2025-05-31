@@ -9,10 +9,10 @@ import os
 
 def wrap_table_html(table_html):
     """Wrap HTML table with responsive container layers.
-    
+
     Args:
         table_html (str): The HTML table string
-        
+
     Returns:
         str: The wrapped HTML table
     """
@@ -29,12 +29,12 @@ def wrap_table_html(table_html):
 
 def find_files_in_dir(directory, pattern=None, extension=None):
     """Find files in a directory matching a pattern or extension.
-    
+
     Args:
         directory (str): The directory to search in
         pattern (str, optional): A substring to match in filenames
         extension (str, optional): A file extension to match (e.g., '.txt')
-        
+
     Returns:
         list: A list of full paths to matching files
     """

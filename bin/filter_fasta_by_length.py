@@ -41,7 +41,12 @@ def parse_args(argv=None):
         action="store_true",
         help="Optional: remove the input FASTA file after creating the filtered FASTA file",
     )
-    parser.add_argument("--log_file", type=str, help="Path to output log file in JSON format", default=None)
+    parser.add_argument(
+        "--log_file",
+        type=str,
+        help="Path to output log file in JSON format",
+        default=None,
+    )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
 
     return parser.parse_args(argv)
@@ -65,7 +70,9 @@ def main(args):
     if (
         args.cutoff == -1
     ):  # When this script is used as a part of a pipeline, -1 can be assigned as a value for the cutoff to indicate that no filtering should be done
-        sys.stderr.write(f"The input FASTA sequences ({fasta_path}) will not be filtered by length\n")
+        sys.stderr.write(
+            f"The input FASTA sequences ({fasta_path}) will not be filtered by length\n"
+        )
         log_stats["filter_mode"] = "none"
 
     retained_seq_count = 0

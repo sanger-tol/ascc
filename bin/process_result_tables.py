@@ -18,15 +18,15 @@ def generate_counts_df(df, counts_df_output_path):
     including the source of the classification
     """
     # Group by both merged_classif and merged_classif_source
-    grouped = df.groupby(['merged_classif', 'merged_classif_source'])
-    
+    grouped = df.groupby(["merged_classif", "merged_classif_source"])
+
     # Initialize lists to store results
     phylum_list = []
     source_list = []
     count_list = []
     cov_list = []
     span_list = []
-    
+
     # Calculate statistics for each group
     for (classif, source), group in grouped:
         phylum_list.append(classif)
@@ -37,16 +37,18 @@ def generate_counts_df(df, counts_df_output_path):
         cov_list.append(round(np.mean(cov_values), 2))
         span_sum = sum(length_values) / 1000000
         span_list.append(round(span_sum, 2))
-    
+
     # Create DataFrame with results
-    counts_df = pd.DataFrame({
-        "phylum": phylum_list,
-        "classification_source": source_list,
-        "number_of_sequences": count_list,
-        "mean_coverage": cov_list,
-        "span_mb": span_list
-    })
-    
+    counts_df = pd.DataFrame(
+        {
+            "phylum": phylum_list,
+            "classification_source": source_list,
+            "number_of_sequences": count_list,
+            "mean_coverage": cov_list,
+            "span_mb": span_list,
+        }
+    )
+
     # Save to CSV
     counts_df.to_csv(counts_df_output_path, index=False)
 
@@ -108,7 +110,7 @@ def main(output_folder, sample_id):
         taxonomy_column = "nt_kraken_phylum"
     elif "tiara_classif" in main_df.columns:
         taxonomy_column = "tiara_classif"
-    
+
     if taxonomy_column is None:
         sys.stderr.write(
             "No taxonomy column (buscoregions_phylum, buscogenes_phylum, btk_bestsum_phylum, fcs_gx_phylum, nt_kraken_phylum, or tiara_classif) was found in results table ({})\n".format(
@@ -116,7 +118,7 @@ def main(output_folder, sample_id):
             )
         )
         sys.exit(1)
-    
+
     # Check if coverage column exists
     if "coverage" not in main_df.columns:
         sys.stderr.write(
@@ -125,7 +127,7 @@ def main(output_folder, sample_id):
             )
         )
         sys.exit(1)
-    
+
     # Check if length column exists
     if "length" not in main_df.columns:
         # If length column doesn't exist, add NaN values to indicate missing data
@@ -176,7 +178,7 @@ def main(output_folder, sample_id):
     # Write the modified DataFrame directly back to the original file
     # This is simpler and avoids issues with file operations
     df.to_csv(main_results_table_path, index=False)
-    
+
     # Generate the counts file separately
     generate_counts_df(df, counts_df_output_path)
 

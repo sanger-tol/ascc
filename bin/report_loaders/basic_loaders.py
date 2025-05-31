@@ -36,7 +36,9 @@ def load_samplesheet(file_path):
                 sample_name = sample_values[0]
 
         # Add column width styles to make the table wider
-        table_html = df.to_html(classes="table table-striped", index=False, table_id="samplesheet_table")
+        table_html = df.to_html(
+            classes="table table-striped", index=False, table_id="samplesheet_table"
+        )
 
         # Wrap the table in multiple container layers for better scrolling
         html_table = wrap_table_html(table_html)
@@ -53,7 +55,7 @@ def load_yaml_params(file_path=None, params_json=None):
     This function can load parameters from either:
     1. A YAML file path
     2. A JSON string containing the params object
-    
+
     Returns:
         tuple: (html_table, params_dict) where html_table is the HTML representation of the parameters
                and params_dict is a dictionary of parameter names to values
@@ -116,11 +118,13 @@ def load_yaml_params(file_path=None, params_json=None):
 
     # Convert to a pandas DataFrame for display
     df = pd.DataFrame(params_list)
-    table_html = df.to_html(classes="table table-striped", index=False, table_id="yaml_params_table")
+    table_html = df.to_html(
+        classes="table table-striped", index=False, table_id="yaml_params_table"
+    )
 
     # Wrap the table in multiple container layers for better scrolling
     html_table = wrap_table_html(table_html)
-    
+
     return html_table, params_dict
 
 

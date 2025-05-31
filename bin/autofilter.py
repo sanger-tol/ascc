@@ -268,7 +268,9 @@ def main():
     )
 
     out_csv_list = list()
-    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action,combined_action_source")
+    out_csv_list.append(
+        "scaff,fcs_gx_action,tiara_action,combined_action,combined_action_source"
+    )
     for scaff, scaff_properties in combined_action_dict.items():
         out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)

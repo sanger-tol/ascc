@@ -14,10 +14,10 @@ def process_reference_file_line_by_line(file_path):
     """Process reference file line by line to avoid loading large files into memory.
 
     Returns a list of dictionaries with assembly statistics that can be converted to an HTML table.
-    
+
     Args:
         file_path (str): Path to the reference FASTA file
-        
+
     Returns:
         str: HTML table with assembly statistics, or None if processing fails
     """
@@ -43,7 +43,9 @@ def process_reference_file_line_by_line(file_path):
                     if current_seq:
                         seq_length = len(current_seq)
                         total_length += seq_length
-                        gc_count += current_seq.upper().count("G") + current_seq.upper().count("C")
+                        gc_count += current_seq.upper().count(
+                            "G"
+                        ) + current_seq.upper().count("C")
                         n_count += current_seq.upper().count("N")
 
                     sequence_count += 1
@@ -55,7 +57,9 @@ def process_reference_file_line_by_line(file_path):
             if current_seq:
                 seq_length = len(current_seq)
                 total_length += seq_length
-                gc_count += current_seq.upper().count("G") + current_seq.upper().count("C")
+                gc_count += current_seq.upper().count("G") + current_seq.upper().count(
+                    "C"
+                )
                 n_count += current_seq.upper().count("N")
 
         # Calculate GC content
@@ -73,7 +77,9 @@ def process_reference_file_line_by_line(file_path):
 
         # Convert to HTML table
         df = pd.DataFrame(stats_list)
-        table_html = df.to_html(classes="table table-striped", index=False, table_id="assembly_stats_table")
+        table_html = df.to_html(
+            classes="table table-striped", index=False, table_id="assembly_stats_table"
+        )
 
         # Wrap the table in multiple container layers for better scrolling
         return f"""

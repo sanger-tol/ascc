@@ -15,7 +15,6 @@ from report_loaders import (
     load_samplesheet,
     load_yaml_params,
     load_barcode_check_results,
-    
     # Table loaders
     load_contamination_check_merged_table,
     load_phylum_coverage_data,
@@ -23,28 +22,22 @@ from report_loaders import (
     load_fcs_adaptor_results_as_table,
     load_vecscreen_results_as_table,
     load_autofiltering_results_as_table,
-    
     # FASTA loaders
     load_fasta_length_filtering_log,
     load_fasta_sanitation_log,
-    
     # FCS-GX loaders
     parse_fcsgx_metadata,
     flatten_nested_dict,
     metadata_to_html_table,
     format_fcsgx_metadata,
     load_fcsgx_taxonomy_as_table,
-    
     # FCS-GX report loaders
     load_fcsgx_results,
     load_fcsgx_report_as_table,
-    
     # K-mer loaders
     load_kmer_dim_reduction_results,
-    
     # Reference loaders
     process_reference_file_line_by_line,
-    
     # Utility functions
     find_files_in_dir,
     wrap_table_html,
@@ -58,45 +51,37 @@ load_autofiltering_results = load_autofiltering_results_as_table
 # Make all loaders available at the module level
 __all__ = [
     # Basic loaders
-    'load_samplesheet',
-    'load_yaml_params',
-    'load_barcode_check_results',
-    
+    "load_samplesheet",
+    "load_yaml_params",
+    "load_barcode_check_results",
     # Table loaders
-    'load_contamination_check_merged_table',
-    'load_phylum_coverage_data',
-    'load_trim_Ns_results',
-    'load_fcs_adaptor_results_as_table',
-    'load_vecscreen_results_as_table',
-    'load_autofiltering_results_as_table',
-    
+    "load_contamination_check_merged_table",
+    "load_phylum_coverage_data",
+    "load_trim_Ns_results",
+    "load_fcs_adaptor_results_as_table",
+    "load_vecscreen_results_as_table",
+    "load_autofiltering_results_as_table",
     # Compatibility aliases
-    'load_fcs_adaptor_results',
-    'load_vecscreen_results',
-    'load_autofiltering_results',
-    
+    "load_fcs_adaptor_results",
+    "load_vecscreen_results",
+    "load_autofiltering_results",
     # FASTA loaders
-    'load_fasta_length_filtering_log',
-    'load_fasta_sanitation_log',
-    
+    "load_fasta_length_filtering_log",
+    "load_fasta_sanitation_log",
     # FCS-GX loaders
-    'parse_fcsgx_metadata',
-    'flatten_nested_dict',
-    'metadata_to_html_table',
-    'format_fcsgx_metadata',
-    'load_fcsgx_taxonomy_as_table',
-    
+    "parse_fcsgx_metadata",
+    "flatten_nested_dict",
+    "metadata_to_html_table",
+    "format_fcsgx_metadata",
+    "load_fcsgx_taxonomy_as_table",
     # FCS-GX report loaders
-    'load_fcsgx_results',
-    'load_fcsgx_report_as_table',
-    
+    "load_fcsgx_results",
+    "load_fcsgx_report_as_table",
     # K-mer loaders
-    'load_kmer_dim_reduction_results',
-    
+    "load_kmer_dim_reduction_results",
     # Reference loaders
-    'process_reference_file_line_by_line',
-    
+    "process_reference_file_line_by_line",
     # Utility functions
-    'find_files_in_dir',
-    'wrap_table_html',
+    "find_files_in_dir",
+    "wrap_table_html",
 ]

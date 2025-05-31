@@ -20,7 +20,12 @@ def render_html_report(data, template_dir, output_file):
         # Set up Jinja2 environment
         env = Environment(
             loader=FileSystemLoader(
-                [template_dir, os.path.join(os.environ.get("WORKFLOW_PROJECTDIR", "."), "assets/templates")]
+                [
+                    template_dir,
+                    os.path.join(
+                        os.environ.get("WORKFLOW_PROJECTDIR", "."), "assets/templates"
+                    ),
+                ]
             )
         )
 
@@ -66,12 +71,12 @@ def prepare_report_data(
     fcs_gx_taxonomy_table=None,
     timestamp=None,
     version=DEFAULT_VERSION,
-    meta=None,                          # Meta parameter
-    kmer_length=None,                   # K-mer length parameter
-    btk_dataset_path=None,              # BlobToolKit dataset path parameter
-    btk_included=None,                  # Whether BlobToolKit dataset creation was included in the run
-    btk_published_path=None,            # Path being checked for the BlobToolKit dataset
-    launch_dir=None,                    # Directory from which the workflow was launched
+    meta=None,  # Meta parameter
+    kmer_length=None,  # K-mer length parameter
+    btk_dataset_path=None,  # BlobToolKit dataset path parameter
+    btk_included=None,  # Whether BlobToolKit dataset creation was included in the run
+    btk_published_path=None,  # Path being checked for the BlobToolKit dataset
+    launch_dir=None,  # Directory from which the workflow was launched
 ):
     """Prepare data for the HTML report.
 
@@ -107,18 +112,30 @@ def prepare_report_data(
         timestamp = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Set flags for tab content availability
-    has_coverage_content = coverage_per_phylum_data is not None and not isinstance(coverage_per_phylum_data, str) or \
-                          (isinstance(coverage_per_phylum_data, str) and 
-                           not any(msg in coverage_per_phylum_data.lower() for msg in 
-                                  ["no phylum coverage data available", "not run", "no data"]))
-    
+    has_coverage_content = (
+        coverage_per_phylum_data is not None
+        and not isinstance(coverage_per_phylum_data, str)
+        or (
+            isinstance(coverage_per_phylum_data, str)
+            and not any(
+                msg in coverage_per_phylum_data.lower()
+                for msg in ["no phylum coverage data available", "not run", "no data"]
+            )
+        )
+    )
+
     has_kmers_content = kmers_results is not None
-    
-    has_cobiont_content = contamination_check_merged_table_data is not None and \
-                         not isinstance(contamination_check_merged_table_data, str) or \
-                         (isinstance(contamination_check_merged_table_data, str) and 
-                          "no contamination check merged table found" not in contamination_check_merged_table_data.lower())
-    
+
+    has_cobiont_content = (
+        contamination_check_merged_table_data is not None
+        and not isinstance(contamination_check_merged_table_data, str)
+        or (
+            isinstance(contamination_check_merged_table_data, str)
+            and "no contamination check merged table found"
+            not in contamination_check_merged_table_data.lower()
+        )
+    )
+
     # Prepare data dictionary
     data = {
         "reference_summary": reference_summary,

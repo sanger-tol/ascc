@@ -87,11 +87,20 @@ def parse_args(argv=None):
         help="Delimiter string for splitting FASTA headers. Default: any whitespace character",
         default="",
     )
-    parser.add_argument("--allow_duplicate_headers", dest="allow_duplicate_headers", action="store_true")
     parser.add_argument(
-        "--keep_n_sequences", action="store_true", help="Keep sequences that are all Ns (default: False)"
+        "--allow_duplicate_headers", dest="allow_duplicate_headers", action="store_true"
     )
-    parser.add_argument("--log_file", type=str, help="Path to output log file in JSON format", default=None)
+    parser.add_argument(
+        "--keep_n_sequences",
+        action="store_true",
+        help="Keep sequences that are all Ns (default: False)",
+    )
+    parser.add_argument(
+        "--log_file",
+        type=str,
+        help="Path to output log file in JSON format",
+        default=None,
+    )
     parser.add_argument(
         "--max_detailed_changes",
         type=int,
@@ -115,7 +124,7 @@ def main(
     keep_n_sequences=False,
     log_file=None,
     max_detailed_changes=100,
-    max_header_len=0, 
+    max_header_len=0,
 ):
     # Initialize log statistics
     log_stats = {
@@ -162,7 +171,11 @@ def main(
                             "details": "Sequence consisted entirely of N's and was skipped",
                         }
                     )
-                    sys.stderr.write("Skipping all-N sequence: {}\n".format(current_header[1:].strip()))
+                    sys.stderr.write(
+                        "Skipping all-N sequence: {}\n".format(
+                            current_header[1:].strip()
+                        )
+                    )
                 else:
                     print(current_header)
                     print(sequence)
@@ -184,21 +197,27 @@ def main(
 
                 # Maximum header length check ---
                 if max_header_len > 0:
-                    header_content = shortened_header[1:] # Exclude '>'
+                    header_content = shortened_header[1:]  # Exclude '>'
                     if len(header_content) > max_header_len:
                         log_stats["headers_exceeding_max_length"] += 1
                         log_stats["has_issues"] = True
-                        
+
                         # Only log details for a limited number of headers
-                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
-                            log_stats["detailed_changes"].append({
-                                "header": header_content,
-                                "change_type": "header_too_long",
-                                "length": len(header_content),
-                                "max_allowed": max_header_len,
-                                "details": f"Header exceeds maximum allowed length of {max_header_len} characters"
-                            })
-                            
+                        if (
+                            max_detailed_changes > 0
+                            and len(log_stats["detailed_changes"])
+                            < max_detailed_changes
+                        ):
+                            log_stats["detailed_changes"].append(
+                                {
+                                    "header": header_content,
+                                    "change_type": "header_too_long",
+                                    "length": len(header_content),
+                                    "max_allowed": max_header_len,
+                                    "details": f"Header exceeds maximum allowed length of {max_header_len} characters",
+                                }
+                            )
+
                             # Print the first few offending headers to stderr
                             if log_stats["headers_exceeding_max_length"] <= 5:
                                 sys.stderr.write(
@@ -210,7 +229,10 @@ def main(
                 if shortened_header != original_header:
                     log_stats["headers_shortened"] += 1
                     log_stats["has_issues"] = True
-                    if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
+                    if (
+                        max_detailed_changes > 0
+                        and len(log_stats["detailed_changes"]) < max_detailed_changes
+                    ):
                         log_stats["detailed_changes"].append(
                             {
                                 "header": original_header[1:],
@@ -235,7 +257,10 @@ def main(
 
                 # Log the sanitised header if it differs from the shortened header
                 if current_header[1:] != shortened_header[1:]:
-                    if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
+                    if (
+                        max_detailed_changes > 0
+                        and len(log_stats["detailed_changes"]) < max_detailed_changes
+                    ):
                         log_stats["detailed_changes"].append(
                             {
                                 "header": shortened_header[1:],
@@ -250,7 +275,11 @@ def main(
                     if allow_duplicate_headers is False:
                         log_stats["duplicate_headers_detected"] += 1
                         log_stats["has_issues"] = True
-                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
+                        if (
+                            max_detailed_changes > 0
+                            and len(log_stats["detailed_changes"])
+                            < max_detailed_changes
+                        ):
                             log_stats["detailed_changes"].append(
                                 {
                                     "header": current_header[1:],
@@ -272,7 +301,11 @@ def main(
                     else:
                         log_stats["duplicate_headers_detected"] += 1
                         log_stats["has_issues"] = True
-                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
+                        if (
+                            max_detailed_changes > 0
+                            and len(log_stats["detailed_changes"])
+                            < max_detailed_changes
+                        ):
                             log_stats["detailed_changes"].append(
                                 {
                                     "header": current_header[1:],
@@ -290,7 +323,9 @@ def main(
                 non_atgc_count = sum(1 for c in line_upper if c not in "ATGCN\n\r")
 
                 if non_atgc_count > 0:
-                    if current_header not in log_stats.get("sequences_with_changes", {}):
+                    if current_header not in log_stats.get(
+                        "sequences_with_changes", {}
+                    ):
                         log_stats["sequences_with_non_atgc"] += 1
                         log_stats["has_issues"] = True
 
@@ -330,13 +365,13 @@ def main(
                     headers_with_commas
                 )
             )
-        
+
         # Check if any headers exceeded the maximum length and exit with error if so
         if max_header_len > 0 and log_stats["headers_exceeding_max_length"] > 0:
             error_message = f"ERROR: {log_stats['headers_exceeding_max_length']} FASTA header(s) exceed maximum allowed length of {max_header_len} characters (required for FCS-adaptor)."
             sys.stderr.write(error_message + "\n")
             log_stats["error"] = error_message
-            
+
             # Update log file before exiting if specified
             if log_file:
                 with open(log_file, "w") as f:
@@ -345,7 +380,10 @@ def main(
             sys.exit(125)
 
     # Add summary if we limited the detailed changes
-    if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) >= max_detailed_changes:
+    if (
+        max_detailed_changes > 0
+        and len(log_stats["detailed_changes"]) >= max_detailed_changes
+    ):
         log_stats["detailed_changes_truncated"] = True
         log_stats["detailed_changes"].append(
             {
