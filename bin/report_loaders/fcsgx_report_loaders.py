@@ -8,10 +8,8 @@ This module contains functions for loading and formatting FCS-GX report data.
 import os
 import sys
 import pandas as pd
-import re
-import io
 import tempfile
-from .fcsgx_loaders import parse_fcsgx_metadata, format_fcsgx_metadata
+from .fcsgx_loaders import format_fcsgx_metadata
 
 
 def load_fcsgx_results(file_path):

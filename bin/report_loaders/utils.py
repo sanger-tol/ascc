@@ -4,9 +4,27 @@ Utility functions for ASCC HTML report generation.
 
 This module contains utility functions used by other report loader modules.
 """
-
 import os
-import sys
+
+
+def wrap_table_html(table_html):
+    """Wrap HTML table with responsive container layers.
+    
+    Args:
+        table_html (str): The HTML table string
+        
+    Returns:
+        str: The wrapped HTML table
+    """
+    return f"""
+    <div class="outer-container">
+        <div class="table-responsive">
+            <div class="table-wrapper">
+                {table_html}
+            </div>
+        </div>
+    </div>
+    """
 
 
 def find_files_in_dir(directory, pattern=None, extension=None):

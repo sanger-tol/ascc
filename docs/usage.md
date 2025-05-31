@@ -91,6 +91,7 @@ Available pipeline components:
 - `pacbio_barcodes` : Detection of PacBio barcode contamination using BLAST
 - `organellar_blast` : BLAST-based detection of organellar sequences
 - `autofilter_assembly`: Automated assembly filtering (requires `tiara` and `fcs-gx`)
+- `html_report` : Generation of interactive HTML report summarizing contamination and cobiont analysis results
 - `ALL` : Run all available components
 - `NONE` : Run no components
 
@@ -121,6 +122,12 @@ nextflow run sanger-tol/ascc --input config.yaml --outdir results --include kmer
 
 ```
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --include ALL --exclude vecscreen,pacbio_barcodes --organellar_include ALL -profile singularity
+```
+
+#### Generate HTML report with analysis results
+
+```
+nextflow run sanger-tol/ascc --input config.yaml --outdir results --include tiara,coverage,nt_blast,fcs-gx,html_report --organellar_include nt_blast,coverage -profile singularity
 ```
 
 Note that the pipeline will create the following files in your working directory:

@@ -9,7 +9,6 @@ into HTML tables for the report.
 import os
 import sys
 import pandas as pd
-import io
 
 
 def load_contamination_check_merged_table(file_path):

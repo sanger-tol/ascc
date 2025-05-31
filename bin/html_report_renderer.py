@@ -4,6 +4,9 @@ import os
 import sys
 from jinja2 import Environment, FileSystemLoader
 
+# Constants
+DEFAULT_VERSION = "1.0"
+
 
 def render_html_report(data, template_dir, output_file):
     """Render the HTML report using Jinja2 templates.
@@ -57,14 +60,12 @@ def prepare_report_data(
     kmers_results=None,
     fasta_sanitation_data=None,
     # FCS-GX report data
-    fcs_gx_report_content=None,         # Original FCS-GX report content arg
-    fcs_gx_taxonomy_content=None,       # Original FCS-GX taxonomy content arg
-    fcs_gx_report_metadata=None,        # New FCS-GX report metadata arg
-    fcs_gx_report_table=None,           # New FCS-GX report table arg
-    fcs_gx_taxonomy_metadata=None,      # New FCS-GX taxonomy metadata arg
-    fcs_gx_taxonomy_table=None,         # New FCS-GX taxonomy table arg
+    fcs_gx_report_metadata=None,
+    fcs_gx_report_table=None,
+    fcs_gx_taxonomy_metadata=None,
+    fcs_gx_taxonomy_table=None,
     timestamp=None,
-    version="1.0",
+    version=DEFAULT_VERSION,
     meta=None,                          # Meta parameter
     kmer_length=None,                   # K-mer length parameter
     btk_dataset_path=None,              # BlobToolKit dataset path parameter
@@ -89,8 +90,10 @@ def prepare_report_data(
         coverage_per_phylum_data: Coverage per phylum data
         kmers_results: K-mer dimensionality reduction results
         fasta_sanitation_data: FASTA sanitation log data
-        fcs_gx_report_content: Content of the FCS-GX report text file
-        fcs_gx_taxonomy_content: Content of the FCS-GX taxonomy report file
+        fcs_gx_report_metadata: FCS-GX report metadata
+        fcs_gx_report_table: FCS-GX report table
+        fcs_gx_taxonomy_metadata: FCS-GX taxonomy metadata
+        fcs_gx_taxonomy_table: FCS-GX taxonomy table
         timestamp: Timestamp for the report
         version: Version of the pipeline
 
@@ -132,10 +135,7 @@ def prepare_report_data(
         "coverage_per_phylum_data": coverage_per_phylum_data,
         "kmers_results": kmers_results,
         "fasta_sanitation_data": fasta_sanitation_data,
-        # Original FCS-GX content (for backward compatibility)
-        "fcs_gx_report_content": fcs_gx_report_content,
-        "fcs_gx_taxonomy_content": fcs_gx_taxonomy_content,
-        # New formatted FCS-GX data
+        # FCS-GX data
         "fcs_gx_report_metadata": fcs_gx_report_metadata,
         "fcs_gx_report_table": fcs_gx_report_table,
         "fcs_gx_taxonomy_metadata": fcs_gx_taxonomy_metadata,

@@ -16,22 +16,18 @@
 
 {% set no_data_message_report = "<p>No data rows found in the FCS-GX report file.</p>" %}
 {% if fcs_gx_report_table and fcs_gx_report_table|striptags|trim|length > 0 and fcs_gx_report_table != no_data_message_report %}
-    <!-- DEBUG: Rendering fcs_gx_report_table (Python-generated HTML table) -->
     <h4>Data</h4>
     <div class="table-responsive">
         {{ fcs_gx_report_table|safe }}
     </div>
 {% elif fcs_gx_report_content and not fcs_gx_report_metadata and fcs_gx_report_content|striptags|trim|length > 0 %}
-    <!-- DEBUG: Rendering fcs_gx_report_content (raw text fallback) -->
-    {# Fallback for original content if it's not empty #}
     <h4>Data</h4>
     <pre><code>{{ fcs_gx_report_content }}</code></pre>
 {% else %}
-    <!-- DEBUG: Rendering no_data_message for FCS-GX Report -->
     {# If table is empty or not available, or contains the no_data_message, and content is also empty or not available #}
     <h4>Data</h4>
-    <div id="fcs_gx_no_data_message" style="width: 960px; max-width: 960px; margin: 1em auto; text-align: center; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background-color: #fed7d7; color: #9b2c2c; display: block; box-sizing: border-box;">
-        <p style="margin: 0;">No data rows found in the FCS-GX report file.</p>
+    <div id="fcs_gx_no_data_message" class="no-data-message">
+        <p>No data rows found in the FCS-GX report file.</p>
     </div>
 {% endif %}
 
@@ -58,8 +54,8 @@
 {% else %}
     {# If table is empty or not available, or contains the no_data_message, and content is also empty or not available #}
     <h4>Data</h4>
-    <div id="fcs_gx_taxonomy_no_data_message" style="width: 960px; max-width: 960px; margin: 1em auto; text-align: center; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background-color: #fed7d7; color: #9b2c2c; display: block; box-sizing: border-box;">
-        <p style="margin: 0;">No data rows found in the FCS-GX taxonomy report file.</p> 
+    <div id="fcs_gx_taxonomy_no_data_message" class="no-data-message">
+        <p>No data rows found in the FCS-GX taxonomy report file.</p> 
     </div>
 {% endif %}
 </div>

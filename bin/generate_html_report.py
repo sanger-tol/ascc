@@ -1,19 +1,34 @@
 #!/usr/bin/env python3
 
+# Constants
+DEFAULT_OUTPUT_PREFIX = "report"
+SCRIPT_VERSION = "1.0"
+DEFAULT_BTK_INCLUDED = "true"
+NOT_PROVIDED_MSG = "Not provided"
+
+DESCRIPTION = f"""
+Script for generating the HTML report of the ASCC pipeline.
+Version = {SCRIPT_VERSION}
+Written by Eerik Aunin (@eeaunin)
+"""
+
 import argparse
 import os
 import sys
 import pandas as pd
+
+
+
 from html_report_loaders import (
     load_samplesheet,
     load_yaml_params,
     load_barcode_check_results,
     load_contamination_check_merged_table,
     load_phylum_coverage_data,
-    load_fcs_adaptor_results,
+    load_fcs_adaptor_results_as_table,
     load_trim_Ns_results,
-    load_vecscreen_results,
-    load_autofiltering_results,
+    load_vecscreen_results_as_table,
+    load_autofiltering_results_as_table,
     load_fasta_sanitation_log,
     load_fcsgx_report_as_table,
     load_fcsgx_taxonomy_as_table,
@@ -42,15 +57,15 @@ def main():
     parser.add_argument("--samplesheet", help="Input samplesheet CSV file")
     parser.add_argument("--params_file", help="Input parameters YAML file")
     parser.add_argument("--params_json", help="JSON string containing the params object")
-    parser.add_argument("--fcs_gx_report_txt", help="Path to FCS-GX report text file") # Add FCS-GX report arg
-    parser.add_argument("--fcs_gx_taxonomy_rpt", help="Path to FCS-GX taxonomy report file") # Add FCS-GX taxonomy arg
-    parser.add_argument("--btk_output_dir", help="Directory containing BlobToolKit dataset output") # Add BTK output dir arg
-    parser.add_argument("--btk_published_path", help="Path to the published BlobToolKit dataset in the output directory") # Add BTK published path arg
-    parser.add_argument("--btk_included", help="Whether BlobToolKit dataset creation was included in the run") # Add BTK included flag
-    parser.add_argument("--launch_dir", help="Directory from which the workflow was launched") # Add launch_dir arg
-    parser.add_argument("--output_prefix", default="report", help="Prefix for the output HTML file")
-    parser.add_argument("--pipeline_version", required=True, help="Version of the ASCC pipeline") # Added pipeline version arg
-    parser.add_argument("--version", action="version", version="1.0") # Kept script version arg
+    parser.add_argument("--fcs_gx_report_txt", help="Path to FCS-GX report text file")
+    parser.add_argument("--fcs_gx_taxonomy_rpt", help="Path to FCS-GX taxonomy report file")
+
+    parser.add_argument("--btk_published_path", help="Path to the published BlobToolKit dataset in the output directory")
+    parser.add_argument("--btk_included", help="Whether BlobToolKit dataset creation was included in the run")
+    parser.add_argument("--launch_dir", help="Directory from which the workflow was launched")
+    parser.add_argument("--output_prefix", default=DEFAULT_OUTPUT_PREFIX, help="Prefix for the output HTML file")
+    parser.add_argument("--pipeline_version", required=True, help="Version of the ASCC pipeline")
+    parser.add_argument("--version", action="version", version=SCRIPT_VERSION)
 
     args = parser.parse_args()
 
@@ -210,15 +225,15 @@ def main():
         load_barcode_check_results(barcode_file) if barcode_file else "No barcode check results found."
     )
     fcs_adaptor_euk_report_data = (
-        load_fcs_adaptor_results(fcs_euk_file) if fcs_euk_file else "No FCS-Adaptor eukaryotic results found."
+        load_fcs_adaptor_results_as_table(fcs_euk_file) if fcs_euk_file else "No FCS-Adaptor eukaryotic results found."
     )
     fcs_adaptor_prok_report_data = (
-        load_fcs_adaptor_results(fcs_prok_file) if fcs_prok_file else "No FCS-Adaptor prokaryotic results found."
+        load_fcs_adaptor_results_as_table(fcs_prok_file) if fcs_prok_file else "No FCS-Adaptor prokaryotic results found."
     )
     trim_Ns_data = load_trim_Ns_results(trim_ns_file) if trim_ns_file else "No trim Ns results found."
-    vecscreen_data = load_vecscreen_results(vecscreen_file) if vecscreen_file else "No vecscreen results found."
+    vecscreen_data = load_vecscreen_results_as_table(vecscreen_file) if vecscreen_file else "No vecscreen results found."
     autofiltering_data = (
-        load_autofiltering_results(autofilter_file) if autofilter_file else "No autofiltering results found."
+        load_autofiltering_results_as_table(autofilter_file) if autofilter_file else "No autofiltering results found."
     )
     contamination_check_merged_table_data = (
         load_contamination_check_merged_table(merged_table_file)
@@ -258,30 +273,14 @@ def main():
         if fcs_gx_taxonomy_table:
             print(f"Successfully converted FCS-GX taxonomy to HTML table", file=sys.stderr)
     
-    # For backward compatibility, also keep the raw content
-    fcs_gx_report_content = None
-    if args.fcs_gx_report_txt and os.path.exists(args.fcs_gx_report_txt):
-        try:
-            with open(args.fcs_gx_report_txt, 'r') as f:
-                fcs_gx_report_content = f.read()
-        except Exception as e:
-            print(f"Error reading FCS-GX report file {args.fcs_gx_report_txt}: {e}", file=sys.stderr)
-
-    fcs_gx_taxonomy_content = None
-    if args.fcs_gx_taxonomy_rpt and os.path.exists(args.fcs_gx_taxonomy_rpt):
-        try:
-            with open(args.fcs_gx_taxonomy_rpt, 'r') as f:
-                fcs_gx_taxonomy_content = f.read()
-        except Exception as e:
-            print(f"Error reading FCS-GX taxonomy file {args.fcs_gx_taxonomy_rpt}: {e}", file=sys.stderr)
 
     # Check for BTK Dataset
     btk_dataset_path = None
-    btk_included = args.btk_included if args.btk_included else "true"  # Default to true if not provided
+    btk_included = args.btk_included if args.btk_included else DEFAULT_BTK_INCLUDED
     
     # Store the published path and launch directory for debugging
-    btk_published_path = args.btk_published_path if args.btk_published_path else "Not provided"
-    launch_dir = args.launch_dir if args.launch_dir else "Not provided"
+    btk_published_path = args.btk_published_path if args.btk_published_path else NOT_PROVIDED_MSG
+    launch_dir = args.launch_dir if args.launch_dir else NOT_PROVIDED_MSG
     print(f"Launch directory: {launch_dir}", file=sys.stderr)
     
     # Resolve the path using the launch directory if it's a relative path
@@ -330,10 +329,7 @@ def main():
         coverage_per_phylum_data=phylum_coverage_data,
         kmers_results=kmers_results,
         fasta_sanitation_data=fasta_sanitation_data,
-        # Original FCS-GX content (for backward compatibility)
-        fcs_gx_report_content=fcs_gx_report_content,
-        fcs_gx_taxonomy_content=fcs_gx_taxonomy_content,
-        # New formatted FCS-GX data
+        # FCS-GX data
         fcs_gx_report_metadata=fcs_gx_report_metadata,
         fcs_gx_report_table=fcs_gx_report_table,
         fcs_gx_taxonomy_metadata=fcs_gx_taxonomy_metadata,

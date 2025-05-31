@@ -119,6 +119,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
             }
         }.ifEmpty { [null, []] })
         .combine(btk_dataset.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
+
          // The map closure now receives id, meta, then pairs of id_dup, files for each combined channel
         .map { id, meta, barcode_id_dup, barcode, fcs_euk_id_dup, fcs_euk, fcs_prok_id_dup, fcs_prok, trim_ns_id_dup, trim_ns, vecscreen_id_dup, vecscreen, autofilter_id_dup, autofilter, merged_id_dup, merged, phylum_id_dup, phylum, kmers_id_dup, kmers, ref_id_dup, ref, sanitation_id_dup, sanitation, length_filtering_id_dup, length_filtering, fcsgx_report_id_dup, fcsgx_report, fcsgx_tax_id_dup, fcsgx_tax, btk_id_dup, btk ->
             // Ensure we handle potential nulls from ifEmpty

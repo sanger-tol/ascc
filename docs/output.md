@@ -24,6 +24,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Sanger-TOL BTK](#sanger-tol-btk)
 - [Merge BTK datasets](#merge-btk-datasets)
 - [ASCC Merge Tables](#ascc-merge-tables)
+- [HTML Report](#html-report)
 - [Pipeline information](#pipeline-information)
 
 ### Processes that produce intermediate outputs:
@@ -205,8 +206,9 @@ This module merged the Create_btk_dataset folder with the Sanger-tol BTK dataset
 <summary>Output files</summary>
 
 - `ASCC-main-output/`
-`*_contamination_check_merged_table.csv` - A CSV table that contains the results of most parts of the pipeline (GC content, coverage, Tiara, Kraken, kmers dimensionality reduction, Diamond, BLAST, FCS-GX, BlobToolKit pipeline) for each sequence in the input assembly file.
-If a set of prerequisite steps have been run, the pipeline puts together a phylum-level combined classification of the input sequences. It uses taxonomy columns in the following order of preference:
+  `*_contamination_check_merged_table.csv` - A CSV table that contains the results of most parts of the pipeline (GC content, coverage, Tiara, Kraken, kmers dimensionality reduction, Diamond, BLAST, FCS-GX, BlobToolKit pipeline) for each sequence in the input assembly file.
+  If a set of prerequisite steps have been run, the pipeline puts together a phylum-level combined classification of the input sequences. It uses taxonomy columns in the following order of preference:
+
 1. BlobToolKit's `buscoregions_phylum` (if available)
 2. BlobToolKit's `buscogenes_phylum` (if available)
 3. BlobToolKit's `bestsum_phylum` (if available)
@@ -217,9 +219,45 @@ If a set of prerequisite steps have been run, the pipeline puts together a phylu
 The combined classification is in the `merged_classif` column, while the `merged_classif_source` column indicates which tool provided the classification for each sequence. The automated classification usually has some flaws in it but is still useful as a starting point for determining the phyla that the input sequences belong to.
 
 `*_phylum_counts_and_coverage.csv` - A CSV report containing information on the number of sequences, mean coverage, and sequence span per phylum, grouped by both the phylum classification and the source of that classification. This file can only be generated if the`merged_classif` variable has been produced in the `*_contamination_check_merged_table.csv` table, as described above.
+
 </details>
 
 Merge Tables merged the summary reports from a number of modules in order to create a single set of reports.
+
+### HTML Report
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `{sample_id}_{assembly_component}/html_report/`
+  - `report/site/{sample_id}_{assembly_component}.html` - Interactive HTML report summarizing contamination and cobiont analysis results
+  - `report/site/css/` - CSS stylesheets for the HTML report
+  - `report/site/templates/` - Jinja2 templates used to generate the report
+
+</details>
+
+The HTML report provides an interactive, web-based summary of the ASCC pipeline results. The report is organized into multiple tabs covering different aspects of the contamination and cobiont analysis:
+
+- **Overview**: Summary of assembly statistics and pipeline run information
+- **Input**: Details about input files, parameters, and sample information
+- **PacBio Barcodes**: Results from PacBio barcode contamination detection
+- **FCS-adaptor**: Adapter contamination screening results from NCBI's FCS-Adaptor
+- **FCS-GX**: Contamination screening results from NCBI's FCS-GX cross-species aligner
+- **Trailing Ns**: Analysis of trailing N nucleotides in sequences
+- **VecScreen**: Vector and adapter contamination screening results
+- **Autofiltering**: Automated assembly filtering results based on contamination detection
+- **Coverage**: Sequence coverage analysis and coverage per phylum statistics
+- **K-mer Analysis**: K-mer counting and dimensionality reduction analysis results
+- **Cobiont Check Merged Table**: Comprehensive table combining results from multiple contamination detection tools
+
+The report file naming follows the pattern `{sample_id}_{assembly_component}.html`, where:
+
+- `{sample_id}` is the sample identifier from the input samplesheet
+- `{assembly_component}` indicates the type of assembly (PRIMARY, HAPLO, MITO, or PLASTID)
+
+For example: `chlamydomonas_dataset_PRIMARY.html` for the primary assembly of sample "chlamydomonas_dataset".
+
+The HTML report is self-contained and includes all necessary CSS and JavaScript for interactive functionality. It can be opened in any modern web browser for viewing and analysis.
 
 ### Pipeline Information
 

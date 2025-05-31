@@ -589,15 +589,17 @@ workflow ASCC_ORGANELLAR {
             ch_vecscreen_results,
             ch_autofilter_results,
             ch_merged_table,
+            Channel.of([[id: "empty"],[]]),  // phylum_counts - not used in organellar
             ch_kmers_results,
             ch_reference_file,
             ch_fasta_sanitation_log,
             ch_fasta_length_filtering_log,
-            ch_jinja_template,
+            Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect(), // jinja_templates_list
             ch_samplesheet_path,
             ch_params_file,
             ch_fcsgx_report_txt,      // Pass FCS-GX report txt
-            ch_fcsgx_taxonomy_rpt     // Pass FCS-GX taxonomy rpt
+            ch_fcsgx_taxonomy_rpt,    // Pass FCS-GX taxonomy rpt
+            Channel.fromPath("${baseDir}/assets/css/*.css").collect() // css_files_list
         )
         ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }

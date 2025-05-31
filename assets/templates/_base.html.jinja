@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ASCC run report{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
-    <!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.7.0/css/colReorder.dataTables.min.css" /> -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.css"> -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=Source+Code+Pro:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap">
     <link rel="stylesheet" href="css/ascc_report.css">
   
     <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-    <!-- <script src="https://cdn.datatables.net/colreorder/1.7.0/js/dataTables.colReorder.min.js"></script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.min.js"></script> -->
     
     {# Determine which sections have content #}
     {% set has_input_content = (samplesheet_data is defined and samplesheet_data) or (yaml_params_data is defined and yaml_params_data) or (reference_summary is defined and reference_summary) %}
@@ -70,7 +66,6 @@
             scrollX: true,
             autoWidth: false, 
             responsive: false,
-            // colReorder: true, // Removed, as we are using a different plugin for resizing
             columnDefs: [
                 { targets: '_all', width: 'auto' }
             ],
@@ -88,47 +83,34 @@
             }
         };
         
-        // Initialize DataTables with horizontal scrolling enabled
+        // Initialize DataTables
         if ($('#cobiont_check_merged_table').length) {
             $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, { 
-                scrollX: false, // Temporarily set to false to test conflict
-                scrollCollapse: false // Also set to false
-                // drawCallback removed, will initialize resizableColumns on tabsactivate
+                scrollX: false,
+                scrollCollapse: false
             }));
         }
         
-        // Autofiltering table uses plain HTML (no DataTables)
-        // if ($('#autofiltering_table').length) {
-        //     $('#autofiltering_table').DataTable($.extend({}, dataTableOptions));
-        // }
+
         
         // Initialize DataTables for FCS-GX tables if they exist
         if ($('#fcsgx_report_table').length) {
-            console.log("Attempting to initialize DataTable for #fcsgx_report_table. Element found: ", $('#fcsgx_report_table').length > 0);
              $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, { 
                 scrollX: false,
                 scrollCollapse: true,
                 pageLength: 25
-                // drawCallback removed
             }));
         }
         
         if ($('#fcsgx_taxonomy_table').length) {
             $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, { 
-                scrollX: false, // Keep this as false if it was already, or test setting to false
-                scrollCollapse: false, // Test with this also false if scrollX is false
+                scrollX: false,
+                scrollCollapse: false,
                 pageLength: 25
-                // drawCallback removed
             }));
         }
         
         // VecScreen and FCS-adaptor tables use plain HTML (no DataTables)
-        // if ($('#vecscreen_table').length) {
-        //     $('#vecscreen_table').DataTable($.extend({}, dataTableOptions));
-        // }
-        // if ($('#fcs_adaptor_table').length) {
-        //     $('#fcs_adaptor_table').DataTable($.extend({}, dataTableOptions));
-        // }
         if ($('#barcodes_table').length) {
             $('#barcodes_table').DataTable($.extend({}, dataTableOptions));
         }
@@ -154,8 +136,7 @@
             adjustAllTables();
         }, 500);
 
-        // Initialize resizableColumns on tab activation
-        // $("#tabs").on("tabsactivate", function(event, ui) { ... }); // Removed resizableColumns logic
+
         
         // Add tab navigation for anchor links
         $(document).on('click', 'a[href^="#"][href$="-tab"]', function(e) {

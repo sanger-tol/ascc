@@ -163,7 +163,7 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
                     classes="table table-striped", index=False, table_id="fasta_sanitation_detailed_table"
                 )
 
-            # Create a more compact table without forcing horizontal scrolling
+            # Create a more compact table without forcing horisontal scrolling
             summary_table_html = f"""
             <div class="fasta-sanitation-table">
                 {summary_table}

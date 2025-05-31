@@ -10,6 +10,7 @@ import os
 import sys
 import pandas as pd
 import json
+from .utils import wrap_table_html
 
 # Constants for common messages
 NO_BARCODE_CONTAMINATION_MSG = "The check for retained PacBio multiplexing barcode contamination was run. No contamination was found."
@@ -38,15 +39,7 @@ def load_samplesheet(file_path):
         table_html = df.to_html(classes="table table-striped", index=False, table_id="samplesheet_table")
 
         # Wrap the table in multiple container layers for better scrolling
-        html_table = f"""
-        <div class="outer-container">
-            <div class="table-responsive">
-                <div class="table-wrapper">
-                    {table_html}
-                </div>
-            </div>
-        </div>
-        """
+        html_table = wrap_table_html(table_html)
 
         return html_table, sample_name
     except Exception as e:
@@ -126,15 +119,7 @@ def load_yaml_params(file_path=None, params_json=None):
     table_html = df.to_html(classes="table table-striped", index=False, table_id="yaml_params_table")
 
     # Wrap the table in multiple container layers for better scrolling
-    html_table = f"""
-    <div class="outer-container">
-        <div class="table-responsive">
-            <div class="table-wrapper">
-                {table_html}
-            </div>
-        </div>
-    </div>
-    """
+    html_table = wrap_table_html(table_html)
     
     return html_table, params_dict
 

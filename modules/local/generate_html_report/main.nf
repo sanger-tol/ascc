@@ -78,7 +78,6 @@ process GENERATE_HTML_REPORT {
         $params_json_arg \\
         --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt \\
         --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt \\
-        --btk_output_dir btk \\
         --btk_published_path "${params.outdir}/${meta.id}/create_btk_dataset/btk_datasets_CBD" \\
         --btk_included "${params.include.contains('create_btk_dataset') || params.include.contains('ALL')}" \\
         --launch_dir "${workflow.launchDir}" \\
