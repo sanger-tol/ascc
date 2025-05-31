@@ -235,6 +235,7 @@ def main():
     scaffs_to_exclude = list()
     scaffs = get_scaff_names(assembly_path)
     for scaff in scaffs:
+        combined_action_source = "NA"
         fcs_gx_action = "NA"
         tiara_action = "NA"
         if scaff in fcs_gx_action_dict:
@@ -249,7 +250,8 @@ def main():
                 combined_action_source = "Tiara"
             elif args.tiara_action_mode == "warn":
                 combined_action = "WARN"
-                combined_action_source = "Tiara"
+                # For warn mode, combined_action_source should remain "NA" since no actual removal happens
+                combined_action_source = "NA"
         if fcs_gx_action == "EXCLUDE" and tiara_action == "EXCLUDE":
             combined_action_source = "FCS-GX_and_Tiara"
         if combined_action == "EXCLUDE":
@@ -266,7 +268,7 @@ def main():
     )
 
     out_csv_list = list()
-    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action")
+    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action,combined_action_source")
     for scaff, scaff_properties in combined_action_dict.items():
         out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)

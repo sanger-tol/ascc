@@ -413,8 +413,9 @@ workflow ASCC_GENOMIC_REPORTING {
         def final_autofilter_channel_for_report
         if ((include_workflow_steps.contains('autofilter_assembly') || include_workflow_steps.contains('ALL')) &&
                 !exclude_workflow_steps.contains("autofilter_assembly")) {
-            // If autofilter step included, use the indicator file from the process
-            final_autofilter_channel_for_report = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
+            // If autofilter step included, use the fcs_tiara_summary file (CSV with contamination results)
+            // This contains the actual autofiltering results, not just an indicator file
+            final_autofilter_channel_for_report = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
         } else {
             // Otherwise, use the initialized empty channel
             final_autofilter_channel_for_report = local_empty_autofilter_channel
@@ -479,8 +480,9 @@ workflow ASCC_GENOMIC_REPORTING {
         log.info "ch_samplesheet_path: ${ch_samplesheet_path.dump()}"
         log.info "ch_params_file: ${ch_params_file.dump()}"
         
-        // Get all Jinja templates
+        // Get all Jinja templates and CSS files
         ch_jinja_templates_list = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+        ch_css_files = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
         // Create a channel with the reference file
         ch_reference_file = reference_tuple_from_GG
@@ -514,7 +516,8 @@ workflow ASCC_GENOMIC_REPORTING {
             ch_params_file,
             ch_fcsgx_report_txt,      // Pass FCS-GX report txt
             ch_fcsgx_taxonomy_rpt,    // Pass FCS-GX taxonomy rpt
-            final_btk_dataset_channel_for_report // Pass BTK dataset
+            final_btk_dataset_channel_for_report, // Pass BTK dataset
+            ch_css_files              // Pass CSS files
         )
         ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }

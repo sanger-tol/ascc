@@ -1,5 +1,9 @@
+<div class="narrow-table-wrapper">
 <h2>Cobiont Check Merged Table</h2>
+<div class="narrow-text-container">
 <p>This comprehensive table combines results from multiple analyses (GC content, coverage, Tiara, Kraken, k-mer dimensionality reduction, Diamond, BLAST, FCS-GX, BlobToolKit) for each sequence in the input assembly. Data for each individual analysis only appears if that step has been included in the pipeline run, as all steps are optional. It provides a phylum-level combined classification of the input sequences, using BlobToolKit data (prioritising 'buscoregions_phylum', then 'buscogenes_phylum', then 'bestsum_phylum' if available), then FCS-GX, then filling gaps with results from nt Kraken and Tiara. The 'merged_classif' column shows the classification, while 'merged_classif_source' indicates which tool provided the classification.</p>
+</div>
 <div class="table-responsive">
     {{ contamination_check_merged_table_data }}
+</div>
 </div>

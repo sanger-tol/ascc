@@ -81,16 +81,16 @@ def load_fasta_length_filtering_log(file_path):
 
         # Combine the tables with a status indicator
         has_filtering = data.get("has_filtering", False)
-        status_class = "alert-info" if has_filtering else "alert-success"
+        status_class = "notice-container notice-error" if has_filtering else "notice-container notice-success"
         status_message = (
-            f"{data.get('sequences_filtered', 0):,} sequences were filtered by length"
+            f"{data.get('sequences_filtered', 0):,} sequences were filtered by length."
             if has_filtering
-            else "No sequences were filtered by length"
+            else "No sequences were filtered by length."
         )
 
         result_html = f"""
         <div class="{status_class}">
-            {status_message}
+            <p>{status_message}</p>
         </div>
         <h4>Length Filtering Summary</h4>
         {summary_table_html}
@@ -181,16 +181,16 @@ def load_fasta_sanitation_log(file_path, length_filtering_file_path=None):
 
             # Combine the tables with a status indicator
             has_issues = data.get("has_issues", False)
-            status_class = "alert-danger" if has_issues else "alert-success"
+            status_class = "notice-container notice-error" if has_issues else "notice-container notice-success"
             status_message = (
-                "Issues with the input FASTA file headers were detected"
+                "Issues with the input FASTA file headers were detected."
                 if has_issues
-                else "No issues with the input FASTA file headers were detected"
+                else "No issues with the input FASTA file headers were detected."
             )
 
             sanitation_html = f"""
             <div class="{status_class}">
-                {status_message}
+                <p>{status_message}</p>
             </div>
             <h4>Header Sanitation Summary</h4>
             {summary_table_html}

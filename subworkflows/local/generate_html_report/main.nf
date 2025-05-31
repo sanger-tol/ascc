@@ -21,6 +21,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     fcsgx_report_txt           // channel: [ val(meta), [ fcsgx_report_txt ] ]
     fcsgx_taxonomy_rpt         // channel: [ val(meta), [ fcsgx_taxonomy_rpt ] ]
     btk_dataset                // channel: [ val(meta), [ btk_dataset ] ]
+    css_files_list             // channel: [ css_files_list ] // CSS files to include in the report
 
     main:
     ch_versions = Channel.empty()
@@ -152,7 +153,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         jinja_templates_list, // Pass the list of Jinja templates
         samplesheet,
         params_file,
-        paramsJson // Note: combined_inputs now contains the fcsgx file paths
+        paramsJson, // Note: combined_inputs now contains the fcsgx file paths
+        css_files_list // Pass the CSS files
     )
     ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 

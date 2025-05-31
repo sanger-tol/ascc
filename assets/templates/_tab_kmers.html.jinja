@@ -1,8 +1,13 @@
+<div class="narrow-table-wrapper">
 <h2>K-mer Analysis</h2>
+<div class="narrow-text-container">
 <p>K-mer analysis counts the frequency of short nucleotide sequences (k-mers) in each sequence of the assembly. Dimensionality reduction techniques are then applied to these counts to visualize patterns. Sequences originating from the same species typically cluster together in these visualizations, helping to identify potential contamination or cobionts. Various dimensionality reduction methods (PCA, UMAP, t-SNE, etc.) are available to provide different perspectives on the data.</p>
+</div>
 
 {% if kmer_length %}
+<div class="notice-container">
 <p><strong>K-mer length used in this analysis: {{ kmer_length }}</strong></p>
+</div>
 {% endif %}
 
 {% if kmers_results %}
@@ -78,3 +83,4 @@
 {% else %}
     <p>No k-mer analysis results found.</p>
 {% endif %}
+</div>

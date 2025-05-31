@@ -5,396 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ASCC run report{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+    <!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.7.0/css/colReorder.dataTables.min.css" /> -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.css"> -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=Source+Code+Pro:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="css/ascc_report.css">
   
     <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-    
-    <style>
-        /* Ensure Cobiont and FCS-GX headers always visible */
-        #cobiont_check_merged_table thead,
-        #fcsgx_report_table thead,
-        #fcsgx_taxonomy_table thead {
-            display: table-header-group !important;
-        }
-        #cobiont_check_merged_table,
-        #fcsgx_report_table,
-        #fcsgx_taxonomy_table {
-            table-layout: auto !important;
-        }
-        /* Base styles */
-        body {
-            font-family: sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-
-        /* Headers */
-        h1, h2, h3 {
-            color: #2c5282; /* Dark blue */
-            margin-top: 1.5em;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 0.3em;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2em;
-            margin-top: 0.5em;
-            margin-bottom: 0.2em;
-        }
-        
-        .subtitle {
-            text-align: center;
-            font-size: 1.5em;
-            margin-top: 0;
-            margin-bottom: 1.5em;
-            border-bottom: none;
-            color: #4a5568;
-        }
-
-        /* Tables */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1em 0;
-            font-family: Consolas, Monaco, 'Courier New', monospace;
-            font-size: 0.9em;
-            border: 1px solid #e2e8f0;
-        }
-
-        th {
-            background-color: #edf2f7;
-            color: #2c5282;
-            font-weight: bold;
-            text-align: left;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        td {
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f7fafc;
-        }
-
-        tr:hover {
-            background-color: #ebf4ff;
-        }
-
-        /* Tabs styling */
-        #tabs {
-            background-color: #f9f9f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        #tabs .ui-tabs-nav {
-            background-color: #edf2f7;
-            border-bottom: 1px solid #e2e8f0;
-            border-radius: 5px 5px 0 0;
-            padding: 0.5em 0.5em 0;
-            display: flex;         /* Use Flexbox */
-            flex-wrap: wrap;       /* Allow wrapping */
-            justify-content: flex-start; /* Align items to the start (left) */
-            list-style: none;      /* Ensure no list bullets */
-        }
-
-        #tabs .ui-tabs-nav li {
-            margin: 0.2em 0.2em 0 0; 
-            border-radius: 5px 5px 0 0;
-            /* display: inline-block; /* No longer needed with flex */ */
-        }
-
-        #tabs .ui-tabs-nav li a {
-            color: #2c5282;
-            padding: 0.5em 1em;
-        }
-
-        #tabs .ui-tabs-nav li.ui-tabs-active {
-            background-color: #fff;
-            border-bottom-color: #fff;
-        }
-
-        #tabs .ui-tabs-nav li.ui-tabs-active a {
-            color: #2c5282;
-            font-weight: bold;
-        }
-
-        #tabs .ui-tabs-panel {
-            padding: 1em;
-            background-color: #fff;
-        }
-        
-        /* Nested tabs styling for K-mer methods */
-        #kmer-methods-tabs {
-            margin-top: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-        }
-        
-        #kmer-methods-tabs .ui-tabs-nav {
-            background-color: #edf2f7;
-            border-bottom: 1px solid #e2e8f0;
-            border-radius: 5px 5px 0 0;
-            padding: 0.5em 0.5em 0;
-        }
-        
-        #kmer-methods-tabs .ui-tabs-nav li {
-            margin: 0.2em 0.2em 0 0;
-            border-radius: 5px 5px 0 0;
-            font-size: 0.9em;
-        }
-        
-        #kmer-methods-tabs .ui-tabs-nav li a {
-            color: #2c5282;
-            padding: 0.4em 0.8em;
-        }
-        
-        #kmer-methods-tabs .ui-tabs-nav li.ui-tabs-active {
-            background-color: #fff;
-            border-bottom-color: #fff;
-        }
-        
-        #kmer-methods-tabs .ui-tabs-panel {
-            padding: 1em;
-            background-color: #fff;
-        }
-        
-        /* Disabled tab styling */
-        #tabs .ui-tabs-nav li.ui-state-disabled {
-            opacity: 0.6;
-            background-color: #f0f0f0;
-        }
-
-        #tabs .ui-tabs-nav li.ui-state-disabled a {
-            color: #8898aa !important; /* Lighter color for disabled tabs */
-            cursor: not-allowed;
-        }
-
-        /* Add a visual indicator that the tab is disabled */
-        #tabs .ui-tabs-nav li.ui-state-disabled:after {
-            content: " (no data)";
-            font-size: 0.8em;
-            color: #8898aa;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-            font-size: 0.8em;
-            color: #718096;
-        }
-
-        /* DataTables customization */
-        .dataTables_wrapper .dataTables_length, 
-        .dataTables_wrapper .dataTables_filter, 
-        .dataTables_wrapper .dataTables_info, 
-        .dataTables_wrapper .dataTables_processing, 
-        .dataTables_wrapper .dataTables_paginate {
-            color: #4a5568;
-            font-family: sans-serif;
-            margin-bottom: 10px;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #edf2f7;
-            border-color: #e2e8f0;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-            background: #e2e8f0;
-            border-color: #cbd5e0;
-        }
-        
-        /* Fix for table header alignment issues */
-        .dataTables_wrapper table.dataTable {
-            table-layout: fixed;
-            width: 100% !important;
-        }
-        
-        /* Ensure consistent styling for header and body cells */
-        .dataTables_wrapper table.dataTable thead th,
-        .dataTables_wrapper table.dataTable tbody td {
-            box-sizing: border-box;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* Ensure header and body cells align properly */
-        .dataTables_wrapper table.dataTable thead th {
-            width: auto !important;
-            white-space: nowrap;
-        }
-
-        /* Section anchors for navigation */
-        section {
-            scroll-margin-top: 20px;
-        }
-        
-        /* Method tabs styling */
-        .method-tab {
-            margin-bottom: 30px;
-            padding: 15px;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            background-color: #f8fafc;
-        }
-        
-        .method-header {
-            background-color: #edf2f7;
-            padding: 10px;
-            margin: -15px -15px 15px -15px;
-            border-radius: 5px 5px 0 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .method-name {
-            color: #2c5282;
-            margin: 0;
-        }
-        
-        .result-section {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px dashed #e2e8f0;
-        }
-        
-        /* Force horizontal scrolling for tables that need it */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto; /* Use auto instead of scroll to only show scrollbar when needed */
-            display: block;
-            margin-bottom: 1em;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            padding-bottom: 15px; /* Space for scrollbar */
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
-        }
-
-        /* Make table wider than container to force scrolling for specific tables */
-        .table-responsive table {
-            width: 100%; /* Default to 100% width */
-            margin-bottom: 0;
-        }
-        
-        /* Special styling for FASTA sanitation tables */
-        .fasta-sanitation-table {
-            width: 100%;
-            margin-bottom: 1em;
-        }
-        
-        .fasta-sanitation-table table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-        
-        /* Alert styling */
-        .alert-danger, .alert-success {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .alert-danger {
-            background-color: #fed7d7;
-            color: #9b2c2c;
-            border: 1px solid #f56565;
-        }
-        
-        .alert-success {
-            background-color: #c6f6d5;
-            color: #276749;
-            border: 1px solid #48bb78;
-        }
-
-        /* Outer container for additional structure */
-        .outer-container {
-            width: 100%;
-            position: relative;
-        }
-
-        /* Table wrapper for proper overflow handling */
-        .table-wrapper {
-            overflow-x: visible;
-            min-width: 100%;
-        }
-
-        /* Ensure DataTables doesn't break the container */
-        .dataTables_wrapper {
-            width: 100%;
-            overflow: visible;
-        }
-        
-        /* Explicit striped rows styling */
-        .table-striped > tbody > tr:nth-of-type(odd) {
-            background-color: #f7fafc;
-        }
-
-        .table-striped > tbody > tr:nth-of-type(even) {
-            background-color: #ffffff;
-        }
-
-        /* Ensure DataTables doesn't override our striping */
-        .dataTables_wrapper .table-striped > tbody > tr:nth-of-type(odd) {
-            background-color: #f7fafc !important;
-        }
-
-        .dataTables_wrapper .table-striped > tbody > tr:nth-of-type(even) {
-            background-color: #ffffff !important;
-        }
-        
-        /* Visualization styling */
-        .visualization-container {
-            max-width: 600px;
-            margin: 0 auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 5px;
-            padding: 10px;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        .visualization-image {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-        
-        /* Pre tag styling for code blocks */
-        pre {
-            white-space: pre-wrap;       /* Since CSS 2.1 */
-            word-wrap: break-word;       /* Internet Explorer 5.5+ */
-            overflow-x: auto;            /* Add horizontal scrollbar if needed */
-            max-width: 100%;             /* Ensure it doesn't exceed container width */
-            background-color: #f8f8f8;   /* Light gray background */
-            padding: 10px;               /* Add some padding */
-            border-radius: 4px;          /* Rounded corners */
-            border: 1px solid #e2e8f0;   /* Light border */
-        }
-        
-        code {
-            font-family: Consolas, Monaco, 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-    </style>
+    <!-- <script src="https://cdn.datatables.net/colreorder/1.7.0/js/dataTables.colReorder.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-columns@0.2.3/dist/jquery.resizableColumns.min.js"></script> -->
     
     {# Determine which sections have content #}
     {% set has_input_content = (samplesheet_data is defined and samplesheet_data) or (yaml_params_data is defined and yaml_params_data) or (reference_summary is defined and reference_summary) %}
@@ -430,7 +51,7 @@
     <script>
     $(document).ready( function () {
         // Initialize main tabs
-        $("#tabs").tabs();
+        $("#tabs").tabs(); // Restore basic tab functionality
         
         // Disable empty tabs
         for (var i = 0; i < emptyTabs.length; i++) {
@@ -443,22 +64,18 @@
                 $("#kmer-methods-tabs").tabs();
             }
         }
-        
+
         // Common DataTable options for consistent behavior
         var dataTableOptions = {
             scrollX: true,
-            autoWidth: false,
+            autoWidth: false, 
             responsive: false,
+            // colReorder: true, // Removed, as we are using a different plugin for resizing
             columnDefs: [
                 { targets: '_all', width: 'auto' }
             ],
-            // Enhanced column width calculation with delay
             initComplete: function(settings, json) {
                 var api = this.api();
-                // Trigger resize to adjust columns
-                $(window).trigger('resize');
-                
-                // Add multiple delays to ensure proper rendering
                 setTimeout(function() {
                     api.columns.adjust();
                 }, 200);
@@ -473,58 +90,45 @@
         
         // Initialize DataTables with horizontal scrolling enabled
         if ($('#cobiont_check_merged_table').length) {
-            $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, {
-                scrollX: false,
-                scrollCollapse: true,
-                autoWidth: true,
-                // Additional configuration for Cobiont Check Merged Table to fix header alignment
-                drawCallback: function(settings) {
-                    var api = this.api();
-                    api.columns.adjust();
-                }
+            $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, { 
+                scrollX: false, // Temporarily set to false to test conflict
+                scrollCollapse: false // Also set to false
+                // drawCallback removed, will initialize resizableColumns on tabsactivate
             }));
         }
         
-        if ($('#autofiltering_table').length) {
-            $('#autofiltering_table').DataTable($.extend({}, dataTableOptions));
-        }
+        // Autofiltering table uses plain HTML (no DataTables)
+        // if ($('#autofiltering_table').length) {
+        //     $('#autofiltering_table').DataTable($.extend({}, dataTableOptions));
+        // }
         
         // Initialize DataTables for FCS-GX tables if they exist
         if ($('#fcsgx_report_table').length) {
-            $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, {
+            console.log("Attempting to initialize DataTable for #fcsgx_report_table. Element found: ", $('#fcsgx_report_table').length > 0);
+             $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, { 
                 scrollX: false,
                 scrollCollapse: true,
-                autoWidth: true,
-                pageLength: 25,    // Show more rows by default
-                // Additional configuration for FCS-GX Report Table to fix header alignment
-                drawCallback: function(settings) {
-                    var api = this.api();
-                    api.columns.adjust();
-                }
+                pageLength: 25
+                // drawCallback removed
             }));
         }
         
         if ($('#fcsgx_taxonomy_table').length) {
-            $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, {
-                scrollX: false,
-                scrollCollapse: true,
-                autoWidth: true,
-                pageLength: 25,    // Show more rows by default
-                // Additional configuration for FCS-GX Taxonomy Table to fix header alignment
-                drawCallback: function(settings) {
-                    var api = this.api();
-                    api.columns.adjust();
-                }
+            $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, { 
+                scrollX: false, // Keep this as false if it was already, or test setting to false
+                scrollCollapse: false, // Test with this also false if scrollX is false
+                pageLength: 25
+                // drawCallback removed
             }));
         }
         
-        // Add initialization for other potential tables if needed
-        if ($('#vecscreen_table').length) {
-            $('#vecscreen_table').DataTable($.extend({}, dataTableOptions));
-        }
-        if ($('#fcs_adaptor_table').length) {
-            $('#fcs_adaptor_table').DataTable($.extend({}, dataTableOptions));
-        }
+        // VecScreen and FCS-adaptor tables use plain HTML (no DataTables)
+        // if ($('#vecscreen_table').length) {
+        //     $('#vecscreen_table').DataTable($.extend({}, dataTableOptions));
+        // }
+        // if ($('#fcs_adaptor_table').length) {
+        //     $('#fcs_adaptor_table').DataTable($.extend({}, dataTableOptions));
+        // }
         if ($('#barcodes_table').length) {
             $('#barcodes_table').DataTable($.extend({}, dataTableOptions));
         }
@@ -549,6 +153,9 @@
         setTimeout(function() {
             adjustAllTables();
         }, 500);
+
+        // Initialize resizableColumns on tab activation
+        // $("#tabs").on("tabsactivate", function(event, ui) { ... }); // Removed resizableColumns logic
         
         // Add tab navigation for anchor links
         $(document).on('click', 'a[href^="#"][href$="-tab"]', function(e) {

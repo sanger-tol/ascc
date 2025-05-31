@@ -1,5 +1,9 @@
+<div class="narrow-table-wrapper">
 <h2>Overview</h2>
-<table class="table table-striped">
+<div class="narrow-text-container">
+<p>This overview provides a summary of all analyses performed on the assembly, showing the status of each check and whether any issues were detected.</p>
+</div>
+<table class="table table-striped overview-table">
   <thead>
     <tr>
       <th>Step</th>
@@ -11,139 +15,158 @@
     {% if fasta_sanitation_data %}
       {% if fasta_sanitation_data.has_issues %}
         {% set fs_color = '#ef4444' %} {# vibrant red #}
+        {% set fs_status = 'Issue detected' %}
       {% else %}
         {% set fs_color = '#22c55e' %} {# vibrant green #}
+        {% set fs_status = 'No issues' %}
       {% endif %}
     {% else %}
       {% set fs_color = '#94a3b8' %} {# darker gray #}
+      {% set fs_status = 'Not run' %}
     {% endif %}
     <tr>
       <td>FASTA header sanitation & length filtering</td>
-      <td style="background-color: {{ fs_color }};"></td>
+      <td style="background-color: {{ fs_color }};">{{ fs_status }}</td>
     </tr>
 
     {# PacBio barcodes #}
     {% set no_barcode_msg = "The check for retained PacBio multiplexing barcode contamination was run. No contamination was found." %}
     {% if not barcodes_check_data or "not run" in (barcodes_check_data | lower) %}
       {% set bc_color = '#94a3b8' %}
+      {% set bc_status = 'Not run' %}
     {% elif barcodes_check_data == no_barcode_msg or "no contamination was found" in (barcodes_check_data | lower) %}
       {% set bc_color = '#22c55e' %}
+      {% set bc_status = 'No issues' %}
     {% else %}
       {% set bc_color = '#ef4444' %}
+      {% set bc_status = 'Issue detected' %}
     {% endif %}
     <tr>
       <td>PacBio barcodes</td>
-      <td style="background-color: {{ bc_color }};"></td>
+      <td style="background-color: {{ bc_color }};">{{ bc_status }}</td>
     </tr>
 
     {# FCS-Adaptor #}
     {% if "no fcs-adaptor eukaryotic results found" in (fcs_adaptor_euk_report_data | lower) or
           "not run" in (fcs_adaptor_euk_report_data | lower) %}
       {% set fa_color = '#94a3b8' %}
+      {% set fa_status = 'Not run' %}
     {% elif "no adaptor contamination was detected" in (fcs_adaptor_euk_report_data | lower) %}
       {% set fa_color = '#22c55e' %}
+      {% set fa_status = 'No issues' %}
     {% else %}
       {% set fa_color = '#ef4444' %}
+      {% set fa_status = 'Issue detected' %}
     {% endif %}
     <tr>
       <td>FCS-Adaptor</td>
-      <td style="background-color: {{ fa_color }};"></td>
+      <td style="background-color: {{ fa_color }};">{{ fa_status }}</td>
     </tr>
 
     {# Trailing Ns #}
     {% if "no trim ns results found" in (trim_Ns_data | lower) or
           "not run" in (trim_Ns_data | lower) %}
       {% set tn_color = '#94a3b8' %} {# darker gray - not run #}
+      {% set tn_status = 'Not run' %}
     {% elif "no issues were found" in (trim_Ns_data | lower) %}
       {% set tn_color = '#22c55e' %} {# vibrant green - no issues #}
+      {% set tn_status = 'No issues' %}
     {% elif "warnings - high n content" in (trim_Ns_data | lower) and "trimming actions" not in (trim_Ns_data | lower) %}
       {% set tn_color = '#eab308' %} {# vibrant yellow - warnings only #}
+      {% set tn_status = 'Warning' %}
     {% else %}
       {% set tn_color = '#ef4444' %} {# vibrant red - trimming actions needed #}
+      {% set tn_status = 'Issue detected' %}
     {% endif %}
     <tr>
       <td>Trailing Ns</td>
-      <td style="background-color: {{ tn_color }};"></td>
+      <td style="background-color: {{ tn_color }};">{{ tn_status }}</td>
     </tr>
 
     {# VecScreen #}
     {% if "no vecscreen results found" in (vecscreen_data | lower) or
           "not run" in (vecscreen_data | lower) %}
       {% set vs_color = '#94a3b8' %}
+      {% set vs_status = 'Not run' %}
     {% elif "no vector contamination was detected" in (vecscreen_data | lower) %}
       {% set vs_color = '#22c55e' %}
+      {% set vs_status = 'No issues' %}
     {% else %}
       {% set vs_color = '#ef4444' %}
+      {% set vs_status = 'Issue detected' %}
     {% endif %}
     <tr>
       <td>VecScreen</td>
-      <td style="background-color: {{ vs_color }};"></td>
+      <td style="background-color: {{ vs_color }};">{{ vs_status }}</td>
     </tr>
 
     {# Autofiltering #}
     {% if "no autofiltering results found" in (autofiltering_data | lower) or
           "not run" in (autofiltering_data | lower) %}
       {% set af_color = '#94a3b8' %}
+      {% set af_status = 'Not run' %}
     {% elif "no filtering was performed" in (autofiltering_data | lower) %}
       {% set af_color = '#22c55e' %}
+      {% set af_status = 'No issues' %}
     {% else %}
       {% set af_color = '#ef4444' %}
+      {% set af_status = 'Issue detected' %}
     {% endif %}
     <tr>
       <td>Autofiltering</td>
-      <td style="background-color: {{ af_color }};"></td>
+      <td style="background-color: {{ af_color }};">{{ af_status }}</td>
     </tr>
 
     {# FCS-GX #}
     {% if not fcs_gx_report_content or fcs_gx_report_content == "FCS-GX check was not run." %}
       {% set gx_color = '#94a3b8' %}
+      {% set gx_status = 'Not run' %}
     {% elif 'EXCLUDE' in fcs_gx_report_content %}
       {% set gx_color = '#ef4444' %}
+      {% set gx_status = 'Issue detected' %}
     {% elif 'TRIM' in fcs_gx_report_content or 'FIX' in fcs_gx_report_content or 'REVIEW' in fcs_gx_report_content or 'REVIEW_RARE' in fcs_gx_report_content or 'INFO' in fcs_gx_report_content %}
       {% set gx_color = '#eab308' %} {# vibrant yellow #}
+      {% set gx_status = 'Warning' %}
     {% else %}
       {% set gx_color = '#22c55e' %}
+      {% set gx_status = 'No issues' %}
     {% endif %}
     <tr>
       <td>FCS-GX</td>
-      <td style="background-color: {{ gx_color }};"></td>
+      <td style="background-color: {{ gx_color }};">{{ gx_status }}</td>
     </tr>
   </tbody>
 </table>
 
-<h3>Legend</h3>
-<ul>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#22c55e;margin-right:0.5em;"></span>No issues (green)</li>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#eab308;margin-right:0.5em;"></span>Warning (yellow)</li>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#ef4444;margin-right:0.5em;"></span>Issue detected (red)</li>
-  <li><span style="display:inline-block;width:1em;height:1em;background-color:#94a3b8;margin-right:0.5em;"></span>Not run (gray)</li>
-</ul>
 
 <h3>Additional Analyses</h3>
-<ul>
-  {% if has_coverage_content %}
-    <li><a href="#coverage-tab">Coverage</a></li>
-  {% else %}
-    <li>Coverage (not run)</li>
-  {% endif %}
-  
-  {% if has_kmers_content %}
-    <li><a href="#kmers-tab">K-mer Analysis</a></li>
-  {% else %}
-    <li>K-mer Analysis (not run)</li>
-  {% endif %}
-  
-  {% if has_cobiont_content %}
-    <li><a href="#cobiont-tab">Cobiont Check Merged Table</a></li>
-  {% else %}
-    <li>Cobiont Check Merged Table (not run)</li>
-  {% endif %}
-  
-  {% if btk_dataset_path %}
-    <li>BlobToolKit dataset: {{ btk_dataset_path }}</li>
-  {% elif btk_included == "false" %}
-    <li>BlobToolKit dataset creation was not included in the run</li>
-  {% else %}
-    <li>BlobToolKit dataset (not run)</li>
-  {% endif %}
-</ul>
+<div class="narrow-text-container">
+  <ul>
+    {% if has_coverage_content %}
+      <li><a href="#coverage-tab">Coverage</a></li>
+    {% else %}
+      <li>Coverage (not run)</li>
+    {% endif %}
+    
+    {% if has_kmers_content %}
+      <li><a href="#kmers-tab">K-mer Analysis</a></li>
+    {% else %}
+      <li>K-mer Analysis (not run)</li>
+    {% endif %}
+    
+    {% if has_cobiont_content %}
+      <li><a href="#cobiont-tab">Cobiont Check Merged Table</a></li>
+    {% else %}
+      <li>Cobiont Check Merged Table (not run)</li>
+    {% endif %}
+    
+    {% if btk_dataset_path %}
+      <li>BlobToolKit dataset: {{ btk_dataset_path }}</li>
+    {% elif btk_included == "false" %}
+      <li>BlobToolKit dataset creation was not included in the run</li>
+    {% else %}
+      <li>BlobToolKit dataset (not run)</li>
+    {% endif %}
+  </ul>
+</div>
+</div>

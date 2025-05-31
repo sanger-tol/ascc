@@ -30,6 +30,7 @@ process GENERATE_HTML_REPORT {
     path(samplesheet)
     path(params_file)
     val(params_json)
+    path(css_files_list, stageAs: "css/*") // CSS files to include in the report
     
     output:
     tuple val(meta), path("report/site/*"), emit: report
@@ -46,7 +47,9 @@ process GENERATE_HTML_REPORT {
     def params_json_arg = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
     """
     mkdir -p report/site/templates
+    mkdir -p report/site/css
     cp templates/*.jinja report/site/templates/
+    cp css/*.css report/site/css/
     
     # Create kmers directory if it doesn't exist
     mkdir -p kmers
@@ -95,8 +98,10 @@ process GENERATE_HTML_REPORT {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     mkdir -p report/site/templates
+    mkdir -p report/site/css
     mkdir -p report/site/kmers
     cp -r kmers/* report/site/kmers
+    cp css/*.css report/site/css/
     touch report/site/${prefix}.html
 
     

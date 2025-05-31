@@ -1,28 +1,38 @@
+<div class="narrow-table-wrapper">
 <h2>FCS-GX Reports</h2>
+<div class="narrow-text-container">
 <p>FCS-GX (Foreign Contamination Screen with cross-species aligner) is NCBI software that detects contaminants in genome assemblies using cross-species alignment. It uses its own database provided by NCBI to identify sequences that may originate from species other than the target organism. The reports show potential contaminant locations and their taxonomic classification.</p>
+</div>
 
 {# FCS-GX Report Section #}
 <h3>FCS-GX Report ({{ sample_name }}{% if assembly_component %}_{{ assembly_component }}{% endif %}.fcs_gx_report.txt)</h3>
 
 {% if fcs_gx_report_metadata %}
     <h4>Metadata</h4>
-    <div class="table-responsive">
+    <div class="narrow-table-wrapper">
         {{ fcs_gx_report_metadata|safe }}
     </div>
 {% endif %}
 
-{% if fcs_gx_report_table %}
+{% set no_data_message_report = "<p>No data rows found in the FCS-GX report file.</p>" %}
+{% if fcs_gx_report_table and fcs_gx_report_table|striptags|trim|length > 0 and fcs_gx_report_table != no_data_message_report %}
+    <!-- DEBUG: Rendering fcs_gx_report_table (Python-generated HTML table) -->
     <h4>Data</h4>
     <div class="table-responsive">
         {{ fcs_gx_report_table|safe }}
     </div>
-{% elif fcs_gx_report_content and not fcs_gx_report_metadata %}
-    {# Fallback to original content if table is not available and metadata is not separately extracted #}
+{% elif fcs_gx_report_content and not fcs_gx_report_metadata and fcs_gx_report_content|striptags|trim|length > 0 %}
+    <!-- DEBUG: Rendering fcs_gx_report_content (raw text fallback) -->
+    {# Fallback for original content if it's not empty #}
+    <h4>Data</h4>
     <pre><code>{{ fcs_gx_report_content }}</code></pre>
-{% elif not fcs_gx_report_content and not fcs_gx_report_table %}
-    <p>FCS-GX Report (.fcs_gx_report.txt) not available.</p>
 {% else %}
-    <p>No data rows found in the FCS-GX report file.</p>
+    <!-- DEBUG: Rendering no_data_message for FCS-GX Report -->
+    {# If table is empty or not available, or contains the no_data_message, and content is also empty or not available #}
+    <h4>Data</h4>
+    <div id="fcs_gx_no_data_message" style="width: 960px; max-width: 960px; margin: 1em auto; text-align: center; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background-color: #fed7d7; color: #9b2c2c; display: block; box-sizing: border-box;">
+        <p style="margin: 0;">No data rows found in the FCS-GX report file.</p>
+    </div>
 {% endif %}
 
 {# FCS-GX Taxonomy Report Section #}
@@ -30,19 +40,26 @@
 
 {% if fcs_gx_taxonomy_metadata %}
     <h4>Metadata</h4>
-    <div class="table-responsive">
+    <div class="narrow-table-wrapper">
         {{ fcs_gx_taxonomy_metadata|safe }}
     </div>
 {% endif %}
 
-{% if fcs_gx_taxonomy_table %}
+{% set no_data_message_taxonomy = "<p>No data rows found in the FCS-GX taxonomy report file.</p>" %}
+{% if fcs_gx_taxonomy_table and fcs_gx_taxonomy_table|striptags|trim|length > 0 and fcs_gx_taxonomy_table != no_data_message_taxonomy %}
     <h4>Data</h4>
     <div class="table-responsive">
         {{ fcs_gx_taxonomy_table }}
     </div>
-{% elif fcs_gx_taxonomy_content %}
-    {# Fallback to original content if table is not available #}
+{% elif fcs_gx_taxonomy_content and fcs_gx_taxonomy_content|striptags|trim|length > 0 %}
+    {# Fallback for original content if it's not empty #}
+    <h4>Data</h4>
     <pre><code>{{ fcs_gx_taxonomy_content }}</code></pre>
 {% else %}
-    <p>FCS-GX Taxonomy Report (.taxonomy.rpt) not available.</p>
+    {# If table is empty or not available, or contains the no_data_message, and content is also empty or not available #}
+    <h4>Data</h4>
+    <div id="fcs_gx_taxonomy_no_data_message" style="width: 960px; max-width: 960px; margin: 1em auto; text-align: center; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); background-color: #fed7d7; color: #9b2c2c; display: block; box-sizing: border-box;">
+        <p style="margin: 0;">No data rows found in the FCS-GX taxonomy report file.</p> 
+    </div>
 {% endif %}
+</div>

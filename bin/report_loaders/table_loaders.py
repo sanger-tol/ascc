@@ -285,9 +285,9 @@ def load_vecscreen_results_as_table(file_path):
         # Convert to DataFrame
         df = pd.DataFrame(data_rows)
         
-        # Convert DataFrame to HTML table with styling
+        # Convert DataFrame to HTML table with simple styling (no DataTables)
         table_html = df.to_html(classes="table table-striped", index=False, 
-                                table_id="vecscreen_table")
+                                table_id="vecscreen_plain_table", escape=False)
         
         # Wrap the table for responsive display
         wrapped_table = f"""
@@ -320,7 +320,7 @@ def load_fcs_adaptor_results_as_table(file_path):
         return "FCS-Adaptor check was not run."
     if os.path.getsize(file_path) == 0:
         print(f"FCS-Adaptor file is empty: {file_path}", file=sys.stderr)
-        return "FCS-Adaptor check was run, but no adaptor contamination was detected."
+        return '<div class="notice-container">FCS-Adaptor check was run and no adaptor contamination was detected.</div>'
     
     try:
         # Read the tab-separated file into a DataFrame, skipping the header line
@@ -330,11 +330,11 @@ def load_fcs_adaptor_results_as_table(file_path):
         # If the DataFrame is empty, return the "No data" message
         if df.empty:
             print(f"FCS-Adaptor file contains no data: {file_path}", file=sys.stderr)
-            return "FCS-Adaptor check was run, but no adaptor contamination was detected."
+            return '<div class="notice-container">FCS-Adaptor check was run and no adaptor contamination was detected.</div>'
         
-        # Convert DataFrame to HTML table with styling
+        # Convert DataFrame to HTML table with simple styling (no DataTables)
         table_html = df.to_html(classes="table table-striped", index=False, 
-                                table_id="fcs_adaptor_table")
+                                table_id="fcs_adaptor_plain_table", escape=False)
         
         # Wrap the table for responsive display
         wrapped_table = f"""
@@ -352,3 +352,87 @@ def load_fcs_adaptor_results_as_table(file_path):
     except Exception as e:
         print(f"Error loading or formatting FCS-Adaptor results: {e}", file=sys.stderr)
         return "Error loading FCS-Adaptor check results."
+
+
+def load_autofiltering_results_as_table(file_path):
+    """Load autofiltering results and format as an HTML table."""
+    if not os.path.exists(file_path):
+        print(f"Autofiltering file does not exist: {file_path}", file=sys.stderr)
+        return "Autofiltering check was not run."
+    if os.path.getsize(file_path) == 0:
+        print(f"Autofiltering file is empty: {file_path}", file=sys.stderr)
+        return "Autofiltering check was run, but no filtering was performed."
+    
+    try:
+        # First, try to read the CSV file normally
+        try:
+            df = pd.read_csv(file_path)
+        except pd.errors.ParserError as e:
+            # If there's a parsing error (likely due to column mismatch), handle it
+            print(f"CSV parsing error, attempting to fix column mismatch: {e}", file=sys.stderr)
+            
+            # Read the file manually to check for column mismatch
+            with open(file_path, 'r') as f:
+                lines = f.readlines()
+            
+            if len(lines) < 2:
+                print(f"Autofiltering file has insufficient data: {file_path}", file=sys.stderr)
+                return "Autofiltering check was run, but no filtering was performed."
+            
+            # Check if header and data have different number of columns
+            header_cols = len(lines[0].strip().split(','))
+            data_cols = len(lines[1].strip().split(','))
+            
+            if header_cols != data_cols:
+                print(f"Column mismatch detected: header has {header_cols} columns, data has {data_cols} columns", file=sys.stderr)
+                
+                # If data has more columns than header, add missing column names
+                if data_cols > header_cols:
+                    # Read with no header first
+                    df = pd.read_csv(file_path, header=None)
+                    
+                    # Create appropriate column names
+                    original_headers = lines[0].strip().split(',')
+                    missing_count = data_cols - header_cols
+                    
+                    # Add generic names for missing columns
+                    for i in range(missing_count):
+                        original_headers.append(f"column_{header_cols + i + 1}")
+                    
+                    # Set the column names
+                    df.columns = original_headers
+                    
+                    # Remove the original header row (which is now data)
+                    df = df.iloc[1:].reset_index(drop=True)
+                else:
+                    # If header has more columns, just read normally and let pandas handle it
+                    df = pd.read_csv(file_path)
+            else:
+                # Re-raise the original error if it's not a column mismatch issue
+                raise e
+        
+        # If the DataFrame is empty, return the "No data" message
+        if df.empty:
+            print(f"Autofiltering file contains no data: {file_path}", file=sys.stderr)
+            return "Autofiltering check was run, but no filtering was performed."
+        
+        # Convert DataFrame to HTML table with simple styling (no DataTables)
+        table_html = df.to_html(classes="table table-striped", index=False, 
+                                table_id="autofiltering_plain_table", escape=False)
+        
+        # Wrap the table for responsive display
+        wrapped_table = f"""
+        <div class="outer-container">
+            <div class="table-responsive">
+                <div class="table-wrapper">
+                    {table_html}
+                </div>
+            </div>
+        </div>
+        """
+        
+        print(f"Successfully loaded and formatted autofiltering data from {file_path}", file=sys.stderr)
+        return wrapped_table
+    except Exception as e:
+        print(f"Error loading or formatting autofiltering results: {e}", file=sys.stderr)
+        return "Error loading autofiltering check results."

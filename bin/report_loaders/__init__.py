@@ -21,6 +21,7 @@ from .table_loaders import (
     load_contamination_check_merged_table,
     load_phylum_coverage_data,
     load_trim_Ns_results,
+    load_autofiltering_results_as_table,
 )
 
 # Text loaders
@@ -81,6 +82,7 @@ __all__ = [
     'load_contamination_check_merged_table',
     'load_phylum_coverage_data',
     'load_trim_Ns_results',
+    'load_autofiltering_results_as_table',
     
     # Text loaders
     'load_fcs_adaptor_results',

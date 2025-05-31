@@ -91,7 +91,7 @@ def main():
 
     autofilter_file = None
     if args.autofilter_dir and os.path.exists(args.autofilter_dir):
-        autofilter_files = find_files_in_dir(args.autofilter_dir, extension=".txt")
+        autofilter_files = find_files_in_dir(args.autofilter_dir, extension=".csv")
         if autofilter_files:
             autofilter_file = autofilter_files[0]
 
