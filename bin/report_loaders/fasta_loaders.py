@@ -4,6 +4,7 @@ FASTA loaders for ASCC HTML report generation.
 
 This module contains functions for loading and formatting FASTA-related data,
 such as sanitation logs and length filtering logs.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import os

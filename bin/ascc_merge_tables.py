@@ -12,7 +12,7 @@ DESCRIPTION = """
 Script for merging contaminant check results into one table
 Version: {VERSION}
 ---
-Written by Eerik Anuin
+Written by Eerik Aunin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """

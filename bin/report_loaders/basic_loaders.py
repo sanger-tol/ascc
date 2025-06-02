@@ -4,6 +4,7 @@ Basic loaders for ASCC HTML report generation.
 
 This module contains functions for loading and formatting simple data types
 like samplesheets, YAML parameters, and other basic file formats.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import os

@@ -3,6 +3,7 @@
 FCS-GX taxonomy loaders for ASCC HTML report generation.
 
 This module contains functions for loading and formatting FCS-GX taxonomy reports.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import os

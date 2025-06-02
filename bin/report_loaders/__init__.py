@@ -3,8 +3,10 @@ Report loaders package for ASCC HTML report generation.
 
 This package contains modules for loading and formatting various types of data
 for inclusion in the HTML report.
-Created by Eerik Aunin @eeaunin
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
+
+__version__ = "1.0.0"
 
 # Import commonly used functions for easier access
 from .fcsgx_loaders import format_fcsgx_metadata

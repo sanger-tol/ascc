@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
-"""
+VERSION = "1.0.0"
+DESCRIPTION = f"""
 Script processing the cobiont check result tables to add a combined classification ('merged_classif') column that is based
     on the output of multiple tools. Also generates a table for estimated coverages per 'merged_classif' column
+Version = {VERSION}
+Written by Eerik Aunin (eeaunin)
 """
 
 import pandas as pd
@@ -20,7 +23,7 @@ def generate_counts_df(df, counts_df_output_path):
     # Group by both merged_classif and merged_classif_source
     grouped = df.groupby(["merged_classif", "merged_classif_source"])
 
-    # Initialize lists to store results
+    # Initialise lists to store results
     phylum_list = []
     source_list = []
     count_list = []
@@ -184,12 +187,13 @@ def main(output_folder, sample_id):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument(
         "output_folder",
         type=str,
         help="Path to the directory with the output tables of the pipeline",
     )
     parser.add_argument("sample_id", type=str, help="Sample ID")
+    parser.add_argument("-v", "--version", action="version", version=VERSION)
     args = parser.parse_args()
     main(args.output_folder, args.sample_id)

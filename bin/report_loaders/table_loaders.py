@@ -4,6 +4,7 @@ Table loaders for ASCC HTML report generation.
 
 This module contains functions for loading and formatting tabular data
 into HTML tables for the report.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import os

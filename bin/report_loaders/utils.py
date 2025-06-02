@@ -3,6 +3,7 @@
 Utility functions for ASCC HTML report generation.
 
 This module contains utility functions used by other report loader modules.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 import os
 

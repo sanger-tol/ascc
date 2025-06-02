@@ -3,6 +3,7 @@
 K-mer dimensionality reduction loaders for ASCC HTML report generation.
 
 This module contains functions for loading and formatting k-mer dimensionality reduction results.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import os

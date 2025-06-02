@@ -3,6 +3,7 @@
 Module for parsing and formatting FCS-GX report data.
 This module contains functions to parse the JSON-like metadata in FCS-GX reports
 and convert it to formatted HTML tables.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import json

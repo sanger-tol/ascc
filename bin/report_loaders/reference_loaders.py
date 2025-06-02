@@ -3,6 +3,7 @@
 Reference file loaders for ASCC HTML report generation.
 
 This module contains functions for loading and processing reference genome files.
+Developed by Eerik Aunin (eeaunin@gmail.com)
 """
 
 import os
