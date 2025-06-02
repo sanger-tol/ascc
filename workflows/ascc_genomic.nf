@@ -34,31 +34,20 @@ workflow ASCC_GENOMIC {
     diamond_uniprot_db_path
     taxid                   // NEW PARAMETER from dev branch
     nt_kraken_db_path       // NEW PARAMETER from dev branch
+    vecscreen_database_path
+    reads_path
+    reads_layout
+    reads_type
+    btk_lineages
+    btk_lineages_path
 
     main:
     ch_versions = Channel.empty()
 
     //
-    // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
-    //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //      TODO: YES THIS IS DUPLICATED FROM PIPELINE INIT,
-    //              HOWEVER THAT CONVERTED THE VALUES INTO A CHANNEL WHICH ISN'T THE EASIEST THING TO THEN PARSE OUT
-    include_workflow_steps  = params.include ? params.include.split(",") : "ALL"
-    exclude_workflow_steps  = params.exclude ? params.exclude.split(",") : "NONE"
-
-    full_list               = [
-        "essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond",
-        "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco",
-        "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "create_btk_dataset",
-        "merge", "html_report", "ALL", "NONE"
-    ]
-
-    if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
-        exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
-    }
-
-    log.info "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    log.info "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
+    // LOGIC: USING DEV BRANCH run_* PARAMETER SYSTEM
+    //
+    // log.info "GENOMIC RUN -- Using run_* parameter system from dev branch"
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -77,7 +66,9 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( !exclude_workflow_steps.contains("essentials") && (include_workflow_steps.contains("ALL") || include_workflow_steps.contains("essentials")) ) {
+    if (params.run_essentials == "both" || 
+        (params.run_essentials == "genomic" && params.genomic_only) ||
+        (params.run_essentials == "organellar" && !params.genomic_only)) {
 
         ESSENTIAL_JOBS(
             ch_samplesheet
@@ -93,7 +84,7 @@ workflow ASCC_GENOMIC {
         filter_fasta_length_filtering_log = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
     } else {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials genomic`)")
 
         reference_tuple_from_GG = ch_samplesheet // This is the reference genome input channel
         ej_dot_genome = Channel.of([[],[]])
@@ -109,8 +100,6 @@ workflow ASCC_GENOMIC {
     //
     ASCC_GENOMIC_ANALYSIS(
         reference_tuple_from_GG,
-        include_workflow_steps,
-        exclude_workflow_steps,
         organellar_genomes,
         fcs_db,
         reads,
@@ -131,14 +120,16 @@ workflow ASCC_GENOMIC {
     fcsgx_taxonomy_report = Channel.of([[],[]])
 
     // Get PACBIO_BARCODE_CHECK outputs if the workflow was run
-    if ((include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("pacbio_barcodes")) {
+    if (params.run_pacbio_barcodes == "both" || 
+        (params.run_pacbio_barcodes == "genomic" && params.genomic_only) ||
+        (params.run_pacbio_barcodes == "organellar" && !params.genomic_only)) {
         pacbio_barcode_check_filtered = ASCC_GENOMIC_ANALYSIS.out.barcode_check_filtered
     }
 
     // Get RUN_FCSGX outputs if the workflow was run
-    if ((include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL')) &&
-            !exclude_workflow_steps.contains("fcs-gx")) {
+    if (params.run_fcsgx == "both" || 
+        (params.run_fcsgx == "genomic" && params.genomic_only) ||
+        (params.run_fcsgx == "organellar" && !params.genomic_only)) {
         fcsgx_report = ASCC_GENOMIC_ANALYSIS.out.fcsgx_report_txt
         fcsgx_taxonomy_report = ASCC_GENOMIC_ANALYSIS.out.fcsgx_taxonomy_rpt
     }
@@ -150,8 +141,6 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG,
         ej_dot_genome,
         ej_gc_coverage,
-        include_workflow_steps,
-        exclude_workflow_steps,
         ASCC_GENOMIC_ANALYSIS.out.kmers,
         ASCC_GENOMIC_ANALYSIS.out.tiara,
         ASCC_GENOMIC_ANALYSIS.out.nt_blast,
@@ -191,6 +180,9 @@ workflow ASCC_GENOMIC {
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
+
+    emit:
+    versions = ch_versions
 }
 
 /*

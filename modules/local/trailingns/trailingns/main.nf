@@ -2,7 +2,7 @@ process TRAILINGNS {
     tag "$meta.id"
     label 'process_single'
 
-    conda "${moduleDir}/environment.yml"
+    conda "bioconda::biopython=1.81"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.81':
         'quay.io/biocontainers/biopython:1.81' }"

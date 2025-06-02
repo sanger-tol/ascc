@@ -3,7 +3,7 @@ process KMER_COUNT_DIM_REDUCTION {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "${moduleDir}/environment.yml"
+    conda "conda-forge::python=3.9 conda-forge::pandas=2.2.1 conda-forge::tensorlflow=2.15.0 conda-forge::scikit-learn=1.4.1 conda-forge::umap=0.5.5 conda-forge::matplotlib=3.8.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:34bd58763b84a3ea2f6c60b87b4858b2f80c070e-0' :
         'biocontainers/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:34bd58763b84a3ea2f6c60b87b4858b2f80c070e-0' }"
@@ -15,7 +15,8 @@ process KMER_COUNT_DIM_REDUCTION {
     val autoencoder_epochs_count
 
     output:
-    tuple val(meta), path('*_kmers_dim_reduction_embeddings.csv'),      emit: csv
+    tuple val(meta), path('*_kmers_dim_reduction_dir'),                 emit: kmers_dim_reduction_dir
+    tuple val(meta), path('./'),                                        emit: results_dir
     path "versions.yml",                                                emit: versions
 
     when:
@@ -24,11 +25,15 @@ process KMER_COUNT_DIM_REDUCTION {
     script:
     def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
+    def dir_name = "${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir"
     """
+    # Create the directory with the standardized naming convention
+    mkdir -p $dir_name
 
+    # Run the dimensionality reduction and save the output in the directory
     kmer_count_dim_reduction.py \\
         $kmer_counts_file \\
-        ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_embeddings.csv \\
+        $dir_name \\
         --selected_methods $dimensionality_reduction_method \\
         --n_neighbors_setting $n_neighbors_setting \\
         --autoencoder_epochs_count $autoencoder_epochs_count
@@ -48,8 +53,10 @@ process KMER_COUNT_DIM_REDUCTION {
     stub:
     def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
+    def dir_name = "${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir"
     """
-    touch ${prefix}_kmers_dim_reduction_embeddings.csv
+    mkdir -p $dir_name
+    touch $dir_name/kmers_dim_reduction_embeddings.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

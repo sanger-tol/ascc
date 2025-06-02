@@ -291,6 +291,12 @@
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
+                "run_html_report": {
+                    "type": "string",
+                    "description": "Run HTML report generation on assemblies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
                 "btk_busco_run_mode": {
                     "type": "string",
                     "description": "Should btk be run as mandatory or conditional on levels of contamination.",

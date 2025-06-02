@@ -72,10 +72,16 @@ workflow GET_KMERS_PROFILE {
     //
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
     //
-    KMER_COUNT_DIM_REDUCTION.out.csv
+    KMER_COUNT_DIM_REDUCTION.out.kmers_dim_reduction_dir
         .filter{meta, file -> !file.toString().contains("EMPTY")}
         .groupTuple(by: [0])
         .set { collected_files_for_combine }
+        
+    // Collect the results directories from KMER_COUNT_DIM_REDUCTION
+    KMER_COUNT_DIM_REDUCTION.out.results_dir
+        .filter{meta, dir -> !dir.toString().contains("EMPTY")}
+        .groupTuple(by: [0])
+        .set { collected_results_dirs }
 
     //
     // MODULE: COMBINE OUTPUTS OF MULTIPLE METHODS
@@ -87,5 +93,6 @@ workflow GET_KMERS_PROFILE {
 
     emit:
     combined_csv = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
+    kmers_results = collected_files_for_combine
     versions     = ch_versions
 }

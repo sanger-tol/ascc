@@ -2,7 +2,7 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
     tag "$meta.id"
     label 'process_low'
 
-    conda "${moduleDir}/environment.yml"
+    conda "conda-forge::python=3.9 conda-forge::pandas=1.5.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'quay.io/biocontainers/pandas:1.5.2' }"
