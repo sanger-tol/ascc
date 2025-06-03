@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=Source+Code+Pro:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap">
     <link rel="stylesheet" href="css/ascc_report.css">
-  
+
     <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-    
+
     {# Determine which sections have content #}
     {% set has_input_content = (samplesheet_data is defined and samplesheet_data) or (yaml_params_data is defined and yaml_params_data) or (reference_summary is defined and reference_summary) %}
     {% set has_assembly_content = reference_summary is defined and reference_summary %}
@@ -43,20 +43,20 @@
         {% if not has_kmers_content %}emptyTabs.push(9);{% endif %}
         {% if not has_cobiont_content %}emptyTabs.push(10);{% endif %}
     </script>
-  
+
     <script>
     $(document).ready( function () {
         // Initialize main tabs
         $("#tabs").tabs(); // Restore basic tab functionality
-        
+
         // Disable empty tabs
         for (var i = 0; i < emptyTabs.length; i++) {
             $("#tabs").tabs("disable", emptyTabs[i]);
         }
-        
+
         // Initialize K-mer method tabs (if K-mer tab is not disabled)
         if (!emptyTabs.includes(9)) { // Check if K-mer tab (index 9) is enabled
-             if ($("#kmer-methods-tabs").length) { // Check if the element exists
+            if ($("#kmer-methods-tabs").length) { // Check if the element exists
                 $("#kmer-methods-tabs").tabs();
             }
         }
@@ -64,7 +64,7 @@
         // Common DataTable options for consistent behavior
         var dataTableOptions = {
             scrollX: true,
-            autoWidth: false, 
+            autoWidth: false,
             responsive: false,
             columnDefs: [
                 { targets: '_all', width: 'auto' }
@@ -82,39 +82,39 @@
                 }, 1000);
             }
         };
-        
+
         // Initialize DataTables
         if ($('#cobiont_check_merged_table').length) {
-            $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, { 
+            $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, {
                 scrollX: false,
                 scrollCollapse: false
             }));
         }
-        
 
-        
+
+
         // Initialize DataTables for FCS-GX tables if they exist
         if ($('#fcsgx_report_table').length) {
-             $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, { 
+            $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, {
                 scrollX: false,
                 scrollCollapse: true,
                 pageLength: 25
             }));
         }
-        
+
         if ($('#fcsgx_taxonomy_table').length) {
-            $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, { 
+            $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, {
                 scrollX: false,
                 scrollCollapse: false,
                 pageLength: 25
             }));
         }
-        
+
         // VecScreen and FCS-adaptor tables use plain HTML (no DataTables)
         if ($('#barcodes_table').length) {
             $('#barcodes_table').DataTable($.extend({}, dataTableOptions));
         }
-        
+
         // Function to adjust all DataTables columns
         function adjustAllTables() {
             $('.dataTable').each(function() {
@@ -125,19 +125,19 @@
                 }
             });
         }
-        
+
         // Adjust column widths on window resize - using standard DataTables API
         $(window).on('resize', function() {
             adjustAllTables();
         });
-        
+
         // Force adjustment after a delay to ensure proper initial rendering
         setTimeout(function() {
             adjustAllTables();
         }, 500);
 
 
-        
+
         // Add tab navigation for anchor links
         $(document).on('click', 'a[href^="#"][href$="-tab"]', function(e) {
             e.preventDefault();
@@ -147,7 +147,7 @@
                 $("#tabs").tabs("option", "active", tabIndex);
             }
         });
-        
+
         // Add more table initializations here as needed, checking for existence first
     } );
     </script>
@@ -161,7 +161,7 @@
         {% block tab_list %}
             {# Tab list (ul) from child template will go here #}
         {% endblock %}
-        
+
         {% block tab_panels %}
             {# Tab panels (divs with includes) from child template will go here #}
         {% endblock %}
@@ -171,7 +171,7 @@
         <p>Report generated: {{ timestamp }}</p>
         <p>ASCC Pipeline Version: {{ version }}</p>
     </div>
-    
+
     {# Optional block for additional scripts if needed later, though primary scripts are in head #}
     {% block body_scripts %}{% endblock %}
 </body>

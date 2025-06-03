@@ -64,7 +64,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if (params.run_essentials == "both" || 
+    if (params.run_essentials == "both" ||
         (params.run_essentials == "genomic" && params.genomic_only) ||
         (params.run_essentials == "organellar" && !params.genomic_only)) {
 
@@ -118,14 +118,14 @@ workflow ASCC_GENOMIC {
     fcsgx_taxonomy_report = Channel.of([[],[]])
 
     // Get PACBIO_BARCODE_CHECK outputs if the workflow was run
-    if (params.run_pacbio_barcodes == "both" || 
+    if (params.run_pacbio_barcodes == "both" ||
         (params.run_pacbio_barcodes == "genomic" && params.genomic_only) ||
         (params.run_pacbio_barcodes == "organellar" && !params.genomic_only)) {
         pacbio_barcode_check_filtered = ASCC_GENOMIC_ANALYSIS.out.barcode_check_filtered
     }
 
     // Get RUN_FCSGX outputs if the workflow was run
-    if (params.run_fcsgx == "both" || 
+    if (params.run_fcsgx == "both" ||
         (params.run_fcsgx == "genomic" && params.genomic_only) ||
         (params.run_fcsgx == "organellar" && !params.genomic_only)) {
         fcsgx_report = ASCC_GENOMIC_ANALYSIS.out.fcsgx_report_txt

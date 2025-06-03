@@ -25,10 +25,10 @@ workflow RUN_VECSCREEN {
     ch_versions                 = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
 
     // Convert the database path to a channel if it isn't already
-    vecscreen_database_ch = vecscreen_database instanceof groovyx.gpars.dataflow.DataflowVariable ? 
-                            vecscreen_database : 
+    vecscreen_database_ch = vecscreen_database instanceof groovyx.gpars.dataflow.DataflowVariable ?
+                            vecscreen_database :
                             Channel.value(vecscreen_database)
-    
+
     vecscreen_database_ch.map{ it ->
         tuple(
             [id: "db"],

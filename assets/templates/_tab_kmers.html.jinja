@@ -12,7 +12,7 @@
 
 {% if kmers_results %}
     <h3>Dimensionality Reduction Results</h3>
-    
+
     {% set methods = {} %}
     {% for key, value in kmers_results.items() %}
         {% set method_name = key.split('_')[0] %}
@@ -21,23 +21,23 @@
         {% endif %}
         {% set _ = methods[method_name].append(key) %}
     {% endfor %}
-    
+
     <div id="kmer-methods-tabs">
         <ul>
             {% for method_name, keys in methods.items() %}
                 <li><a href="#kmer-method-{{ method_name }}">{{ method_name|upper }}</a></li>
             {% endfor %}
         </ul>
-        
+
         {% for method_name, keys in methods.items() %}
             <div id="kmer-method-{{ method_name }}">
                 <h4 class="method-name">{{ method_name|upper }} Dimensionality Reduction</h4>
-                
+
                 {# Group metrics by type #}
                 {% set regular_metrics = [] %}
                 {% set clustering_metrics = [] %}
                 {% set visualizations = [] %}
-                
+
                 {% for key in keys %}
                     {% if key.endswith('_metrics.txt') and not key.endswith('_clustering_metrics.txt') %}
                         {% set _ = regular_metrics.append(key) %}
@@ -47,7 +47,7 @@
                         {% set _ = visualizations.append(key) %}
                     {% endif %}
                 {% endfor %}
-                
+
                 {# Display regular metrics #}
                 {% if regular_metrics %}
                     <div class="result-section">
@@ -57,7 +57,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-                
+
                 {# Display clustering metrics #}
                 {% if clustering_metrics %}
                     <div class="result-section">
@@ -67,7 +67,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-                
+
                 {# Display visualizations #}
                 {% for key in visualizations %}
                     <div class="result-section">

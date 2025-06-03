@@ -76,7 +76,7 @@ workflow GET_KMERS_PROFILE {
         .filter{meta, file -> !file.toString().contains("EMPTY")}
         .groupTuple(by: [0])
         .set { collected_files_for_combine }
-        
+
     // Collect the results directories from KMER_COUNT_DIM_REDUCTION
     KMER_COUNT_DIM_REDUCTION.out.results_dir
         .filter{meta, dir -> !dir.toString().contains("EMPTY")}

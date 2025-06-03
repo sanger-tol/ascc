@@ -244,34 +244,34 @@ workflow ASCC_GENOMIC_REPORTING {
     // HTML REPORT GENERATION
     //
     if (params.run_html_report == "both" || params.run_html_report == "genomic") {
-        
+
         // Get all Jinja templates and CSS files
         ch_jinja_templates_list = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
         ch_css_files = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
-        
+
         // Create samplesheet and params file channels
         samplesheet = Channel.fromPath(params.input)
         params_file = Channel.value(file("${workflow.launchDir}/nextflow.config"))
-        
+
         // Create empty channel with proper meta structure for missing data
         empty_meta_channel = Channel.of([[id: "empty"], []])
-        
+
         // Get BTK dataset if available
-        btk_dataset_channel = (params.run_create_btk_dataset == "both" || 
-                              params.run_create_btk_dataset == "genomic") ? 
-                             CREATE_BTK_DATASET.out.btk_datasets : empty_meta_channel
-        
+        btk_dataset_channel = (params.run_create_btk_dataset == "both" ||
+                                params.run_create_btk_dataset == "genomic") ?
+                            CREATE_BTK_DATASET.out.btk_datasets : empty_meta_channel
+
         // Get merged table if available
         merged_table_channel = ((params.run_essentials == "both" || params.run_essentials == "genomic") &&
-                               (params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic")) ? 
-                               ASCC_MERGE_TABLES.out.merged_table : empty_meta_channel
-        
+                                (params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic")) ?
+                                ASCC_MERGE_TABLES.out.merged_table : empty_meta_channel
+
         // Get autofilter results if available
         autofilter_channel = ((params.run_tiara == "both" || params.run_tiara == "genomic") &&
-                             (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") &&
-                             (params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic")) ? 
-                             AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary : empty_meta_channel
-        
+                            (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") &&
+                            (params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic")) ?
+                            AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary : empty_meta_channel
+
         // Handle FCS adaptor channels properly
         if ((params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic")) {
             fcs_adaptor_euk_channel = fcsadapt.map { meta, euk, prok -> [meta, euk] }
@@ -280,7 +280,7 @@ workflow ASCC_GENOMIC_REPORTING {
             fcs_adaptor_euk_channel = empty_meta_channel
             fcs_adaptor_prok_channel = empty_meta_channel
         }
-        
+
         GENERATE_HTML_REPORT_WORKFLOW (
             pacbio_barcode_check_filtered.ifEmpty(empty_meta_channel),  // barcode_results
             fcs_adaptor_euk_channel,        // fcs_adaptor_euk

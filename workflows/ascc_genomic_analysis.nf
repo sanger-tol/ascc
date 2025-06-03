@@ -35,7 +35,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
 
     main:
     ch_versions = Channel.empty()
-    
+
     // Initialize output channels
     ch_kmers = Channel.of([[],[]])
     ch_tiara = Channel.of([[],[]])
@@ -61,7 +61,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // KMERS ANALYSIS
     //
-    if (params.run_kmers == "both" || 
+    if (params.run_kmers == "both" ||
         (params.run_kmers == "genomic" && params.genomic_only) ||
         (params.run_kmers == "organellar" && !params.genomic_only)) {
         //
@@ -93,7 +93,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
                                     [[id: it[0].id, process: "KMERS"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
-                                
+
         ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
                                 .map { meta, dirs ->
                                     [[id: meta.id, process: "KMERS_RESULTS"], dirs]
@@ -104,7 +104,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // TIARA ANALYSIS
     //
-    if (params.run_tiara == "both" || 
+    if (params.run_tiara == "both" ||
         (params.run_tiara == "genomic" && params.genomic_only) ||
         (params.run_tiara == "organellar" && !params.genomic_only)) {
         EXTRACT_TIARA_HITS (
@@ -121,7 +121,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // NT-BLAST ANALYSIS
     //
-    if (params.run_nt_blast == "both" || 
+    if (params.run_nt_blast == "both" ||
         (params.run_nt_blast == "genomic" && params.genomic_only) ||
         (params.run_nt_blast == "organellar" && !params.genomic_only)) {
         //
@@ -161,7 +161,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // DIAMOND BLAST ANALYSIS
     //
-    if (params.run_nr_diamond == "both" || 
+    if (params.run_nr_diamond == "both" ||
         (params.run_nr_diamond == "genomic" && params.genomic_only) ||
         (params.run_nr_diamond == "organellar" && !params.genomic_only)) {
         NR_DIAMOND (
@@ -190,7 +190,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // UNIPROT DIAMOND BLAST ANALYSIS
     //
-    if (params.run_uniprot_diamond == "both" || 
+    if (params.run_uniprot_diamond == "both" ||
         (params.run_uniprot_diamond == "genomic" && params.genomic_only) ||
         (params.run_uniprot_diamond == "organellar" && !params.genomic_only)) {
         UP_DIAMOND (
@@ -219,7 +219,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // ORGANELLAR BLAST ANALYSIS
     //
-    if (params.run_organellar_blast == "both" || 
+    if (params.run_organellar_blast == "both" ||
         (params.run_organellar_blast == "genomic" && params.genomic_only) ||
         (params.run_organellar_blast == "organellar" && !params.genomic_only)) {
         //
@@ -269,7 +269,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // PACBIO BARCODE ANALYSIS
     //
-    if (params.run_pacbio_barcodes == "both" || 
+    if (params.run_pacbio_barcodes == "both" ||
         (params.run_pacbio_barcodes == "genomic" && params.genomic_only) ||
         (params.run_pacbio_barcodes == "organellar" && !params.genomic_only)) {
         reference_tuple_from_GG
@@ -293,7 +293,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // FCS-ADAPTOR ANALYSIS
     //
-    if (params.run_fcs_adaptor == "both" || 
+    if (params.run_fcs_adaptor == "both" ||
         (params.run_fcs_adaptor == "genomic" && params.genomic_only) ||
         (params.run_fcs_adaptor == "organellar" && !params.genomic_only)) {
         RUN_FCSADAPTOR (
@@ -317,7 +317,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // FCS-GX ANALYSIS
     //
-    if (params.run_fcsgx == "both" || 
+    if (params.run_fcsgx == "both" ||
         (params.run_fcsgx == "genomic" && params.genomic_only) ||
         (params.run_fcsgx == "organellar" && !params.genomic_only)) {
         joint_channel = reference_tuple_from_GG
@@ -348,7 +348,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // READ COVERAGE ANALYSIS
     //
-    if (params.run_coverage == "both" || 
+    if (params.run_coverage == "both" ||
         (params.run_coverage == "genomic" && params.genomic_only) ||
         (params.run_coverage == "organellar" && !params.genomic_only)) {
         RUN_READ_COVERAGE (
@@ -374,7 +374,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // VECTOR SCREENING ANALYSIS
     //
-    if (params.run_vecscreen == "both" || 
+    if (params.run_vecscreen == "both" ||
         (params.run_vecscreen == "genomic" && params.genomic_only) ||
         (params.run_vecscreen == "organellar" && !params.genomic_only)) {
         RUN_VECSCREEN (
@@ -393,7 +393,7 @@ workflow ASCC_GENOMIC_ANALYSIS {
     //
     // KRAKEN CLASSIFICATION
     //
-    if (params.run_kraken == "both" || 
+    if (params.run_kraken == "both" ||
         (params.run_kraken == "genomic" && params.genomic_only) ||
         (params.run_kraken == "organellar" && !params.genomic_only)) {
         RUN_NT_KRAKEN(
@@ -445,16 +445,16 @@ workflow ASCC_GENOMIC_ANALYSIS {
     // Additional outputs needed by reporting workflow
     mito = ch_mito
     chloro = ch_chloro
-    fcsgx_report_txt = (params.run_fcsgx == "both" || 
-                       (params.run_fcsgx == "genomic" && params.genomic_only) ||
-                       (params.run_fcsgx == "organellar" && !params.genomic_only)) ? 
+    fcsgx_report_txt = (params.run_fcsgx == "both" ||
+                        (params.run_fcsgx == "genomic" && params.genomic_only) ||
+                        (params.run_fcsgx == "organellar" && !params.genomic_only)) ?
                         RUN_FCSGX.out.fcsgx_report : Channel.of([[],[]])
-    fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" || 
-                         (params.run_fcsgx == "genomic" && params.genomic_only) ||
-                         (params.run_fcsgx == "organellar" && !params.genomic_only)) ? 
+    fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" ||
+                        (params.run_fcsgx == "genomic" && params.genomic_only) ||
+                        (params.run_fcsgx == "organellar" && !params.genomic_only)) ?
                         RUN_FCSGX.out.taxonomy_report : Channel.of([[],[]])
-    barcode_check_filtered = (params.run_pacbio_barcodes == "both" || 
-                             (params.run_pacbio_barcodes == "genomic" && params.genomic_only) ||
-                             (params.run_pacbio_barcodes == "organellar" && !params.genomic_only)) ? 
+    barcode_check_filtered = (params.run_pacbio_barcodes == "both" ||
+                            (params.run_pacbio_barcodes == "genomic" && params.genomic_only) ||
+                            (params.run_pacbio_barcodes == "organellar" && !params.genomic_only)) ?
                         PACBIO_BARCODE_CHECK.out.filtered : Channel.of([[],[]])
 }

@@ -1,7 +1,7 @@
 process FILTER_FASTA {
     tag "${meta.id}"
     label 'process_low'
-    
+
     // Custom error strategy to handle validation failures (exit code 125)
     errorStrategy = { task.exitStatus == 125 ? 'terminate' : 'retry' }
 

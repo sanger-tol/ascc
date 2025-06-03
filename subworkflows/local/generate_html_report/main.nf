@@ -69,7 +69,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .combine(phylum_counts.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
         .combine(kmers_results.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
         .combine(reference_fasta.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] }) // Reference fasta should always have a valid meta
-        .combine(fasta_sanitation_log.map { obj -> 
+        .combine(fasta_sanitation_log.map { obj ->
             if (obj instanceof Map) {
                 return [obj.id, obj.file ?: []]
             } else if (obj instanceof List && obj.size() >= 2) {
@@ -84,7 +84,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                 return [null, []]
             }
         }.ifEmpty { [null, []] })
-        .combine(fasta_length_filtering_log.map { obj -> 
+        .combine(fasta_length_filtering_log.map { obj ->
             if (obj instanceof Map) {
                 return [obj.id, obj.file ?: []]
             } else if (obj instanceof List && obj.size() >= 2) {
@@ -100,7 +100,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
             }
         }.ifEmpty { [null, []] })
         // Handle fcsgx_report_txt and fcsgx_taxonomy_rpt channels which are already in the format [id, file]
-        .combine(fcsgx_report_txt.filter { obj -> 
+        .combine(fcsgx_report_txt.filter { obj ->
             if (obj instanceof List && obj.size() >= 1) {
                 return obj[0] != "empty"
             } else if (obj instanceof Map && obj.containsKey('id')) {
@@ -109,7 +109,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                 return true
             }
         }.ifEmpty { [null, []] })
-        .combine(fcsgx_taxonomy_rpt.filter { obj -> 
+        .combine(fcsgx_taxonomy_rpt.filter { obj ->
             if (obj instanceof List && obj.size() >= 1) {
                 return obj[0] != "empty"
             } else if (obj instanceof Map && obj.containsKey('id')) {
@@ -120,7 +120,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         }.ifEmpty { [null, []] })
         .combine(btk_dataset.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
 
-         // The map closure now receives id, meta, then pairs of id_dup, files for each combined channel
+        // The map closure now receives id, meta, then pairs of id_dup, files for each combined channel
         .map { id, meta, barcode_id_dup, barcode, fcs_euk_id_dup, fcs_euk, fcs_prok_id_dup, fcs_prok, trim_ns_id_dup, trim_ns, vecscreen_id_dup, vecscreen, autofilter_id_dup, autofilter, merged_id_dup, merged, phylum_id_dup, phylum, kmers_id_dup, kmers, ref_id_dup, ref, sanitation_id_dup, sanitation, length_filtering_id_dup, length_filtering, fcsgx_report_id_dup, fcsgx_report, fcsgx_tax_id_dup, fcsgx_tax, btk_id_dup, btk ->
             // Ensure we handle potential nulls from ifEmpty
             def final_barcode = barcode ?: []
@@ -147,7 +147,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
     // Convert params to JSON for passing to the HTML report
     def paramsJson = JsonOutput.toJson(params)
-    
+
     // Generate HTML report
     GENERATE_HTML_REPORT (
         combined_inputs,

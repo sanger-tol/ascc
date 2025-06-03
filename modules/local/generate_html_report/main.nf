@@ -1,41 +1,41 @@
 process GENERATE_HTML_REPORT {
     tag "$meta.id"
     label 'process_low'
-    
+
     publishDir "${params.outdir}/${meta.id}/html_report", mode: 'copy'
-    
+
     conda "conda-forge::python=3.9 conda-forge::pandas=1.5.3 conda-forge::jinja2=3.1.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-ab48c38c3be93a696d7773767d9287b4a0d3bf19:e3c8a1ac0a27058d7922e8b6d02f303c30d93e3a-0' :
         'quay.io/biocontainers/mulled-v2-ab48c38c3be93a696d7773767d9287b4a0d3bf19:e3c8a1ac0a27058d7922e8b6d02f303c30d93e3a-0' }"
-    
+
     input:
-    tuple val(meta), 
-          path(barcode_results, stageAs: "barcodes/*"),
-          path(fcs_adaptor_euk, stageAs: "fcs/*"),
-          path(fcs_adaptor_prok, stageAs: "fcs/*"),
-          path(trim_ns_results, stageAs: "trailingns/*"),
-          path(vecscreen_results, stageAs: "vecscreen/*"),
-          path(autofilter_results, stageAs: "autofilter/*"),
-          path(merged_table, stageAs: "merged/*"),
-          path(phylum_counts, stageAs: "coverage/*"),       // Add phylum coverage data input
-          path(kmers_results, stageAs: "kmers/**"),
-          path(reference_fasta),
-          path(fasta_sanitation_log, stageAs: "fasta_sanitation/*"),
-          path(fasta_length_filtering_log, stageAs: "fasta_length_filtering/*"),
-          path(fcs_gx_report_txt, stageAs: "fcsgx/*"),      // Add FCS-GX report txt input
-          path(fcs_gx_taxonomy_rpt, stageAs: "fcsgx/*"),    // Add FCS-GX taxonomy rpt input
-          path(btk_output_dir, stageAs: "btk/*")            // Add BTK output dir input
+    tuple val(meta),
+        path(barcode_results, stageAs: "barcodes/*"),
+        path(fcs_adaptor_euk, stageAs: "fcs/*"),
+        path(fcs_adaptor_prok, stageAs: "fcs/*"),
+        path(trim_ns_results, stageAs: "trailingns/*"),
+        path(vecscreen_results, stageAs: "vecscreen/*"),
+        path(autofilter_results, stageAs: "autofilter/*"),
+        path(merged_table, stageAs: "merged/*"),
+        path(phylum_counts, stageAs: "coverage/*"),       // Add phylum coverage data input
+        path(kmers_results, stageAs: "kmers/**"),
+        path(reference_fasta),
+        path(fasta_sanitation_log, stageAs: "fasta_sanitation/*"),
+        path(fasta_length_filtering_log, stageAs: "fasta_length_filtering/*"),
+        path(fcs_gx_report_txt, stageAs: "fcsgx/*"),      // Add FCS-GX report txt input
+        path(fcs_gx_taxonomy_rpt, stageAs: "fcsgx/*"),    // Add FCS-GX taxonomy rpt input
+        path(btk_output_dir, stageAs: "btk/*")            // Add BTK output dir input
     path(jinja_templates_list, stageAs: "templates/*") // Updated to accept a list and stage them
     path(samplesheet)
     path(params_file)
     val(params_json)
     path(css_files_list, stageAs: "css/*") // CSS files to include in the report
-    
+
     output:
     tuple val(meta), path("report/site/*"), emit: report
     path "versions.yml", emit: versions
-    
+
     when:
     task.ext.when == null || task.ext.when
 
@@ -50,14 +50,14 @@ process GENERATE_HTML_REPORT {
     mkdir -p report/site/css
     cp templates/*.jinja report/site/templates/
     cp css/*.css report/site/css/
-    
+
     # Create kmers directory if it doesn't exist
     mkdir -p kmers
-    
+
     # Debug: List the contents of the kmers directory
     echo "Contents of kmers directory:"
     ls -la kmers/
-    
+
     # Run the report generation script directly from bin directory
     python $baseDir/bin/generate_html_report.py \\
         --output_dir report \\
@@ -83,7 +83,7 @@ process GENERATE_HTML_REPORT {
         --launch_dir "${workflow.launchDir}" \\
         --pipeline_version ${workflow.manifest.version} \\
         --output_prefix $prefix
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
@@ -103,10 +103,10 @@ process GENERATE_HTML_REPORT {
     cp css/*.css report/site/css/
     touch report/site/${prefix}.html
 
-    
+
     # Run the report generation script (stub mode)
     echo "Would run python $baseDir/bin/generate_html_report.py --pipeline_version ${workflow.manifest.version} --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt with samplesheet $samplesheet ${params_file ? "and params file $params_file" : ""} and FASTA sanitation logs"
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
