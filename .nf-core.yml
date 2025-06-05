@@ -13,6 +13,7 @@ lint:
     - lib/NfcoreTemplate.groovy
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
+    - bin/kmer-counter
   files_unchanged:
     - LICENCE
     - .github/CONTRIBUTING.md
@@ -41,6 +42,8 @@ lint:
   multiqc_config: False
   actions_awsfulltest: False
   template_strings: False
+  merge_markers:
+    - bin/kmer-counter
 nf_core_version: 3.2.1
 repository_type: pipeline
 template:
