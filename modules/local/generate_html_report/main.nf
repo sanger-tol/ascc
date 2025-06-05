@@ -4,7 +4,7 @@ process GENERATE_HTML_REPORT {
 
     publishDir "${params.outdir}/${meta.id}/html_report", mode: 'copy'
 
-    conda "conda-forge::python=3.9 conda-forge::pandas=1.5.3 conda-forge::jinja2=3.1.2"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-ab48c38c3be93a696d7773767d9287b4a0d3bf19:e3c8a1ac0a27058d7922e8b6d02f303c30d93e3a-0' :
         'quay.io/biocontainers/mulled-v2-ab48c38c3be93a696d7773767d9287b4a0d3bf19:e3c8a1ac0a27058d7922e8b6d02f303c30d93e3a-0' }"

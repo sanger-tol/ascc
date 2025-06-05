@@ -5,8 +5,8 @@
 */
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
-include { ASCC_GENOMIC_ANALYSIS                         } from './ascc_genomic_analysis'
-include { ASCC_GENOMIC_REPORTING                        } from './ascc_genomic_reporting'
+include { ASCC_GENOMIC_ANALYSIS                         } from '../subworkflows/local/ascc_genomic_analysis/main'
+include { ASCC_GENOMIC_REPORTING                        } from '../subworkflows/local/ascc_genomic_reporting/main'
 
 include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -32,8 +32,8 @@ workflow ASCC_GENOMIC {
     nt_database_path
     diamond_nr_db_path
     diamond_uniprot_db_path
-    taxid                   // NEW PARAMETER from dev branch
-    nt_kraken_db_path       // NEW PARAMETER from dev branch
+    taxid                   // channel: val(taxid)
+    nt_kraken_db_path       // channel: path(database)
     vecscreen_database_path
     reads_path
     reads_layout
@@ -47,7 +47,6 @@ workflow ASCC_GENOMIC {
     //
     // LOGIC: USING DEV BRANCH run_* PARAMETER SYSTEM
     //
-    // log.info "GENOMIC RUN -- Using run_* parameter system from dev branch"
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -59,7 +58,7 @@ workflow ASCC_GENOMIC {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            // File processing: $meta -- $sample
         }
 
     //
@@ -110,7 +109,8 @@ workflow ASCC_GENOMIC {
         diamond_nr_db_path,
         diamond_uniprot_db_path,
         taxid,
-        nt_kraken_db_path
+        nt_kraken_db_path,
+        vecscreen_database_path
     )
     ch_versions = ch_versions.mix(ASCC_GENOMIC_ANALYSIS.out.versions)
 

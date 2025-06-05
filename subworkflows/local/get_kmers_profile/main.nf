@@ -2,6 +2,7 @@
 // MODULE IMPORT BLOCK
 //
 include { GET_KMER_COUNTS                       } from '../../../modules/local/get/kmer_counts/main'
+include { REFORMAT_NPY_2_CSV                    } from '../../../modules/local/reformat/npy_2_csv/main'
 include { KMER_COUNT_DIM_REDUCTION              } from '../../../modules/local/kmer_count/dim_reduction/main'
 include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../../modules/local/kmer_count/dim_reduction_combine_csv/main'
 
@@ -28,13 +29,22 @@ workflow GET_KMERS_PROFILE {
         .set { modified_input }
 
     //
-    // MODULE: PRODUCE KMER COUNTS (USING KCOUNTER)
+    // MODULE: PRODUCE KMER COUNTS (USING KMER-COUNTER)
     //
     GET_KMER_COUNTS (
         modified_input,      // val(meta), path(reads)
         kmer_size            // val kmer_size
     )
     ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
+
+    //
+    // MODULE: CONVERT NPY TO CSV FORMAT
+    //
+    REFORMAT_NPY_2_CSV (
+        GET_KMER_COUNTS.out.npy,  // val(meta), path(fasta), path(npy)
+        kmer_size                  // val kmer_size
+    )
+    ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)
 
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
@@ -46,7 +56,7 @@ workflow GET_KMERS_PROFILE {
         .set{hey_neighbour}
 
     dim_methods
-        .combine(GET_KMER_COUNTS.out.csv)
+        .combine(REFORMAT_NPY_2_CSV.out.csv)
         .combine(autoencoder_epochs_count.first())
         .combine(hey_neighbour)
         .multiMap { dr_method, csv_meta, csv_file, epochs, n_neighbours ->
@@ -92,7 +102,7 @@ workflow GET_KMERS_PROFILE {
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
 
     emit:
-    combined_csv = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
+    combined_csv  = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
     kmers_results = collected_files_for_combine
-    versions     = ch_versions
+    versions      = ch_versions
 }

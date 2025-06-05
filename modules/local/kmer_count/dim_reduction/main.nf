@@ -3,7 +3,7 @@ process KMER_COUNT_DIM_REDUCTION {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "conda-forge::python=3.9 conda-forge::pandas=2.2.1 conda-forge::tensorlflow=2.15.0 conda-forge::scikit-learn=1.4.1 conda-forge::umap=0.5.5 conda-forge::matplotlib=3.8.0"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:34bd58763b84a3ea2f6c60b87b4858b2f80c070e-0' :
         'biocontainers/mulled-v2-ac95cc1cb32439236d915b38af3e056ce8eb0375:34bd58763b84a3ea2f6c60b87b4858b2f80c070e-0' }"

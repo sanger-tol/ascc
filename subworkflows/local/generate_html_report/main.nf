@@ -26,20 +26,6 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     main:
     ch_versions = Channel.empty()
 
-    // Add debug logging (commented out for normal runs)
-    // log.info "HTML Report Generation - Input Channels:"
-    // log.info "barcode_results: ${barcode_results.dump()}"
-    // log.info "fcs_adaptor_euk: ${fcs_adaptor_euk.dump()}"
-    // log.info "fcs_adaptor_prok: ${fcs_adaptor_prok.dump()}"
-    // log.info "trim_ns_results: ${trim_ns_results.dump()}"
-    // log.info "vecscreen_results: ${vecscreen_results.dump()}"
-    // log.info "autofilter_results: ${autofilter_results.dump()}"
-    // log.info "merged_table: ${merged_table.dump()}"
-    // log.info "fasta_sanitation_log: ${fasta_sanitation_log.dump()}"
-    // log.info "fasta_length_filtering_log: ${fasta_length_filtering_log.dump()}"
-    // log.info "jinja_templates_list: ${jinja_templates_list.dump()}" // Updated logging
-    // log.info "fcsgx_report_txt: ${fcsgx_report_txt.dump()}"
-    // log.info "fcsgx_taxonomy_rpt: ${fcsgx_taxonomy_rpt.dump()}"
 
     // Use mix instead of join to handle empty channels
     // Create a channel keyed by meta.id containing the meta map
@@ -143,7 +129,6 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         }
         .set { combined_inputs }
 
-    // log.info "Combined inputs for HTML report: ${combined_inputs.dump()}"
 
     // Convert params to JSON for passing to the HTML report
     def paramsJson = JsonOutput.toJson(params)

@@ -7,7 +7,7 @@ import os
 import sys
 import general_purpose_functions as gpf
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 DESCRIPTION = """
 Script for merging contaminant check results into one table
 Version: {VERSION}

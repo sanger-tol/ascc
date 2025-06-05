@@ -62,7 +62,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            // File processing: $meta -- $sample
         }
 
 
@@ -226,7 +226,7 @@ workflow ASCC_ORGANELLAR {
 
         RUN_VECSCREEN (
             reference_tuple_from_GG, // Again should this be the validated fasta?
-            vecscreen_database_path.first()
+            vecscreen_database_path
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
@@ -297,7 +297,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            log.info "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+            // Running BLAST on valid organelle: $meta --- $file
         }
 
     //
@@ -484,55 +484,53 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: GENERATE HTML REPORT
     //
     if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
-        // Create channels for HTML report inputs
-        // Initialize all channels as empty by default
-        ch_barcode_results = Channel.of([[id: "empty"],[]])
-        ch_fcs_adaptor_euk = Channel.of([[id: "empty"],[]])
-        ch_fcs_adaptor_prok = Channel.of([[id: "empty"],[]])
-        ch_trim_ns_results = Channel.of([[id: "empty"],[]])
-        ch_vecscreen_results = Channel.of([[id: "empty"],[]])
+        // Create channels for HTML report inputs using inline conditional pattern
+        ch_barcode_results = (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar") ? 
+            PACBIO_BARCODE_CHECK.out.filtered : 
+            Channel.of([[id: "empty"],[]])
+        
+        ch_fcs_adaptor_euk = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ? 
+            RUN_FCSADAPTOR.out.ch_euk : 
+            Channel.of([[id: "empty"],[]])
+        
+        ch_fcs_adaptor_prok = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ? 
+            RUN_FCSADAPTOR.out.ch_prok : 
+            Channel.of([[id: "empty"],[]])
+        
+        ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "organellar") ? 
+            ESSENTIAL_JOBS.out.trailing_ns_report : 
+            Channel.of([[id: "empty"],[]])
+        
+        ch_fasta_sanitation_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ? 
+            ESSENTIAL_JOBS.out.filter_fasta_sanitation_log : 
+            Channel.of([[id: "empty"],[]])
+        
+        ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ? 
+            ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log : 
+            Channel.of([[id: "empty"],[]])
+        
+        ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "organellar") ? 
+            RUN_VECSCREEN.out.vecscreen_contam : 
+            Channel.of([[id: "empty"],[]])
+        
         ch_autofilter_results = Channel.of([[id: "empty"],[]])
         ch_merged_table = Channel.of([[id: "empty"],[]])
         ch_kmers_results = Channel.of([[id: "empty"],[]])
-        ch_fasta_sanitation_log = Channel.of([[id: "empty"],[]])
-        ch_fasta_length_filtering_log = Channel.of([[id: "empty"],[]])
-        ch_fcsgx_report_txt = Channel.of([[id: "empty"],[]])
-        ch_fcsgx_taxonomy_rpt = Channel.of([[id: "empty"],[]])
-
-        // Only access workflow outputs if the workflow was actually run
-        if (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar") {
-            ch_barcode_results = PACBIO_BARCODE_CHECK.out.filtered
-        }
-
-        if (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") {
-            ch_fcs_adaptor_euk = RUN_FCSADAPTOR.out.ch_euk
-            ch_fcs_adaptor_prok = RUN_FCSADAPTOR.out.ch_prok
-        }
-
-        if (params.run_essentials == "both" || params.run_essentials == "organellar") {
-            ch_trim_ns_results = ESSENTIAL_JOBS.out.trailing_ns_report
-            ch_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
-            ch_fasta_length_filtering_log = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
-        }
-
-        if (params.run_vecscreen == "both" || params.run_vecscreen == "organellar") {
-            ch_vecscreen_results = RUN_VECSCREEN.out.vecscreen_contam
-        }
 
         // Capture FCS-GX report files with conditional handling
-        if (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") {
-            ch_fcsgx_report_txt = RUN_FCSGX.out.fcsgx_report
-                                    .filter { meta, file -> meta && file }
-                                    .map { meta, file -> [meta.id, file] }
-                                    .ifEmpty { [[],[]] }
-            ch_fcsgx_taxonomy_rpt = RUN_FCSGX.out.taxonomy_report
-                                    .filter { meta, file -> meta && file }
-                                    .map { meta, file -> [meta.id, file] }
-                                    .ifEmpty { [[],[]] }
-        } else {
-            ch_fcsgx_report_txt = Channel.of([[],[]])
-            ch_fcsgx_taxonomy_rpt = Channel.of([[],[]])
-        }
+        ch_fcsgx_report_txt = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") ?
+            RUN_FCSGX.out.fcsgx_report
+                .filter { meta, file -> meta && file }
+                .map { meta, file -> [meta.id, file] }
+                .ifEmpty { [[],[]] } :
+            Channel.of([[],[]])
+        
+        ch_fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") ?
+            RUN_FCSGX.out.taxonomy_report
+                .filter { meta, file -> meta && file }
+                .map { meta, file -> [meta.id, file] }
+                .ifEmpty { [[],[]] } :
+            Channel.of([[],[]])
 
         // Create channels for the input samplesheet and YAML parameters file
         ch_samplesheet_path = Channel.fromPath(params.input)
@@ -544,17 +542,6 @@ workflow ASCC_ORGANELLAR {
             ch_params_file = Channel.value([])
         }
 
-        // Add debug logging (commented out for normal runs)
-        // log.info "HTML Report Generation - Input Channels in organellar workflow:"
-        // log.info "ch_barcode_results: ${ch_barcode_results.dump()}"
-        // log.info "ch_fcs_adaptor_euk: ${ch_fcs_adaptor_euk.dump()}"
-        // log.info "ch_fcs_adaptor_prok: ${ch_fcs_adaptor_prok.dump()}"
-        // log.info "ch_trim_ns_results: ${ch_trim_ns_results.dump()}"
-        // log.info "ch_vecscreen_results: ${ch_vecscreen_results.dump()}"
-        // log.info "ch_fasta_sanitation_log: ${ch_fasta_sanitation_log.dump()}"
-        // log.info "ch_fasta_length_filtering_log: ${ch_fasta_length_filtering_log.dump()}"
-        // log.info "ch_samplesheet_path: ${ch_samplesheet_path.dump()}"
-        // log.info "ch_params_file: ${ch_params_file.dump()}"
 
         // Get the Jinja template
         ch_jinja_template = Channel.fromPath("${baseDir}/assets/templates/ascc_report.html.jinja")

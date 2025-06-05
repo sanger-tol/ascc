@@ -10,7 +10,7 @@ include { SUMMARISE_VECSCREEN_OUTPUT    }   from '../../../modules/local/vecscre
 workflow RUN_VECSCREEN {
     take:
     reference_tuple             // val(meta), path(fasta)
-    vecscreen_database          // val(db_path)
+    vecscreen_database          // channel: tuple(val(meta), path(db))
 
     main:
     ch_versions                 = Channel.empty()
@@ -24,25 +24,13 @@ workflow RUN_VECSCREEN {
     )
     ch_versions                 = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
 
-    // Convert the database path to a channel if it isn't already
-    vecscreen_database_ch = vecscreen_database instanceof groovyx.gpars.dataflow.DataflowVariable ?
-                            vecscreen_database :
-                            Channel.value(vecscreen_database)
-
-    vecscreen_database_ch.map{ it ->
-        tuple(
-            [id: "db"],
-            it
-        )
-    }
-    .set { vecscreen_database_tuple }
 
     //
     // MODULE: RUNS NCBI VECSCREEN
     //
     NCBITOOLS_VECSCREEN(
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
-        vecscreen_database_tuple
+        vecscreen_database
     )
     ch_versions                 = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
 

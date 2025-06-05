@@ -45,9 +45,9 @@ workflow RUN_FCSGX {
     ch_versions     = ch_versions.mix( PARSE_FCSGX_RESULT.out.versions )
 
     emit:
-    fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
-    fcsgx_report   = FCSGX_RUNGX.out.fcsgx_report
+    fcsgxresult     = PARSE_FCSGX_RESULT.out.fcsgxresult
+    fcsgx_report    = FCSGX_RUNGX.out.fcsgx_report
     taxonomy_report = FCSGX_RUNGX.out.taxonomy_report
-    versions       = ch_versions
+    versions        = ch_versions
 
 }

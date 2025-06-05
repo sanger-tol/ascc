@@ -261,7 +261,7 @@ The intention of this pipeline is to succeed the currently in production Cobiont
 | REFORMAT_DIAMOND_OUTFMT6                | -           | python:3.9, reformat_diamond_outfmt6.py:1.0.0                                                                                     |
 | GC_CONTENT                              | -           | python:3.9, gc_content.py:1.0.0                                                                                                   |
 | GENERATE_SAMPLESHEET                    | -           | python:3.9, generate_samplesheet.py:1.0.0                                                                                         |
-| GET_KMER_COUNTS                         | -           | python:3.9, kcounter:0.1.1, get_kmers_counts.py:1.0.0, general_purpose_functions.py:1.0.0                                         |
+| GET_KMER_COUNTS                         | -           | kmer-counter:0.1.2                                                                                                                |
 | GET_LARGEST_SCAFF                       | -           | coreutils:9.1                                                                                                                     |
 | GET_LINEAGE_FOR_KRAKEN                  | -           | pandas:1.5.2, python:3.9, general_purpose_functions.py:1.0.0, get_lineage_for_kraken_results.py:1.0.0                             |
 | GET_LINEAGE_FOR_TOP                     | -           | python:3.9, get_lineage_for_top.py:1.0.0                                                                                          |

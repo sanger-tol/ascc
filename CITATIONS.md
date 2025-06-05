@@ -15,10 +15,9 @@
   > Astashyn, Alexander, Eric S. Tvedte, Deacon Sweeney, Victor Sapojnikov, Nathan Bouk, Victor Joukov, Eyal Mozes, et al. 2023. “FCS-Adaptor.” FCS-Adaptor. June 6, 2023.
   > ———. 2024. “Rapid and Sensitive Detection of Genome Contamination at Scale with FCS-GX.” Genome Biology 25 (1): 60.
 
-- [Kcounter](https://github.com/apcamargo/kcounter).
+- [kmer-counter](https://github.com/CobiontID/kmer-counter).
 
-  > Buchfink, Benjamin, Klaus Reuter, and Hajk-Georg Drost. 2021. “Sensitive Protein Alignments at Tree-of-Life Scale Using DIAMOND.” Nature Methods 18 (4): 366–68.
-  > Camargo, Antônio. 2020. “Kcounter.” Kcounter. February 17, 2020. https://github.com/apcamargo/kcounter.
+  > Weber, Claudia. 2024. "kmer-counter: Fast k-mer counting in Rust." https://github.com/CobiontID/kmer-counter.
 
 - [BlobToolKit](https://github.com/sanger-tol/blobtoolkit).
 

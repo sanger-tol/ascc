@@ -5,7 +5,7 @@ process FILTER_FASTA {
     // Custom error strategy to handle validation failures (exit code 125)
     errorStrategy = { task.exitStatus == 125 ? 'terminate' : 'retry' }
 
-    conda "conda-forge::python=3.9"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.9' :
         'biocontainers/python:3.9' }"

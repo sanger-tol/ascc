@@ -153,6 +153,15 @@ workflow PIPELINE_INITIALISATION {
     Channel.of(params.fcs_gx_database_path)
         .set { fcs_gx_database_path}
 
+    // Create vecscreen database channel
+    Channel.value(params.vecscreen_database_path)
+        .map{ it ->
+            tuple(
+                [id: "db"],
+                it
+            )
+        }
+        .set { vecscreen_database_tuple }
 
     //
     // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
@@ -208,6 +217,7 @@ workflow PIPELINE_INITIALISATION {
     barcodes_file           = barcode_data_file
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_path
+    vecscreen_database      = vecscreen_database_tuple
     collected_reads         = ch_grabbed_reads_path
     versions                = ch_versions
 }
