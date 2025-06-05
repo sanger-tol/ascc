@@ -485,34 +485,34 @@ workflow ASCC_ORGANELLAR {
     //
     if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
         // Create channels for HTML report inputs using inline conditional pattern
-        ch_barcode_results = (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar") ? 
-            PACBIO_BARCODE_CHECK.out.filtered : 
+        ch_barcode_results = (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar") ?
+            PACBIO_BARCODE_CHECK.out.filtered :
             Channel.of([[id: "empty"],[]])
-        
-        ch_fcs_adaptor_euk = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ? 
-            RUN_FCSADAPTOR.out.ch_euk : 
+
+        ch_fcs_adaptor_euk = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ?
+            RUN_FCSADAPTOR.out.ch_euk :
             Channel.of([[id: "empty"],[]])
-        
-        ch_fcs_adaptor_prok = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ? 
-            RUN_FCSADAPTOR.out.ch_prok : 
+
+        ch_fcs_adaptor_prok = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ?
+            RUN_FCSADAPTOR.out.ch_prok :
             Channel.of([[id: "empty"],[]])
-        
-        ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "organellar") ? 
-            ESSENTIAL_JOBS.out.trailing_ns_report : 
+
+        ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.trailing_ns_report :
             Channel.of([[id: "empty"],[]])
-        
-        ch_fasta_sanitation_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ? 
-            ESSENTIAL_JOBS.out.filter_fasta_sanitation_log : 
+
+        ch_fasta_sanitation_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.filter_fasta_sanitation_log :
             Channel.of([[id: "empty"],[]])
-        
-        ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ? 
-            ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log : 
+
+        ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log :
             Channel.of([[id: "empty"],[]])
-        
-        ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "organellar") ? 
-            RUN_VECSCREEN.out.vecscreen_contam : 
+
+        ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "organellar") ?
+            RUN_VECSCREEN.out.vecscreen_contam :
             Channel.of([[id: "empty"],[]])
-        
+
         ch_autofilter_results = Channel.of([[id: "empty"],[]])
         ch_merged_table = Channel.of([[id: "empty"],[]])
         ch_kmers_results = Channel.of([[id: "empty"],[]])
@@ -524,7 +524,7 @@ workflow ASCC_ORGANELLAR {
                 .map { meta, file -> [meta.id, file] }
                 .ifEmpty { [[],[]] } :
             Channel.of([[],[]])
-        
+
         ch_fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") ?
             RUN_FCSGX.out.taxonomy_report
                 .filter { meta, file -> meta && file }
