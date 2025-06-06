@@ -118,7 +118,7 @@ workflow {
         Channel.fromPath(params.diamond_uniprot_database_path),
         Channel.of(params.taxid),
         Channel.fromPath(params.nt_kraken_database_path),
-        Channel.fromPath(params.vecscreen_database_path),
+        PIPELINE_INITIALISATION.out.vecscreen_database,
         Channel.from(params.reads_path),
         params.reads_layout,
         params.reads_type,

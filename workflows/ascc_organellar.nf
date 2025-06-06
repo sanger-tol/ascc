@@ -20,6 +20,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +62,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            // File processing: $meta -- $sample
         }
 
 
@@ -225,7 +226,7 @@ workflow ASCC_ORGANELLAR {
 
         RUN_VECSCREEN (
             reference_tuple_from_GG, // Again should this be the validated fasta?
-            vecscreen_database_path.first()
+            vecscreen_database_path
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
@@ -296,7 +297,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            log.info "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+            // Running BLAST on valid organelle: $meta --- $file
         }
 
     //
@@ -477,6 +478,99 @@ workflow ASCC_ORGANELLAR {
             scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: GENERATE HTML REPORT
+    //
+    if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
+        // Create channels for HTML report inputs using inline conditional pattern
+        ch_barcode_results = (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar") ?
+            PACBIO_BARCODE_CHECK.out.filtered :
+            Channel.of([[id: "empty"],[]])
+
+        ch_fcs_adaptor_euk = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ?
+            RUN_FCSADAPTOR.out.ch_euk :
+            Channel.of([[id: "empty"],[]])
+
+        ch_fcs_adaptor_prok = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ?
+            RUN_FCSADAPTOR.out.ch_prok :
+            Channel.of([[id: "empty"],[]])
+
+        ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.trailing_ns_report :
+            Channel.of([[id: "empty"],[]])
+
+        ch_fasta_sanitation_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.filter_fasta_sanitation_log :
+            Channel.of([[id: "empty"],[]])
+
+        ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log :
+            Channel.of([[id: "empty"],[]])
+
+        ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "organellar") ?
+            RUN_VECSCREEN.out.vecscreen_contam :
+            Channel.of([[id: "empty"],[]])
+
+        ch_autofilter_results = Channel.of([[id: "empty"],[]])
+        ch_merged_table = Channel.of([[id: "empty"],[]])
+        ch_kmers_results = Channel.of([[id: "empty"],[]])
+
+        // Capture FCS-GX report files with conditional handling
+        ch_fcsgx_report_txt = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") ?
+            RUN_FCSGX.out.fcsgx_report
+                .filter { meta, file -> meta && file }
+                .map { meta, file -> [meta.id, file] }
+                .ifEmpty { [[],[]] } :
+            Channel.of([[],[]])
+
+        ch_fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") ?
+            RUN_FCSGX.out.taxonomy_report
+                .filter { meta, file -> meta && file }
+                .map { meta, file -> [meta.id, file] }
+                .ifEmpty { [[],[]] } :
+            Channel.of([[],[]])
+
+        // Create channels for the input samplesheet and YAML parameters file
+        ch_samplesheet_path = Channel.fromPath(params.input)
+
+        // Handle the params_file parameter - check if it exists and create a channel
+        if (params.containsKey('params_file') && params.params_file) {
+            ch_params_file = Channel.fromPath(params.params_file)
+        } else {
+            ch_params_file = Channel.value([])
+        }
+
+
+        // Get the Jinja template
+        ch_jinja_template = Channel.fromPath("${baseDir}/assets/templates/ascc_report.html.jinja")
+
+        // Create a channel with the reference file
+        ch_reference_file = reference_tuple_from_GG
+
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_results,
+            ch_fcs_adaptor_euk,
+            ch_fcs_adaptor_prok,
+            ch_trim_ns_results,
+            ch_vecscreen_results,
+            ch_autofilter_results,
+            ch_merged_table,
+            Channel.of([[id: "empty"],[]]),  // phylum_counts - not used in organellar
+            ch_kmers_results,
+            ch_reference_file,
+            ch_fasta_sanitation_log,
+            ch_fasta_length_filtering_log,
+            Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect(), // jinja_templates_list
+            ch_samplesheet_path,
+            ch_params_file,
+            ch_fcsgx_report_txt,      // Pass FCS-GX report txt
+            ch_fcsgx_taxonomy_rpt,    // Pass FCS-GX taxonomy rpt
+            Channel.of([[id: "empty"],[]]),  // btk_dataset - add missing 19th channel
+            Channel.fromPath("${baseDir}/assets/css/*.css").collect() // css_files_list
+        )
+        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
     emit:
