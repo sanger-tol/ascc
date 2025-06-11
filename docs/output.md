@@ -220,7 +220,6 @@ Merge Tables merged the summary reports from a number of modules in order to cre
 
 ### Pipeline information
 
-
 <details markdown="1">
 <summary>Output files</summary>
 
