@@ -11,6 +11,7 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 <<<<<<< HEAD
+
 ### Processes that produce the main outputs:
 
 - [Trailing Ns Check](#trailing-ns-check)
@@ -218,11 +219,14 @@ If a set of prerequisite steps have been run (nt BLAST, nr Diamond, Uniprot Diam
 Merge Tables merged the summary reports from a number of modules in order to create a single set of reports.
 
 ### Pipeline Information
+
 =======
+
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
 ### Pipeline information
->>>>>>> TEMPLATE
+
+> > > > > > > TEMPLATE
 
 <details markdown="1">
 <summary>Output files</summary>
