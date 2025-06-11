@@ -154,6 +154,8 @@ workflow PIPELINE_INITIALISATION {
         .set { fcs_gx_database_path}
 
 
+
+
     //
     // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
     //
