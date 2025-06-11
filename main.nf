@@ -14,15 +14,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-<<<<<<< HEAD
 include { ASCC                      } from './workflows/ascc'
 include { PIPELINE_INITIALISATION   } from './subworkflows/local/utils_nfcore_ascc_pipeline'
 include { PIPELINE_COMPLETION       } from './subworkflows/local/utils_nfcore_ascc_pipeline'
-=======
-include { ASCC  } from './workflows/ascc'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_ascc_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_ascc_pipeline'
->>>>>>> TEMPLATE
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -33,7 +27,6 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_ascc
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
 workflow SANGERTOL_ASCC {
-<<<<<<< HEAD
 
     take:
     genomic             // Genomic fasta tuples
@@ -83,8 +76,6 @@ workflow SANGERTOL_ASCC {
         btk_lineages_path
     )
 }
-=======
->>>>>>> TEMPLATE
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -119,7 +110,6 @@ workflow {
         params.input
     )
 
-<<<<<<< HEAD
 
     //
     // WORKFLOW: MAIN ASCC WORKFLOW FILE THAT SEPERATES INTO GENOMIC AND ORGANELLAR
@@ -147,14 +137,6 @@ workflow {
     )
 
 
-=======
-    //
-    // WORKFLOW: Run main workflow
-    //
-    SANGERTOL_ASCC (
-        PIPELINE_INITIALISATION.out.samplesheet
-    )
->>>>>>> TEMPLATE
     //
     // SUBWORKFLOW: Run completion tasks
     //
@@ -164,11 +146,7 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
-<<<<<<< HEAD
-        []
-=======
->>>>>>> TEMPLATE
+        params.hook_url
     )
 }
 

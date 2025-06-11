@@ -230,17 +230,9 @@ workflow PIPELINE_COMPLETION {
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
     hook_url        //  string: hook URL for notifications
-<<<<<<< HEAD
-    multiqc_report  //  string: Path to MultiQC report
 
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    def multiqc_reports = multiqc_report.toList()
-=======
-
-    main:
-    summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
->>>>>>> TEMPLATE
 
     //
     // Completion email and summary
@@ -254,11 +246,7 @@ workflow PIPELINE_COMPLETION {
                 plaintext_email,
                 outdir,
                 monochrome_logs,
-<<<<<<< HEAD
-                multiqc_reports.getVal(),
-=======
                 []
->>>>>>> TEMPLATE
             )
         }
 
@@ -282,7 +270,6 @@ workflow PIPELINE_COMPLETION {
 //
 // Validate channels from input samplesheet
 //
-<<<<<<< HEAD
 // def validateInputSamplesheet(input) {
 //     def (metas, fastqs) = input[1..2]
 
@@ -295,19 +282,6 @@ workflow PIPELINE_COMPLETION {
 //     return [ metas[0], fastqs ]
 // }
 
-=======
-def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
-
-    // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
-    def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
-    if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
-    }
-
-    return [ metas[0], fastqs ]
-}
->>>>>>> TEMPLATE
 //
 // Generate methods description for MultiQC
 //
@@ -317,11 +291,6 @@ def toolCitationText() {
     // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
             "Tools used in the workflow included:",
-<<<<<<< HEAD
-            "FastQC (Andrews 2010),",
-            "MultiQC (Ewels et al. 2016)",
-=======
->>>>>>> TEMPLATE
             "."
         ].join(' ').trim()
 
@@ -332,13 +301,7 @@ def toolBibliographyText() {
     // TODO nf-core: Optionally add bibliographic entries to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
     // Uncomment function in methodsDescriptionText to render in MultiQC report
-    def reference_text = [
-<<<<<<< HEAD
-            "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
-            "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
-=======
->>>>>>> TEMPLATE
-        ].join(' ').trim()
+    def reference_text = [].join(' ').trim()
 
     return reference_text
 }
