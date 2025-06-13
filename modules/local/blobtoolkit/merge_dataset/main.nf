@@ -2,7 +2,6 @@ process MERGE_BTK_DATASETS {
     tag "$meta.id"
     label 'process_low'
 
-    conda "${moduleDir}/environment.yml"
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:

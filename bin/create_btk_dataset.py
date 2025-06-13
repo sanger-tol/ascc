@@ -455,7 +455,7 @@ def preprocess_fcsgx_csv(input_path, output_path, debug=False):
         f.writelines(processed_lines)
 
     if debug:
-        sys.stderr.write(f"[DEBUG] FCS-GX CSV preprocessing complete\n")
+        sys.stderr.write("[DEBUG] FCS-GX CSV preprocessing complete\n")
 
 
 def main(args):

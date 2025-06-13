@@ -2,11 +2,9 @@ process CREATE_BTK_DATASET {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "${moduleDir}/environment.yml"
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
-
     tuple val(id), val(meta),   path(reference),
         val(nt_blast_meta),     path(nt_blast_file, stageAs: "BLAST_HITS.tsv"),
         val(tiara_meta),        path(tiara_file, stageAs: "TIARA.txt"),
@@ -78,8 +76,8 @@ process CREATE_BTK_DATASET {
     def prefix  = task.ext.prefix   ?: "${meta.id}"
 
     """
-    mkdir btk_datasets
-    touch btk_datasets/${prefix}.txt
+    mkdir btk_datasets_CBD
+    touch btk_datasets_CBD/${prefix}.txt
     touch btk_summary_table_full.tsv
 
     cat <<-END_VERSIONS > versions.yml

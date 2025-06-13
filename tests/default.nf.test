@@ -1,10 +1,123 @@
 nextflow_pipeline {
 
-    name "Test pipeline"
+    // Full pipeline test minus the sanger-tol/blobtoolkit nested pipeline module
+    // Module is long running and already tested via it's own CICD.
+    // The test would be nice to include due to downstream parsing, however
+    // it is difficult to justify.
+
+    name "Test pipeline (NO BLOBTOOLKIT)"
     script "../main.nf"
     tag "pipeline"
 
     test("-profile test") {
+
+        setup {
+            // Data and Databases: that use curl | tar
+            // For loop as the data is all treated the same
+
+            def database_dict = [
+                                    "TEST_DATA" : [
+                                        "URL": "https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz",
+                                        "OUT": "asccTinyTest_V2"
+                                    ],
+                                    "BLASTN" : [
+                                        "URL": "https://dp24.cog.sanger.ac.uk/blastn.tar.gz",
+                                        "OUT": "blastn"
+                                    ],
+                                    "BUSCO_LINEAGES" :  [
+                                        "URL": "https://tolit.cog.sanger.ac.uk/test-data/resources/busco/blobtoolkit.GCA_922984935.2.2023-08-03.lineages.tar.gz",
+                                        "OUT": "busco_database"
+                                    ],
+                                    "KRAKEN2" :         [
+                                        "URL": "https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/genome/db/kraken2.tar.gz",
+                                        "OUT": "kraken2"
+                                    ],
+                                    "NT_SUBSET" :       [
+                                        "URL": "https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz",
+                                        "OUT": "NT_database"
+                                    ],
+                                    "VECSCREEN" :       [
+                                        "URL": "https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz",
+                                        "OUT": "vecscreen"
+                                    ]
+                                ]
+
+
+            for (String dbKey : database_dict.keySet()) {
+                def db = database_dict.get(dbKey)
+
+                println "\nDownloading the database ${dbKey}..."
+                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}/${db['OUT']}"]
+                def process = command.execute()
+                process.waitFor()
+                println "Done"
+            }
+
+            // Copy the test data so that we have a fake haplo
+            def data_copy_command = ['bash', '-c', "cp asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa"]
+            def data_copy_proc = data_copy_command.execute()
+            data_copy_proc.waitFor()
+
+            // Databases: FCS DATABASE
+            def fcs_database = [
+                "FCS1" : [
+                    "FILE": "test-only.taxa.tsv",
+                    "OUT" : "all.taxa.tsv"
+                ],
+                "FCS2" : [
+                    "FILE": "test-only.gxi",
+                    "OUT": "all.gxi"
+                ],
+                "FCS3" : [
+                    "FILE": "test-only.gxs",
+                    "OUT": "all.gxs"
+                ],
+                "FCS4" : [
+                    "FILE": "test-only.meta.jsonl",
+                    "OUT": "all.meta.jsonl"
+                ],
+                "FCS5" : [
+                    "FILE": "test-only.blast_div.tsv.gz",
+                    "OUT": "all.blast_div.tsv.gz"
+                ]
+            ]
+
+            def command = ['bash', '-c', "mkdir ${launchDir}/FCS_gx"]
+            def process = command.execute()
+            process.waitFor()
+
+            for (String dbKey : fcs_database.keySet()) {
+                def db = fcs_database.get(dbKey)
+
+                println "\nDownloading the FCS file: ${db['FILE']}..."
+                def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${launchDir}/FCS_gx/${db['OUT']}"]
+                def process2 = command.execute()
+                process2.waitFor()
+                println "Done"
+            }
+
+            // Databases: The wierd ones
+            def other_dbs = [
+                "NCBI_TAXONOMY_DB": [
+                    "COMMAND":
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ncbi_taxdump -xzf new_taxdump.tar.gz"
+                ],
+                "ASCC_DIAMOND_DB": [
+                    "COMMAND":
+                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd"
+                ]
+            ]
+
+            for (String dbKey : other_dbs.keySet()) {
+                def db = other_dbs.get(dbKey)
+
+                println "\nDownloading the OTHER DB: ${dbKey}..."
+                def command3 = ['bash', '-c', "${db['COMMAND']}"]
+                def process3 = command.execute()
+                process3.waitFor()
+                println "Done"
+            }
+        }
 
         when {
             params {
@@ -15,17 +128,74 @@ nextflow_pipeline {
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+
+            // stable_name: sorted per subworkflow output directory
+            // output for ascc exists across n (= number of input assemblies) directories and so the tests need to also reflect this.
+
+            // First block are files which will only be found in PRIMARY or HAPLO files
+            // due to these processes existing only in the GENOMIC subworkflow
+            def ascc_main_output    = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/filter_barcode/*filtered.txt")
+            def autofilter_files    = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/autofilter/*autofiltered.fasta")
+            def autofilter_txt      = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/autofilter/*autofiltered.[csv,txt]")
+            def kmer_data_files     = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/kmer_data/*", include: ["*KMER_COUNTS.csv", "_combined.csv"])
+
+            // DONE
+            def autofilter_warn_txt = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/autofilter_done_indicator_file.txt") // We want specifically this file
+            def generate_samplesheet= getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/generate_samplesheet/*csv")
+
+
+            // Second block covers all other output
+            def average_coverage    = getAllFilesFromDir("${params.outdir}/*/average_coverage/*tsv")
+            def create_btk_dataset  = getAllFilesFromDir("${params.outdir}/*/create_btk_dataset/btk_datasets_CBD/*", include: ["*.yaml", "*.json"])
+            def create_btk_tsv      = getAllFilesFromDir("${params.outdir}/*/create_btk_dataset/*.tsv")
+            def fcs_adaptor_euk     = getAllFilesFromDir("${params.outdir}/*/fcs_adaptor/*_euk.*", include: ["*cleaned_sequences.fa.gz", "*.log", "*_report.txt", "*args.yaml", "*skipped_trims.jsonl"])
+            def fcs_adaptor_prok    = getAllFilesFromDir("${params.outdir}/*/fcs_adaptor/*_prok.*", include: ["*cleaned_sequences.fa.gz", "*.log", "*_report.txt", "*args.yaml", "*skipped_trims.jsonl"])
+            def fcsgx_data          = getAllFilesFromDir("${params.outdir}/*/fcsgx_data/*")
+
+            // DONE
+            def filter_brcde_bc2001 = getAllFilesFromDir("${params.outdir}/*/filter_barcode/*", include: ["*bc2001_filtered.txt"])
+            def filter_brcde_bc2009 = getAllFilesFromDir("${params.outdir}/*/filter_barcode/*", include: ["*bc2009_filtered.txt"])
+
+            def filtered_fasta      = getAllFilesFromDir("${params.outdir}/*/filtered_fasta/*", include: ["*filtered.fasta"])
+            def gc_content_files    = getAllFilesFromDir("${params.outdir}/*/gc_content/*", include: ["*GC_CONTENT.txt"])
+            def kraken2_files       = getAllFilesFromDir("${params.outdir}/*/KRAKEN2/*", include: ["*.kraken2.report.txt"])
+            def sorted_mapped_bam   = getAllFilesFromDir("${params.outdir}/*/sorted_mapped_bam/*", include: ["*_sorted.bam"])
+            def summarise_vecscreen = getAllFilesFromDir("${params.outdir}/*/summarise_vecscreen_output/*", include: ["*vecscreen_contamination"])
+            def tiara_raw_files     = getAllFilesFromDir("${params.outdir}/*/tiara_raw_output/asccTinyTest_V2_PRIMARY.txt") // We want specifically this file
+            def trailingns          = getAllFilesFromDir("${params.outdir}/*/trailingns/*_trim_Ns")
+
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
+
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
-                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_ascc_software_mqc_versions.yml"),
+                    removeNextflowVersion("$outputDir/pipeline_info/ascc_software_versions.yml"),
+
                     // All stable path name, with a relative path
                     stable_name,
+
+                    // GENOMIC only workflow output
+                    autofilter_warn_txt,
+                    autofilter_warn_txt.size() == 2,
+
+                    generate_samplesheet,
+                    generate_samplesheet.size() == 2,
+
+
+                    // ALL workflow outputs
+                    filter_brcde_bc2001,
+                    filter_brcde_bc2001.size() == 3,
+
+                    filter_brcde_bc2009,
+                    filter_brcde_bc2009.size() == 2,
+
+
+
                     // All files with stable contents
                     stable_path
                 ).match() }
