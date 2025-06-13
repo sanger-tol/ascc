@@ -201,5 +201,18 @@ nextflow_pipeline {
                 ).match() }
             )
         }
+
+        cleanup {
+            new File("${launchDir}/FCS_gx").deleteDir()
+            new File("${launchDir}/blastdb").deleteDir()
+            new File("${launchDir}/busco").deleteDir()
+            new File("${launchDir}/asccTinyTest_V2").deleteDir()
+            new File("${launchDir}/ncbi_taxdump").deleteDir()
+            new File("${launchDir}/NT_database").deleteDir()
+            new File("${launchDir}/kraken2").deleteDir()
+            new File("${launchDir}/vecscreen").deleteDir()
+            new File("${launchDir}/diamond.dmnd").delete()
+            new File("${workDir}").deleteDir()
+        }
     }
 }
