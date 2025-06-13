@@ -42,7 +42,7 @@ process SANGER_TOL_BTK {
     """
     nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
-        -profile  $profiles \\
+        -profile $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta "\$(realpath $reference)" \\
