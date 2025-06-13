@@ -50,6 +50,11 @@ nextflow_pipeline {
                 def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}/${db['OUT']}"]
                 def process = command.execute()
                 process.waitFor()
+
+                if (process.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${dbKey}: ${process.err.text}")
+                }
+
                 println "Done"
             }
 
@@ -82,9 +87,7 @@ nextflow_pipeline {
                 ]
             ]
 
-            def command = ['bash', '-c', "mkdir ${launchDir}/FCS_gx"]
-            def process = command.execute()
-            process.waitFor()
+            new File("${launchDir}/FCS_gx").mkdir()
 
             for (String dbKey : fcs_database.keySet()) {
                 def db = fcs_database.get(dbKey)
@@ -93,6 +96,11 @@ nextflow_pipeline {
                 def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${launchDir}/FCS_gx/${db['OUT']}"]
                 def process2 = command.execute()
                 process2.waitFor()
+
+                if (process2.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${dbKey}: ${process2.err.text}")
+                }
+
                 println "Done"
             }
 
@@ -115,6 +123,11 @@ nextflow_pipeline {
                 def command3 = ['bash', '-c', "${db['COMMAND']}"]
                 def process3 = command.execute()
                 process3.waitFor()
+
+                if (process3.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${dbKey}: ${process3.err.text}")
+                }
+
                 println "Done"
             }
         }
@@ -193,7 +206,6 @@ nextflow_pipeline {
 
                     filter_brcde_bc2009,
                     filter_brcde_bc2009.size() == 2,
-
 
 
                     // All files with stable contents
