@@ -660,15 +660,13 @@ workflow ASCC_GENOMIC {
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { meta, file -> [meta, file.text.trim()] }
             .branch { meta, data ->
-                println data
+                log.info("[ASCC info] Run for ${meta.id} has no ${data}")
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION")
                 dont_run    : data.contains("NO_ABNORMAL_CONTAMINATION")
                 invalid     : true
             }
 
         btk_bool_run_btk        = btk_bool.run_btk
-        btk_bool_run_btk.view{"BTK PASS: $it"}
-        btk_bool.dont_run.view{"BTK NO RUN: $it"}
         auto_filter_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file.map{it -> tuple([id:it[0].id], it[1])}
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
@@ -748,10 +746,18 @@ workflow ASCC_GENOMIC {
     // WITHOUT AUTOFILTER
     // an empty tuple [[id: "NA"], file]
     combined_input = run_btk_conditional.run_btk
-        .map{ it -> tuple([id:it[0].id], it[1])}
+        .map{
+            it -> tuple(
+                [id:it[0].id],
+                it[1]
+            )
+        }
         .combine(btk_samplesheet, by: 0)
 
-    log.info("[ASCC info] BTK will run for: $combined_input")
+    combined_input
+        .map{ it ->
+            log.info("[ASCC info] BTK will run for: $it")
+        }
 
     //
     // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
