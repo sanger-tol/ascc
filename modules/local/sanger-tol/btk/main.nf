@@ -3,8 +3,7 @@ process SANGER_TOL_BTK {
     label 'process_low'
 
     input:
-    tuple val(meta),    path(reference)
-    path(samplesheet_csv)
+    tuple val(meta), path(reference), path(samplesheet_csv), path(autofilter)
     path blastp,                        stageAs: "blastp.dmnd"
     path blastn
     path blastx

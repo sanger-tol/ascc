@@ -120,9 +120,9 @@ workflow {
         Channel.fromPath(params.nt_kraken_database_path),
         Channel.fromPath(params.vecscreen_database_path),
         Channel.from(params.reads_path),
-        params.reads_layout,
-        params.reads_type,
-        params.busco_lineages,
+        Channel.of(params.reads_layout),
+        Channel.of(params.reads_type),
+        Channel.of(params.busco_lineages),
         Channel.fromPath(params.busco_lineages_folder)
     )
 

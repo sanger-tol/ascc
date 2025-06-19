@@ -1,9 +1,10 @@
 reads_path:
-  - /lustre/scratch124/tol/projects/asg/data/sponges/Cymbastela_concentrica/genomic_data/odCymConc1/pacbio/fasta/m84047_240125_151157_s4.ccs.bc2031.rmdup.filtered.fasta.gz
+  - /lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/genomic_data/odCymConc1/pacbio/fasta/m84047_240125_151157_s4.ccs.bc2031.rmdup.trim.fasta.gz
+  - /lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/genomic_data/odCymConc1/pacbio/fasta/m84098_240223_150913_s3.ccs.bc2031.rmdup.trim.fasta.gz
 reads_type: "hifi"
 reads_layout: "SINGLE"
 pacbio_barcode_file: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
-#pacbio_barcode_names: "bc2008,bc2009"
+pacbio_barcode_names: "bc2008,bc2009,bc2031"
 sample_id: "Cymbastela_concentrica"
 scientific_name: "Cymbastela concentrica"
 taxid: 352914
@@ -11,18 +12,17 @@ kmer_length: 7
 dimensionality_reduction_methods: ["pca", "random_trees"]
 # all available methods
 # "pca,umap,t-sne,isomap,lle_standard,lle_hessian,lle_modified,mds,se,random_trees,kernel_pca,pca_svd,autoencoder_sigmoid,autoencoder_linear,autoencoder_selu,autoencoder_relu,nmf"
-nt_database_path: /data/blastdb/Supported/NT/current/
-nt_database_prefix: nt
-nt_kraken_database_path: /lustre/scratch122/tol/resources/nt_kraken2/latest/
-ncbi_taxonomy_path: /lustre/scratch122/tol/resources/taxonomy/latest/new_taxdump/
-ncbi_ranked_lineage_path: /lustre/scratch122/tol/resources/taxonomy/latest/new_taxdump/rankedlineage.dmp
-busco_lineages_folder: /lustre/scratch122/tol/resources/busco/latest
-busco_lineages: "metazoa_odb10"
-fcs_gx_database_path: /tmp/tol_data/fcs-gx/2023-01-24/
-vecscreen_database_path: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/ascc_vecscreen
-diamond_uniprot_database_path: /lustre/scratch122/tol/resources/uniprot_reference_proteomes/latest/reference_proteomes.dmnd
-diamond_nr_database_path: /lustre/scratch123/tol/resources/nr/latest/nr.dmnd
+nt_database_path: "/data/tol/resources/nt/latest/"
+nt_database_prefix: "nt"
+nt_kraken_database_path: "/data/tol/resources/nt_kraken2/latest"
+ncbi_taxonomy_path: "/data/tol/resources/taxonomy/latest/new_taxdump"
+ncbi_ranked_lineage_path: "/data/tol/resources/taxonomy/latest/new_taxdump/rankedlineage.dmp"
+busco_lineages_folder: "/data/tol/resources/busco/latest/"
+fcs_gx_database_path: "/tmp/tol_data/fcs-gx/2023-01-24/"
+vecscreen_database_path: "/data/tol/resources/ascc_vecscreen/"
+diamond_uniprot_database_path: "/data/tol/resources/uniprot_reference_proteomes/latest/reference_proteomes.dmnd"
+diamond_nr_database_path: "/data/tol/resources/nr/latest/nr.dmnd"
 seqkit_sliding: 100000
 seqkit_window: 6000
 n_neighbours: 13
-btk_yaml: /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/btk_draft.yaml
+btk_yaml: "${projectDir}/assets/btk_draft.yaml"

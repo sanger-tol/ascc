@@ -66,7 +66,7 @@ jobs:
 
       - name: Temporary BLASTN Data
         run: |
-          curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf -
+          curl https://dp24.cog.sanger.ac.uk/blastn.tar.gz | tar xzf - -C blastn
 
       - name: Download the NCBI taxdump database
         run: |

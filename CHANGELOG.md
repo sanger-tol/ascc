@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - Red Mouse [ ##/06/2024]
+
+Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for sanger production.
+
+### `Added`
+- Added pipeline-level nf-test testing.
+- Return free-disk-space to nf-test CI runners (suggestion by @prototaxites)
+- Updated test files to post-datacentre crash (Only affects internal sanger users).
+- Test and Production (this is sanger specific, please change if you want to use the same style) configs have been updated.
+
+### `Fixed`
+- Bug where in some cases the btk_run variable would not be set prior to it's use in a conditional, causing the pipeline to crash.
+- Bug where btk input parameters would not be correctly set leading to incorrect runs of btk, where the wrong sample (no contamination) is used and the right sample is passed over.
+
+### `Bugs`
+- Currently, Blobtoolkit will *not* run if there is no autofilter output channel.
+  - In cases where blobtoolkit is set to a mandatory
+
+
 ## v0.3.1 - Red Lamp (H1) [12/05/2025]
 
 Release 5 of sanger-tol/ascc, correcting environments and updating module structure.
