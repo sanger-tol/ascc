@@ -47,7 +47,7 @@ nextflow_pipeline {
                 def db = database_dict.get(dbKey)
 
                 println "\nDownloading the database ${dbKey}..."
-                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}/${db['OUT']}"]
+                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}"]
                 def process = command.execute()
                 process.waitFor()
 
