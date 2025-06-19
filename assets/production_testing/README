@@ -2,6 +2,8 @@
 
 You need to have generated files like those in this directory, the params.yaml and samplesheet.csv.
 
+NOTE: The current test data belongs to a sponge, so may take a while to complete especially in the blast stages. I'll be looking for a better one!
+
 You can call the pipeline with:
 
 ```
@@ -10,6 +12,9 @@ nextflow run {main.nf|sanger-tol/ascc} -profile sanger,production,singularity -p
 
 params.yaml contains a reference to samplesheet.csv so you don't need to explicitly declare it on the CLI.
 
+The `conf/production.config` file contains static variables such as DB locations and others that should not change.
+If you need to use an alternative database for testing, the value in the production.config can be overwritten on the cli.
+
 Seeing as this file only contains 12 values you could also declare them explicitly like:
 
 ```
@@ -17,7 +22,7 @@ nextflow run {main.nf|sanger-tol/ascc}\
     -profile sanger,production,singularity
     --input /nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/production_testing/samplesheet.csv\
     --outdir OUTPUT-results\
-    --reads_path ["/nfs/treeoflife-01/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz"]\
+    --reads_path ["/path/to/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz"]\
     --reads_type hifi\
     --reads_layout SINGLE\
     --pacbio_barcode_names "bc2001,bc2009"\
