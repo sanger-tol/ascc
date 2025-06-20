@@ -1,3 +1,4 @@
+input: "/nfs/treeoflife-01/teams/tola/users/dp24/ascc/assets/farm_testing/samplesheet.csv"
 reads_path:
   - /lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/genomic_data/odCymConc1/pacbio/fasta/m84047_240125_151157_s4.ccs.bc2031.rmdup.trim.fasta.gz
   - /lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/genomic_data/odCymConc1/pacbio/fasta/m84098_240223_150913_s3.ccs.bc2031.rmdup.trim.fasta.gz

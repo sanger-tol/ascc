@@ -22,6 +22,9 @@ workflow RUN_READ_COVERAGE {
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
     //
+    //
+    reference_tuple.view{'HELLO'}
+    reads.view{'IM INSIDE'}
     collection_of_reads = reads.flatten()
 
     ref_and_data        =   reference_tuple

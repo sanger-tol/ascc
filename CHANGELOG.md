@@ -21,6 +21,7 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - Currently, Blobtoolkit will *not* run if there is no autofilter output channel.
   - In cases where blobtoolkit is set to a mandatory
 
+- tiara, fcsgx, autofilter must always be activated.
 
 ## v0.3.1 - Red Lamp (H1) [12/05/2025]
 

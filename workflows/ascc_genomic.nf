@@ -413,11 +413,12 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
+
     if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            reads,
-            reads_type,
+            reads_path.first(),
+            reads_type.first(),
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
@@ -667,12 +668,13 @@ workflow ASCC_GENOMIC {
             }
 
         btk_bool_run_btk        = btk_bool.run_btk
+
         auto_filter_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file.map{it -> tuple([id:it[0].id], it[1])}
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        btk_bool_run_btk        = false
-        auto_filter_indicator   = Channel.of([id: "NA"],[]) // Defined like this so downstream isn't stopped
+        btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
+        auto_filter_indicator   = Channel.empty()
 
         ch_autofilt_assem       = Channel.empty()
         ch_autofilt_indicator   = Channel.empty()
@@ -685,7 +687,7 @@ workflow ASCC_GENOMIC {
 
     run_btk_conditional = reference_tuple_from_GG
         | combine ( btk_bool_run_btk )
-        | branch { meta, assembly, btk_boolean ->
+        | branch { meta, assembly, meta2, btk_boolean ->
             def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
@@ -714,7 +716,7 @@ workflow ASCC_GENOMIC {
     //
     //
     GENERATE_SAMPLESHEET (
-        AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file,
+        auto_filter_indicator,
         run_btk_conditional.run_btk,
         reads_path.first(),
         reads_layout.first()
