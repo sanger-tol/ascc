@@ -413,12 +413,13 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
+    //
 
     if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            reads_path.first(),
-            reads_type.first(),
+            reads_path,
+            reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 

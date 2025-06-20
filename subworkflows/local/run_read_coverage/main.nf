@@ -22,9 +22,6 @@ workflow RUN_READ_COVERAGE {
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
     //
-    //
-    reference_tuple.view{'HELLO'}
-    reads.view{'IM INSIDE'}
     collection_of_reads = reads.flatten()
 
     ref_and_data        =   reference_tuple
@@ -39,7 +36,7 @@ workflow RUN_READ_COVERAGE {
     // types
     //
 
-    if ( platform == "hifi" || platform == "clr" || platform == "ont" ) {
+    if ( params.reads_type == "hifi" || params.reads_type == "clr" || params.reads_type == "ont" ) {
 
         //
         // MODULE: RUN SINGLE END MAPPING ON THE REFERENCE AND LONGREAD DATA
@@ -51,7 +48,7 @@ workflow RUN_READ_COVERAGE {
         ch_align_bam    = SE_MAPPING.out.mapped_bam
 
     }
-    else if ( platform == "illumina" ) {
+    else if ( params.reads_type == "illumina" ) {
 
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND LONGREAD DATA
