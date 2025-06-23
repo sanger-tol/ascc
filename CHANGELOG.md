@@ -16,6 +16,8 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 ### `Fixed`
 - Bug where in some cases the btk_run variable would not be set prior to it's use in a conditional, causing the pipeline to crash.
 - Bug where btk input parameters would not be correctly set leading to incorrect runs of btk, where the wrong sample (no contamination) is used and the right sample is passed over.
+- Corrected an error with output of FCSGX where it was only looking for BAM files, which are not produced by FCSGX!
+- RUN_COVERAGE was using a legacy Variable name
 
 ### `Bugs`
 - Currently, Blobtoolkit will *not* run if there is no autofilter output channel.
