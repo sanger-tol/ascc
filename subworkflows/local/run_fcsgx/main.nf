@@ -1,3 +1,4 @@
+include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
 include { FCSGX_RUNGX           } from '../../../modules/nf-core/fcsgx/rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../../modules/local/fcsgx/parse_results/main'
 
@@ -11,12 +12,26 @@ workflow RUN_FCSGX {
     main:
     ch_versions     = Channel.empty()
 
+    //
+    // MODULE: Use SAMTOOLS_DICT to get origin file and md5sum of each sequence
+    //
+    SAMTOOLS_DICT(
+        reference
+    )
+    ch_versions     = ch_versions.mix( SAMTOOLS_DICT.out.versions )
+
 
     //
     // MODULE: FCSGX_RUNGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
     //
+    SAMTOOLS_DICT.out.dict
+        .map { meta, ref, dict ->
+            tuple(meta, ref)
+        }
+        .set { samtools_reference }
+
     FCSGX_RUNGX (
-        reference,
+        samtools_reference,
         fcsgxpath,
         []
     )
@@ -46,6 +61,7 @@ workflow RUN_FCSGX {
 
     emit:
     fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
+    genomedict     = samtools_reference
     versions       = ch_versions
 
 }
