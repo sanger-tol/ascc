@@ -253,11 +253,26 @@ workflow PIPELINE_COMPLETION {
         if (hook_url) {
             imNotification(summary_params, hook_url)
         }
+
+        // Usecase is so that we have a deffinative source of pipeline completion
+        // Useful for the current infrastructure at Sanger (July 2025)
+        if (workflow.success == "SUCESS") {
+            def completionFile = file("${params.outdir}/workflow_completed.txt")
+            completionFile.text = """
+                Workflow completed successfully!
+                Completed at: ${workflow.complete}
+                Duration: ${workflow.duration}
+                Success: ${workflow.success}
+                Work directory: ${workflow.workDir}
+                Exit status: ${workflow.exitStatus}
+            """.stripIndent()
+        }
     }
 
     workflow.onError {
         log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
     }
+
 }
 
 /*
