@@ -382,7 +382,6 @@ workflow ASCC_GENOMIC {
                 meta = [id: meta.id, taxid: meta.taxid]
                 reference: [meta, ref]
                 fcs_db_path: db
-                taxid_val: tax_id
                 ncbi_tax_path: tax_path
             }
 

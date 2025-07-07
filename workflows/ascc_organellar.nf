@@ -166,7 +166,8 @@ workflow ASCC_ORGANELLAR {
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
             .multiMap { meta, ref, db, tax_id, tax_path ->
-                reference: [meta, tax_id, ref]
+                meta = [id: meta.id, taxid: meta.taxid]
+                reference: [meta, ref]
                 fcs_db_path: db
                 taxid_val: tax_id
                 ncbi_tax_path: tax_path
