@@ -16,12 +16,20 @@ workflow ORGANELLAR_BLAST {
     main:
     ch_versions     = Channel.empty()
 
+    reference_tuple
+        .combine(organellar_tuple)
+        .map { ref_meta, ref_file, org_meta, org_file ->
+            def meta = ref_meta + [ og: org_meta.id]
+            tuple(meta, ref_file)
+        }
+        .set{ new_ref_tuple }
+
 
     //
     // MODULE: STRIP SPACES OUT OF GENOMIC FASTA
     //
     SED_SED (
-        reference_tuple
+        new_ref_tuple
     )
     ch_versions     = ch_versions.mix(SED_SED.out.versions)
 
@@ -59,9 +67,9 @@ workflow ORGANELLAR_BLAST {
     BLAST_BLASTN.out.txt
         .combine ( organellar_tuple )
         .map { meta, file, org_meta, org_file ->
-            tuple ( [   id: meta.id,
-                        og: org_meta.id,
-                        sz: file.size() ],
+            tuple ( [   id: meta.id,                // Assembly Name
+                        og: org_meta.id,            // Organellar Name
+                        sz: file.size() ],          // Size of assembly
                     file
             )
         }
@@ -87,20 +95,22 @@ workflow ORGANELLAR_BLAST {
         }
         .set {no_comments}
 
-    reference_tuple
+    no_comments.valid.view{"ORGANELLAR_BLAST VALID ORGANELLAR: $it"}
+
+    // Strip out a ton of junk meta
+    new_ref_tuple
         .map{meta, file ->
-            [[id: meta.id], file]
+            [[id: meta.id, og: meta.og], file]
         }
         .set{fixed_ref}
 
-    log.debug "ORGANELLAR_BLAST REFERENCE: $fixed_ref"
+    fixed_ref.view{"ORGANELLAR_BLAST REFERENCE: $it"}
 
-    log.debug "ORGANELLAR_BLAST VALID ORGANELLAR: $no_comments.valid"
 
     no_comments
         .valid
         .map{ meta, file ->
-            [[id: meta.id], file]
+            [[id: meta.id, og: meta.og], file]
         }
         .combine(fixed_ref, by: 0)
         .multiMap { meta, no_comment_file, reference ->
@@ -109,6 +119,9 @@ workflow ORGANELLAR_BLAST {
 
         }
         .set { mapped }
+
+    mapped.filtered.view{"FILTERED: $it"}
+    mapped.reference.view{"REF: $it"}
 
 
     //
