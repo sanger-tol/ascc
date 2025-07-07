@@ -8,7 +8,7 @@ process FCSGX_RUNGX {
         'biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
 
     input:
-    tuple val(meta), val(taxid), path(fasta)
+    tuple val(meta), path(fasta)
     path gxdb
     path ramdisk_path
 
@@ -31,12 +31,11 @@ process FCSGX_RUNGX {
     // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
     """
-
     export GX_NUM_CORES=${task.cpus}
     run_gx.py \\
         --fasta ${fasta} \\
         --gx-db ${database} \\
-        --tax-id ${taxid} \\
+        --tax-id ${meta.taxid} \\
         --generate-logfile true \\
         --out-basename ${prefix} \\
         --out-dir . \\
@@ -44,7 +43,7 @@ process FCSGX_RUNGX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
+        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
     END_VERSIONS
     """
 
@@ -59,7 +58,7 @@ process FCSGX_RUNGX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
+        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
     END_VERSIONS
     """
 }

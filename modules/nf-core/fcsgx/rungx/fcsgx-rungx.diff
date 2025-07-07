@@ -1,19 +1,22 @@
 Changes in component 'nf-core/fcsgx/rungx'
-'modules/nf-core/fcsgx/rungx/environment.yml' is unchanged
 'modules/nf-core/fcsgx/rungx/meta.yml' is unchanged
+'modules/nf-core/fcsgx/rungx/environment.yml' is unchanged
 Changes in 'fcsgx/rungx/main.nf':
 --- modules/nf-core/fcsgx/rungx/main.nf
 +++ modules/nf-core/fcsgx/rungx/main.nf
-@@ -10,7 +10,7 @@
+@@ -8,9 +8,9 @@
+         'biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
+ 
      input:
-     tuple val(meta), val(taxid), path(fasta)
+-    tuple val(meta), val(taxid), path(fasta)
++    tuple val(meta), path(fasta)
      path gxdb
 -    val ramdisk_path
 +    path ramdisk_path
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,11 +25,12 @@
+@@ -25,17 +25,17 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -27,10 +30,35 @@ Changes in 'fcsgx/rungx/main.nf':
      """
 -    # Copy DB to RAM-disk when supplied. Otherwise, the tool is very slow.
 -    $mv_database_to_ram
- 
+-
      export GX_NUM_CORES=${task.cpus}
      run_gx.py \\
+         --fasta ${fasta} \\
+         --gx-db ${database} \\
+-        --tax-id ${taxid} \\
++        --tax-id ${meta.taxid} \\
+         --generate-logfile true \\
+         --out-basename ${prefix} \\
+         --out-dir . \\
+@@ -43,7 +43,7 @@
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
++        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
+     END_VERSIONS
+     """
+ 
+@@ -58,7 +58,7 @@
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
++        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
+     END_VERSIONS
+     """
+ }
 
-'modules/nf-core/fcsgx/rungx/tests/main.nf.test.snap' is unchanged
 'modules/nf-core/fcsgx/rungx/tests/main.nf.test' is unchanged
+'modules/nf-core/fcsgx/rungx/tests/main.nf.test.snap' is unchanged
 ************************************************************
