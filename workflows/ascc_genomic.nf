@@ -89,8 +89,6 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
-
 
     } else {
         log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
@@ -98,7 +96,6 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ch_samplesheet
         ej_dot_genome           = Channel.empty()
         ej_gc_coverage          = Channel.empty()
-        reference_tuple_w_seqkt = Channel.empty()
     }
 
 
@@ -382,7 +379,8 @@ workflow ASCC_GENOMIC {
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
             .multiMap { meta, ref, db, tax_id, tax_path ->
-                reference: [meta, tax_id, ref]
+                meta = [id: meta.id, taxid: meta.taxid]
+                reference: [meta, ref]
                 fcs_db_path: db
                 taxid_val: tax_id
                 ncbi_tax_path: tax_path
@@ -394,6 +392,7 @@ workflow ASCC_GENOMIC {
             joint_channel.ncbi_tax_path
         )
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+
 
         //
         // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
@@ -663,9 +662,8 @@ workflow ASCC_GENOMIC {
             .map { meta, file -> [meta, file.text.trim()] }
             .branch { meta, data ->
                 log.info("[ASCC info] Run for ${meta.id} has ${data}")
-                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION")
-                dont_run    : data.contains("NO_ABNORMAL_CONTAMINATION")
-                invalid     : true
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
+                dont_run    : true
             }
 
         btk_bool_run_btk        = btk_bool.run_btk
