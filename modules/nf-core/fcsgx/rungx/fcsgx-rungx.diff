@@ -16,7 +16,7 @@ Changes in 'fcsgx/rungx/main.nf':
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,17 +25,17 @@
+@@ -25,17 +25,19 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -30,8 +30,10 @@ Changes in 'fcsgx/rungx/main.nf':
      """
 -    # Copy DB to RAM-disk when supplied. Otherwise, the tool is very slow.
 -    $mv_database_to_ram
--
-     export GX_NUM_CORES=${task.cpus}
++    export GX_NUM_CORES=${task.cpus}
++    export GX_INSTANTIATE_FASTA=1
+ 
+-    export GX_NUM_CORES=${task.cpus}
      run_gx.py \\
          --fasta ${fasta} \\
          --gx-db ${database} \\
@@ -40,21 +42,21 @@ Changes in 'fcsgx/rungx/main.nf':
          --generate-logfile true \\
          --out-basename ${prefix} \\
          --out-dir . \\
-@@ -43,7 +43,7 @@
+@@ -43,7 +45,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
 -        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
-+        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
++        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
      END_VERSIONS
      """
  
-@@ -58,7 +58,7 @@
+@@ -58,7 +60,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
 -        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
-+        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
++        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
      END_VERSIONS
      """
  }

@@ -169,7 +169,6 @@ workflow ASCC_ORGANELLAR {
                 meta = [id: meta.id, taxid: meta.taxid]
                 reference: [meta, ref]
                 fcs_db_path: db
-                taxid_val: tax_id
                 ncbi_tax_path: tax_path
             }
 
@@ -297,7 +296,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            log.info "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+            log.info "[ASCC info] Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
         }
 
     //

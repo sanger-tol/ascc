@@ -32,6 +32,8 @@ process FCSGX_RUNGX {
     def database = ramdisk_path ?: gxdb
     """
     export GX_NUM_CORES=${task.cpus}
+    export GX_INSTANTIATE_FASTA=1
+
     run_gx.py \\
         --fasta ${fasta} \\
         --gx-db ${database} \\
@@ -43,7 +45,7 @@ process FCSGX_RUNGX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
+        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
     END_VERSIONS
     """
 
@@ -58,7 +60,7 @@ process FCSGX_RUNGX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fcsgx_galaxy: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
+        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
     END_VERSIONS
     """
 }
