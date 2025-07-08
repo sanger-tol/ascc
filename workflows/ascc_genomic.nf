@@ -702,11 +702,26 @@ workflow ASCC_GENOMIC {
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
+        log.info "[ASCC info]"
         log.info "run_autofilter_assembly is off, but run_btk_busco != off"
         log.info "This will stop blobtoolkit from running unless you restart with:"
         log.info "    `--btk_busco_run_mode mandatory`"
     }
 
+    combined_ch = run_btk_conditional.skip_btk
+        .map { meta, file -> [meta.id, meta, file] }
+        .join(
+            auto_filter_indicator.map { meta, file -> [meta.id, meta, file] }
+        )
+        .map { id, ref_meta, ref_file, alarm_meta, alarm_file ->
+            // Merge the metadata, keeping all fields from both
+            def merged_meta = ref_meta + alarm_meta
+            [merged_meta, ref_file, alarm_file]
+        }
+
+    combined_ch.map { meta, ref_file, alarm_file ->
+        log.info "[ASCC info] Combined: ${meta} | REF: ${ref_file} | ALARM: ${alarm_file}"
+    }
 
     //
     // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
@@ -714,8 +729,7 @@ workflow ASCC_GENOMIC {
     //
     //
     GENERATE_SAMPLESHEET (
-        auto_filter_indicator,
-        run_btk_conditional.run_btk,
+        combined_ch,
         reads_path.first(),
         reads_layout.first()
     )

@@ -8,8 +8,7 @@ process GENERATE_SAMPLESHEET {
     'docker.io/ubuntu:20.04' }"
 
     input:
-    tuple val(meta), path(alarm_file)
-    tuple val(meta), path(reference)
+    tuple val(meta), path(reference), path(alarm_file)
     path(pacbio_path)
     val(reads_layout)
 
@@ -22,6 +21,7 @@ process GENERATE_SAMPLESHEET {
     def VERSION = "1.1.0"
     """
     echo "Run BTK"
+    echo "Running for $meta - $reference - $alarm_file"
     echo "sample,datatype,datafile,library_layout" > pre_samplesheet.csv
 
     i=0
