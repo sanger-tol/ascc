@@ -254,29 +254,6 @@ workflow PIPELINE_COMPLETION {
             imNotification(summary_params, hook_url)
         }
 
-        // Usecase is so that we have a deffinative source of pipeline completion
-        // Useful for the current infrastructure at Sanger (July 2025)
-        if (workflow.success) {
-            try {
-                def completionFile = file("${params.outdir}/workflow_completed.txt")
-                completionFile.text = """
-                    Workflow completed successfully!
-                    Completed at: ${workflow.complete}
-                    Duration: ${workflow.duration}
-                    Success: ${workflow.success}
-                    Work directory: ${workflow.workDir}
-                    Exit status: ${workflow.exitStatus}
-                    Run name: ${workflow.runName}
-                    Session ID: ${workflow.sessionId}
-                    Project directory: ${workflow.projectDir}
-                    Launch directory: ${workflow.launchDir}
-                    Command line: ${workflow.commandLine}
-                """.stripIndent()
-                log.info "Completion file created: ${completionFile}"
-            } catch (Exception e) {
-                log.warn "Failed to create completion file: ${e.message}"
-            }
-        }
     }
 
     workflow.onError {

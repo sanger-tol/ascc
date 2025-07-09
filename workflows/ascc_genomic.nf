@@ -667,7 +667,12 @@ workflow ASCC_GENOMIC {
 
         btk_bool_run_btk        = btk_bool.run_btk
 
-        auto_filter_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file.map{it -> tuple([id:it[0].id], it[1])}
+        auto_filter_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map{ meta, file ->
+                tuple(
+                    [id: meta.id], file
+                )
+            }
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
@@ -684,8 +689,25 @@ workflow ASCC_GENOMIC {
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
     run_btk_conditional = reference_tuple_from_GG
-        | combine ( btk_bool_run_btk )
-        | branch { meta, assembly, meta2, btk_boolean ->
+        | map { meta, file ->
+                tuple([id: meta.id, taxid: meta.taxid] , file)
+            }
+        // below is combined into the tuple to enforce the block to only run when channel is present.
+        | combine ( btk_bool_run_btk
+                        .map{ meta, data ->
+                            def joined_content = data
+                                    .replaceAll(/\s*\|\s*/, "-")     // Replace " | " with "-"
+                                    .replaceAll(/\s+/, "-")          // Replace remaining spaces with "-"
+                                    .replaceAll(/_+/, "_")           // Keep underscores as they are
+                                    .replaceAll(/-+/, "-")           // Clean up multiple dashes
+                            tuple(
+                                [id: meta.id, taxid: meta.taxid],
+                                joined_content
+                            )
+                        },
+                by: [0]
+            )
+        | branch { meta, assembly, data ->
             def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
@@ -708,16 +730,23 @@ workflow ASCC_GENOMIC {
         log.info "    `--btk_busco_run_mode mandatory`"
     }
 
-    combined_ch = run_btk_conditional.skip_btk
-        .map { meta, file -> [meta.id, meta, file] }
+    // Noticed a race condition, this should fix that.
+    //
+    run_btk_conditional.run_btk.view{"FFS: $it"}
+    run_btk_conditional.run_btk
+        .map { meta, file, data -> [meta.id, meta, file] }
         .join(
-            auto_filter_indicator.map { meta, file -> [meta.id, meta, file] }
+            auto_filter_indicator
+                .map { meta, file ->
+                    [meta.id, meta, file]
+                }
         )
         .map { id, ref_meta, ref_file, alarm_meta, alarm_file ->
-            // Merge the metadata, keeping all fields from both
             def merged_meta = ref_meta + alarm_meta
             [merged_meta, ref_file, alarm_file]
         }
+        .set { combined_ch }
+
 
     combined_ch.map { meta, ref_file, alarm_file ->
         log.info "[ASCC info] Combined: ${meta} | REF: ${ref_file} | ALARM: ${alarm_file}"
