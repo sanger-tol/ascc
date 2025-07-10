@@ -20,6 +20,7 @@ kraken2-build --build --threads 16 --db nt
 ```
 
 Warning: building this database requires hundreds of gigabytes of memory.
+See their Manual at: https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown
 
 ## BUSCO5 database
 

@@ -1,6 +1,7 @@
 process FCSGX_RUNGX {
     tag "$meta.id"
     label 'process_high'
+    maxForks 1
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -30,12 +31,15 @@ process FCSGX_RUNGX {
     // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
     // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
+    //    export GX_INSTANTIATE_FASTA=1
+
     """
     export GX_NUM_CORES=${task.cpus}
-    export GX_INSTANTIATE_FASTA=1
+
+    cp `readlink ${fasta}` ${prefix}_copied_input.fasta
 
     run_gx.py \\
-        --fasta ${fasta} \\
+        --fasta ${prefix}_copied_input.fasta \\
         --gx-db ${database} \\
         --tax-id ${meta.taxid} \\
         --generate-logfile true \\

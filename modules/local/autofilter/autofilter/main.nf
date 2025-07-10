@@ -20,6 +20,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tuple val(meta), path("fcs-gx_alarm_indicator_file.txt"),           emit: alarm_file
     tuple val(meta), path("autofiltering_done_indicator_file.txt"),     emit: indicator_file
     path("autofilter_output.log"),                                      emit: autofilter_log
+    path("raw_report.txt"),                                             emit: raw_report
     path "versions.yml",                                                emit: versions
 
     script:

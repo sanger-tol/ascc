@@ -712,27 +712,25 @@ workflow ASCC_GENOMIC {
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
             def ignore_autofilter       = params.btk_busco_run_mode == "mandatory" && btk_requested
-            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && btk_boolean
+            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && data.contains("YES")
 
             run_btk: (ignore_autofilter || not_mandatory_btk)
             skip_btk: true
         }
 
     run_btk_conditional.skip_btk
-        .map { meta, file ->
+        .map { meta, file, data ->
             log.warn "[ASCC WARNING]: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]"
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
-        log.info "[ASCC info]"
-        log.info "run_autofilter_assembly is off, but run_btk_busco != off"
-        log.info "This will stop blobtoolkit from running unless you restart with:"
-        log.info "    `--btk_busco_run_mode mandatory`"
+        log.info "[ASCC info] run_autofilter_assembly is off, but run_btk_busco != off \n"
+        log.info "This will stop blobtoolkit from running unless you restart with: \n"
+        log.info "    `--btk_busco_run_mode mandatory` \n"
     }
 
     // Noticed a race condition, this should fix that.
     //
-    run_btk_conditional.run_btk.view{"FFS: $it"}
     run_btk_conditional.run_btk
         .map { meta, file, data -> [meta.id, meta, file] }
         .join(

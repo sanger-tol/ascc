@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import general_purpose_functions as gpf
 import sys
@@ -41,6 +41,7 @@ def parse_args():
     parser.add_argument("-p", "--alarm_percentage", type=int, help="Percentage of putative contaminant sequence in genomic assembly that will trip the alarm", default=3)
     parser.add_argument("-l", "--alarm_length_removed", type=int, help="Length of removed sequence is greater than default, greater than this will trip the alarm.", default=1e7)
     parser.add_argument("-s", "--alarm_scaff_length", type=int, help="Length of largest scaffold removed to trip alarm.", default=1.8e6)
+    parser.add_argument("-t", "--alarm_scaff_percent_removed", type=float, help="Percentage of Scaffolds set for removal from assembly to trip the alarm.", default=10.0)
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
 
@@ -108,6 +109,7 @@ def main():
         "TOTAL_LENGTH_REMOVED": args.alarm_length_removed,
         "PERCENTAGE_LENGTH_REMOVED": args.alarm_percentage,
         "LARGEST_SCAFFOLD_REMOVED": args.alarm_scaff_length,
+        "PERCENTAGE_SCAFFOLDS_REMOVED": args.alarm_scaff_percent_removed
     }
 
     report_dict = {
@@ -118,8 +120,10 @@ def main():
         "PERCENTAGE_SCAFFOLDS_REMOVED": 100 * scaffolds_removed / scaffold_count,
     }
 
-    for param in report_dict:
-        sys.stderr.write(f"{param}: {report_dict[param]}\n")
+    # Seperated out to ensure that the file is written in one go and doesn't confuse Nextflow
+    with open("raw_report.txt", "a") as f:
+        for x, y in report_dict.items():
+            f.write(": ".join([x, str(y)]) + "\n")
 
     pathlib.Path(args.output).unlink(missing_ok=True)
 

@@ -95,7 +95,8 @@ workflow ORGANELLAR_BLAST {
         }
         .set {no_comments}
 
-    no_comments.valid.view{"ORGANELLAR_BLAST VALID ORGANELLAR: $it"}
+    no_comments.valid.map {meta, file ->
+        log.info "[ASCC info] ORGANELLAR_BLAST VALID ORGANELLAR: \n    - $meta\n    -$file\n "}
 
     // Strip out a ton of junk meta
     new_ref_tuple
@@ -103,8 +104,6 @@ workflow ORGANELLAR_BLAST {
             [[id: meta.id, og: meta.og], file]
         }
         .set{fixed_ref}
-
-    fixed_ref.view{"ORGANELLAR_BLAST REFERENCE: $it"}
 
 
     no_comments
@@ -119,9 +118,6 @@ workflow ORGANELLAR_BLAST {
 
         }
         .set { mapped }
-
-    mapped.filtered.view{"FILTERED: $it"}
-    mapped.reference.view{"REF: $it"}
 
 
     //
