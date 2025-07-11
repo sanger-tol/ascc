@@ -61,7 +61,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -296,7 +296,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            log.info "[ASCC info] Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+            log.info "[ASCC info] Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t--${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
 
     //

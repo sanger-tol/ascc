@@ -90,28 +90,29 @@ workflow ORGANELLAR_BLAST {
     //
     FILTER_COMMENTS.out.txt
         .branch { meta, file ->
+
             valid: file.countLines() >= 1
             invalid : file.countLines() < 1
+
+            log.info "[ASCC info] ORGANELLAR_BLAST is: ${ file.countLines() >= 1 ? "VALID (${ file.countLines() } results)" : "INVALID (0 results)" }\n\t--$meta.id & $meta.og "}
         }
-        .set {no_comments}
+        .set { no_comments }
 
-    no_comments.valid.map {meta, file ->
-        log.info "[ASCC info] ORGANELLAR_BLAST VALID ORGANELLAR: \n    - $meta\n    -$file\n "}
-
-    // Strip out a ton of junk meta
-    new_ref_tuple
-        .map{meta, file ->
-            [[id: meta.id, og: meta.og], file]
-        }
-        .set{fixed_ref}
-
-
+    //
+    // NOTE: Strip out a ton of junk meta so we can join the tuples together
+    //
     no_comments
         .valid
         .map{ meta, file ->
             [[id: meta.id, og: meta.og], file]
         }
-        .combine(fixed_ref, by: 0)
+        .combine(
+            new_ref_tuple
+                .map{ meta, file ->
+                    tuple([id: meta.id, og: meta.og], file)
+                },
+            by: 0
+        )
         .multiMap { meta, no_comment_file, reference ->
             filtered: tuple(meta, no_comment_file)
             reference: tuple(meta, reference)

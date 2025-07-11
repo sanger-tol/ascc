@@ -71,7 +71,7 @@ workflow ASCC_GENOMIC {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.info "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -91,7 +91,7 @@ workflow ASCC_GENOMIC {
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
 
     } else {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)\n")
 
         reference_tuple_from_GG = ch_samplesheet
         ej_dot_genome           = Channel.empty()
@@ -426,14 +426,14 @@ workflow ASCC_GENOMIC {
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-                                .map { it ->
-                                    [[id: it[0].id, process: "Coverage"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "Coverage"], file]
                                 }
                                 .ifEmpty { [[],[]] }
 
         ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-                                .map { it ->
-                                    [[id: it[0].id, process: "Mapped Bam"], it[1]]
+                                .map { meta, file ->
+                                    tuple([id: meta.id, process: "Mapped Bam"], file)
                                 }
                                 .ifEmpty { [[],[]] }
 
@@ -504,7 +504,6 @@ workflow ASCC_GENOMIC {
         ch_kraken1 = Channel.empty()
         ch_kraken2 = Channel.empty()
         ch_kraken3 = Channel.empty()
-
     }
 
 
@@ -660,27 +659,32 @@ workflow ASCC_GENOMIC {
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { meta, file -> [meta, file.text.trim()] }
             .branch { meta, data ->
-                log.info("[ASCC info] Run for ${meta.id} has ${data}")
+                log.info("[ASCC info] Run for ${meta.id} has ${data}\n")
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
                 dont_run    : true
             }
 
         btk_bool_run_btk        = btk_bool.run_btk
 
-        auto_filter_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+        ch_autofilt_alarm_file   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map{ meta, file ->
                 tuple(
                     [id: meta.id], file
                 )
             }
 
+        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+        ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
+        ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
+
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
         btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
-        auto_filter_indicator   = Channel.empty()
+        ch_autofilt_alarm_file   = Channel.empty()
 
         ch_autofilt_assem       = Channel.empty()
         ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_fcs_tiara   = Channel.empty()
     }
 
 
@@ -734,7 +738,7 @@ workflow ASCC_GENOMIC {
     run_btk_conditional.run_btk
         .map { meta, file, data -> [meta.id, meta, file] }
         .join(
-            auto_filter_indicator
+            ch_autofilt_alarm_file
                 .map { meta, file ->
                     [meta.id, meta, file]
                 }
@@ -747,7 +751,7 @@ workflow ASCC_GENOMIC {
 
 
     combined_ch.map { meta, ref_file, alarm_file ->
-        log.info "[ASCC info] Combined: ${meta} | REF: ${ref_file} | ALARM: ${alarm_file}"
+        log.info "[ASCC info] Combined for: ${meta}\n\t| REF: ${ref_file}\n\t| ALARM: ${alarm_file}\n"
     }
 
     //
@@ -796,8 +800,8 @@ workflow ASCC_GENOMIC {
         .combine(btk_samplesheet, by: 0)
 
     combined_input
-        .map{ it ->
-            log.info("[ASCC info] BTK will run for: $it")
+        .map{ meta, ref, samplesheet, alarms ->
+            log.info("[ASCC info] BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n\t| ALM: ${alarm}")
         }
 
     //
@@ -918,6 +922,38 @@ if (
     }
 
     emit:
+    // ascc_merged_table           = ASCC_MERGE_TABLES.out.merged_table
+    // ascc_merged_table_extended  = ASCC_MERGE_TABLES.out.extended_table
+    // ascc_merged_table_phylum_c  = ASCC_MERGE_TABLES.out.phylum_counts
+
+    // merged_btk_ds_datasets      = MERGE_BTK_DATASETS.out.merged_datasets
+    // merged_btk_ds_busco_summary = MERGE_BTK_DATASETS.out.busco_summary_tsv
+
+    // sanger_tol_btk_dataset      = SANGER_TOL_BTK.out.dataset
+    // sanger_tol_btk_plots        = SANGER_TOL_BTK.out.plots
+    // sanger_tol_btk_summary_json = SANGER_TOL_BTK.out.summary_json
+    // sanger_tol_btk_busco_data   = SANGER_TOL_BTK.out.busco_data
+    // sanger_tol_btk_multiqc      = SANGER_TOL_BTK.out.multiqc_report
+    // sanger_tol_btk_pipeline_info= SANGER_TOL_BTK.out.pipeline_info
+
+    // generate_samplesheet_csv    = GENERATE_SAMPLESHEET.out.csv
+
+    autofilter_deconned_assm    = ch_autofilt_assem
+    autofilter_fcs_tiar_smry    = ch_autofilt_fcs_tiara
+    autofilter_removed_seqs     = ch_autofilt_removed_seqs
+    autofilter_alarm_file       = ch_autofilt_alarm_file
+    autofilter_indicator_file   = ch_autofilt_indicator
+    autofilter_raw_report       = ch_autofilt_raw_report
+
+    //create_btk_ds_dataset       = CREATE_DATASET.out.btk_datasets
+    create_btk_ds_create_smry   = create_summary
+
+    kraken2_classified          = ch_kraken1
+    kraken2_report              = ch_kraken2
+    kraken2_lineage             = ch_kraken3
+
+    vecscreen_contam            = ch_vecscreen
+
     versions                    = ch_versions
 }
 

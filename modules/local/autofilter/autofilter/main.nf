@@ -19,7 +19,6 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
     tuple val(meta), path("fcs-gx_alarm_indicator_file.txt"),           emit: alarm_file
     tuple val(meta), path("autofiltering_done_indicator_file.txt"),     emit: indicator_file
-    path("autofilter_output.log"),                                      emit: autofilter_log
     path("raw_report.txt"),                                             emit: raw_report
     path "versions.yml",                                                emit: versions
 
@@ -34,11 +33,11 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         --fcsgx_sum $fcs_csv \\
         --out_prefix $prefix \\
         --ncbi_rankedlineage_path $ncbi_rankedlineage \\
-        ${args} >> autofilter_output.log\\
+        ${args} \\
 
     abnormal_contamination_check.py \\
         $reference \\
-        ${prefix}_ABNORMAL_CHECK.csv >> abnormal_contamination_check.log
+        ${prefix}_ABNORMAL_CHECK.csv
 
     # The below indicator file is used in Sanger-Tol to allow for other processes
     # to begin once generated. This allows us to speed up the overall flow of the
