@@ -75,7 +75,8 @@
                         "git_sha": "0e9cb409c32d3ec4f0d3804588e4778971c09b7e",
                         "installed_by": [
                             "modules"
-                        ]
+                        ],
+                        "patch": "modules/nf-core/kraken2/kraken2/kraken2-kraken2.diff"
                     },
                     "minimap2/align": {
                         "branch": "master",

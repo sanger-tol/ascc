@@ -519,6 +519,11 @@ workflow ASCC_ORGANELLAR {
                     ncbi_rank:  ncbi
             }
 
+        autofilter_input_formatted.reference.view{"REF: $it"}
+        autofilter_input_formatted.tiara_file.view{"TIA: $it"}
+        autofilter_input_formatted.fcs_file.view{"FCS: $it"}
+        autofilter_input_formatted.ncbi_rank.view{"TAX: $it"}
+
         //
         // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
         //
