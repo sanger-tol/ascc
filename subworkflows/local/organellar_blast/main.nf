@@ -90,11 +90,12 @@ workflow ORGANELLAR_BLAST {
     //
     FILTER_COMMENTS.out.txt
         .branch { meta, file ->
+            def lines_in_file = file.countLines()
+            valid: lines_in_file >= 1
+            invalid : lines_in_file < 1
 
-            valid: file.countLines() >= 1
-            invalid : file.countLines() < 1
-
-            log.info "[ASCC info] ORGANELLAR_BLAST is: ${ file.countLines() >= 1 ? "VALID (${ file.countLines() } results)" : "INVALID (0 results)" }\n\t--$meta.id & $meta.og "}
+            log.info "[ASCC info] ORGANELLAR_BLAST results contain ${ lines_in_file } lines (> 0 is Valid)\n"
+            log.info "\t--$meta.id & $meta.og "
         }
         .set { no_comments }
 
@@ -104,12 +105,16 @@ workflow ORGANELLAR_BLAST {
     no_comments
         .valid
         .map{ meta, file ->
-            [[id: meta.id, og: meta.og], file]
+            tuple(
+                [id: meta.id, og: meta.og], file
+            )
         }
         .combine(
             new_ref_tuple
                 .map{ meta, file ->
-                    tuple([id: meta.id, og: meta.og], file)
+                    tuple(
+                        [id: meta.id, og: meta.og], file
+                    )
                 },
             by: 0
         )

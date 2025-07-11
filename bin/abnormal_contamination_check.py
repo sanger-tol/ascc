@@ -37,6 +37,7 @@ def parse_args():
     )
     parser.add_argument("assembly", type=str, help="Path to the fasta assembly file")
     parser.add_argument("summary_path", type=str, help="Path to the tiara summary file")
+    parser.add_argument("-q", "--out_prefix", type=str, help="Output file prefix for the report")
     parser.add_argument("-o", "--output", type=str, help="Path to output file", default="fcs-gx_alarm_indicator_file.txt")
     parser.add_argument("-p", "--alarm_percentage", type=int, help="Percentage of putative contaminant sequence in genomic assembly that will trip the alarm", default=3)
     parser.add_argument("-l", "--alarm_length_removed", type=int, help="Length of removed sequence is greater than default, greater than this will trip the alarm.", default=1e7)
@@ -121,7 +122,7 @@ def main():
     }
 
     # Seperated out to ensure that the file is written in one go and doesn't confuse Nextflow
-    with open("raw_report.txt", "a") as f:
+    with open(f"{args.out_prefix}_raw_report.txt", "a") as f:
         for x, y in report_dict.items():
             f.write(": ".join([x, str(y)]) + "\n")
 

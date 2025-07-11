@@ -680,7 +680,7 @@ workflow ASCC_GENOMIC {
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
         btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
-        ch_autofilt_alarm_file   = Channel.empty()
+        ch_autofilt_alarm_file  = Channel.empty()
 
         ch_autofilt_assem       = Channel.empty()
         ch_autofilt_indicator   = Channel.empty()
@@ -724,7 +724,7 @@ workflow ASCC_GENOMIC {
 
     run_btk_conditional.skip_btk
         .map { meta, file, data ->
-            log.warn "[ASCC WARNING]: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]"
+            log.warn "[ASCC WARNING]: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]\n"
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
@@ -801,7 +801,7 @@ workflow ASCC_GENOMIC {
 
     combined_input
         .map{ meta, ref, samplesheet, alarms ->
-            log.info("[ASCC info] BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n\t| ALM: ${alarm}")
+            log.info("[ASCC info] BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n\t| ALM: ${alarms}\n")
         }
 
     //

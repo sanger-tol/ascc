@@ -51,12 +51,6 @@ workflow ASCC_ORGANELLAR {
 
 
     //
-    // LOGIC: CREATE btk_busco_run_mode VALUE
-    //
-    btk_busco_run_mode = params.btk_busco_run_mode ?: "conditional"
-
-
-    //
     // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
     //
     ch_samplesheet
@@ -477,6 +471,84 @@ workflow ASCC_ORGANELLAR {
             scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+    }
+
+
+    //
+    // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
+    //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
+    //
+    if (
+        ( params.run_tiara == "both" || params.run_tiara == "organellar" ) &&
+        ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) &&
+        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "organellar" )
+    ) {
+        //
+        // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
+        //          - We can't just combine on meta.id as some of the Channels have other data
+        //              in there too so we just sanitise, and _then_ combine on 0, and
+        //              _then_ add back in the taxid as we need that for this process.
+        //              Thankfully taxid is a param so easy enough to add back in.
+        //                  Actually, it just makes more sense to passs in as its own channel.
+        //
+
+        autofilter_input_formatted = reference_tuple_from_GG
+            .map{ it -> tuple([id: it[0].id], it[1])}
+            .combine(
+                ch_tiara
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
+                ch_fcsgx
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
+                ncbi_ranked_lineage_path
+            )
+            .combine(
+                taxid
+            )
+            .multiMap{
+                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                    def new_meta = [id: meta.id, taxid: thetaxid]
+                    reference:  tuple(new_meta, ref)
+                    tiara_file: tuple(new_meta, tiara)
+                    fcs_file:   tuple(new_meta, fcs)
+                    ncbi_rank:  ncbi
+            }
+
+        //
+        // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
+        //
+        AUTOFILTER_AND_CHECK_ASSEMBLY (
+            autofilter_input_formatted.reference,
+            autofilter_input_formatted.tiara_file,
+            autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.ncbi_rank
+        )
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
+
+        ch_autofilt_alarm_file   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map{ meta, file ->
+                tuple(
+                    [id: meta.id], file
+                )
+            }
+
+        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+        ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
+        ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
+
+        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+    } else {
+        ch_autofilt_alarm_file  = Channel.empty()
+
+        ch_autofilt_assem       = Channel.empty()
+        ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_fcs_tiara   = Channel.empty()
     }
 
     emit:
