@@ -39,7 +39,7 @@ process CREATE_BTK_DATASET {
     def blastn_arg      = nt_blast_file     ? "-bh ${nt_blast_file}"     : ""
     def nt_diamond_arg  = nr_full_file      ? "-nr ${nr_full_file}"      : ""
     def un_diamond_arg  = un_full_file      ? "-ud ${un_full_file}"      : ""
-    def kraken_arg      = kraken3_file      ? "-k ${kraken3_file}"       : ""
+    def kraken_arg      = kraken2_file      ? "-k ${kraken2_file}"       : ""
     def mapped_arg      = mapped_bam_file   ? "-r ${mapped_bam_file}"    : ""
     def tiara_arg       = tiara_file        ? "-t ${tiara_file}"         : ""
     def pca_arg         = kmers_file        ? "-p ${kmers_file}"         : ""
