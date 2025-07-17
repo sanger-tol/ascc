@@ -69,8 +69,6 @@ workflow ASCC_ORGANELLAR {
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
-
 
     } else {
         log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
@@ -565,7 +563,6 @@ workflow ASCC_ORGANELLAR {
     essential_reference         = ch_reference
     essential_genome_file       = ej_dot_genome
     essential_gc_cov            = ej_gc_coverage
-    essential_reference_modified= reference_tuple_w_seqkt
 
     blast_output                = ch_nt_blast
     blast_lineage               = ch_blast_lineage
