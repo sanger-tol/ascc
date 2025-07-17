@@ -1,7 +1,10 @@
 process FCSGX_RUNGX {
     tag "$meta.id"
     label 'process_high'
-    maxForks 1
+    maxForks 1          // Should ensure that only one instance runs at any given time
+    maxRetries 2        // 2 retries to hopefully avoid the issue of fcs crashes once and kills the pipeline
+    errorStrategy { sleep(1200 as long); return 'retry' } // 20 Minute delay, same reason as above.
+
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -31,6 +34,9 @@ process FCSGX_RUNGX {
     // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
     // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
+    // cp `readlink` has been used as a potentially better alternative
+    // to to adding the below to the script block.
+    // In theory they should do the same thing.
     //    export GX_INSTANTIATE_FASTA=1
 
     """

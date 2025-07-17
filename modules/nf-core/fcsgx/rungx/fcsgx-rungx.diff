@@ -4,15 +4,18 @@ Changes in component 'nf-core/fcsgx/rungx'
 Changes in 'fcsgx/rungx/main.nf':
 --- modules/nf-core/fcsgx/rungx/main.nf
 +++ modules/nf-core/fcsgx/rungx/main.nf
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,10 @@
  process FCSGX_RUNGX {
      tag "$meta.id"
      label 'process_high'
-+    maxForks 1
++    maxForks 1          // Should ensure that only one instance runs at any given time
++    maxRetries 2        // 2 retries to hopefully avoid the issue of fcs crashes once and kills the pipeline
++    errorStrategy { sleep(1200 as long); return 'retry' } // 20 Minute delay, same reason as above.
++
  
      conda "${moduleDir}/environment.yml"
      container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-@@ -8,9 +9,9 @@
+@@ -8,9 +12,9 @@
          'biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
  
      input:
@@ -24,7 +27,7 @@ Changes in 'fcsgx/rungx/main.nf':
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,17 +26,22 @@
+@@ -25,17 +29,25 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -35,6 +38,9 @@ Changes in 'fcsgx/rungx/main.nf':
 +    // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
 +    // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
 +    def database = ramdisk_path ?: gxdb
++    // cp `readlink` has been used as a potentially better alternative
++    // to to adding the below to the script block.
++    // In theory they should do the same thing.
 +    //    export GX_INSTANTIATE_FASTA=1
 +
      """
@@ -54,7 +60,7 @@ Changes in 'fcsgx/rungx/main.nf':
          --generate-logfile true \\
          --out-basename ${prefix} \\
          --out-dir . \\
-@@ -43,7 +49,7 @@
+@@ -43,7 +55,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
@@ -63,7 +69,7 @@ Changes in 'fcsgx/rungx/main.nf':
      END_VERSIONS
      """
  
-@@ -58,7 +64,7 @@
+@@ -58,7 +70,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
