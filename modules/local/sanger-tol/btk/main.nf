@@ -9,6 +9,7 @@ process SANGER_TOL_BTK {
     path blastx
     path tax_dump
     path( "input_pacbio_files/*" )
+    path blobtoolkit_config_file
     val busco_lineages_folder
     val busco_lineages
     val taxon
@@ -41,6 +42,7 @@ process SANGER_TOL_BTK {
     """
     nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
+        -c $blobtoolkit_config_file \\
         -profile  $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
