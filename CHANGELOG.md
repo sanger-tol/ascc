@@ -18,6 +18,10 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - Update to Organellar Blast subworkflow to include organellar name in output.
 - Updated some scripts for logging and linting.
 - The AUTOFILTER_AND_CHECK_ASSEMBLY module has been added to the ORGANELLAR subworkflow, done to ensure that sanger-tol/ascc matches previously reported statistics.
+- FCSGX Module now includes a timed backoff for when it fails, this is aimed at stopping random crashes.
+- Re-organised some of the files in the assets folder and updated configs to reflect.
+- Added a `btk_pipeline.config` file in `assets/btk_config_files` to modify btk process resource requirements. Currently contains an alternate requirement for `BLASTN_TAXON`.
+- Added most of the output files to the emit of the major subworkflow (GENOMIC and ORGANELLAR) this is setup for future version nf-tools which will mandate output files are treated like this.
 
 ### `Fixed`
 
@@ -28,6 +32,7 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - Bug where fcsgx was not generating output matching cobiontcheck (predecessor to ASCC), found to be caused by an incorrect threshold value.
 - AUTOFILTER scripts were adapted to make the trigger values accessible to the end-user.
 - Other fixes introduced a race condition for sanger-tol/btk. This is now fixed and v2 os sanger-tol/ascc will wholey remove them.
+- Removed cpu and memory resource multipliers, it's not needed. If it crashes, it'll be for something else.
 
 ### `Bugs`
 
