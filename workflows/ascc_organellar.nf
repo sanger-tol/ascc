@@ -67,6 +67,7 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
 
@@ -560,7 +561,7 @@ workflow ASCC_ORGANELLAR {
 
     emit:
 
-    essential_reference         = ch_reference
+    essential_reference         = reference_tuple_from_GG
     essential_genome_file       = ej_dot_genome
     essential_gc_cov            = ej_gc_coverage
 

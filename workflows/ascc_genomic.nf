@@ -71,7 +71,7 @@ workflow ASCC_GENOMIC {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
+            log.info "[ASCC info] GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
