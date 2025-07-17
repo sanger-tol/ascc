@@ -557,6 +557,7 @@ workflow ASCC_ORGANELLAR {
         ch_autofilt_assem       = Channel.empty()
         ch_autofilt_indicator   = Channel.empty()
         ch_autofilt_fcs_tiara   = Channel.empty()
+        ch_autofilt_raw_report  = Channel.empty()
     }
 
     emit:
