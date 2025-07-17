@@ -940,7 +940,7 @@ if (
     }
 
     emit:
-    essential_reference         = ch_reference
+    essential_reference         = reference_tuple_from_GG
     essential_genome_file       = ej_dot_genome
     essential_gc_cov            = ej_gc_coverage
     essential_reference_modified= reference_tuple_w_seqkt
