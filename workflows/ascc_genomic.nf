@@ -91,7 +91,7 @@ workflow ASCC_GENOMIC {
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
 
     } else {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)\n")
+        log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         reference_tuple_from_GG = ch_samplesheet
         ej_dot_genome           = Channel.empty()
@@ -334,8 +334,11 @@ workflow ASCC_GENOMIC {
             params.pacbio_barcode_names,
             duplicated_db.pacbio_db
         )
-
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+
+    } else {
+        ch_barcode_check    = Channel.empty()
     }
 
 
@@ -590,8 +593,10 @@ workflow ASCC_GENOMIC {
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
         create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
+        create_btk_dataset      = CREATE_BTK_DATASET.out.btk_datasets
     } else {
         create_summary          = Channel.empty()
+        create_btk_dataset      = Channel.empty()
     }
 
 
@@ -681,7 +686,7 @@ workflow ASCC_GENOMIC {
     } else {
         btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
         ch_autofilt_alarm_file  = Channel.empty()
-
+        ch_autofilt_removed_seqs= Channel.empty()
         ch_autofilt_assem       = Channel.empty()
         ch_autofilt_indicator   = Channel.empty()
         ch_autofilt_fcs_tiara   = Channel.empty()
@@ -817,6 +822,7 @@ workflow ASCC_GENOMIC {
         diamond_uniprot_db_path.first(),
         ncbi_taxonomy_path.first(),
         reads_path.first(),
+        file("${projectDir}/assets/btk_config_files/btk_pipeline.config"),
         btk_lineages_path.first(),
         btk_lineages.first(),
         taxid.first(),
@@ -831,7 +837,7 @@ if (
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
         //
-        merged_channel = CREATE_BTK_DATASET.out.btk_datasets
+        merged_channel = create_btk_dataset
             .map { meta, file -> [meta.id, [meta, file]] }
             .join(
                 SANGER_TOL_BTK.out.dataset
@@ -845,8 +851,11 @@ if (
         )
         ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+        merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {
         busco_merge_btk         = Channel.empty()
+        merged_ds               = Channel.empty()
+
     }
 
 
@@ -919,16 +928,55 @@ if (
             ascc_combined_channels.map { it[1..-1] } // Remove the first item in tuple (mapping key)
         )
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+
+        merged_table            = ASCC_MERGE_TABLES.out.merged_table
+        merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
+        merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
+
+    } else {
+        merged_table            = Channel.empty()
+        merged_extended_table   = Channel.empty()
+        merged_phylum_count     = Channel.empty()
     }
 
     emit:
-    // ascc_merged_table           = ASCC_MERGE_TABLES.out.merged_table
-    // ascc_merged_table_extended  = ASCC_MERGE_TABLES.out.extended_table
-    // ascc_merged_table_phylum_c  = ASCC_MERGE_TABLES.out.phylum_counts
+    essential_reference         = ch_reference
+    essential_genome_file       = ej_dot_genome
+    essential_gc_cov            = ej_gc_coverage
+    essential_reference_modified= reference_tuple_w_seqkt
 
-    // merged_btk_ds_datasets      = MERGE_BTK_DATASETS.out.merged_datasets
-    // merged_btk_ds_busco_summary = MERGE_BTK_DATASETS.out.busco_summary_tsv
+    kmer_data                   = ch_kmers
 
+    blast_output                = ch_nt_blast
+    blast_lineage               = ch_blast_lineage
+    blast_btk_formatted         = ch_btk_format
+
+    diamond_nr_blast_full       = nr_full
+    diamond_nr_blast_hits       = nr_hits
+
+    diamond_un_blast_full       = un_full
+    diamond_un_blast_hits       = un_hits
+
+    read_coverage_output        = ch_coverage
+    read_coverage_bam           = ch_bam
+
+    fcsadaptor_prok_euk         = ch_fcsadapt
+    fcsgx_output                = ch_fcsgx
+
+    organellar_blast_mito       = ch_mito
+    organellar_blast_chloro     = ch_chloro
+
+    pacbio_barcode_files        = ch_barcode_check // This is a collection of (params.barcode * [meta, file])
+
+    ascc_merged_table           = merged_table
+    ascc_merged_table_extended  = merged_extended_table
+    ascc_merged_table_phylum_c  = merged_phylum_count
+
+    merged_btk_ds_datasets      = merged_ds
+    merged_btk_ds_busco_summary = busco_merge_btk
+
+    // THESE ONES DON'T RELY ON THE NORMAL IF ELSE STRUCTURE OF THE OTHER
+    // SUBWORKFLOWS SO THERE'S NO "BACKUP" CHANNEL.
     // sanger_tol_btk_dataset      = SANGER_TOL_BTK.out.dataset
     // sanger_tol_btk_plots        = SANGER_TOL_BTK.out.plots
     // sanger_tol_btk_summary_json = SANGER_TOL_BTK.out.summary_json
@@ -945,7 +993,7 @@ if (
     autofilter_indicator_file   = ch_autofilt_indicator
     autofilter_raw_report       = ch_autofilt_raw_report
 
-    //create_btk_ds_dataset       = CREATE_DATASET.out.btk_datasets
+    create_btk_ds_dataset       = create_btk_dataset
     create_btk_ds_create_smry   = create_summary
 
     kraken2_classified          = ch_kraken1
@@ -953,6 +1001,8 @@ if (
     kraken2_lineage             = ch_kraken3
 
     vecscreen_contam            = ch_vecscreen
+
+    tiara_output                = ch_tiara
 
     versions                    = ch_versions
 }
