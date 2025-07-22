@@ -234,4 +234,5 @@ if __name__ == "__main__":
     )
     parser.add_argument("-v", action="version", version="1.0.1")
     args = parser.parse_args()
+
     main(args.fcs_gx_reports_folder, args.ncbi_rankedlineage_path)

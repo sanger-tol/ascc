@@ -30,7 +30,9 @@ workflow ASCC_ORGANELLAR {
 
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
-    fcs_db                  // path(file)
+    fcs_ov                  // params.fcs_override
+    fcs_ss                  //
+    fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
@@ -154,7 +156,8 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) {
+
+    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") & !params.fcs_override) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
@@ -179,6 +182,10 @@ workflow ASCC_ORGANELLAR {
                                 }
                                 .ifEmpty { [[],[]] }
 
+    } else if (params.fcs_override) {
+        log.info("[ASCC info] Overriding Internal FCSGX")
+        ch_fcsgx         = fcs_ss
+        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
     } else {
         ch_fcsgx         = Channel.of( [[],[]] )
     }

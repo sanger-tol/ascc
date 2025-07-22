@@ -38,15 +38,23 @@ process SANGER_TOL_BTK {
 
     // blastx and blastp use the same database hence the StageAs
 
-
+    // First rename the input fasta, this is done to remove the "_filtered" string
+    // from the fasta name.
+    // Without doing this, and without the end user knowing, the BTK viewer can
+    // end up with non-functional enteries.
+    // e.g. uploading the entry iyTipFemo_PRIMARY (which is what the resulting dataset is named)
+    // will be a blank entry, with iyTipFemo_PRIMARY_filtered being the correct name due to the input fasta
+    // both could be blank because of this.
     """
+    mv $reference ${meta.id}.fasta
+
     nextflow run sanger-tol/blobtoolkit \\
         -r $pipeline_version \\
         -c $blobtoolkit_config_file \\
         -profile  $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
-        --fasta "\$(realpath $reference)" \\
+        --fasta ${meta.id}.fasta \\
         --busco $busco_lineages_folder \\
         --busco_lineages $busco_lineages \\
         --taxon $taxon \\

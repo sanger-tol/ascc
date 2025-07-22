@@ -41,6 +41,7 @@ process FCSGX_RUNGX {
 
     """
     export GX_NUM_CORES=${task.cpus}
+    export FCS_DEFAULT_IMAGE="https://depot.galaxyproject.org/singularity/ncbi-fcs-gx:0.5.5--h9948957_0"
 
     cp `readlink ${fasta}` ${prefix}_copied_input.fasta
 

@@ -295,6 +295,22 @@
                     "description": "Switch off the organellar workflow",
                     "fa_icon": "fas fa-file-lines",
                     "default": false
+                },
+                "fcs_override": {
+                    "type": "boolean",
+                    "description": "Use provided fcs sampleshet",
+                    "fa_icon": "fas fa-file-lines",
+                    "default": false
+                },
+                "fcs_override_samplesheet": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/fcs_schema_input.json",
+                    "mimetype": "text/csv",
+                    "description": "Override the internal FCS and provide your own. READ THE DOCS TO MAKE SURE IT IS GENERATED CORRECTLY.",
+                    "fa_icon": "fas fa-file-lines",
+                    "default": "NONE"
                 }
             }
         },

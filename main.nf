@@ -31,13 +31,16 @@ include { PIPELINE_COMPLETION       } from './subworkflows/local/utils_nfcore_as
 workflow SANGERTOL_ASCC {
 
     take:
-    genomic             // Genomic fasta tuples
-    organelles          // Organellar fasta tuples
-    fcs                 // fcs db
-    read_files          // Read files
-    scientific_name     // Scientific name
-    pacbio_db           // Pacbio database
-    ncbi_taxonomy_path  // NCBI taxonomy path
+    genomic                 // Genomic fasta tuples
+    organelles              // Organellar fasta tuples
+    fcs_override            // bool
+    genomic_fcs_samplesheet         //
+    organellar_fcs_samplesheet
+    fcs_db                  // [path(path)]
+    read_files              // Read files
+    scientific_name         // Scientific name
+    pacbio_db               // Pacbio database
+    ncbi_taxonomy_path      // NCBI taxonomy path
     ncbi_ranked_lineage_path
     nt_database_path
     diamond_nr_db_path
@@ -59,7 +62,10 @@ workflow SANGERTOL_ASCC {
     ASCC (
         genomic,
         organelles,
-        fcs,
+        fcs_override,
+        genomic_fcs_samplesheet,
+        organellar_fcs_samplesheet,
+        fcs_db,
         read_files,
         scientific_name,
         pacbio_db,
@@ -107,6 +113,9 @@ workflow {
     SANGERTOL_ASCC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
+        params.fcs_override,
+        PIPELINE_INITIALISATION.out.geno_fcs_samplesheet,
+        PIPELINE_INITIALISATION.out.orga_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
         PIPELINE_INITIALISATION.out.collected_reads,
         params.scientific_name,

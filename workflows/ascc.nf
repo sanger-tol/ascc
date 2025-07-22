@@ -19,6 +19,9 @@ workflow ASCC {
     take:
     genomic_genomes         // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
+    fcs_override            // bool
+    genomic_fcs_samplesheet //
+    organellar_fcs_samplesheet
     fcs_db                  // [path(path)]
     collected_reads         //
     scientific_name         // val(name)
@@ -43,9 +46,13 @@ workflow ASCC {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
+    //
+    // TODO: FCS OVERRIDE VALUES NOW AVAILABLE
     GENOMIC (
         genomic_genomes,
         organellar_genomes,
+        fcs_override,
+        genomic_fcs_samplesheet,
         fcs_db,
         collected_reads,
         scientific_name,
@@ -73,6 +80,8 @@ workflow ASCC {
     if ( !params.genomic_only ) {
         ORGANELLAR (
             organellar_genomes,
+            fcs_override,
+            organellar_fcs_samplesheet,
             fcs_db,
             collected_reads,
             scientific_name,

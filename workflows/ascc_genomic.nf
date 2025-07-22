@@ -39,6 +39,8 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
+    fcs_ov                  // params.fcs_override
+    fcs_ss                  //
     fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
@@ -375,7 +377,7 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) {
+    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
@@ -401,13 +403,18 @@ workflow ASCC_GENOMIC {
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
-                                .map { it ->
-                                    [[id: it[0].id, process: "FCSGX result"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "FCSGX result"], file]
                                 }
                                 .ifEmpty { [[],[]] }
 
+    } else if ( params.fcs_override ) {
+        log.info("[ASCC info] Overriding Internal FCSGX")
+        ch_fcsgx            = fcs_ss
+
+        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
     } else {
-        ch_fcsgx         = Channel.of( [[],[]] )
+        ch_fcsgx            = Channel.of( [[],[]] )
     }
 
 
@@ -755,10 +762,6 @@ workflow ASCC_GENOMIC {
         }
         .set { combined_ch }
 
-
-    combined_ch.map { meta, ref_file, alarm_file ->
-        log.info "[ASCC info] Combined for: ${meta}\n\t| REF: ${ref_file}\n\t| ALARM: ${alarm_file}\n"
-    }
 
     //
     // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
