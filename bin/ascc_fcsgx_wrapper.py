@@ -11,6 +11,15 @@ Wrapper has been written to get arround an
 issue with the singularity container of FCS not
 working well on LSF.
 
+!!!
+The script requires a compute space of
+32cores and 512Gb of memory in order to run FCS-GX.
+
+The script also required the general_purpose_function script
+to be shipped with it, this contains some functions needed by
+some scripts.
+!!!
+
 This script runs the:
    - FILTER_FASTA_BY_LENGTH
     - Not running this will result in less contamination
@@ -28,11 +37,6 @@ This script will then generate a fcs_samplesheet.csv containing:
     assembly,assembly_type,fcs_file
     iyTipFemo1,PRIMARY,*fcs_summary.csv
 """
-
-FILTER_FA_SCRIPT="/lustre/scratch124/tol/teams/tola/users/dp24/ascc/bin/filter_fasta_by_length.py"
-RUN_FCSGX_BINARY="/lustre/scratch124/tol/teams/tola/users/dp24/fcs-gx/dist/run_gx"
-RUN_FCSGX_DATABS="/tmp/tol_data/fcs-gx/2023-01-24/"
-PARSE_FCS_SCRIPT="/lustre/scratch124/tol/teams/tola/users/dp24/ascc/bin/parse_fcsgx_result.py"
 
 # Eeriks module for general functions
 import general_purpose_functions as gpf
@@ -79,16 +83,31 @@ def parse_args(argv=None):
         default=100000000,
         help="Cutoff value for filtering"
     )
+
+    # Important paths
     parser.add_argument(
-        "-l",
-        "--low_pass",
-        action="store_true",
-        help="Optional: low pass filtering mode (sequences longer than the cutoff value will be removed)",
+        "--filter_fasta_script",
+        type=str,
+        default="filter_fasta_by_length.py",
+        help="filter_fasta_by_length.py script found in the ASCC bin folder"
     )
     parser.add_argument(
-        "--remove_original_fasta",
-        action="store_true",
-        help="Optional: remove the input FASTA file after creating the filtered FASTA file",
+        "--fcs_binary_path",
+        type=str,
+        default="run_gx",
+        help="Path to the run_gx dist of your fcs install"
+    )
+    parser.add_argument(
+        "--fcs_database",
+        type=str,
+        default="/tmp/tol_data/fcs-gx/2023-01-24/",
+        help="Path to the FCS-GX database folder"
+    )
+    parser.add_argument(
+        "--parse_fcs_results",
+        type=str,
+        default="parse_fcsgx_result.py",
+        help="parse_fcsgx_result.py script found in the ASCC bin folder"
     )
 
     parser.add_argument("-v", action="version", version=VERSION)
@@ -139,7 +158,7 @@ def gunzip_input(samplesheet: dict) -> dict:
     return new_dict
 
 
-def filter_fasta_by_length_wrapper(input_dict: dict, cutoff: int) -> dict:
+def filter_fasta_by_length_wrapper(input_dict: dict, cutoff: int, script: str) -> dict:
     filter_dict = dict()
     for x, y in input_dict.items():
         if os.path.exists(f"{x}_filtering/{x}_filtered.fasta"):
@@ -151,7 +170,7 @@ def filter_fasta_by_length_wrapper(input_dict: dict, cutoff: int) -> dict:
             subprocess.call(mkdir_args)
 
             filter_args = [
-                "python3",f"{FILTER_FA_SCRIPT}",
+                "python3",f"{script}",
                 str(y), str(cutoff), "--low_pass",
                 "--remove_original_fasta",
                 ">", f"{x}_filtering/{x}_filtered.fasta"
@@ -162,7 +181,7 @@ def filter_fasta_by_length_wrapper(input_dict: dict, cutoff: int) -> dict:
     return filter_dict
 
 
-def run_fcs_gx(input_dict: dict, taxid) -> dict:
+def run_fcs_gx(input_dict: dict, taxid: str, binary: str, database: str) -> dict:
     fcs_dict = dict()
     for x, y in input_dict.items():
         print(f"{x}: RUN FCS_GX : STARTING")
@@ -170,9 +189,9 @@ def run_fcs_gx(input_dict: dict, taxid) -> dict:
         subprocess.call(mkdir_args)
 
         fcs_args = [
-            RUN_FCSGX_BINARY,
+            binary,
             "--fasta", y,
-            "--gx-db", RUN_FCSGX_DATABS,
+            "--gx-db", database,
             "--tax-id", taxid,
             "--generate-logfile", "true",
             "--out-basename", x,
@@ -187,7 +206,7 @@ def run_fcs_gx(input_dict: dict, taxid) -> dict:
     return fcs_dict
 
 
-def parse_fcs_results(input_dict, ncbi_tax_path) -> dict:
+def parse_fcs_results(input_dict, ncbi_tax_path, script) -> dict:
     parsed_dict = dict()
 
     for x, y in input_dict.items():
@@ -196,7 +215,7 @@ def parse_fcs_results(input_dict, ncbi_tax_path) -> dict:
         subprocess.call(mkdir_args)
 
         filter_args = [
-            "python3",f"{PARSE_FCS_SCRIPT}",
+            "python3",script,
             y, ncbi_tax_path,
             ">", f"{x}_parsed_fcsgx.csv"
         ]
@@ -226,16 +245,15 @@ def main():
 
     gunzipped_dictionary = gunzip_input(sample_dictionary)
 
-    filtered_dict = filter_fasta_by_length_wrapper(gunzipped_dictionary, args.cutoff)
-    print(filtered_dict)
+    filtered_dict = filter_fasta_by_length_wrapper(gunzipped_dictionary, args.cutoff, args.filter_fasta_script)
 
-    fcs_dict = run_fcs_gx(filtered_dict, args.taxid)
-    print(fcs_dict)
+    fcs_dict = run_fcs_gx(filtered_dict, args.taxid, args.fcs_binary_path, args.fcs_database)
 
-    parsed_fcs_dict = parse_fcs_results(fcs_dict, args.ncbi_taxonomy_path)
+    parsed_fcs_dict = parse_fcs_results(fcs_dict, args.ncbi_taxonomy_path, args.parse_fcs_results)
     print(parsed_fcs_dict)
 
     generate_fcs_samplesheet(parsed_fcs_dict)
+
 
 if __name__ == "__main__":
     main()
