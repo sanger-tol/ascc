@@ -22,6 +22,7 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - Re-organised some of the files in the assets folder and updated configs to reflect.
 - Added a `btk_pipeline.config` file in `assets/btk_config_files` to modify btk process resource requirements. Currently contains an alternate requirement for `BLASTN_TAXON`.
 - Added most of the output files to the emit of the major subworkflow (GENOMIC and ORGANELLAR) this is setup for future version nf-tools which will mandate output files are treated like this.
+- Added `--fcs_override` and `--fcs_override_samplesheet` to allow the pipeline to accept externally run FCS-GX results. These results must be filteres and parsed as inside the pipeline. A wrapper script is provided as `bin/ascc_fcsgx_wrapper.py`.
 
 ### `Fixed`
 

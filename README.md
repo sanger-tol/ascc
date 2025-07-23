@@ -99,6 +99,7 @@ nextflow run sanger-tol/ascc \
    --params-input YAML \
    --outdir <OUTDIR> -entry SANGERTOL_ASCC
 ```
+
 > [!WARNING]
 > If certain steps such as FCS-GX fail multiple times, especially when using Singularity containers then please use `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`. This is a known issue when some tools in singularity containers will have PID namespace conflicts and crash when anything else it attempting to access the same files. In our case the database files.
 

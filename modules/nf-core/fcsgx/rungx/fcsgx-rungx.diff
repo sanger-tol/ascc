@@ -4,18 +4,17 @@ Changes in component 'nf-core/fcsgx/rungx'
 Changes in 'fcsgx/rungx/main.nf':
 --- modules/nf-core/fcsgx/rungx/main.nf
 +++ modules/nf-core/fcsgx/rungx/main.nf
-@@ -1,6 +1,10 @@
+@@ -1,6 +1,9 @@
  process FCSGX_RUNGX {
      tag "$meta.id"
      label 'process_high'
-+    maxForks 1          // Should ensure that only one instance runs at any given time
 +    maxRetries 2        // 2 retries to hopefully avoid the issue of fcs crashes once and kills the pipeline
 +    errorStrategy { sleep(1200 as long); return 'retry' } // 20 Minute delay, same reason as above.
 +
  
      conda "${moduleDir}/environment.yml"
      container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-@@ -8,9 +12,9 @@
+@@ -8,9 +11,9 @@
          'biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
  
      input:
@@ -27,7 +26,7 @@ Changes in 'fcsgx/rungx/main.nf':
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,17 +29,25 @@
+@@ -25,17 +28,23 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -49,18 +48,15 @@ Changes in 'fcsgx/rungx/main.nf':
 +    export GX_NUM_CORES=${task.cpus}
  
 -    export GX_NUM_CORES=${task.cpus}
-+    cp `readlink ${fasta}` ${prefix}_copied_input.fasta
-+
      run_gx.py \\
--        --fasta ${fasta} \\
-+        --fasta ${prefix}_copied_input.fasta \\
+         --fasta ${fasta} \\
          --gx-db ${database} \\
 -        --tax-id ${taxid} \\
 +        --tax-id ${meta.taxid} \\
          --generate-logfile true \\
          --out-basename ${prefix} \\
          --out-dir . \\
-@@ -43,7 +55,7 @@
+@@ -43,7 +52,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
@@ -69,7 +65,7 @@ Changes in 'fcsgx/rungx/main.nf':
      END_VERSIONS
      """
  
-@@ -58,7 +70,7 @@
+@@ -58,7 +67,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
