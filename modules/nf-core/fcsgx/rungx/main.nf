@@ -1,7 +1,6 @@
 process FCSGX_RUNGX {
     tag "$meta.id"
     label 'process_high'
-    maxForks 1          // Should ensure that only one instance runs at any given time
     maxRetries 2        // 2 retries to hopefully avoid the issue of fcs crashes once and kills the pipeline
     errorStrategy { sleep(1200 as long); return 'retry' } // 20 Minute delay, same reason as above.
 
@@ -41,12 +40,9 @@ process FCSGX_RUNGX {
 
     """
     export GX_NUM_CORES=${task.cpus}
-    export FCS_DEFAULT_IMAGE="https://depot.galaxyproject.org/singularity/ncbi-fcs-gx:0.5.5--h9948957_0"
-
-    cp `readlink ${fasta}` ${prefix}_copied_input.fasta
 
     run_gx.py \\
-        --fasta ${prefix}_copied_input.fasta \\
+        --fasta ${fasta} \\
         --gx-db ${database} \\
         --tax-id ${meta.taxid} \\
         --generate-logfile true \\
