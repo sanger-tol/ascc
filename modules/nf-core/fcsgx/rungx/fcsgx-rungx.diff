@@ -4,17 +4,7 @@ Changes in component 'nf-core/fcsgx/rungx'
 Changes in 'fcsgx/rungx/main.nf':
 --- modules/nf-core/fcsgx/rungx/main.nf
 +++ modules/nf-core/fcsgx/rungx/main.nf
-@@ -1,6 +1,9 @@
- process FCSGX_RUNGX {
-     tag "$meta.id"
-     label 'process_high'
-+    maxRetries 2        // 2 retries to hopefully avoid the issue of fcs crashes once and kills the pipeline
-+    errorStrategy { sleep(1200 as long); return 'retry' } // 20 Minute delay, same reason as above.
-+
- 
-     conda "${moduleDir}/environment.yml"
-     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-@@ -8,9 +11,9 @@
+@@ -8,9 +8,9 @@
          'biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
  
      input:
@@ -26,7 +16,7 @@ Changes in 'fcsgx/rungx/main.nf':
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,17 +28,23 @@
+@@ -25,17 +25,23 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -56,7 +46,7 @@ Changes in 'fcsgx/rungx/main.nf':
          --generate-logfile true \\
          --out-basename ${prefix} \\
          --out-dir . \\
-@@ -43,7 +52,7 @@
+@@ -43,7 +49,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
@@ -65,7 +55,7 @@ Changes in 'fcsgx/rungx/main.nf':
      END_VERSIONS
      """
  
-@@ -58,7 +67,7 @@
+@@ -58,7 +64,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
