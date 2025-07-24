@@ -13,7 +13,7 @@ process GET_LINEAGE_FOR_KRAKEN {
     path ncbi_rankedlineage_path
 
     output:
-    path '*_nt_kraken_lineage_file.txt', emit: txt
+    tuple val(meta), path('*_nt_kraken_lineage_file.txt'), emit: txt
     path "versions.yml", emit: versions
 
     when:

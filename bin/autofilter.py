@@ -7,7 +7,7 @@ import sys
 import argparse
 import textwrap
 
-VERSION = "V1.0.1"
+VERSION = "V1.0.2"
 
 DESCRIPTION = """
 -------------------------------------
@@ -143,7 +143,7 @@ def process_tiara_results(tiara_results_path, target_domain):
         split_line = line.split()
         assert len(split_line) == 3
         tiara_class_fst_stage = split_line[1]
-        assert tiara_class_fst_stage in (
+        assert tiara_class_fst_stage.lower() in (
             "archaea",
             "bacteria",
             "prokarya",
@@ -195,7 +195,7 @@ def filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path):
     fasta_data = gpf.read_fasta_in_chunks(assembly_path)
     for header, seq in fasta_data:
         if header not in scaffs_to_exclude:
-            out_list.append(">" + header)
+            out_list.append(f">{header}")
             split_seq = gpf.split_with_fixed_row_length(seq, 80)
             out_list.extend(split_seq)
         else:
@@ -235,6 +235,7 @@ def main():
     scaffs_to_exclude = list()
     scaffs = get_scaff_names(assembly_path)
     for scaff in scaffs:
+        combined_action_source = "NA"
         fcs_gx_action = "NA"
         tiara_action = "NA"
         if scaff in fcs_gx_action_dict:
@@ -266,10 +267,11 @@ def main():
     )
 
     out_csv_list = list()
-    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action")
+    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action,combined_action_source")
     for scaff, scaff_properties in combined_action_dict.items():
         out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)
+    #Output the Excluded sequence list in the csv
     gpf.export_list_as_line_break_separated_file(
         out_csv_list, f"{args.out_prefix}_ABNORMAL_CHECK.csv"
     )

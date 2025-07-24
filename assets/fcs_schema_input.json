@@ -1,0 +1,31 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/assets/schema_input.json",
+    "title": "sanger-tol/ascc pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "sample": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "meta": ["id"]
+            },
+            "assembly_type": {
+                "type": "string",
+                "enum": ["PRIMARY", "HAPLO", "MITO", "PLASTID"],
+                "errorMessage": "Not a valid assembly type, must be of [PRIMARY,HAPLOTYPE,MITO,PLASTID]"
+            },
+            "fcs_file": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\_parsed_fcsgx.csv$",
+                "errorMessage": "FCS output file"
+            }
+        },
+        "required": ["sample", "assembly_type", "fcs_file"]
+    }
+}

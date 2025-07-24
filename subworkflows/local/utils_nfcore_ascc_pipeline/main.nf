@@ -80,9 +80,6 @@ workflow PIPELINE_INITIALISATION {
                 return [[ id: sample.id + '_' + type_of_assembly, assembly_type: type_of_assembly, single_end:true ], assembly_file ]
         }
         .groupTuple()
-        // .map { samplesheet ->
-        //     validateInputSamplesheet(samplesheet)
-        // }
         .map {
             meta, fastas ->
                 return [ meta, fastas[0] ] // We are only expecting one fasta file per sample+haplo
@@ -200,6 +197,46 @@ workflow PIPELINE_INITIALISATION {
     }
 
 
+    //
+    // NOTE: FCS OVERRIDE - THIS SHOULD BE TEMPORARY
+    //          FCS DOESN'T LIKE COMPLETING WHEN USED IN THE PIPELINE
+    //          THIS IS LIKELY AN INFRASTRUCTURE ISSUE AND SO WE HAVE AN
+    //          OVERRIDE SO THAT WE CAN RUN FCS EXTERNALLY AND INGEST THE RESULTS
+    //
+
+    if (params.fcs_override) {
+        Channel
+            .fromList(
+                samplesheetToList(params.fcs_override_samplesheet, "${projectDir}/assets/fcs_schema_input.json"))
+            .map {
+                sample, type_of_assembly, fcs_file ->
+                    return [[ id: sample.id + '_' + type_of_assembly, assembly_type: type_of_assembly, single_end:true ], fcs_file ]
+            }
+            .groupTuple()
+            .map {
+                meta, files ->
+                    def meta2 = meta + [process: "FCSGX result"]
+                    return [ meta2, files[0] ] // We are only expecting one fasta file per sample+haplo
+            }
+            .set { ch_fcs_samplesheet }
+
+        ch_fcs_samplesheet
+            .branch{
+                organellar_fcs: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
+                genomic_fcs: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
+                error: true
+            }
+            .set { ch_fcs_final_samplesheet }
+
+        geno_fcs_samplesheet    = ch_fcs_final_samplesheet.genomic_fcs
+        orga_fcs_samplesheet    = ch_fcs_final_samplesheet.organellar_fcs
+
+    } else {
+        geno_fcs_samplesheet    = Channel.empty()
+        orga_fcs_samplesheet    = Channel.empty()
+    }
+
+
     emit:
     samplesheet             = ch_samplesheet
     sample_id               = params.sample_id
@@ -209,6 +246,9 @@ workflow PIPELINE_INITIALISATION {
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_path
     collected_reads         = ch_grabbed_reads_path
+    geno_fcs_samplesheet    = geno_fcs_samplesheet
+    orga_fcs_samplesheet    = orga_fcs_samplesheet
+
     versions                = ch_versions
 }
 
@@ -253,11 +293,13 @@ workflow PIPELINE_COMPLETION {
         if (hook_url) {
             imNotification(summary_params, hook_url)
         }
+
     }
 
     workflow.onError {
         log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
     }
+
 }
 
 /*

@@ -39,6 +39,8 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
+    fcs_ov                  // params.fcs_override
+    fcs_ss                  //
     fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
@@ -71,7 +73,7 @@ workflow ASCC_GENOMIC {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.info "[ASCC info] GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -89,16 +91,13 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
-
 
     } else {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         reference_tuple_from_GG = ch_samplesheet
         ej_dot_genome           = Channel.empty()
         ej_gc_coverage          = Channel.empty()
-        reference_tuple_w_seqkt = Channel.empty()
     }
 
 
@@ -337,8 +336,11 @@ workflow ASCC_GENOMIC {
             params.pacbio_barcode_names,
             duplicated_db.pacbio_db
         )
-
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+
+    } else {
+        ch_barcode_check    = Channel.empty()
     }
 
 
@@ -375,16 +377,16 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) {
+    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
             .multiMap { meta, ref, db, tax_id, tax_path ->
-                reference: [meta, tax_id, ref]
+                meta = [id: meta.id, taxid: meta.taxid]
+                reference: [meta, ref]
                 fcs_db_path: db
-                taxid_val: tax_id
                 ncbi_tax_path: tax_path
             }
 
@@ -395,29 +397,37 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
 
+
         //
         // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
-                                .map { it ->
-                                    [[id: it[0].id, process: "FCSGX result"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "FCSGX result"], file]
                                 }
                                 .ifEmpty { [[],[]] }
 
+    } else if ( params.fcs_override ) {
+        log.info("[ASCC info] Overriding Internal FCSGX")
+        ch_fcsgx            = fcs_ss
+
+        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
     } else {
-        ch_fcsgx         = Channel.of( [[],[]] )
+        ch_fcsgx            = Channel.of( [[],[]] )
     }
 
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
+    //
+
     if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            reads,
-            reads_type,
+            reads_path,
+            reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
@@ -426,14 +436,14 @@ workflow ASCC_GENOMIC {
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-                                .map { it ->
-                                    [[id: it[0].id, process: "Coverage"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "Coverage"], file]
                                 }
                                 .ifEmpty { [[],[]] }
 
         ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-                                .map { it ->
-                                    [[id: it[0].id, process: "Mapped Bam"], it[1]]
+                                .map { meta, file ->
+                                    tuple([id: meta.id, process: "Mapped Bam"], file)
                                 }
                                 .ifEmpty { [[],[]] }
 
@@ -504,7 +514,6 @@ workflow ASCC_GENOMIC {
         ch_kraken1 = Channel.empty()
         ch_kraken2 = Channel.empty()
         ch_kraken3 = Channel.empty()
-
     }
 
 
@@ -591,8 +600,10 @@ workflow ASCC_GENOMIC {
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
         create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
+        create_btk_dataset      = CREATE_BTK_DATASET.out.btk_datasets
     } else {
         create_summary          = Channel.empty()
+        create_btk_dataset      = Channel.empty()
     }
 
 
@@ -634,9 +645,10 @@ workflow ASCC_GENOMIC {
             )
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
-                    reference:  tuple([id: meta.id, taxid: thetaxid], ref)
-                    tiara_file: tuple(meta, tiara)
-                    fcs_file:   tuple(meta, fcs)
+                    def new_meta = [id: meta.id, taxid: thetaxid]
+                    reference:  tuple(new_meta, ref)
+                    tiara_file: tuple(new_meta, tiara)
+                    fcs_file:   tuple(new_meta, fcs)
                     ncbi_rank:  ncbi
             }
 
@@ -657,16 +669,35 @@ workflow ASCC_GENOMIC {
         //          OUTPUT FILE.
         //          CHANGE OUTPUT NAME TO BE REFERENCE NAME AND THEN ALARM FILE
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-            .map { file -> file.text.trim() }
-            .branch { it ->
-                run_btk     : it.contains("YES_ABNORMAL_CONTAMINATION")
+            .map { meta, file -> [meta, file.text.trim()] }
+            .branch { meta, data ->
+                log.info("[ASCC info] Run for ${meta.id} has ${data}\n")
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
                 dont_run    : true
             }
 
+        btk_bool_run_btk        = btk_bool.run_btk
+
+        ch_autofilt_alarm_file   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map{ meta, file ->
+                tuple(
+                    [id: meta.id], file
+                )
+            }
+
+        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+        ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
+        ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
+
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
+        btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
+        ch_autofilt_alarm_file  = Channel.empty()
+        ch_autofilt_removed_seqs= Channel.empty()
         ch_autofilt_assem       = Channel.empty()
         ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_fcs_tiara   = Channel.empty()
+        ch_autofilt_raw_report  = Channel.empty()
     }
 
 
@@ -675,37 +706,72 @@ workflow ASCC_GENOMIC {
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
     run_btk_conditional = reference_tuple_from_GG
-        | branch { meta, assembly ->
+        | map { meta, file ->
+                tuple([id: meta.id, taxid: meta.taxid] , file)
+            }
+        // below is combined into the tuple to enforce the block to only run when channel is present.
+        | combine ( btk_bool_run_btk
+                        .map{ meta, data ->
+                            def joined_content = data
+                                    .replaceAll(/\s*\|\s*/, "-")     // Replace " | " with "-"
+                                    .replaceAll(/\s+/, "-")          // Replace remaining spaces with "-"
+                                    .replaceAll(/_+/, "_")           // Keep underscores as they are
+                                    .replaceAll(/-+/, "-")           // Clean up multiple dashes
+                            tuple(
+                                [id: meta.id, taxid: meta.taxid],
+                                joined_content
+                            )
+                        },
+                by: [0]
+            )
+        | branch { meta, assembly, data ->
             def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
             def ignore_autofilter       = params.btk_busco_run_mode == "mandatory" && btk_requested
-            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && btk_bool.run_btk
+            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && data.contains("YES")
 
             run_btk: (ignore_autofilter || not_mandatory_btk)
             skip_btk: true
         }
 
     run_btk_conditional.skip_btk
-        .map { meta, file ->
-            log.warn "BLOBTOOLKIT: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]"
+        .map { meta, file, data ->
+            log.warn "[ASCC WARNING]: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]\n"
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
-        log.info "run_autofilter_assembly is off, but run_btk_busco != off"
-        log.info "This will stop blobtoolkit from running unless you restart with:"
-        log.info "    `--btk_busco_run_mode mandatory`"
+        log.info "[ASCC info] run_autofilter_assembly is off, but run_btk_busco != off \n"
+        log.info "This will stop blobtoolkit from running unless you restart with: \n"
+        log.info "    `--btk_busco_run_mode mandatory` \n"
     }
+
+    // Noticed a race condition, this should fix that.
+    //
+    run_btk_conditional.run_btk
+        .map { meta, file, data -> [meta.id, meta, file] }
+        .join(
+            ch_autofilt_alarm_file
+                .map { meta, file ->
+                    [meta.id, meta, file]
+                }
+        )
+        .map { id, ref_meta, ref_file, alarm_meta, alarm_file ->
+            def merged_meta = ref_meta + alarm_meta
+            [merged_meta, ref_file, alarm_file]
+        }
+        .set { combined_ch }
 
 
     //
     // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
     //          USE IN THE BTK PIPELINE
     //
+    //
     GENERATE_SAMPLESHEET (
-        run_btk_conditional.run_btk,
-        reads_path,
-        reads_layout
+        combined_ch,
+        reads_path.first(),
+        reads_layout.first()
     )
     ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
@@ -713,19 +779,38 @@ workflow ASCC_GENOMIC {
     // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
     //
     btk_samplesheet = GENERATE_SAMPLESHEET.out.csv
-        .map{ meta, csv ->
+        .map{ meta, csv, indicator ->
             tuple(
                 [ id: meta.id ],
-                csv
+                csv,
+                indicator
             )
         }
 
+
+    //
+    // So autofilter needs to be in a "Shreodingers cat" situation
+    // It can either exist or not but both need to be able to run.
+    // WITH AUTOFILTER
+    // we can bind this file into the required inputs
+    // this is to avoid a possible race condition which a generic fcs_gx (no meta)
+    // will trigger btk to start running however if the PRIMARY passes AUTOFILTER
+    // but HAPLO completes the other required steps
+    // then HAPLO will be triggered for BTK not PRIMARY which would be correct
+    // WITHOUT AUTOFILTER
+    // an empty tuple [[id: "NA"], file]
     combined_input = run_btk_conditional.run_btk
-        .map{ it -> tuple([id:it[0].id], it[1])}
+        .map{
+            it -> tuple(
+                [id:it[0].id],
+                it[1]
+            )
+        }
         .combine(btk_samplesheet, by: 0)
-        .multiMap { meta_1, ref, csv ->
-            reference: [meta_1, ref]
-            samplesheet: csv
+
+    combined_input
+        .map{ meta, ref, samplesheet, alarms ->
+            log.info("[ASCC info] BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n\t| ALM: ${alarms}\n")
         }
 
     //
@@ -735,16 +820,16 @@ workflow ASCC_GENOMIC {
     //              This will also eventually check for the above run_btk boolean from
     //              autofilter
     SANGER_TOL_BTK (
-        combined_input.reference,
-        combined_input.samplesheet,
+        combined_input,
         diamond_uniprot_db_path.first(),
         nt_database_path.first(),
         diamond_uniprot_db_path.first(),
         ncbi_taxonomy_path.first(),
-        reads_path,
+        reads_path.first(),
+        file("${projectDir}/assets/btk_config_files/btk_pipeline.config"),
         btk_lineages_path.first(),
-        btk_lineages,
-        taxid,
+        btk_lineages.first(),
+        taxid.first(),
     )
     ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
@@ -756,7 +841,7 @@ if (
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
         //
-        merged_channel = CREATE_BTK_DATASET.out.btk_datasets
+        merged_channel = create_btk_dataset
             .map { meta, file -> [meta.id, [meta, file]] }
             .join(
                 SANGER_TOL_BTK.out.dataset
@@ -770,8 +855,11 @@ if (
         )
         ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+        merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {
         busco_merge_btk         = Channel.empty()
+        merged_ds               = Channel.empty()
+
     }
 
 
@@ -844,9 +932,81 @@ if (
             ascc_combined_channels.map { it[1..-1] } // Remove the first item in tuple (mapping key)
         )
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+
+        merged_table            = ASCC_MERGE_TABLES.out.merged_table
+        merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
+        merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
+
+    } else {
+        merged_table            = Channel.empty()
+        merged_extended_table   = Channel.empty()
+        merged_phylum_count     = Channel.empty()
     }
 
     emit:
+    essential_reference         = reference_tuple_from_GG
+    essential_genome_file       = ej_dot_genome
+    essential_gc_cov            = ej_gc_coverage
+
+    kmer_data                   = ch_kmers
+
+    blast_output                = ch_nt_blast
+    blast_lineage               = ch_blast_lineage
+    blast_btk_formatted         = ch_btk_format
+
+    diamond_nr_blast_full       = nr_full
+    diamond_nr_blast_hits       = nr_hits
+
+    diamond_un_blast_full       = un_full
+    diamond_un_blast_hits       = un_hits
+
+    read_coverage_output        = ch_coverage
+    read_coverage_bam           = ch_bam
+
+    fcsadaptor_prok_euk         = ch_fcsadapt
+    fcsgx_output                = ch_fcsgx
+
+    organellar_blast_mito       = ch_mito
+    organellar_blast_chloro     = ch_chloro
+
+    pacbio_barcode_files        = ch_barcode_check // This is a collection of (params.barcode * [meta, file])
+
+    ascc_merged_table           = merged_table
+    ascc_merged_table_extended  = merged_extended_table
+    ascc_merged_table_phylum_c  = merged_phylum_count
+
+    merged_btk_ds_datasets      = merged_ds
+    merged_btk_ds_busco_summary = busco_merge_btk
+
+    // THESE ONES DON'T RELY ON THE NORMAL IF ELSE STRUCTURE OF THE OTHER
+    // SUBWORKFLOWS SO THERE'S NO "BACKUP" CHANNEL.
+    // sanger_tol_btk_dataset      = SANGER_TOL_BTK.out.dataset
+    // sanger_tol_btk_plots        = SANGER_TOL_BTK.out.plots
+    // sanger_tol_btk_summary_json = SANGER_TOL_BTK.out.summary_json
+    // sanger_tol_btk_busco_data   = SANGER_TOL_BTK.out.busco_data
+    // sanger_tol_btk_multiqc      = SANGER_TOL_BTK.out.multiqc_report
+    // sanger_tol_btk_pipeline_info= SANGER_TOL_BTK.out.pipeline_info
+
+    // generate_samplesheet_csv    = GENERATE_SAMPLESHEET.out.csv
+
+    autofilter_deconned_assm    = ch_autofilt_assem
+    autofilter_fcs_tiar_smry    = ch_autofilt_fcs_tiara
+    autofilter_removed_seqs     = ch_autofilt_removed_seqs
+    autofilter_alarm_file       = ch_autofilt_alarm_file
+    autofilter_indicator_file   = ch_autofilt_indicator
+    autofilter_raw_report       = ch_autofilt_raw_report
+
+    create_btk_ds_dataset       = create_btk_dataset
+    create_btk_ds_create_smry   = create_summary
+
+    kraken2_classified          = ch_kraken1
+    kraken2_report              = ch_kraken2
+    kraken2_lineage             = ch_kraken3
+
+    vecscreen_contam            = ch_vecscreen
+
+    tiara_output                = ch_tiara
+
     versions                    = ch_versions
 }
 

@@ -5,12 +5,11 @@
 */
 
 include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
-include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
-include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
 include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
@@ -31,7 +30,9 @@ workflow ASCC_ORGANELLAR {
 
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
-    fcs_db                  // path(file)
+    fcs_ov                  // params.fcs_override
+    fcs_ss                  //
+    fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
@@ -51,17 +52,11 @@ workflow ASCC_ORGANELLAR {
 
 
     //
-    // LOGIC: CREATE btk_busco_run_mode VALUE
-    //
-    btk_busco_run_mode = params.btk_busco_run_mode ?: "conditional"
-
-
-    //
     // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample"
+            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -74,13 +69,12 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
-
 
     } else {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         reference_tuple_from_GG = ch_samplesheet
         ej_dot_genome           = Channel.empty()
@@ -126,8 +120,11 @@ workflow ASCC_ORGANELLAR {
             params.pacbio_barcode_names,
             duplicated_db.pacbio_db
         )
-
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+
+    } else {
+        ch_barcode_check    = Channel.empty()
     }
 
 
@@ -159,16 +156,17 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) {
+
+    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") & !params.fcs_override) {
 
         joint_channel = reference_tuple_from_GG
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
             .multiMap { meta, ref, db, tax_id, tax_path ->
-                reference: [meta, tax_id, ref]
+                meta = [id: meta.id, taxid: meta.taxid]
+                reference: [meta, ref]
                 fcs_db_path: db
-                taxid_val: tax_id
                 ncbi_tax_path: tax_path
             }
 
@@ -184,6 +182,10 @@ workflow ASCC_ORGANELLAR {
                                 }
                                 .ifEmpty { [[],[]] }
 
+    } else if (params.fcs_override) {
+        log.info("[ASCC info] Overriding Internal FCSGX")
+        ch_fcsgx         = fcs_ss
+        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
     } else {
         ch_fcsgx         = Channel.of( [[],[]] )
     }
@@ -296,7 +298,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            log.info "Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: $meta --- $file"
+            log.info "[ASCC info] Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
 
     //
@@ -477,9 +479,134 @@ workflow ASCC_ORGANELLAR {
             scientific_name
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+
+        create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
+        create_btk_dataset      = CREATE_BTK_DATASET.out.btk_datasets
+    } else {
+        create_summary          = Channel.empty()
+        create_btk_dataset      = Channel.empty()
+    }
+
+
+    //
+    // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
+    //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
+    //
+    if (
+        ( params.run_tiara == "both" || params.run_tiara == "organellar" ) &&
+        ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) &&
+        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "organellar" )
+    ) {
+        //
+        // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
+        //          - We can't just combine on meta.id as some of the Channels have other data
+        //              in there too so we just sanitise, and _then_ combine on 0, and
+        //              _then_ add back in the taxid as we need that for this process.
+        //              Thankfully taxid is a param so easy enough to add back in.
+        //                  Actually, it just makes more sense to passs in as its own channel.
+        //
+
+        autofilter_input_formatted = reference_tuple_from_GG
+            .map{ it -> tuple([id: it[0].id], it[1])}
+            .combine(
+                ch_tiara
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
+                ch_fcsgx
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
+                ncbi_ranked_lineage_path
+            )
+            .combine(
+                taxid
+            )
+            .multiMap{
+                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                    def new_meta = [id: meta.id, taxid: thetaxid]
+                    reference:  tuple(new_meta, ref)
+                    tiara_file: tuple(new_meta, tiara)
+                    fcs_file:   tuple(new_meta, fcs)
+                    ncbi_rank:  ncbi
+            }
+
+
+        //
+        // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
+        //
+        AUTOFILTER_AND_CHECK_ASSEMBLY (
+            autofilter_input_formatted.reference,
+            autofilter_input_formatted.tiara_file,
+            autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.ncbi_rank
+        )
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
+
+        ch_autofilt_alarm_file  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map{ meta, file ->
+                tuple(
+                    [id: meta.id], file
+                )
+            }
+
+        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+        ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
+        ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
+
+        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+    } else {
+        ch_autofilt_alarm_file  = Channel.empty()
+        ch_autofilt_removed_seqs= Channel.empty()
+        ch_autofilt_assem       = Channel.empty()
+        ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_fcs_tiara   = Channel.empty()
+        ch_autofilt_raw_report  = Channel.empty()
     }
 
     emit:
+
+    essential_reference         = reference_tuple_from_GG
+    essential_genome_file       = ej_dot_genome
+    essential_gc_cov            = ej_gc_coverage
+
+    blast_output                = ch_nt_blast
+    blast_lineage               = ch_blast_lineage
+    blast_btk_formatted         = ch_btk_format
+
+    diamond_nr_blast_full       = nr_full
+    diamond_nr_blast_hits       = nr_hits
+
+    diamond_un_blast_full       = un_full
+    diamond_un_blast_hits       = un_hits
+
+    read_coverage_output        = ch_coverage
+    read_coverage_bam           = ch_bam
+
+    fcsadaptor_prok_euk         = ch_fcsadapt
+    fcsgx_output                = ch_fcsgx
+
+    autofilter_deconned_assm    = ch_autofilt_assem
+    autofilter_fcs_tiar_smry    = ch_autofilt_fcs_tiara
+    autofilter_removed_seqs     = ch_autofilt_removed_seqs
+    autofilter_alarm_file       = ch_autofilt_alarm_file
+    autofilter_indicator_file   = ch_autofilt_indicator
+    autofilter_raw_report       = ch_autofilt_raw_report
+
+    create_btk_ds_dataset       = create_btk_dataset
+    create_btk_ds_create_smry   = create_summary
+
+    kraken2_classified          = ch_kraken1
+    kraken2_report              = ch_kraken2
+    kraken2_lineage             = ch_kraken3
+
+    vecscreen_contam            = ch_vecscreen
+
+    tiara_output                = ch_tiara
+
     versions                    = ch_versions
 
 }
