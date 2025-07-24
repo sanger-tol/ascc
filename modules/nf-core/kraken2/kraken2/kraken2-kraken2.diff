@@ -1,0 +1,43 @@
+Changes in component 'nf-core/kraken2/kraken2'
+'modules/nf-core/kraken2/kraken2/meta.yml' is unchanged
+'modules/nf-core/kraken2/kraken2/environment.yml' is unchanged
+Changes in 'kraken2/kraken2/main.nf':
+--- modules/nf-core/kraken2/kraken2/main.nf
++++ modules/nf-core/kraken2/kraken2/main.nf
+@@ -24,22 +24,21 @@
+     task.ext.when == null || task.ext.when
+ 
+     script:
+-    def args = task.ext.args ?: ''
+-    def prefix = task.ext.prefix ?: "${meta.id}"
+-    def paired       = meta.single_end ? "" : "--paired"
+-    def classified   = meta.single_end ? "${prefix}.classified.fastq"   : "${prefix}.classified#.fastq"
+-    def unclassified = meta.single_end ? "${prefix}.unclassified.fastq" : "${prefix}.unclassified#.fastq"
+-    def classified_option = save_output_fastqs ? "--classified-out ${classified}" : ""
+-    def unclassified_option = save_output_fastqs ? "--unclassified-out ${unclassified}" : ""
+-    def readclassification_option = save_reads_assignment ? "--output ${prefix}.kraken2.classifiedreads.txt" : "--output /dev/null"
+-    def compress_reads_command = save_output_fastqs ? "pigz -p $task.cpus *.fastq" : ""
++    def args                        = task.ext.args ?: ''
++    def prefix                      = task.ext.prefix ?: "${meta.id}"
++    def paired                      = meta.single_end ? "" : "--paired"
++    def classified                  = meta.single_end ? "${prefix}.classified.fastq"   : "${prefix}.classified#.fastq"
++    def unclassified                = meta.single_end ? "${prefix}.unclassified.fastq" : "${prefix}.unclassified#.fastq"
++    def classified_option           = save_output_fastqs ? "--classified-out ${classified}" : ""
++    def unclassified_option         = save_output_fastqs ? "--unclassified-out ${unclassified}" : ""
++    def readclassification_option   = save_reads_assignment ? "--output ${prefix}.kraken2.classifiedreads.txt" : "--output /dev/null"
++    def compress_reads_command      = save_output_fastqs ? "pigz -p $task.cpus *.fastq" : ""
+ 
+     """
+     kraken2 \\
+         --db $db \\
+         --threads $task.cpus \\
+         --report ${prefix}.kraken2.report.txt \\
+-        --gzip-compressed \\
+         $unclassified_option \\
+         $classified_option \\
+         $readclassification_option \\
+
+'modules/nf-core/kraken2/kraken2/tests/main.nf.test' is unchanged
+'modules/nf-core/kraken2/kraken2/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/kraken2/kraken2/tests/tags.yml' is unchanged
+************************************************************

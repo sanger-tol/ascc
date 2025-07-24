@@ -23,6 +23,9 @@ workflow ASCC {
     take:
     genomic_genomes         // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
+    fcs_override            // bool
+    genomic_fcs_samplesheet //
+    organellar_fcs_samplesheet
     fcs_db                  // [path(path)]
     collected_reads         //
     scientific_name         // val(name)
@@ -47,9 +50,13 @@ workflow ASCC {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
+    //
+    // TODO: FCS OVERRIDE VALUES NOW AVAILABLE
     GENOMIC (
         genomic_genomes,
         organellar_genomes,
+        fcs_override,
+        genomic_fcs_samplesheet,
         fcs_db,
         collected_reads,
         scientific_name,
@@ -77,6 +84,8 @@ workflow ASCC {
     if ( !params.genomic_only ) {
         ORGANELLAR (
             organellar_genomes,
+            fcs_override,
+            organellar_fcs_samplesheet,
             fcs_db,
             collected_reads,
             scientific_name,
@@ -110,4 +119,28 @@ workflow ASCC {
     emit:
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
+}
+
+workflow.onComplete {
+    if (workflow.success) {
+        try {
+            def completionFile = file("${params.outdir}/workflow_completed.txt")
+            completionFile.text = """
+                Workflow completed successfully!
+                Completed at: ${workflow.complete}
+                Duration: ${workflow.duration}
+                Success: ${workflow.success}
+                Work directory: ${workflow.workDir}
+                Exit status: ${workflow.exitStatus}
+                Run name: ${workflow.runName}
+                Session ID: ${workflow.sessionId}
+                Project directory: ${workflow.projectDir}
+                Launch directory: ${workflow.launchDir}
+                Command line: ${workflow.commandLine}
+            """.stripIndent()
+            log.info "Completion file created: ${completionFile}"
+        } catch (Exception e) {
+            log.warn "Failed to create completion file: ${e.message}"
+        }
+    }
 }

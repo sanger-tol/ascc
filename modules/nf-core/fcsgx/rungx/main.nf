@@ -8,7 +8,7 @@ process FCSGX_RUNGX {
         'biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
 
     input:
-    tuple val(meta), val(taxid), path(fasta)
+    tuple val(meta), path(fasta)
     path gxdb
     path ramdisk_path
 
@@ -30,13 +30,18 @@ process FCSGX_RUNGX {
     // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
     // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
-    """
+    // cp `readlink` has been used as a potentially better alternative
+    // to to adding the below to the script block.
+    // In theory they should do the same thing.
+    //    export GX_INSTANTIATE_FASTA=1
 
+    """
     export GX_NUM_CORES=${task.cpus}
+
     run_gx.py \\
         --fasta ${fasta} \\
         --gx-db ${database} \\
-        --tax-id ${taxid} \\
+        --tax-id ${meta.taxid} \\
         --generate-logfile true \\
         --out-basename ${prefix} \\
         --out-dir . \\
@@ -44,7 +49,7 @@ process FCSGX_RUNGX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
+        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
     END_VERSIONS
     """
 
@@ -59,7 +64,7 @@ process FCSGX_RUNGX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/-.*//' )
+        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
     END_VERSIONS
     """
 }
