@@ -133,9 +133,9 @@ workflow PIPELINE_INITIALISATION {
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
     //
     standardised_unzipped_input
-        .branch{
-            organellar_genome: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
-            genomic_genome: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
+        .branch{ meta, fasta ->
+            organellar_genome: (meta.assembly_type in ["MITO", "PLASTID"])
+            genomic_genome: !(meta.assembly_type in ["MITO", "PLASTID"])
             error: true
         }
         .set { branched_assemblies }
@@ -221,9 +221,9 @@ workflow PIPELINE_INITIALISATION {
             .set { ch_fcs_samplesheet }
 
         ch_fcs_samplesheet
-            .branch{
-                organellar_fcs: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
-                genomic_fcs: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
+            .branch{ meta, file ->
+                organellar_fcs: (meta.assembly_type in ["MITO", "PLASTID"])
+                genomic_fcs: !(meta.assembly_type in ["MITO", "PLASTID"])
                 error: true
             }
             .set { ch_fcs_final_samplesheet }
