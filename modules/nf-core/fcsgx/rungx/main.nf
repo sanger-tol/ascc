@@ -37,6 +37,7 @@ process FCSGX_RUNGX {
 
     """
     export GX_NUM_CORES=${task.cpus}
+    export GX_INSTANTIATE_FASTA=1
 
     run_gx.py \\
         --fasta ${fasta} \\
