@@ -136,20 +136,17 @@ def main():
 
         # IF CONTAMINATING SEQ FOUND FILL FILE WITH ABNORMAL CONTAM
         if param_value > alarm_threshold_for_parameter[param]:
-            stage1_decon_pass_flag = False
             alarm_list.append(
-                f"YES_ABNORMAL_CONTAMINATION: Stage 1 decon alarm triggered for {param}: the value for this parameter in this assembly is {param_value} | alarm threshold is {alarm_threshold}\n"
+                f"YES_ABNORMAL_CONTAMINATION: Stage 1 decon for {args.assembly}: {param} == {param_value} : Alarm threshold == {alarm_threshold}\n"
+            )
+        else:
+            alarm_list.append(
+                f"NO_ABNORMAL_CONTAMINATION: Stage 1 decon for {args.assembly}: {param} == {param_value} : Alarm threshold == {alarm_threshold}\n"
             )
 
     # Seperated out to ensure that the file is written in one go and doesn't confuse Nextflow
     with open(args.output, "a") as f:
         f.write("".join(alarm_list))
-
-    # IF NO CONTAM FILL FILE WITH NO CONTAM
-    if stage1_decon_pass_flag is True:
-        alarm_message = f"NO_ABNORMAL_CONTAMINATION: No scaffolds were tagged for removal by FCS-GX\n"
-        with open(args.output, "a") as f:
-            f.write(alarm_message)
 
 
 if __name__ == "__main__":
