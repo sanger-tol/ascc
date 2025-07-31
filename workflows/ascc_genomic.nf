@@ -674,7 +674,7 @@ workflow ASCC_GENOMIC {
                 log.info("[ASCC info] Run for ${meta.id} has:\n\t${data}\n")
 
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
-                dont_run    : true
+                dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
 
         btk_bool_run_btk        = btk_bool.run_btk
