@@ -671,7 +671,8 @@ workflow ASCC_GENOMIC {
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { meta, file -> [meta, file.text.trim()] }
             .branch { meta, data ->
-                log.info("[ASCC info] Run for ${meta.id} has ${data}\n")
+                log.info("[ASCC info] Run for ${meta.id} has:\n\t${data}\n")
+
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
                 dont_run    : true
             }
@@ -737,13 +738,15 @@ workflow ASCC_GENOMIC {
 
     run_btk_conditional.skip_btk
         .map { meta, file, data ->
-            log.warn "[ASCC WARNING]: SKIPPING BLOBTOOLKIT FOR: [$meta, $file]\n"
+            log.warn "[ASCC WARNING]: CONTAMINATION THRESHOLD NOT MET"
+            log.warn "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
+            log.warn "\t- You can verify here: $file"
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
-        log.info "[ASCC info] run_autofilter_assembly is off, but run_btk_busco != off \n"
-        log.info "This will stop blobtoolkit from running unless you restart with: \n"
-        log.info "    `--btk_busco_run_mode mandatory` \n"
+        log.info "[ASCC info] run_autofilter_assembly is off, but run_btk_busco != off"
+        log.info "This will stop blobtoolkit from running unless you restart with:"
+        log.info "    `--btk_busco_run_mode mandatory`"
     }
 
     // Noticed a race condition, this should fix that.
