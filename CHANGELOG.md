@@ -33,15 +33,13 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - RUN_COVERAGE was using a legacy Variable name
 - Bug where fcsgx was not generating output matching cobiontcheck (predecessor to ASCC), found to be caused by an incorrect threshold value.
 - AUTOFILTER scripts were adapted to make the trigger values accessible to the end-user.
-- Other fixes introduced a race condition for sanger-tol/btk. This is now fixed and v2 os sanger-tol/ascc will wholey remove them.
+- Other fixes introduced a race condition for sanger-tol/btk. This is now fixed and v2 of sanger-tol/ascc will wholey remove them.
 - Removed cpu and memory resource multipliers, it's not needed. If it crashes, it'll be for something else.
 
 ### `Bugs`
 
 - Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
 - tiara, fcsgx, autofilter must always be activated.
-- FCSGX may sometimes crash for no dissernable reason.
-  - We are talking to the devs to look at reasons why.
 
 ## v0.3.1 - Red Lamp (H1) [12/05/2025]
 
