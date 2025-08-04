@@ -56,7 +56,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
+            log.info "[ASCC info] ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -185,7 +185,7 @@ workflow ASCC_ORGANELLAR {
     } else if (params.fcs_override) {
         log.info("[ASCC info] Overriding Internal FCSGX")
         ch_fcsgx         = fcs_ss
-        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
+        ch_fcsgx.view{"[ASCC info] OVERRIDDEN_FCSGX: $it"}
     } else {
         ch_fcsgx         = Channel.of( [[],[]] )
     }
