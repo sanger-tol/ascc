@@ -671,7 +671,7 @@ workflow ASCC_GENOMIC {
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map { meta, file -> [meta, file.text.trim()] }
             .branch { meta, data ->
-                log.info("[ASCC info] Run for ${meta.id} has:\n\t${data}\n")
+                log.info("[ASCC info] Run for ${meta.id} has:\n${data}\n")
 
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
