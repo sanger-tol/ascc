@@ -45,12 +45,12 @@ process SANGER_TOL_BTK {
     // e.g. uploading the entry iyTipFemo_PRIMARY (which is what the resulting dataset is named)
     // will be a blank entry, with iyTipFemo_PRIMARY_filtered being the correct name due to the input fasta
     // both could be blank because of this.
+    //
+    // -r $pipeline_version \\
     """
     mv $reference ${meta.id}.fasta
 
-    nextflow run sanger-tol/blobtoolkit \\
-        -r $pipeline_version \\
-        -c $blobtoolkit_config_file \\
+    nextflow run /lustre/scratch124/tol/teams/tola/users/dp24/blobtoolkit/main.nf \\
         -profile  $profiles \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
@@ -64,6 +64,7 @@ process SANGER_TOL_BTK {
         --blastx "\$(realpath $blastx)" \\
         --use_work_dir_as_temp true \\
         --align \\
+        -c $blobtoolkit_config_file \\
         $args
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
