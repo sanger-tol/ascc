@@ -28,7 +28,8 @@ process SANGER_TOL_BTK {
     def args                =   task.ext.args           ?:  ""
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
-    def pipeline_version    =   task.ext.version        ?: "0.6.0"
+    def pipeline            =   task.ext.pipeline       ?: "sanger-tol/blobtookit"
+    def pipeline_version    =   task.ext.version        ?: "0.8.0"
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -46,12 +47,12 @@ process SANGER_TOL_BTK {
     // will be a blank entry, with iyTipFemo_PRIMARY_filtered being the correct name due to the input fasta
     // both could be blank because of this.
     //
-    // -r $pipeline_version \\
     """
     mv $reference ${meta.id}.fasta
 
-    nextflow run /lustre/scratch124/tol/teams/tola/users/dp24/blobtoolkit/main.nf \\
-        -profile  $profiles \\
+    nextflow run ${pipeline} \\
+        -r $pipeline_version \\
+        -c $blobtoolkit_config_file \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta ${meta.id}.fasta \\
