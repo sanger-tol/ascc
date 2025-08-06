@@ -53,6 +53,7 @@ workflow SANGERTOL_ASCC {
     reads_type                  // Type of input reads [HIFI, CLR, ILLUMINA, etc...]
     btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
     btk_lineages_path           // Path to the ODB10 lineages
+    barcodes                    // ["barcode_1,barcode_2"]
 
     main:
 
@@ -81,7 +82,8 @@ workflow SANGERTOL_ASCC {
         reads_layout,
         reads_type,
         btk_lineages,
-        btk_lineages_path
+        btk_lineages_path,
+        barcodes
     )
 }
 
@@ -132,7 +134,8 @@ workflow {
         Channel.of(params.reads_layout),
         Channel.of(params.reads_type),
         Channel.of(params.busco_lineages),
-        Channel.fromPath(params.busco_lineages_folder)
+        Channel.fromPath(params.busco_lineages_folder),
+        PIPELINE_INITIALISATION.out.barcodes
     )
 
 
