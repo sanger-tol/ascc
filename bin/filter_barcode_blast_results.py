@@ -33,7 +33,7 @@ def main():
     length_for_record = {}
 
     fasta_input_handle = None
-    if re.search("\.gz$", args.input):
+    if re.search(r"\.gz$", args.input):
         fasta_input_handle = gzip.open(args.input, "rt")
     else:
         fasta_input_handle = open(args.input, "rt")
@@ -55,7 +55,7 @@ def main():
         for line in blast_input_handle:
             if not re.search("^#", line):
                 # barcode_location_handle.write(line)
-                blast_fields = re.split("\s+", line)
+                blast_fields = re.split(r"\s+", line)
                 blast_id = blast_fields[0]
                 blast_barcode_id = blast_fields[1]
                 blast_percentage = float(blast_fields[2])

@@ -3,13 +3,13 @@ process SANGER_TOL_BTK {
     label 'process_low'
 
     input:
-    tuple val(meta),    path(reference)
-    path(samplesheet_csv)
+    tuple val(meta), path(reference), path(samplesheet_csv), path(autofilter)
     path blastp,                        stageAs: "blastp.dmnd"
     path blastn
     path blastx
     path tax_dump
     path( "input_pacbio_files/*" )
+    path blobtoolkit_config_file
     val busco_lineages_folder
     val busco_lineages
     val taxon
@@ -28,7 +28,8 @@ process SANGER_TOL_BTK {
     def args                =   task.ext.args           ?:  ""
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
-    def pipeline_version    =   task.ext.version        ?: "0.6.0"
+    def pipeline            =   task.ext.pipeline       ?: "sanger-tol/blobtookit"
+    def pipeline_version    =   task.ext.version        ?: "0.8.0"
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -38,14 +39,23 @@ process SANGER_TOL_BTK {
 
     // blastx and blastp use the same database hence the StageAs
 
-
+    // First rename the input fasta, this is done to remove the "_filtered" string
+    // from the fasta name.
+    // Without doing this, and without the end user knowing, the BTK viewer can
+    // end up with non-functional enteries.
+    // e.g. uploading the entry iyTipFemo_PRIMARY (which is what the resulting dataset is named)
+    // will be a blank entry, with iyTipFemo_PRIMARY_filtered being the correct name due to the input fasta
+    // both could be blank because of this.
+    //
     """
-    nextflow run sanger-tol/blobtoolkit \\
+    mv $reference ${meta.id}.fasta
+
+    nextflow run ${pipeline} \\
         -r $pipeline_version \\
-        -profile  $profiles \\
+        -c $blobtoolkit_config_file \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
-        --fasta "\$(realpath $reference)" \\
+        --fasta ${meta.id}.fasta \\
         --busco $busco_lineages_folder \\
         --busco_lineages $busco_lineages \\
         --taxon $taxon \\
@@ -55,6 +65,7 @@ process SANGER_TOL_BTK {
         --blastx "\$(realpath $blastx)" \\
         --use_work_dir_as_temp true \\
         --align \\
+        -c $blobtoolkit_config_file \\
         $args
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info

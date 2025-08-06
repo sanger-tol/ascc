@@ -2,25 +2,26 @@ process GENERATE_SAMPLESHEET {
     tag "$meta.id"
     label "process_low"
 
-    conda "conda-forge::coreutils=9.1"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
     'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
     'docker.io/ubuntu:20.04' }"
 
     input:
-    tuple val(meta), path(reference)
+    tuple val(meta), path(reference), path(alarm_file)
     path(pacbio_path)
     val(reads_layout)
 
     output:
-    tuple val(meta),    path("samplesheet.csv"),    emit: csv
-    path "versions.yml",                            emit: versions
+    tuple val(meta),    path("samplesheet.csv"),    path(alarm_file),   emit: csv
+    path "versions.yml",                                                emit: versions
 
     script:
     def args    = task.ext.args     ?: ""
     def VERSION = "1.1.0"
     """
     echo "Run BTK"
+    echo "Running for $meta - $reference - $alarm_file"
     echo "sample,datatype,datafile,library_layout" > pre_samplesheet.csv
 
     i=0

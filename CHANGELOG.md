@@ -3,9 +3,80 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - Red Mouse [ ##/06/2024]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for sanger production.
+
+### `Added`
+
+- Added pipeline-level nf-test testing.
+- Return free-disk-space to nf-test CI runners (suggestion by @prototaxites)
+- Updated test files to post-datacentre crash (Only affects internal sanger users).
+- Test and Production (this is sanger specific, please change if you want to use the same style) configs have been updated.
+- Update to Organellar Blast subworkflow to include organellar name in output.
+- Updated some scripts for logging and linting.
+- The AUTOFILTER_AND_CHECK_ASSEMBLY module has been added to the ORGANELLAR subworkflow, done to ensure that sanger-tol/ascc matches previously reported statistics.
+- FCSGX Module now includes a timed backoff for when it fails, this is aimed at stopping random crashes.
+- Re-organised some of the files in the assets folder and updated configs to reflect.
+- Added a `btk_pipeline.config` file in `assets/btk_config_files` to modify btk process resource requirements. Currently contains an alternate requirement for `BLASTN_TAXON`.
+- Added most of the output files to the emit of the major subworkflow (GENOMIC and ORGANELLAR) this is setup for future version nf-tools which will mandate output files are treated like this.
+- Added `--fcs_override` and `--fcs_override_samplesheet` to allow the pipeline to accept externally run FCS-GX results. These results must be filteres and parsed as inside the pipeline. A wrapper script is provided as `bin/ascc_fcsgx_wrapper.py`.
+- Support for `HAP1` and `HAP2` assemblies in the samplesheet, this effects naming of output files.
+- Pipeline can now correctly handle a null value as a barcode value, removing the need for a dummy value in cases of data such as ONT which does not use barcodes.
+- Pipeline now creates a unique list of barcodes internally, stops issues where end-user scripts collect a running list of barcodes from read files.
+
+### `Fixed`
+
+- Bug where in some cases the btk_run variable would not be set prior to it's use in a conditional, causing the pipeline to crash.
+- Bug where btk input parameters would not be correctly set leading to incorrect runs of btk, where the wrong sample (no contamination) is used and the right sample is passed over.
+- Corrected an error with output of FCSGX where it was only looking for BAM files, which are not produced by FCSGX!
+- RUN_COVERAGE was using a legacy Variable name
+- Bug where fcsgx was not generating output matching cobiontcheck (predecessor to ASCC), found to be caused by an incorrect threshold value.
+- AUTOFILTER scripts were adapted to make the trigger values accessible to the end-user.
+- Other fixes introduced a race condition for sanger-tol/btk. This is now fixed and v2 of sanger-tol/ascc will wholey remove them.
+- Removed cpu and memory resource multipliers, it's not needed. If it crashes, it'll be for something else.
+
+### `Bugs`
+
+- Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
+- tiara, fcsgx, autofilter must always be activated.
+
+## v0.3.1 - Red Lamp (H1) [12/05/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 5 of sanger-tol/ascc, correcting environments and updating module structure.
+
+### Enhancements & Fixes
+
+- Testing for conda revealed multiple incorrect conda channels.
+  - Leading to version inconsistancy between singularity/docker and conda.
+- Updating module structure to be more similar to NF-Core modules.
+  - All local modules now have a `environment.yml` for conda env control.
+- RUN_READS_COVERAGE has stopped running due to conditionals becoming channels
+  - channels cannot be compared
+  - Removed channel.of(params....) to remedy this.
+- Added a missing process conditional.
+- KMER Analysis is now switched off in production.config
+  - This primarily effects only SANGER-TOLA production
+- Added new output from EXTRACT_CONTAMINANTS for parity with cobiontcheck (unreleased pre-nf_core ASCC pipeline).
+  - Output will be added to `organellar_contamination_recomendations`
+- Update sanger-tol/blobtoolkit to [v0.8.0 - Sprigatito](https://github.com/sanger-tol/blobtoolkit/releases/tag/0.8.0)
+  - We will also be using the `miniprot` gene predictor.
+
+### Dependencies
+
+| Module         | Old Version | New Versions |
+| -------------- | ----------- | ------------ |
+| SANGER_TOL_BTK | dev         | 0.8.0        |
+
 ## v0.3.0 - Red Lamp [02/05/2025]
 
-Release 4 of sanger-toll/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 4 of sanger-tol/ascc, correcting bugs found in production testing and correcting the strucutre of the pipeline.
 
 ### Enhancements & Fixes
 
@@ -75,6 +146,8 @@ Release 4 of sanger-toll/ascc, correcting bugs found in production testing and c
 
 ## v0.2.1 - Red Speaker [25/04/2025]
 
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
 Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
 
 ### Enhancements & Fixes
@@ -89,6 +162,8 @@ Release 3 of sanger-tol/ascc, correcting bugs stopping use in production.
   - BLAST_MAKEBLASTDB_BARCODES -> BLAST_MAKEBLASTDB
 
 ## v0.2.0 - Red Speaker [14/04/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
 Release 2 of sanger-tol/ascc, updated with the [nf-core](https://nf-co.re/) template (v3.2).
 

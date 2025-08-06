@@ -3,7 +3,7 @@ process GET_LINEAGE_FOR_KRAKEN {
     tag "$meta.id"
     label 'process_low'
 
-    conda "conda-forge::python=3.9 conda-forge::pandas=1.5.2"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'quay.io/biocontainers/pandas:1.5.2' }"
@@ -13,7 +13,7 @@ process GET_LINEAGE_FOR_KRAKEN {
     path ncbi_rankedlineage_path
 
     output:
-    path '*_nt_kraken_lineage_file.txt', emit: txt
+    tuple val(meta), path('*_nt_kraken_lineage_file.txt'), emit: txt
     path "versions.yml", emit: versions
 
     when:

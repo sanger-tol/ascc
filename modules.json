@@ -55,7 +55,8 @@
                     "kraken2/kraken2": {
                         "branch": "master",
                         "git_sha": "0e9cb409c32d3ec4f0d3804588e4778971c09b7e",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/kraken2/kraken2/kraken2-kraken2.diff"
                     },
                     "minimap2/align": {
                         "branch": "master",
@@ -78,6 +79,11 @@
                         "installed_by": ["modules"]
                     },
                     "samtools/depth": {
+                        "branch": "master",
+                        "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/dict": {
                         "branch": "master",
                         "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
                         "installed_by": ["modules"]

@@ -47,13 +47,15 @@
                     "type": "string",
                     "description": "Type of read (hifi)",
                     "fa_icon": "fas fa-input-text",
-                    "default": "hifi"
+                    "default": "hifi",
+                    "enum": ["hifi", "clr", "ont", "illumina"]
                 },
                 "reads_layout": {
                     "type": "string",
                     "description": "Specify whether all reads are SINGLE or PAIRED end reads",
-                    "pattern": "^(SINGLE|PAIRED)$",
-                    "fa_icon": "fas fa-input-text"
+                    "enum": ["SINGLE", "PAIRED"],
+                    "fa_icon": "fas fa-input-text",
+                    "default": "SINGLE"
                 },
                 "pacbio_barcode_file": {
                     "type": "string",
@@ -161,14 +163,6 @@
                     "description": "Nearest Neighbour value - This is for the dimensional reduction of kmer counts (UMAP and t-SNE).",
                     "fa_icon": "fas fa-hashtag",
                     "default": 13
-                },
-                "btk_yaml": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "pattern": "^\\S+\\.yaml$",
-                    "description": "Path to BTK yaml",
-                    "fa_icon": "fas fa-file"
                 },
                 "outdir": {
                     "type": "string",
@@ -302,6 +296,21 @@
                     "description": "Switch off the organellar workflow",
                     "fa_icon": "fas fa-file-lines",
                     "default": false
+                },
+                "fcs_override": {
+                    "type": "boolean",
+                    "description": "Use provided fcs sampleshet",
+                    "fa_icon": "fas fa-file-lines",
+                    "default": false
+                },
+                "fcs_override_samplesheet": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/fcs_schema_input.json",
+                    "mimetype": "text/csv",
+                    "description": "Override the internal FCS and provide your own. READ THE DOCS TO MAKE SURE IT IS GENERATED CORRECTLY.",
+                    "fa_icon": "fas fa-file-lines"
                 }
             }
         },
