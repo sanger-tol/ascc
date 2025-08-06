@@ -43,6 +43,7 @@ workflow ASCC {
     reads_type
     btk_lineages
     btk_lineages_path
+    barcodes
 
     main:
     ch_versions     = Channel.empty()
@@ -73,7 +74,8 @@ workflow ASCC {
         reads_layout,
         reads_type,
         btk_lineages,
-        btk_lineages_path
+        btk_lineages_path,
+        barcodes
     )
     ch_versions         = ch_versions.mix(GENOMIC.out.versions)
 
@@ -99,7 +101,8 @@ workflow ASCC {
             nt_kraken_db_path,
             vecscreen_database_path,
             reads_path,
-            reads_type
+            reads_type,
+            barcodes
         )
         ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
     }

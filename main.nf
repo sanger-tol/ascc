@@ -29,28 +29,29 @@ include { PIPELINE_COMPLETION       } from './subworkflows/local/utils_nfcore_as
 workflow SANGERTOL_ASCC {
 
     take:
-    genomic                 // Genomic fasta tuples
-    organelles              // Organellar fasta tuples
-    fcs_override            // bool
-    genomic_fcs_samplesheet         //
-    organellar_fcs_samplesheet
-    fcs_db                  // [path(path)]
-    read_files              // Read files
-    scientific_name         // Scientific name
-    pacbio_db               // Pacbio database
-    ncbi_taxonomy_path      // NCBI taxonomy path
-    ncbi_ranked_lineage_path
-    nt_database_path
-    diamond_nr_db_path
-    diamond_uniprot_db_path
-    taxid
-    nt_kraken_db_path
-    vecscreen_database_path
-    reads_path
-    reads_layout
-    reads_type
-    btk_lineages
-    btk_lineages_path
+    genomic                     // Genomic fasta tuples
+    organelles                  // Organellar fasta tuples
+    fcs_override                // bool
+    genomic_fcs_samplesheet     // genomic data tuple from fcs_override samplesheet generated from external fcs process
+    organellar_fcs_samplesheet  // organellar data tuple from fcs_override samplesheet generated from external fcs process
+    fcs_db                      // [path(path)]
+    read_files                  // Read files
+    scientific_name             // Scientific name
+    pacbio_db                   // Pacbio database
+    ncbi_taxonomy_path          // NCBI taxonomy path
+    ncbi_ranked_lineage_path    // ranked_lineage file path
+    nt_database_path            // NT database path
+    diamond_nr_db_path          // NR database path
+    diamond_uniprot_db_path     // UNIPROT database path
+    taxid                       // taxid of input assembly
+    nt_kraken_db_path           // path to custom kraken database
+    vecscreen_database_path     // Path to custom Vecscreen database
+    reads_path                  // tuple of paths to input read files
+    reads_layout                // Layout of input reads [SINGLE, PAIRED]
+    reads_type                  // Type of input reads [HIFI, CLR, ILLUMINA, etc...]
+    btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
+    btk_lineages_path           // Path to the ODB10 lineages
+    barcodes                    // ["barcode_1,barcode_2"]
 
     main:
 
@@ -79,7 +80,8 @@ workflow SANGERTOL_ASCC {
         reads_layout,
         reads_type,
         btk_lineages,
-        btk_lineages_path
+        btk_lineages_path,
+        barcodes
     )
 }
 
@@ -130,7 +132,8 @@ workflow {
         Channel.of(params.reads_layout),
         Channel.of(params.reads_type),
         Channel.of(params.busco_lineages),
-        Channel.fromPath(params.busco_lineages_folder)
+        Channel.fromPath(params.busco_lineages_folder),
+        PIPELINE_INITIALISATION.out.barcodes
     )
 
 

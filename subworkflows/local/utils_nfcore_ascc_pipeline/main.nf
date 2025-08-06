@@ -134,9 +134,9 @@ workflow PIPELINE_INITIALISATION {
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
     //
     standardised_unzipped_input
-        .branch{
-            organellar_genome: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
-            genomic_genome: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
+        .branch{ meta, fasta ->
+            organellar_genome: (meta.assembly_type in ["MITO", "PLASTID"])
+            genomic_genome: !(meta.assembly_type in ["MITO", "PLASTID"])
             error: true
         }
         .set { branched_assemblies }
@@ -157,12 +157,16 @@ workflow PIPELINE_INITIALISATION {
     //
     // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
     //
+    ch_barcodes = params.pacbio_barcode_names ?
+        Channel.of(params.pacbio_barcode_names) :
+        Channel.empty()
+
     PREPARE_BLASTDB (
         params.sample_id,
         params.reads_path,
         params.reads_type,
         barcode_data_file,
-        params.pacbio_barcode_names
+        ch_barcodes
     )
     versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
 
@@ -224,9 +228,9 @@ workflow PIPELINE_INITIALISATION {
             .set { ch_fcs_samplesheet }
 
         ch_fcs_samplesheet
-            .branch{
-                organellar_fcs: it[0].assembly_type == "MITO" || it[0].assembly_type == "PLASTID"
-                genomic_fcs: it[0].assembly_type  == "PRIMARY" || it[0].assembly_type  == "HAPLO"
+            .branch{ meta, file ->
+                organellar_fcs: (meta.assembly_type in ["MITO", "PLASTID"])
+                genomic_fcs: !(meta.assembly_type in ["MITO", "PLASTID"])
                 error: true
             }
             .set { ch_fcs_final_samplesheet }
@@ -246,6 +250,7 @@ workflow PIPELINE_INITIALISATION {
     main_genomes            = branched_assemblies.genomic_genome
     organellar_genomes      = branched_assemblies.organellar_genome
     barcodes_file           = barcode_data_file
+    barcodes                = ch_barcodes
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_path
     collected_reads         = ch_grabbed_reads_path

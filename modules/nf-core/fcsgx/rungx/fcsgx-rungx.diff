@@ -16,7 +16,7 @@ Changes in 'fcsgx/rungx/main.nf':
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,17 +25,23 @@
+@@ -25,17 +25,20 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -27,15 +27,12 @@ Changes in 'fcsgx/rungx/main.nf':
 +    // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
 +    // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
 +    def database = ramdisk_path ?: gxdb
-+    // cp `readlink` has been used as a potentially better alternative
-+    // to to adding the below to the script block.
-+    // In theory they should do the same thing.
-+    //    export GX_INSTANTIATE_FASTA=1
 +
      """
 -    # Copy DB to RAM-disk when supplied. Otherwise, the tool is very slow.
 -    $mv_database_to_ram
 +    export GX_NUM_CORES=${task.cpus}
++    export GX_INSTANTIATE_FASTA=1
  
 -    export GX_NUM_CORES=${task.cpus}
      run_gx.py \\
@@ -46,7 +43,7 @@ Changes in 'fcsgx/rungx/main.nf':
          --generate-logfile true \\
          --out-basename ${prefix} \\
          --out-dir . \\
-@@ -43,7 +49,7 @@
+@@ -43,7 +46,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
@@ -55,7 +52,7 @@ Changes in 'fcsgx/rungx/main.nf':
      END_VERSIONS
      """
  
-@@ -58,7 +64,7 @@
+@@ -58,7 +61,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":

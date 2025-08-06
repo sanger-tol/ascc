@@ -46,6 +46,7 @@ workflow ASCC_ORGANELLAR {
     vecscreen_database_path
     reads_path
     reads_type
+    ch_barcodes
 
     main:
     ch_versions = Channel.empty()
@@ -56,7 +57,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
+            log.info "[ASCC info] ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -117,7 +118,7 @@ workflow ASCC_ORGANELLAR {
 
         PACBIO_BARCODE_CHECK (
             duplicated_db.reference,
-            params.pacbio_barcode_names,
+            ch_barcodes,
             duplicated_db.pacbio_db
         )
         ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
@@ -185,7 +186,7 @@ workflow ASCC_ORGANELLAR {
     } else if (params.fcs_override) {
         log.info("[ASCC info] Overriding Internal FCSGX")
         ch_fcsgx         = fcs_ss
-        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
+        ch_fcsgx.view{"[ASCC info] OVERRIDDEN_FCSGX: $it"}
     } else {
         ch_fcsgx         = Channel.of( [[],[]] )
     }

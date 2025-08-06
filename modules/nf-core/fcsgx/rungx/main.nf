@@ -30,13 +30,10 @@ process FCSGX_RUNGX {
     // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
     // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
-    // cp `readlink` has been used as a potentially better alternative
-    // to to adding the below to the script block.
-    // In theory they should do the same thing.
-    //    export GX_INSTANTIATE_FASTA=1
 
     """
     export GX_NUM_CORES=${task.cpus}
+    export GX_INSTANTIATE_FASTA=1
 
     run_gx.py \\
         --fasta ${fasta} \\

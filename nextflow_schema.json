@@ -47,7 +47,8 @@
                     "type": "string",
                     "description": "Type of read (hifi)",
                     "fa_icon": "fas fa-input-text",
-                    "default": "hifi"
+                    "default": "hifi",
+                    "enum": ["hifi", "clr", "ont", "illumina"]
                 },
                 "reads_layout": {
                     "type": "string",
