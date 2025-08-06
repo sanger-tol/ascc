@@ -110,7 +110,7 @@ nextflow_pipeline {
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
-                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ncbi_taxdump -xzf new_taxdump.tar.gz"
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${launchDir}/ncbi_taxdump -xzf new_taxdump.tar.gz"
                 ],
                 "ASCC_DIAMOND_DB": [
                     "COMMAND":
