@@ -11,7 +11,6 @@ This error will most likely be solved by the use of `export NXF_SINGULARITY_NEW_
 
 This will not be identical due to the run specific nature of the summary.txt and the work directory so please ensure that you are looking in the right place for your run.
 
-
 ## FCS-GX part 2
 
 If the above fix does not work and FCS continues to crash in what seems like a generic fashion, try running fcs locally. With NO container.
