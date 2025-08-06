@@ -32,16 +32,11 @@ workflow PACBIO_BARCODE_CHECK {
     //
     // LOGIC: FOR I (MAPPED TO OTHER CHANNELS) IN CSV LIST RUN FILTER BLAST
     //
-    Channel.of(barcode_names)
-        .set {barcodes_name_list}
-
-    barcodes_name_list
-        .map { it ->
-            tuple( it.split(',') )
-        }
+    barcode_names
+        .map { it.split(',') }
         .flatten()
+        .unique()
         .set {barcode_list}
-
 
     //
     // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE
@@ -50,7 +45,6 @@ workflow PACBIO_BARCODE_CHECK {
         .combine(BLAST_BLASTN.out.txt, by:0)
         .combine(barcode_list)
         .set { filter_input }
-
 
     FILTER_BARCODE (
         filter_input

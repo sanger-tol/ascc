@@ -58,6 +58,7 @@ workflow ASCC_GENOMIC {
     reads_type
     btk_lineages
     btk_lineages_path
+    ch_barcodes
 
     main:
     ch_versions = Channel.empty()
@@ -333,7 +334,7 @@ workflow ASCC_GENOMIC {
 
         PACBIO_BARCODE_CHECK (
             duplicated_db.reference,
-            params.pacbio_barcode_names,
+            ch_barcodes,
             duplicated_db.pacbio_db
         )
         ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()

@@ -36,7 +36,7 @@ workflow RUN_READ_COVERAGE {
     // types
     //
 
-    if ( params.reads_type == "hifi" || params.reads_type == "clr" || params.reads_type == "ont" ) {
+    if ( params.reads_type in ["hifi", "clr", "ont"] ) {
 
         //
         // MODULE: RUN SINGLE END MAPPING ON THE REFERENCE AND LONGREAD DATA
@@ -48,7 +48,7 @@ workflow RUN_READ_COVERAGE {
         ch_align_bam    = SE_MAPPING.out.mapped_bam
 
     }
-    else if ( params.reads_type == "illumina" ) {
+    else if ( params.reads_type in ["illumina"] ) {
 
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND LONGREAD DATA

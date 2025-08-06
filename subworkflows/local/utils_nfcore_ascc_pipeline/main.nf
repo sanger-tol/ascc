@@ -154,12 +154,16 @@ workflow PIPELINE_INITIALISATION {
     //
     // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
     //
+    ch_barcodes = params.pacbio_barcode_names ?
+        Channel.of(params.pacbio_barcode_names) :
+        Channel.empty()
+
     PREPARE_BLASTDB (
         params.sample_id,
         params.reads_path,
         params.reads_type,
         barcode_data_file,
-        params.pacbio_barcode_names
+        ch_barcodes
     )
     versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
 
@@ -243,6 +247,7 @@ workflow PIPELINE_INITIALISATION {
     main_genomes            = branched_assemblies.genomic_genome
     organellar_genomes      = branched_assemblies.organellar_genome
     barcodes_file           = barcode_data_file
+    barcodes                = ch_barcodes
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
     fcs_gx_database         = fcs_gx_database_path
     collected_reads         = ch_grabbed_reads_path

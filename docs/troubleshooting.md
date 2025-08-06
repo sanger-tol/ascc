@@ -11,8 +11,10 @@ This error will most likely be solved by the use of `export NXF_SINGULARITY_NEW_
 
 This will not be identical due to the run specific nature of the summary.txt and the work directory so please ensure that you are looking in the right place for your run.
 
-## FILTER_BARCODE
+## FCS-GX part 2
 
-An error of: `ln: failed to create symbolic link` or about not being able to overwrite versions file are typically about the previous process erroring so quickly that the process which manifests the error is a red herring.
+If the above fix does not work and FCS continues to crash in what seems like a generic fashion, try running fcs locally. With NO container.
 
-In the case of FILTER_BARCODE this is likely due to the use of a non-unique list of barcodes. A simple fix.
+To make life easier, there is now `--fcs_override_samplesheet` (A boolean, default false) and `--fcs_samplesheet` (For the samplesheet path). The samplesheet can be generated with the script `./bin/ascc_fcsgx_wrapper.py`. Point this towards a local install of fcs along with a number of other config options that you can read about using `-h`.
+
+This will parse the ASCC samplesheet, gunzip input if needed, filter the fasta (using the same method as in ASCC), run fcs-gx, parse the fcs-gx results into something ASCC can read and fianlly generate the fcs_samplesheet.csv file needed for the `--fcs_override_samplesheet` flag.
