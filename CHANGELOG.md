@@ -24,6 +24,8 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - Added most of the output files to the emit of the major subworkflow (GENOMIC and ORGANELLAR) this is setup for future version nf-tools which will mandate output files are treated like this.
 - Added `--fcs_override` and `--fcs_override_samplesheet` to allow the pipeline to accept externally run FCS-GX results. These results must be filteres and parsed as inside the pipeline. A wrapper script is provided as `bin/ascc_fcsgx_wrapper.py`.
 - Support for `HAP1` and `HAP2` assemblies in the samplesheet, this effects naming of output files.
+- Pipeline can now correctly handle a null value as a barcode value, removing the need for a dummy value in cases of data such as ONT which does not use barcodes.
+- Pipeline now creates a unique list of barcodes internally, stops issues where end-user scripts collect a running list of barcodes from read files.
 
 ### `Fixed`
 

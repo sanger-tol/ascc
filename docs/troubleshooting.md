@@ -16,9 +16,9 @@ This will not be identical due to the run specific nature of the summary.txt and
 
 If the above fix does not work and FCS continues to crash in what seems like a generic fashion, try running fcs locally. With NO container.
 
-To make life easier, there is now `--fcs_override` (A boolean, default false) and `--fcs_samplesheet` (For the samplesheet path). The samplesheet can be generated with the script `./bin/ascc_fcsgx_wrapper.py`. Point this towards a local install of fcs along with a number of other config options that you can read about using `-h`.
+To make life easier, there is now `--fcs_override_samplesheet` (A boolean, default false) and `--fcs_samplesheet` (For the samplesheet path). The samplesheet can be generated with the script `./bin/ascc_fcsgx_wrapper.py`. Point this towards a local install of fcs along with a number of other config options that you can read about using `-h`.
 
-This will parse the ASCC samplesheet, gunzip input if needed, filter the fasta (using the same method as in ASCC), run fcs-gx, parse the fcs-gx results into something ASCC can read and fianlly generate the fcs_samplesheet.csv file needed for the `--fcs_samplesheet` flag.
+This will parse the ASCC samplesheet, gunzip input if needed, filter the fasta (using the same method as in ASCC), run fcs-gx, parse the fcs-gx results into something ASCC can read and fianlly generate the fcs_samplesheet.csv file needed for the `--fcs_override_samplesheet` flag.
 
 
 ## FILTER_BARCODE
