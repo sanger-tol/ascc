@@ -94,7 +94,7 @@ nextflow_pipeline {
 
                 println "\nDownloading the FCS file: ${db['FILE']}..."
                 def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${launchDir}/FCS_gx/${db['OUT']}"]
-                def process2 = command.execute()
+                def process2 = command2.execute()
                 process2.waitFor()
 
                 if (process2.exitValue() != 0) {
@@ -121,7 +121,7 @@ nextflow_pipeline {
 
                 println "\nDownloading the OTHER DB: ${dbKey}..."
                 def command3 = ['bash', '-c', "${db['COMMAND']}"]
-                def process3 = command.execute()
+                def process3 = command3.execute()
                 process3.waitFor()
 
                 if (process3.exitValue() != 0) {
