@@ -105,6 +105,8 @@ nextflow_pipeline {
             }
 
             // Databases: The wierd ones
+
+            new File("${launchDir}/ncbi_taxdump").mkdir()
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
