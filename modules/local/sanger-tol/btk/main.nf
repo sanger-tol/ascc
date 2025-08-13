@@ -53,6 +53,7 @@ process SANGER_TOL_BTK {
     nextflow run ${pipeline} \\
         -r $pipeline_version \\
         -c $blobtoolkit_config_file \\
+        -profile ${profiles} \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta ${meta.id}.fasta \\
