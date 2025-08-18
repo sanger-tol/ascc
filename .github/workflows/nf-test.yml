@@ -99,6 +99,10 @@ jobs:
 
       - name: TEMP SEE WHERE EVERTHING IS
         run: |
+          pwd
+          echo "Up one Dir"
+          ls -la ../
+          echo "Curent Dir"
           ls -la ./
 
       - name: Run nf-test
