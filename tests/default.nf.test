@@ -134,7 +134,7 @@ nextflow_pipeline {
             }
 
             def command4 = ['bash', '-c', "ls -lha ./"]
-                def process4 = command3.execute()
+                def process4 = command4.execute()
                 process4.waitFor()
         }
 
