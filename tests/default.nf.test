@@ -45,9 +45,10 @@ nextflow_pipeline {
 
             for (String dbKey : database_dict.keySet()) {
                 def db = database_dict.get(dbKey)
+                new File("${projectDir}/${dbKey}").mkdir()
 
                 println "\nDownloading the database ${dbKey}..."
-                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${projectDir}"]
+                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${projectDir}/${dbKey}/"]
                 def process = command.execute()
                 process.waitFor()
 
@@ -59,7 +60,7 @@ nextflow_pipeline {
             }
 
             // Copy the test data so that we have a fake haplo
-            def data_copy_command = ['bash', '-c', "cp asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa"]
+            def data_copy_command = ['bash', '-c', "cp ${projectDir}/TEST_DATA/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa ${projectDir}/TEST_DATA/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa"]
             def data_copy_proc = data_copy_command.execute()
             data_copy_proc.waitFor()
 
@@ -106,15 +107,16 @@ nextflow_pipeline {
 
             // Databases: The wierd ones
 
-            new File("${projectDir}/ncbi_taxdump").mkdir()
+            new File("${projectDir}/NCBI_TAXONOMY").mkdir()
+            new File("${projectDir}/DIAMOND").mkdir()
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
-                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${projectDir}/ncbi_taxdump -xzf new_taxdump.tar.gz"
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${projectDir}/NCBI_TAXONOMY -xzf new_taxdump.tar.gz"
                 ],
                 "ASCC_DIAMOND_DB": [
                     "COMMAND":
-                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o ${projectDir}/diamond.dmnd"
+                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o ${projectDir}/DIAMOND/diamond.dmnd"
                 ]
             ]
 

@@ -97,14 +97,6 @@ jobs:
       - name: Clean up Disk space
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
 
-      - name: TEMP SEE WHERE EVERTHING IS
-        run: |
-          pwd
-          echo "Up one Dir"
-          ls -la ../
-          echo "Curent Dir"
-          ls -la ./
-
       - name: Run nf-test
         uses: ./.github/actions/nf-test
         env:
