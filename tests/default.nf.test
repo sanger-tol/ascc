@@ -47,7 +47,7 @@ nextflow_pipeline {
                 def db = database_dict.get(dbKey)
 
                 println "\nDownloading the database ${dbKey}..."
-                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}"]
+                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${projectDir}"]
                 def process = command.execute()
                 process.waitFor()
 
@@ -87,13 +87,13 @@ nextflow_pipeline {
                 ]
             ]
 
-            new File("${launchDir}/FCS_gx").mkdir()
+            new File("${projectDir}/FCS_gx").mkdir()
 
             for (String dbKey : fcs_database.keySet()) {
                 def db = fcs_database.get(dbKey)
 
                 println "\nDownloading the FCS file: ${db['FILE']}..."
-                def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${launchDir}/FCS_gx/${db['OUT']}"]
+                def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${projectDir}/FCS_gx/${db['OUT']}"]
                 def process2 = command2.execute()
                 process2.waitFor()
 
@@ -106,22 +106,22 @@ nextflow_pipeline {
 
             // Databases: The wierd ones
 
-            new File("${launchDir}/ncbi_taxdump").mkdir()
+            new File("${projectDir}/ncbi_taxdump").mkdir()
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
-                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${launchDir}/ncbi_taxdump -xzf new_taxdump.tar.gz"
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${projectDir}/ncbi_taxdump -xzf new_taxdump.tar.gz"
                 ],
                 "ASCC_DIAMOND_DB": [
                     "COMMAND":
-                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o diamond.dmnd"
+                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o ${projectDir}/diamond.dmnd"
                 ]
             ]
 
             for (String dbKey : other_dbs.keySet()) {
                 def db = other_dbs.get(dbKey)
 
-                println "\nDownloading the OTHER DB: ${dbKey}..."
+                println "\nDownloading the OTHER DB's: ${dbKey}..."
                 def command3 = ['bash', '-c', "${db['COMMAND']}"]
                 def process3 = command3.execute()
                 process3.waitFor()
@@ -133,9 +133,9 @@ nextflow_pipeline {
                 println "Done"
             }
 
-            def command4 = ['bash', '-c', "ls -lha ./"]
-                def process4 = command4.execute()
-                process4.waitFor()
+            String result = "ls -lha ".execute().text
+            println result.toUpperCase()
+
         }
 
         when {
@@ -221,15 +221,15 @@ nextflow_pipeline {
         }
 
         cleanup {
-            new File("${launchDir}/FCS_gx").deleteDir()
-            new File("${launchDir}/blastdb").deleteDir()
-            new File("${launchDir}/busco").deleteDir()
-            new File("${launchDir}/asccTinyTest_V2").deleteDir()
-            new File("${launchDir}/ncbi_taxdump").deleteDir()
-            new File("${launchDir}/NT_database").deleteDir()
-            new File("${launchDir}/kraken2").deleteDir()
-            new File("${launchDir}/vecscreen").deleteDir()
-            new File("${launchDir}/diamond.dmnd").delete()
+            new File("${projectDir}/FCS_gx").deleteDir()
+            new File("${projectDir}/blastdb").deleteDir()
+            new File("${projectDir}/busco").deleteDir()
+            new File("${projectDir}/asccTinyTest_V2").deleteDir()
+            new File("${projectDir}/ncbi_taxdump").deleteDir()
+            new File("${projectDir}/NT_database").deleteDir()
+            new File("${projectDir}/kraken2").deleteDir()
+            new File("${projectDir}/vecscreen").deleteDir()
+            new File("${projectDir}/diamond.dmnd").delete()
             new File("${workDir}").deleteDir()
         }
     }
