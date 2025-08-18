@@ -28,7 +28,7 @@ process SANGER_TOL_BTK {
     def args                =   task.ext.args           ?:  ""
     def profiles            =   task.ext.profiles       ?:  ""
     def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
-    def pipeline            =   task.ext.pipeline       ?: "sanger-tol/blobtookit"
+    def pipeline            =   task.ext.pipeline       ?: "sanger-tol/blobtoolkit"
     def pipeline_version    =   task.ext.version        ?: "0.8.0"
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
@@ -53,6 +53,7 @@ process SANGER_TOL_BTK {
     nextflow run ${pipeline} \\
         -r $pipeline_version \\
         -c $blobtoolkit_config_file \\
+        -profile ${profiles} \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta ${meta.id}.fasta \\
