@@ -243,7 +243,7 @@ nextflow_pipeline {
                     fcs_adaptor_prok,
                     fcs_adaptor_prok.sizes() == (5 * 3),
                     fcsgx_data,
-                    fcsgx_data.sizes() == (),
+                    fcsgx_data.sizes() == (4 * 3),
                     filter_brcde_bc2001,
                     filter_brcde_bc2001.sizes() == (1 * 3),
                     filter_brcde_bc2009,
