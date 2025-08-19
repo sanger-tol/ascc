@@ -158,14 +158,14 @@ nextflow_pipeline {
 
             // First block are files which will only be found in PRIMARY or HAPLO files
             // due to these processes existing only in the GENOMIC subworkflow
-            def ascc_main_output    = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/filter_barcode/*filtered.txt")
-            def autofilter_files    = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/autofilter/*autofiltered.fasta")
-            def autofilter_txt      = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/autofilter/*autofiltered.[csv,txt]")
-            def kmer_data_files     = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/kmer_data/*", include: ["*KMER_COUNTS.csv", "_combined.csv"])
+            def ascc_main_output    = getAllFilesFromDir("${params.outdir}/asccTinyTest_V2_*/filter_barcode/*filtered.txt")
+            def autofilter_files    = getAllFilesFromDir("${params.outdir}/asccTinyTest_V2_*/autofilter/*autofiltered.fasta")
+            def autofilter_txt      = getAllFilesFromDir("${params.outdir}/asccTinyTest_V2_*/autofilter/*autofiltered.[csv,txt]")
+            def kmer_data_files     = getAllFilesFromDir("${params.outdir}/asccTinyTest_V2_*/kmer_data/*", include: ["*KMER_COUNTS.csv", "_combined.csv"])
 
             // DONE
-            def autofilter_warn_txt = getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/autofilter_done_indicator_file.txt") // We want specifically this file
-            def generate_samplesheet= getAllFilesFromDir("${params.outdir}/*{HAPLO,PRIMARY}/generate_samplesheet/*csv")
+            def autofilter_warn_txt = getAllFilesFromDir("${params.outdir}/asccTinyTest_V2_*/autofilter_done_indicator_file.txt") // We want specifically this file
+            def generate_samplesheet= getAllFilesFromDir("${params.outdir}/asccTinyTest_V2_*/generate_samplesheet/*csv")
 
 
             // Second block covers all other output
@@ -187,6 +187,9 @@ nextflow_pipeline {
             def summarise_vecscreen = getAllFilesFromDir("${params.outdir}/*/summarise_vecscreen_output/*", include: ["*vecscreen_contamination"])
             def tiara_raw_files     = getAllFilesFromDir("${params.outdir}/*/tiara_raw_output/asccTinyTest_V2_PRIMARY.txt") // We want specifically this file
             def trailingns          = getAllFilesFromDir("${params.outdir}/*/trailingns/*_trim_Ns")
+
+            // Pipeline completion file, needed for Sanger internal processes
+            def completion_file     = getAllFilesFromDir("${params.outdir}/workflow_completed.txt")
 
             assertAll(
                 { assert workflow.success},
@@ -217,21 +220,23 @@ nextflow_pipeline {
 
 
                     // All files with stable contents
-                    stable_path
+                    stable_path,
+
+                    completion_file
                 ).match() }
             )
         }
 
         cleanup {
             new File("${projectDir}/FCS_gx").deleteDir()
-            new File("${projectDir}/blastdb").deleteDir()
-            new File("${projectDir}/busco").deleteDir()
-            new File("${projectDir}/asccTinyTest_V2").deleteDir()
-            new File("${projectDir}/ncbi_taxdump").deleteDir()
-            new File("${projectDir}/NT_database").deleteDir()
-            new File("${projectDir}/kraken2").deleteDir()
-            new File("${projectDir}/vecscreen").deleteDir()
-            new File("${projectDir}/diamond.dmnd").delete()
+            new File("${projectDir}/BLASTN").deleteDir()
+            new File("${projectDir}/BUSCO_LINEAGES").deleteDir()
+            new File("${projectDir}/TEST_DATA").deleteDir()
+            new File("${projectDir}/NCBI_TAXONOMY").deleteDir()
+            new File("${projectDir}/NT_SUBSET").deleteDir()
+            new File("${projectDir}/KRAKEN2").deleteDir()
+            new File("${projectDir}/VECSCREEN").deleteDir()
+            new File("${projectDir}/DIAMOND").deleteDir()
             new File("${workDir}").deleteDir()
         }
     }
