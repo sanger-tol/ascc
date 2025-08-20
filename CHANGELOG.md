@@ -3,6 +3,29 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - Red Spider-Boat [ ##/08/2024]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
+
+### `Added`
+
+- Added pipeline-level nf-test testing which is now running as standard CI.
+- Corrected versioning in the .nextflow.log.
+- Spelling mistakes... again.
+- Minor updates to the base.config.
+- singularity pid setting is now false.
+
+### `Fixed`
+
+- singularity pid change is down to an issue with Singularity and FCSGX, multiple instances of the tool accessing the same DB files causes crashes.
+
+### `Bugs`
+
+- Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
+- tiara, fcsgx, autofilter must always be activated.
+
 ## [0.4.0] - Red Mouse [ ##/06/2024]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
@@ -11,7 +34,6 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 
 ### `Added`
 
-- Added pipeline-level nf-test testing.
 - Return free-disk-space to nf-test CI runners (suggestion by @prototaxites)
 - Updated test files to post-datacentre crash (Only affects internal sanger users).
 - Test and Production (this is sanger specific, please change if you want to use the same style) configs have been updated.
