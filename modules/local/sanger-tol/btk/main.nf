@@ -65,7 +65,6 @@ process SANGER_TOL_BTK {
         --blastx "\$(realpath $blastx)" \\
         --use_work_dir_as_temp true \\
         --align \\
-        -c $blobtoolkit_config_file \\
         $args
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
