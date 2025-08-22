@@ -430,17 +430,7 @@
                 "pipeline_info/ascc_software_versions.yml",
                 "workflow_completed.txt"
             ],
-            [
-                "asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv:md5,f7cabba0931ba211799a62c49334e1e4",
-                "asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv:md5,564641254da601efc55bf80a58d1ee63"
-            ],
             true,
-            [
-                "asccTinyTest_V2_HAPLO_KMER_COUNTS.csv:md5,b93f01e98054bb9fd2b182920023bcac",
-                "asccTinyTest_V2_HAPLO_kmers_dim_reduction_embeddings_combined.csv:md5,599ef840a0543f136b775c49432b83c9",
-                "asccTinyTest_V2_PRIMARY_KMER_COUNTS.csv:md5,1df2ea2f14b3466d1e2b996aeccd4df7",
-                "asccTinyTest_V2_PRIMARY_kmers_dim_reduction_embeddings_combined.csv:md5,d859af2d704f221a09f852ec80d4ddb2"
-            ],
             true,
             [
                 "autofiltering_done_indicator_file.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
@@ -496,10 +486,6 @@
                 "bestsum_superkingdom_cindex.json:md5,e29edfb7604484146598087e63377e15",
                 "bestsum_superkingdom_positions.json:md5,b64d7edafd13647ac54a28401dd8ae8b",
                 "bestsum_superkingdom_score.json:md5,e29edfb7604484146598087e63377e15",
-                "embedding_dim_1_PCA.json:md5,f463a3b0439cd51788fc5621c466bcdd",
-                "embedding_dim_1_random_trees.json:md5,23cc5cd5fa7c26c34fc0ef0cbb9a8394",
-                "embedding_dim_2_PCA.json:md5,788c058f959534fe64caa1485527cfe0",
-                "embedding_dim_2_random_trees.json:md5,7230daff0ff618846b105782368d8f09",
                 "fcs_gx_action.json:md5,daf4d777154e3e964daca72a26bb41d5",
                 "fcs_gx_coverage_by_div.json:md5,10d36275383f9d563b3ff22947f3b020",
                 "fcs_gx_coverage_by_tax.json:md5,cb1763fdc1d353d62b6dad64cef75d01",
@@ -509,7 +495,6 @@
                 "gc.json:md5,41f2e97b5614d91e30df5a5c719fa61f",
                 "identifiers.json:md5,6bf375bd976383d36ac9e2d23ba0394e",
                 "length.json:md5,55b2b5ac2b53dbec97d1c6eacfd6269a",
-                "meta.json:md5,4eebe90f07557e27efc3657c720df45e",
                 "ncount.json:md5,b60eb2c2db5900c017ce99d689adff26",
                 "nt_kraken_class.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "nt_kraken_domain.json:md5,5d4cfc05f7f814841c229184b114fe54",
@@ -524,7 +509,6 @@
                 "gc.json:md5,5e9eaa862517a4fafada54e4f8fa109b",
                 "identifiers.json:md5,a8fa6468ed53c0a3fe7ec689f524b8bf",
                 "length.json:md5,ee9819c30d44eb747a17e22a52ee0192",
-                "meta.json:md5,aff33e2c7a5158fc6c7bcee3bd6f60b2",
                 "ncount.json:md5,db3bfe371d6198e64cade978c5094222",
                 "nt_kraken_class.json:md5,f6aaad03d4929f8d7e24a5449ef88d08",
                 "nt_kraken_domain.json:md5,f6aaad03d4929f8d7e24a5449ef88d08",
@@ -569,10 +553,6 @@
                 "bestsum_superkingdom_cindex.json:md5,e29edfb7604484146598087e63377e15",
                 "bestsum_superkingdom_positions.json:md5,b64d7edafd13647ac54a28401dd8ae8b",
                 "bestsum_superkingdom_score.json:md5,e29edfb7604484146598087e63377e15",
-                "embedding_dim_1_PCA.json:md5,5462d285588c2d4d11504c4f5ed6e97e",
-                "embedding_dim_1_random_trees.json:md5,9c9b3c3bc34adfa463ca1994bc29cc56",
-                "embedding_dim_2_PCA.json:md5,5f926b86a4514229258fcf2ec79f444b",
-                "embedding_dim_2_random_trees.json:md5,b87c6d20051f9ccca2469e2444ef9874",
                 "fcs_gx_action.json:md5,daf4d777154e3e964daca72a26bb41d5",
                 "fcs_gx_coverage_by_div.json:md5,10d36275383f9d563b3ff22947f3b020",
                 "fcs_gx_coverage_by_tax.json:md5,cb1763fdc1d353d62b6dad64cef75d01",
@@ -582,7 +562,6 @@
                 "gc.json:md5,41f2e97b5614d91e30df5a5c719fa61f",
                 "identifiers.json:md5,6bf375bd976383d36ac9e2d23ba0394e",
                 "length.json:md5,55b2b5ac2b53dbec97d1c6eacfd6269a",
-                "meta.json:md5,a0cb87ccc5577426e5fe49fadede200f",
                 "ncount.json:md5,b60eb2c2db5900c017ce99d689adff26",
                 "nt_kraken_class.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "nt_kraken_domain.json:md5,5d4cfc05f7f814841c229184b114fe54",
@@ -603,16 +582,13 @@
             true,
             [
                 "asccTinyTest_V2_HAPLO_euk.cleaned_sequences.fa.gz:md5,20877d6b104598de175a3fc42e3b1f8f",
-                "asccTinyTest_V2_HAPLO_euk.fcs_adaptor.log:md5,e1e122753ceab9afb6a4f5d8f01a5ca6",
                 "asccTinyTest_V2_HAPLO_euk.fcs_adaptor_report.txt:md5,5b680f558420be42cae6a68a009d0999",
                 "asccTinyTest_V2_HAPLO_euk.pipeline_args.yaml:md5,27a3f834ecdd3cb2e350337a505a309d",
                 "asccTinyTest_V2_HAPLO_euk.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "asccTinyTest_V2_MITO_euk.fcs_adaptor.log:md5,ee9d8496ab91ed7a6282247aeb6dab9d",
                 "asccTinyTest_V2_MITO_euk.fcs_adaptor_report.txt:md5,27375be4671e01d2d2674ddd1d44414a",
                 "asccTinyTest_V2_MITO_euk.pipeline_args.yaml:md5,5bc3caa1ff1d451b3f8c5243744fe7b1",
                 "asccTinyTest_V2_MITO_euk.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_PRIMARY_euk.cleaned_sequences.fa.gz:md5,20877d6b104598de175a3fc42e3b1f8f",
-                "asccTinyTest_V2_PRIMARY_euk.fcs_adaptor.log:md5,685078eb6603aad7a1931724571b8db5",
                 "asccTinyTest_V2_PRIMARY_euk.fcs_adaptor_report.txt:md5,5b680f558420be42cae6a68a009d0999",
                 "asccTinyTest_V2_PRIMARY_euk.pipeline_args.yaml:md5,9ce26ec31a9bbbfa8f581e9781380d54",
                 "asccTinyTest_V2_PRIMARY_euk.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e"
@@ -620,33 +596,21 @@
             true,
             [
                 "asccTinyTest_V2_HAPLO_prok.cleaned_sequences.fa.gz:md5,20877d6b104598de175a3fc42e3b1f8f",
-                "asccTinyTest_V2_HAPLO_prok.fcs_adaptor.log:md5,7c56a4edda19d7259389f4d7af8068ed",
                 "asccTinyTest_V2_HAPLO_prok.fcs_adaptor_report.txt:md5,5b680f558420be42cae6a68a009d0999",
                 "asccTinyTest_V2_HAPLO_prok.pipeline_args.yaml:md5,42d128f9989f6d2167720e443530c409",
                 "asccTinyTest_V2_HAPLO_prok.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "asccTinyTest_V2_MITO_prok.fcs_adaptor.log:md5,9109dc6a3cb5ebac0db4583f7f5511b4",
                 "asccTinyTest_V2_MITO_prok.fcs_adaptor_report.txt:md5,27375be4671e01d2d2674ddd1d44414a",
                 "asccTinyTest_V2_MITO_prok.pipeline_args.yaml:md5,7ac30af74092cb31eb34261cec8ba642",
                 "asccTinyTest_V2_MITO_prok.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_PRIMARY_prok.cleaned_sequences.fa.gz:md5,20877d6b104598de175a3fc42e3b1f8f",
-                "asccTinyTest_V2_PRIMARY_prok.fcs_adaptor.log:md5,8fbb35c1d7147f35c596d5fcf814b7c2",
                 "asccTinyTest_V2_PRIMARY_prok.fcs_adaptor_report.txt:md5,5b680f558420be42cae6a68a009d0999",
                 "asccTinyTest_V2_PRIMARY_prok.pipeline_args.yaml:md5,fc8a06a94f223dd86e5ca0a4f08e9f8e",
                 "asccTinyTest_V2_PRIMARY_prok.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             true,
             [
-                "asccTinyTest_V2_HAPLO.fcs_gx_report.txt:md5,e823af7a35229ddd24651e4c8d332105",
-                "asccTinyTest_V2_HAPLO.summary.txt:md5,50ced374dd8b2bd01ab52b330ad67bb5",
-                "asccTinyTest_V2_HAPLO.taxonomy.rpt:md5,2b1e6b66768c1721eb751ecf99fef964",
                 "asccTinyTest_V2_HAPLO_parsed_fcsgx.csv:md5,eb69fdddfb1922cb5a2a5384867220ff",
-                "asccTinyTest_V2_MITO.fcs_gx_report.txt:md5,a23d0d58a95b7107ca436b11bd1ebe14",
-                "asccTinyTest_V2_MITO.summary.txt:md5,af0836ed1e0db196c4bb9ee275f8f5f5",
-                "asccTinyTest_V2_MITO.taxonomy.rpt:md5,9a37f2ab6f787f3e4650ea159becbafa",
                 "asccTinyTest_V2_MITO_parsed_fcsgx.csv:md5,ee43b4f252ddc5bb0372a68e210c5d9c",
-                "asccTinyTest_V2_PRIMARY.fcs_gx_report.txt:md5,78279f3fc4fcc5382745def504be02ae",
-                "asccTinyTest_V2_PRIMARY.summary.txt:md5,e2c6e2aab28a6b0e18854d65189cf83b",
-                "asccTinyTest_V2_PRIMARY.taxonomy.rpt:md5,a44e526dd53cf4b5b59d03c3e6a84a29",
                 "asccTinyTest_V2_PRIMARY_parsed_fcsgx.csv:md5,eb69fdddfb1922cb5a2a5384867220ff"
             ],
             true,
@@ -707,14 +671,12 @@
                 "asccTinyTest_V2_PRIMARY_trim_Ns:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             true,
-            [
-                "workflow_completed.txt:md5,3d1a321c71373ba4a7ac2c928ea4490f"
-            ]
+            true
         ],
         "meta": {
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-08-20T15:42:46.632802488"
+        "timestamp": "2025-08-22T00:48:14.83426739"
     }
 }

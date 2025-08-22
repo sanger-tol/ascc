@@ -135,8 +135,9 @@ nextflow_pipeline {
                 println "Done"
             }
 
-            String result = "ls -lha ".execute().text
-            println result.toUpperCase()
+            // Useful for debugging
+            // String result = "ls -lha ".execute().text
+            // println result.toUpperCase()
 
         }
 
@@ -165,23 +166,29 @@ nextflow_pipeline {
                                             "asccTinyTest_V2_*/autofilter/*.csv",
                                             "asccTinyTest_V2_*/autofilter/*.txt"
                                         ])
-            def create_btk_dataset  = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/*.{yaml,json}"])
+            def create_btk_dataset  = getAllFilesFromDir(params.outdir,
+                                        include: [
+                                            "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/*.{yaml,json}"
+                                        ],
+                                        ignore: [
+                                            "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/embedding_dim*.json",
+                                            "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/meta.json"
+                                        ])
             def create_btk_tsv      = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/create_btk_dataset/*.tsv"])
             def fcs_adaptor_euk     = getAllFilesFromDir(params.outdir, include: [
                                             "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.fa.gz",
-                                            "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.log",
                                             "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.txt",
                                             "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.yaml",
                                             "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.jsonl"
                                         ])
-            def fcs_adaptor_prok    = getAllFilesFromDir(params.outdir, include: [
+            def fcs_adaptor_prok    = getAllFilesFromDir(params.outdir,
+                                        include: [
                                             "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.fa.gz",
-                                            "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.log",
                                             "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.txt",
                                             "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.yaml",
                                             "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.jsonl"
                                         ])
-            def fcsgx_data          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/fcsgx_data/*.{txt,rpt,csv}"])  // <--
+            def fcsgx_data          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/fcsgx_data/*.csv"])  // txt and rpt files are intermediary files and change per run, however, the csv does not.
             def filter_brcde_bc2001 = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/filter_barcode/*bc2001_filtered.txt"])
             def filter_brcde_bc2009 = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/filter_barcode/*bc2009_filtered.txt"])
             def filtered_fasta      = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/filtered_fasta/*filtered.fasta"])
@@ -207,9 +214,9 @@ nextflow_pipeline {
                     stable_name,
 
                     // sizes have been written to show that there are X numbers across the Y relevant input assemblies
-                    ascc_main_output,
+                    // ascc_main_output                         // file output has minute changes per run
                     ascc_main_output.size() == 2,
-                    kmer_data_files,
+                    // kmer_data_files,                         // ML method outputs, changes per run
                     kmer_data_files.size() == 4,
                     autofilter_warn_txt,                        // Autofilter warn file - Warns of completion
                     autofilter_warn_txt.size() == 2,
@@ -218,15 +225,15 @@ nextflow_pipeline {
                     autofilter_txt,                             // Autofilter report files
                     autofilter_txt.size() == (3 * 2),           // 3 files across 2 assemblies
                     create_btk_dataset,
-                    create_btk_dataset.size() == (58 * 2 + 15), // The genomic assemblies return all files, MITO returns 15, the dataset doesn't have as much data as MITO
+                    create_btk_dataset.size() == (53 * 2 + 14), // 120 - The genomic assemblies return all files, MITO returns 15, the dataset doesn't have as much data as MITO. 10 files are excluded from this as their data change per run.
                     create_btk_tsv,
                     create_btk_tsv.size() == (1 * 3),
                     fcs_adaptor_euk,
-                    fcs_adaptor_euk.size() == (5 * 2 + 4), // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
+                    fcs_adaptor_euk.size() == (4 * 2 + 3),  // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
                     fcs_adaptor_prok,
-                    fcs_adaptor_prok.size() == (5 * 2 + 4), // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
+                    fcs_adaptor_prok.size() == (4 * 2 + 3), // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
                     fcsgx_data,
-                    fcsgx_data.size() == (4 * 3),
+                    fcsgx_data.size() == 3,
                     filter_brcde_bc2001,
                     filter_brcde_bc2001.size() == (1 * 3),
                     filter_brcde_bc2009,
@@ -245,7 +252,7 @@ nextflow_pipeline {
                     trailingns.size() == (1 * 3),
 
                     // Workflow completion file
-                    completion_file
+                    completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check
 
                 ).match() }
             )
