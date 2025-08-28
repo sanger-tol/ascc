@@ -24,7 +24,6 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - GENERATE_SAMPLESHEET was only taking into account 1 read file for BTK rather than all provided read files.
 - GENERATE_SAMPLESHEET was not using the `reads_type` variable.
 
-
 ### `Bugs`
 
 - Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
