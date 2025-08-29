@@ -78,7 +78,15 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map {
             sample, type_of_assembly, assembly_file ->
-                return [[ id: sample.id + '_' + type_of_assembly, assembly_type: type_of_assembly, single_end:true ], assembly_file ]
+                return [
+                    [
+                        id: sample.id + '_' + type_of_assembly,
+                        assembly_type: type_of_assembly,
+                        filter_cutoff: params.filter_cutoff
+                        single_end: true
+                    ],
+                    assembly_file
+                ]
         }
         .groupTuple()
         .map {
@@ -150,8 +158,6 @@ workflow PIPELINE_INITIALISATION {
 
     Channel.of(params.fcs_gx_database_path)
         .set { fcs_gx_database_path}
-
-
 
 
     //
