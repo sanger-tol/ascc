@@ -48,7 +48,7 @@ nextflow_pipeline {
                 new File("${launchDir}/${dbKey}").mkdir()
 
                 println "\nDownloading the database ${dbKey}..."
-                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${projectDir}/${dbKey}/"]
+                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}/${dbKey}/"]
                 def process = command.execute()
                 process.waitFor()
 
@@ -59,10 +59,6 @@ nextflow_pipeline {
                 println "Done"
             }
 
-            // Copy the test data so that we have a fake haplo
-            def data_copy_command = ['bash', '-c', "cp ${projectDir}/TEST_DATA/asccTinyTest_V2/assembly/pyoelii_tiny_testfile_with_adapters.fa ${projectDir}/TEST_DATA/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_hap.fa"]
-            def data_copy_proc = data_copy_command.execute()
-            data_copy_proc.waitFor()
 
             // Databases: FCS DATABASE
             def fcs_database = [
@@ -94,7 +90,7 @@ nextflow_pipeline {
                 def db = fcs_database.get(dbKey)
 
                 println "\nDownloading the FCS file: ${db['FILE']}..."
-                def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${projectDir}/FCS_gx/${db['OUT']}"]
+                def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${launchDir}/FCS_gx/${db['OUT']}"]
                 def process2 = command2.execute()
                 process2.waitFor()
 
@@ -112,11 +108,11 @@ nextflow_pipeline {
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
-                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${projectDir}/NCBI_TAXONOMY -xzf new_taxdump.tar.gz"
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${launchDir}/NCBI_TAXONOMY -xzf new_taxdump.tar.gz"
                 ],
                 "ASCC_DIAMOND_DB": [
                     "COMMAND":
-                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o ${projectDir}/DIAMOND/diamond.dmnd"
+                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o ${launchDir}/DIAMOND/diamond.dmnd"
                 ]
             ]
 
@@ -143,7 +139,20 @@ nextflow_pipeline {
 
         when {
             params {
-                outdir = "$outputDir"
+                outdir                          = "$outputDir"
+
+                // DB params to overwrite those in `/conf/test.config`
+                nt_database_path                = "${launchDir}/BLASTN/blastdb/"
+                nt_kraken_database_path         = "${launchDir}/KRAKEN2/kraken2"
+                ncbi_taxonomy_path              = "${launchDir}/NCBI_TAXONOMY/"
+                ncbi_ranked_lineage_path        = "${launchDir}/NCBI_TAXONOMY/rankedlineage.dmp"
+                busco_lineages_folder           = "${launchDir}/BUSCO_LINEAGES/"
+                fcs_gx_database_path            = "${launchDir}/FCS_gx/"
+                vecscreen_database_path         = "${launchDir}/VECSCREEN/"
+                diamond_uniprot_database_path   = "${launchDir}/DIAMOND/diamond.dmnd"
+                diamond_nr_database_path        = "${launchDir}/DIAMOND/diamond.dmnd"
+
+                // other params can be found in `/conf/test.config`
             }
         }
 
