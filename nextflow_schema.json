@@ -147,22 +147,30 @@
                     "fa_icon": "fas fa-file-lines"
                 },
                 "seqkit_sliding": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Length of slide for Seqkit",
                     "fa_icon": "fas fa-hashtag",
                     "default": 100000
                 },
                 "seqkit_window": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Length of the window for Seqkit",
                     "fa_icon": "fas fa-hashtag",
                     "default": 6000
                 },
                 "n_neighbours": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Nearest Neighbour value - This is for the dimensional reduction of kmer counts (UMAP and t-SNE).",
                     "fa_icon": "fas fa-hashtag",
                     "default": 13
+                },
+                "filter_cutoff": {
+                    "type": "integer",
+                    "description": "The filter cutoff for the input fasta, scaffolds above this limit will be removed from analysis.",
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 1900000000,
+                    "minimum": 0,
+                    "maximum": 1900000000
                 },
                 "outdir": {
                     "type": "string",
