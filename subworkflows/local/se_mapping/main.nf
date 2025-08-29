@@ -22,7 +22,7 @@ workflow SE_MAPPING {
                 ],
                 ref,
                 reads_path,
-                "bai",
+                "csi",
                 true,
                 false,
                 false,
