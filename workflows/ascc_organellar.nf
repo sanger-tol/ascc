@@ -283,15 +283,21 @@ workflow ASCC_ORGANELLAR {
         // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         //
         .map{ meta, file ->
-            tuple(
-                [
+            def total_length = 0
+            new File(fasta_file).eachLine { line ->
+                if (line && !line.startsWith('>')) {
+                    total_length += line.length()
+                }
+            }
+
+            def meta = [
                     id: meta.id,
                     sliding: meta.sliding,
                     window: meta.window,
-                    seq_count: CountFastaLength(file)
-                ],
-                file
-            )
+                    seq_count: total_length
+                ]
+
+            [meta, file]
         }
         .filter { meta, file ->
                     meta.seq_count >= params.seqkit_window
@@ -610,23 +616,6 @@ workflow ASCC_ORGANELLAR {
 
     versions                    = ch_versions
 
-}
-
-//
-// Function: this is to count the length of ONLY the fasta sequence
-//
-// @param input_file: path
-// @return int
-def CountFastaLength(input_file) {
-    def totalLength = 0
-
-    new File(input_file).eachLine { line ->
-        if (line && !line.startsWith('>')) {
-            totalLength += line.length()
-        }
-    }
-
-    return totalLength
 }
 
 /*
