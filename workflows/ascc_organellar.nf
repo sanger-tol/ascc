@@ -620,7 +620,7 @@ workflow ASCC_ORGANELLAR {
 def CountFastaLength(input_file) {
     def totalLength = 0
 
-    new File(inputFile).eachLine { line ->
+    new File(input_file).eachLine { line ->
         if (line && !line.startsWith('>')) {
             totalLength += line.length()
         }
