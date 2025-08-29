@@ -290,14 +290,14 @@ workflow ASCC_ORGANELLAR {
                 }
             }
 
-            def meta = [
+            def meta2 = [
                     id: meta.id,
                     sliding: meta.sliding,
                     window: meta.window,
                     seq_count: total_length
                 ]
 
-            [meta, file]
+            [meta2, file]
         }
         .filter { meta, file ->
                     meta.seq_count >= params.seqkit_window
