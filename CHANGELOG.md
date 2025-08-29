@@ -9,20 +9,26 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
 Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
 
+IF RUNNING A NUMBER OF INSTANCES IN PARALLEL THEN PLEASE USE `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`!
+
 ### `Added`
 
 - Added pipeline-level nf-test testing which is now running as standard CI.
 - Corrected versioning in the .nextflow.log.
-- Spelling mistakes... again.
 - Minor updates to the base.config.
 - singularity pid setting is now false.
+- Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
 
 ### `Fixed`
 
-- singularity pid change is down to an issue with Singularity and FCSGX, multiple instances of the tool accessing the same DB files causes crashes.
+- Spelling mistakes... again.
+- singularity pid env change is down to an issue with Singularity and FCSGX, multiple instances of the tool accessing the same DB files causes crashes.
 - Correct value of 100Mb to 1Gb as the ext.cutoff for FILTER_FASTA
 - GENERATE_SAMPLESHEET was only taking into account 1 read file for BTK rather than all provided read files.
 - GENERATE_SAMPLESHEET was not using the `reads_type` variable.
+- Changed instances of `projectDir` to `launchDir` for safety.
+- Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
+- `withName: 'PACBIO_BARCODE_CHECK:BLAST_BLASTN'` was not being respected, updated to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
 
 ### `Bugs`
 
