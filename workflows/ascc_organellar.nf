@@ -618,14 +618,15 @@ workflow ASCC_ORGANELLAR {
 // @param input_file: path
 // @return int
 def CountFastaLength(input_file) {
-    int counter = 0;
-    def list_lines = new File(input_file.toString()).text.readLines()
-    for (i in list_lines) {
-        if (i[0] != ">") {
-            counter = counter + i.length()
+    def totalLength = 0
+
+    new File(inputFile).eachLine { line ->
+        if (line && !line.startsWith('>')) {
+            totalLength += line.length()
         }
     }
-    return counter;
+
+    return totalLength
 }
 
 /*
