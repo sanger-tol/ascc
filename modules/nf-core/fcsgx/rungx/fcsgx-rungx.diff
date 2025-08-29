@@ -16,7 +16,7 @@ Changes in 'fcsgx/rungx/main.nf':
  
      output:
      tuple val(meta), path("*.fcs_gx_report.txt"), emit: fcsgx_report
-@@ -25,17 +25,20 @@
+@@ -25,25 +25,42 @@
      script:
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -28,6 +28,7 @@ Changes in 'fcsgx/rungx/main.nf':
 +    // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
 +    def database = ramdisk_path ?: gxdb
 +
++    // fcs_py=$(run_gx.py)
      """
 -    # Copy DB to RAM-disk when supplied. Otherwise, the tool is very slow.
 -    $mv_database_to_ram
@@ -35,15 +36,35 @@ Changes in 'fcsgx/rungx/main.nf':
 +    export GX_INSTANTIATE_FASTA=1
  
 -    export GX_NUM_CORES=${task.cpus}
-     run_gx.py \\
-         --fasta ${fasta} \\
-         --gx-db ${database} \\
+-    run_gx.py \\
+-        --fasta ${fasta} \\
+-        --gx-db ${database} \\
 -        --tax-id ${taxid} \\
-+        --tax-id ${meta.taxid} \\
-         --generate-logfile true \\
-         --out-basename ${prefix} \\
-         --out-dir . \\
-@@ -43,7 +46,7 @@
+-        --generate-logfile true \\
+-        --out-basename ${prefix} \\
+-        --out-dir . \\
+-        ${args}
++    if ! command -v run_gx.py; then
++        echo "Using the MODULE install"
++        run_gx \\
++            --fasta ${fasta} \\
++            --gx-db ${database} \\
++            --tax-id ${meta.taxid} \\
++            --generate-logfile true \\
++            --out-basename ${prefix} \\
++            --out-dir . \\
++            ${args}
++    else
++        echo "Using the CONTAINER install"
++        run_gx.py \\
++            --fasta ${fasta} \\
++            --gx-db ${database} \\
++            --tax-id ${meta.taxid} \\
++            --generate-logfile true \\
++            --out-basename ${prefix} \\
++            --out-dir . \\
++            ${args}
++    fi
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
@@ -52,7 +73,7 @@ Changes in 'fcsgx/rungx/main.nf':
      END_VERSIONS
      """
  
-@@ -58,7 +61,7 @@
+@@ -58,7 +75,7 @@
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":

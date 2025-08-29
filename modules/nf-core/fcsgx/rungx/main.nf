@@ -31,18 +31,32 @@ process FCSGX_RUNGX {
     // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
 
+    // fcs_py=$(run_gx.py)
     """
     export GX_NUM_CORES=${task.cpus}
     export GX_INSTANTIATE_FASTA=1
 
-    run_gx.py \\
-        --fasta ${fasta} \\
-        --gx-db ${database} \\
-        --tax-id ${meta.taxid} \\
-        --generate-logfile true \\
-        --out-basename ${prefix} \\
-        --out-dir . \\
-        ${args}
+    if ! command -v run_gx.py; then
+        echo "Using the MODULE install"
+        run_gx \\
+            --fasta ${fasta} \\
+            --gx-db ${database} \\
+            --tax-id ${meta.taxid} \\
+            --generate-logfile true \\
+            --out-basename ${prefix} \\
+            --out-dir . \\
+            ${args}
+    else
+        echo "Using the CONTAINER install"
+        run_gx.py \\
+            --fasta ${fasta} \\
+            --gx-db ${database} \\
+            --tax-id ${meta.taxid} \\
+            --generate-logfile true \\
+            --out-basename ${prefix} \\
+            --out-dir . \\
+            ${args}
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
