@@ -1,4 +1,4 @@
 sample,assembly_type,assembly_file
-asccTinyTest_V2,PRIMARY,https://tolit.cog.sanger.ac.uk/test-data/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_adaptors_hap1.fa
-asccTinyTest_V2,HAPLO,https://tolit.cog.sanger.ac.uk/test-data/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_adaptors_hap2.fa
-asccTinyTest_V2,MITO,https://tolit.cog.sanger.ac.uk/test-data/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
+asccTinyTest_V2,PRIMARY,https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_adaptors_hap1.fa
+asccTinyTest_V2,HAPLO,https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/assembly/Pyoeliiyoelii17XNL_assembly_adaptors_hap2.fa
+asccTinyTest_V2,MITO,https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/organellar/Pyoeliiyoelii17XNL_mitochondrion_ncbi.fa
