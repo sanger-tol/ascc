@@ -166,7 +166,7 @@
                 },
                 "filter_cutoff": {
                     "type": "integer",
-                    "description": "The filter cutoff for the input fasta, scaffolds above this limit will be removed from analysis.",
+                    "description": "The length cutoff for the input fasta, scaffolds longer than this limit will be removed from analysis.",
                     "fa_icon": "fas fa-hashtag",
                     "default": 1900000000,
                     "minimum": 0,
