@@ -10,6 +10,7 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
 
 ### `Notes`
+
 - If running the pipeline in `--profile singularity` and you are crashing with a generic error, try using `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`.
 
 ### `Added`
