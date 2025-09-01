@@ -3,6 +3,42 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - Red Spider-Boat [ ##/08/2024]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
+
+### `Notes`
+
+- If running the pipeline in `--profile singularity` and you are crashing with a generic error, try using `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`.
+
+### `Added`
+
+- Template update to 3.3.2.
+- Added pipeline-level nf-test testing which is now running as standard CI.
+- Corrected versioning in the .nextflow.log.
+- Minor updates to the base.config.
+- singularity pid setting is now false.
+- Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
+- The FCSGX module has been heavily patched when using `--profile production`, this is to support `module` and `modulecmd`.
+
+### `Fixed`
+
+- Spelling mistakes... again.
+- singularity pid env change is down to an issue with Singularity and FCSGX, multiple instances of the tool accessing the same DB files causes crashes.
+- Correct value of 100Mb to 1Gb as the ext.cutoff for FILTER_FASTA
+- GENERATE_SAMPLESHEET was only taking into account 1 read file for BTK rather than all provided read files.
+- GENERATE_SAMPLESHEET was not using the `reads_type` variable.
+- Changed instances of `projectDir` to `launchDir` for safety (In tests).
+- Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
+- Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
+
+### `Bugs`
+
+- Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
+- tiara, fcsgx, autofilter must always be activated.
+
 ## [0.4.0] - Red Mouse [ ##/06/2024]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
@@ -11,7 +47,6 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 
 ### `Added`
 
-- Added pipeline-level nf-test testing.
 - Return free-disk-space to nf-test CI runners (suggestion by @prototaxites)
 - Updated test files to post-datacentre crash (Only affects internal sanger users).
 - Test and Production (this is sanger specific, please change if you want to use the same style) configs have been updated.

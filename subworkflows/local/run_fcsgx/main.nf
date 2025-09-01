@@ -23,6 +23,7 @@ workflow RUN_FCSGX {
 
     //
     // MODULE: FCSGX_RUNGX RUN ON ASSEMBLY FASTA TUPLE WITH THE TAXID AGAINST THE FCSGXDB
+    //         PRODUCTION_MODE WILL CHANGE HOW THE FCSGX MODULE IS RUN E.G IT IS SPECIFIC FOR `module`
     //
     SAMTOOLS_DICT.out.dict
         .map { meta, ref, dict ->
@@ -33,7 +34,8 @@ workflow RUN_FCSGX {
     FCSGX_RUNGX (
         samtools_reference,
         fcsgxpath,
-        []
+        [],
+        "production" in workflow.profile.tokenize(',')
     )
     ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
 

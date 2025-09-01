@@ -1,4 +1,5 @@
 lint:
+  actions_awsfulltest: false
   files_exist:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
@@ -32,16 +33,15 @@ lint:
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
     - .prettierignore
+  multiqc_config: false
   nextflow_config:
     - manifest.name
     - manifest.homePage
     - params.show_hidden_params
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
-  multiqc_config: False
-  actions_awsfulltest: False
-  template_strings: False
-nf_core_version: 3.2.1
+  template_strings: false
+nf_core_version: 3.3.2
 repository_type: pipeline
 template:
   author: DLBPointon, eeaunin

@@ -216,7 +216,9 @@ If a set of prerequisite steps have been run (nt BLAST, nr Diamond, Uniprot Diam
 
 Merge Tables merged the summary reports from a number of modules in order to create a single set of reports.
 
-### Pipeline Information
+- [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+
+### Pipeline information
 
 <details markdown="1">
 <summary>Output files</summary>

@@ -1,0 +1,283 @@
+nextflow_pipeline {
+
+    // Full pipeline test minus the sanger-tol/blobtoolkit nested pipeline module
+    // Module is long running and already tested via it's own CICD.
+    // The test would be nice to include due to downstream parsing, however
+    // it is difficult to justify.
+
+    name "Test pipeline (NO BLOBTOOLKIT)"
+    script "../main.nf"
+    tag "pipeline"
+
+    test("-profile test") {
+
+        setup {
+            // Data and Databases: that use curl | tar
+            // For loop as the data is all treated the same
+
+            def database_dict = [
+                                    "TEST_DATA" : [
+                                        "URL": "https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2.tar.gz",
+                                        "OUT": "asccTinyTest_V2"
+                                    ],
+                                    "BLASTN" : [
+                                        "URL": "https://dp24.cog.sanger.ac.uk/blastn.tar.gz",
+                                        "OUT": "blastn"
+                                    ],
+                                    "BUSCO_LINEAGES" :  [
+                                        "URL": "https://tolit.cog.sanger.ac.uk/test-data/resources/busco/blobtoolkit.GCA_922984935.2.2023-08-03.lineages.tar.gz",
+                                        "OUT": "busco_database"
+                                    ],
+                                    "KRAKEN2" :         [
+                                        "URL": "https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/genome/db/kraken2.tar.gz",
+                                        "OUT": "kraken2"
+                                    ],
+                                    "NT_SUBSET" :       [
+                                        "URL": "https://ftp.ncbi.nlm.nih.gov/blast/db/18S_fungal_sequences.tar.gz",
+                                        "OUT": "NT_database"
+                                    ],
+                                    "VECSCREEN" :       [
+                                        "URL": "https://ftp.ncbi.nlm.nih.gov/blast/db/v4/16SMicrobial_v4.tar.gz",
+                                        "OUT": "vecscreen"
+                                    ]
+                                ]
+
+
+            for (String dbKey : database_dict.keySet()) {
+                def db = database_dict.get(dbKey)
+                new File("${launchDir}/${dbKey}").mkdir()
+
+                println "\nDownloading the database ${dbKey}..."
+                def command = ['bash', '-c', "curl ${db['URL']} | tar xzf - -C ${launchDir}/${dbKey}/"]
+                def process = command.execute()
+                process.waitFor()
+
+                if (process.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${dbKey}: ${process.err.text}")
+                }
+
+                println "Done"
+            }
+
+
+            // Databases: FCS DATABASE
+            def fcs_database = [
+                "FCS1" : [
+                    "FILE": "test-only.taxa.tsv",
+                    "OUT" : "all.taxa.tsv"
+                ],
+                "FCS2" : [
+                    "FILE": "test-only.gxi",
+                    "OUT": "all.gxi"
+                ],
+                "FCS3" : [
+                    "FILE": "test-only.gxs",
+                    "OUT": "all.gxs"
+                ],
+                "FCS4" : [
+                    "FILE": "test-only.meta.jsonl",
+                    "OUT": "all.meta.jsonl"
+                ],
+                "FCS5" : [
+                    "FILE": "test-only.blast_div.tsv.gz",
+                    "OUT": "all.blast_div.tsv.gz"
+                ]
+            ]
+
+            new File("${launchDir}/FCS_gx").mkdir()
+
+            for (String dbKey : fcs_database.keySet()) {
+                def db = fcs_database.get(dbKey)
+
+                println "\nDownloading the FCS file: ${db['FILE']}..."
+                def command2 = ['bash', '-c', "wget -cq https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/${db['FILE']} -O ${launchDir}/FCS_gx/${db['OUT']}"]
+                def process2 = command2.execute()
+                process2.waitFor()
+
+                if (process2.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${dbKey}: ${process2.err.text}")
+                }
+
+                println "Done"
+            }
+
+            // Databases: The wierd ones
+
+            new File("${launchDir}/NCBI_TAXONOMY").mkdir()
+            new File("${launchDir}/DIAMOND").mkdir()
+            def other_dbs = [
+                "NCBI_TAXONOMY_DB": [
+                    "COMMAND":
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${launchDir}/NCBI_TAXONOMY -xzf new_taxdump.tar.gz"
+                ],
+                "ASCC_DIAMOND_DB": [
+                    "COMMAND":
+                        "curl https://dp24.cog.sanger.ac.uk/ascc/diamond.dmnd -o ${launchDir}/DIAMOND/diamond.dmnd"
+                ]
+            ]
+
+            for (String dbKey : other_dbs.keySet()) {
+                def db = other_dbs.get(dbKey)
+
+                println "\nDownloading the OTHER DB's: ${dbKey}..."
+                def command3 = ['bash', '-c', "${db['COMMAND']}"]
+                def process3 = command3.execute()
+                process3.waitFor()
+
+                if (process3.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${dbKey}: ${process3.err.text}")
+                }
+
+                println "Done"
+            }
+
+            // Useful for debugging
+            // String result = "ls -lha ".execute().text
+            // println result.toUpperCase()
+
+        }
+
+        when {
+            params {
+                outdir                          = "$outputDir"
+
+                // DB params to overwrite those in `/conf/test.config`
+                nt_database_path                = "${launchDir}/BLASTN/blastdb/"
+                nt_kraken_database_path         = "${launchDir}/KRAKEN2/kraken2"
+                ncbi_taxonomy_path              = "${launchDir}/NCBI_TAXONOMY/"
+                ncbi_ranked_lineage_path        = "${launchDir}/NCBI_TAXONOMY/rankedlineage.dmp"
+                busco_lineages_folder           = "${launchDir}/BUSCO_LINEAGES/"
+                fcs_gx_database_path            = "${launchDir}/FCS_gx/"
+                vecscreen_database_path         = "${launchDir}/VECSCREEN/"
+                diamond_uniprot_database_path   = "${launchDir}/DIAMOND/diamond.dmnd"
+                diamond_nr_database_path        = "${launchDir}/DIAMOND/diamond.dmnd"
+
+                // other params can be found in `/conf/test.config`
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+
+            def ascc_main_output    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/ascc_main_output/*contamination_check_merged_table.csv"])
+            def kmer_data_files     = getAllFilesFromDir(params.outdir, include: [
+                                            "asccTinyTest_V2_{HAPLO,PRIMARY}/kmer_data/*KMER_COUNTS.csv",
+                                            "asccTinyTest_V2_{HAPLO,PRIMARY}/kmer_data/*combined.csv"
+                                        ])
+            def autofilter_warn_txt = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofiltering_done_indicator_file.txt"])
+
+            def autofilter_files    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/autofilter/*autofiltered.fasta"])
+            def autofilter_txt      = getAllFilesFromDir(params.outdir, include: [
+                                            "asccTinyTest_V2_*/autofilter/*.csv",
+                                            "asccTinyTest_V2_*/autofilter/*.txt"
+                                        ])
+            def create_btk_dataset  = getAllFilesFromDir(params.outdir,
+                                        include: [
+                                            "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/*.{yaml,json}"
+                                        ],
+                                        ignore: [
+                                            "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/embedding_dim*.json",
+                                            "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/meta.json"
+                                        ])
+            def create_btk_tsv      = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/create_btk_dataset/*.tsv"])
+            def fcs_adaptor_euk     = getAllFilesFromDir(params.outdir, include: [
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.fa.gz",
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.txt",
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.yaml",
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_euk.*.jsonl"
+                                        ])
+            def fcs_adaptor_prok    = getAllFilesFromDir(params.outdir,
+                                        include: [
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.fa.gz",
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.txt",
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.yaml",
+                                            "asccTinyTest_V2_*/fcs_adaptor/*_prok.*.jsonl"
+                                        ])
+            def fcsgx_data          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/fcsgx_data/*.csv"])  // txt and rpt files are intermediary files and change per run, however, the csv does not.
+            def filter_brcde_bc2001 = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/filter_barcode/*bc2001_filtered.txt"])
+            def filter_brcde_bc2009 = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/filter_barcode/*bc2009_filtered.txt"])
+            def filtered_fasta      = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/filtered_fasta/*filtered.fasta"])
+            def gc_content_files    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/gc_content/*GC_CONTENT.txt"])
+            def kraken2_files       = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/KRAKEN2/*.txt"])
+            def summarise_vecscreen = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/summarise_vecscreen_output/*vecscreen_contamination"])
+            def tiara_raw_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/tiara_raw_output/*.txt"])
+            def trailingns          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/trailingns/*_trim_Ns"])
+
+            // Pipeline completion file, needed for Sanger internal processes
+            def completion_file     = getAllFilesFromDir(params.outdir, include: ["workflow_completed.txt"])
+
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/ascc_software_versions.yml"),
+
+                    // All stable path name, with a relative path
+                    stable_name,
+
+                    // sizes have been written to show that there are X numbers across the Y relevant input assemblies
+                    // ascc_main_output                         // file output has minute changes per run
+                    ascc_main_output.size() == 2,
+                    // kmer_data_files,                         // ML method outputs, changes per run
+                    kmer_data_files.size() == 4,
+                    autofilter_warn_txt,                        // Autofilter warn file - Warns of completion
+                    autofilter_warn_txt.size() == 2,
+                    autofilter_files,                           // Autofiltered fasta
+                    autofilter_files.size() == (1 * 2),         // Isn't output for Organellar
+                    autofilter_txt,                             // Autofilter report files
+                    autofilter_txt.size() == (3 * 2),           // 3 files across 2 assemblies
+                    create_btk_dataset,
+                    create_btk_dataset.size() == (53 * 2 + 14), // 120 - The genomic assemblies return all files, MITO returns 15, the dataset doesn't have as much data as MITO. 10 files are excluded from this as their data change per run.
+                    create_btk_tsv,
+                    create_btk_tsv.size() == (1 * 3),
+                    fcs_adaptor_euk,
+                    fcs_adaptor_euk.size() == (4 * 2 + 3),  // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
+                    fcs_adaptor_prok,
+                    fcs_adaptor_prok.size() == (4 * 2 + 3), // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
+                    fcsgx_data,
+                    fcsgx_data.size() == 3,
+                    filter_brcde_bc2001,
+                    filter_brcde_bc2001.size() == (1 * 3),
+                    filter_brcde_bc2009,
+                    filter_brcde_bc2001.size() == (1 * 3),
+                    filtered_fasta,
+                    filtered_fasta.size() == (1 * 3),
+                    gc_content_files,
+                    gc_content_files.size() == (1 * 3),
+                    kraken2_files,
+                    kraken2_files.size() == (3 * 3),
+                    summarise_vecscreen,
+                    summarise_vecscreen.size() == (1 * 3),
+                    tiara_raw_files,
+                    tiara_raw_files.size() == (2 * 3),
+                    trailingns,
+                    trailingns.size() == (1 * 3),
+
+                    // Workflow completion file
+                    completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check
+
+                ).match() }
+            )
+        }
+
+        cleanup {
+            new File("${projectDir}/FCS_gx").deleteDir()
+            new File("${projectDir}/BLASTN").deleteDir()
+            new File("${projectDir}/BUSCO_LINEAGES").deleteDir()
+            new File("${projectDir}/TEST_DATA").deleteDir()
+            new File("${projectDir}/NCBI_TAXONOMY").deleteDir()
+            new File("${projectDir}/NT_SUBSET").deleteDir()
+            new File("${projectDir}/KRAKEN2").deleteDir()
+            new File("${projectDir}/VECSCREEN").deleteDir()
+            new File("${projectDir}/DIAMOND").deleteDir()
+            new File("${workDir}").deleteDir()
+        }
+    }
+}
