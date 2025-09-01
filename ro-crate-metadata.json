@@ -87,7 +87,11 @@
             },
             "mentions": [
                 {
+<<<<<<< HEAD
                     "@id": "#b97d284b-f0de-43c4-8c1c-c9da9e40e194"
+=======
+                    "@id": "#21f02dec-1fa2-47cb-bab3-32299c226ed4"
+>>>>>>> TEMPLATE
                 }
             ],
             "name": "sanger-tol/ascc"
@@ -115,7 +119,11 @@
                 "ComputationalWorkflow"
             ],
             "dateCreated": "",
+<<<<<<< HEAD
             "dateModified": "2025-06-11T10:25:57Z",
+=======
+            "dateModified": "2025-09-01T16:49:25Z",
+>>>>>>> TEMPLATE
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -151,6 +159,7 @@
             "url": {
                 "@id": "https://www.nextflow.io/"
             },
+<<<<<<< HEAD
             "version": "!>=24.04.2"
         },
         {
@@ -159,6 +168,16 @@
             "instance": [
                 {
                     "@id": "#235f1aeb-7652-4ccb-9226-80fe0c83e278"
+=======
+            "version": "!>=24.10.5"
+        },
+        {
+            "@id": "#21f02dec-1fa2-47cb-bab3-32299c226ed4",
+            "@type": "TestSuite",
+            "instance": [
+                {
+                    "@id": "#9388f207-55e2-41cb-954f-00d82ec0d95c"
+>>>>>>> TEMPLATE
                 }
             ],
             "mainEntity": {
@@ -167,7 +186,11 @@
             "name": "Test suite for sanger-tol/ascc"
         },
         {
+<<<<<<< HEAD
             "@id": "#235f1aeb-7652-4ccb-9226-80fe0c83e278",
+=======
+            "@id": "#9388f207-55e2-41cb-954f-00d82ec0d95c",
+>>>>>>> TEMPLATE
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing sanger-tol/ascc",
             "resource": "repos/sanger-tol/ascc/actions/workflows/nf-test.yml",

@@ -41,7 +41,7 @@ lint:
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
   template_strings: false
-nf_core_version: 3.3.1
+nf_core_version: 3.3.2
 repository_type: pipeline
 template:
   author: DLBPointon, eeaunin
