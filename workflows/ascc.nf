@@ -10,7 +10,7 @@ include { softwareVersionsToYAML            } from '../subworkflows/nf-core/util
 include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
 
 // TODO: WHERE IS THIS FOR?
-include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { paramsSummaryMap                  } from 'plugin/nf-schema'
 
 
 /*

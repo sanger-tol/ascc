@@ -15,6 +15,7 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 
 ### `Added`
 
+- Template update to 3.3.2.
 - Added pipeline-level nf-test testing which is now running as standard CI.
 - Corrected versioning in the .nextflow.log.
 - Minor updates to the base.config.
