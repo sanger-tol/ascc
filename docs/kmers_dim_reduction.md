@@ -81,16 +81,13 @@ Key features:
 This synthetic dataset was chosen over real environmental samples for several key reasons:
 
 1. **Reliable Sequence Classifications**:
-
    - All sequences are publicly available
    - Pre-existing, high-confidence taxonomic classifications from NCBI
 
 2. **Validation Independence**:
-
    - External classifications prevent circular validation when testing taxonomic separation methods
 
 3. **Fragment Size Control**:
-
    - Uniform fragmentation helps evaluate method performance across consistent sequence lengths
    - Short sequences (≤50 kb) represent the most difficult cases for taxonomic classification
 
@@ -220,13 +217,11 @@ For most datasets, we recommend starting with **PCA**:
 ### Method Selection Guide
 
 1. **Simple Dataset or Initial Analysis**
-
    - Use PCA
    - Quick results
    - Well-understood properties
 
 2. **Need for More Detailed Analysis**
-
    - Try UMAP
    - Better preservation of both local and global structure
    - More natural cluster shapes
