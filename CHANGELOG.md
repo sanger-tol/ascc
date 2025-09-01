@@ -18,6 +18,7 @@ IF RUNNING A NUMBER OF INSTANCES IN PARALLEL THEN PLEASE USE `export NXF_SINGULA
 - Minor updates to the base.config.
 - singularity pid setting is now false.
 - Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
+- Added `--production_mode`, this is specific to running FCS as a module. You'll also need to fill in the `module_name` arg for FCSGX.
 
 ### `Fixed`
 
@@ -26,9 +27,9 @@ IF RUNNING A NUMBER OF INSTANCES IN PARALLEL THEN PLEASE USE `export NXF_SINGULA
 - Correct value of 100Mb to 1Gb as the ext.cutoff for FILTER_FASTA
 - GENERATE_SAMPLESHEET was only taking into account 1 read file for BTK rather than all provided read files.
 - GENERATE_SAMPLESHEET was not using the `reads_type` variable.
-- Changed instances of `projectDir` to `launchDir` for safety.
+- Changed instances of `projectDir` to `launchDir` for safety (In tests).
 - Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
-- `withName: 'PACBIO_BARCODE_CHECK:BLAST_BLASTN'` was not being respected, updated to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
+- Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
 
 ### `Bugs`
 
