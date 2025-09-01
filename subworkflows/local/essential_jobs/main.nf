@@ -19,11 +19,13 @@ workflow ESSENTIAL_JOBS {
     //
     input_ref
         .map { meta, ref ->
-            tuple([ id      : meta.id,
-                    sliding : params.seqkit_sliding,
-                    window  : params.seqkit_window,
-                    taxid   : params.taxid
-                ],
+            def meta2 = meta + [
+                sliding : params.seqkit_sliding,
+                window  : params.seqkit_window,
+                taxid   : params.taxid
+            ]
+            tuple(
+                meta2,
                 ref
             )
         }

@@ -9,6 +9,10 @@ include { ASCC_ORGANELLAR   as ORGANELLAR   } from './ascc_organellar'
 include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
 
+// TODO: WHERE IS THIS FOR?
+include { paramsSummaryMap       } from 'plugin/nf-schema'
+
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -103,7 +107,6 @@ workflow ASCC {
         ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
     }
 
-
     //
     // Collate and save software versions
     //
@@ -114,6 +117,10 @@ workflow ASCC {
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
+
+
+    emit:
+    versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }
 

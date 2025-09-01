@@ -15,10 +15,8 @@
 */
 
 include { ASCC                      } from './workflows/ascc'
-
 include { PIPELINE_INITIALISATION   } from './subworkflows/local/utils_nfcore_ascc_pipeline'
 include { PIPELINE_COMPLETION       } from './subworkflows/local/utils_nfcore_ascc_pipeline'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -148,8 +146,7 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
-        []
+        params.hook_url
     )
 }
 

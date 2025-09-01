@@ -2,6 +2,7 @@ process MERGE_BTK_DATASETS {
     tag "$meta.id"
     label 'process_low'
 
+
     if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
         exit 1, "MERGE_BTK_DATASETS module does not support Conda. Please use Docker / Singularity / Podman instead."
     }

@@ -774,7 +774,7 @@ workflow ASCC_GENOMIC {
     //
     GENERATE_SAMPLESHEET (
         combined_ch,
-        reads_path.first(),
+        reads_path.collect(),
         reads_layout.first()
     )
     ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
@@ -829,7 +829,7 @@ workflow ASCC_GENOMIC {
         nt_database_path.first(),
         diamond_uniprot_db_path.first(),
         ncbi_taxonomy_path.first(),
-        reads_path.first(),
+        reads_path.collect(),
         file("${projectDir}/assets/btk_config_files/btk_pipeline.config"),
         btk_lineages_path.first(),
         btk_lineages.first(),

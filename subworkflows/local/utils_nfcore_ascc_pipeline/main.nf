@@ -17,6 +17,7 @@ include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
+// ASCC Custom param pre-processing
 include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
 include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main'
 include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
@@ -77,7 +78,14 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map {
             sample, type_of_assembly, assembly_file ->
-                return [[ id: sample.id + '_' + type_of_assembly, assembly_type: type_of_assembly, single_end:true ], assembly_file ]
+                return [
+                    [
+                        id: sample.id + '_' + type_of_assembly,
+                        assembly_type: type_of_assembly,
+                        single_end: true
+                    ],
+                    assembly_file
+                ]
         }
         .groupTuple()
         .map {
@@ -272,11 +280,9 @@ workflow PIPELINE_COMPLETION {
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
     hook_url        //  string: hook URL for notifications
-    multiqc_report  //  string: Path to MultiQC report
 
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    def multiqc_reports = multiqc_report.toList()
 
     //
     // Completion email and summary
@@ -290,7 +296,7 @@ workflow PIPELINE_COMPLETION {
                 plaintext_email,
                 outdir,
                 monochrome_logs,
-                multiqc_reports.getVal(),
+                []
             )
         }
 
@@ -337,8 +343,6 @@ def toolCitationText() {
     // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
             "Tools used in the workflow included:",
-            "FastQC (Andrews 2010),",
-            "MultiQC (Ewels et al. 2016)",
             "."
         ].join(' ').trim()
 
@@ -349,10 +353,7 @@ def toolBibliographyText() {
     // TODO nf-core: Optionally add bibliographic entries to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
     // Uncomment function in methodsDescriptionText to render in MultiQC report
-    def reference_text = [
-            "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
-            "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
-        ].join(' ').trim()
+    def reference_text = [].join(' ').trim()
 
     return reference_text
 }
