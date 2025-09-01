@@ -284,7 +284,7 @@ workflow ASCC_ORGANELLAR {
         //
         .map{ meta, file ->
             def total_length = 0
-            new File(file).eachLine { line ->
+            file.eachLine { line ->
                 if (line && !line.startsWith('>')) {
                     total_length += line.length()
                 }
