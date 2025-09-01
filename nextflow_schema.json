@@ -172,13 +172,6 @@
                     "minimum": 0,
                     "maximum": 1900000000
                 },
-                "production_mode": {
-                    "type": "boolean",
-                    "description": "Is the pipeline in production mode? THIS IS A SANGER ONLY OPTION unless you know what you're doing.",
-                    "fa_icon": "fas fa-check-to-slot",
-                    "default": false,
-                    "hidden": true
-                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

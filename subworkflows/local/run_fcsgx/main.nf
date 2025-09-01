@@ -35,7 +35,7 @@ workflow RUN_FCSGX {
         samtools_reference,
         fcsgxpath,
         [],
-        params.production_mode
+        "production" in workflow.profile.tokenize(',')
     )
     ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
 
