@@ -9,7 +9,8 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
 Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
 
-IF RUNNING A NUMBER OF INSTANCES IN PARALLEL THEN PLEASE USE `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`!
+### `Notes`
+- If running the pipeline in `--profile singularity` and you are crashing with a generic error, try using `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`.
 
 ### `Added`
 
@@ -18,7 +19,7 @@ IF RUNNING A NUMBER OF INSTANCES IN PARALLEL THEN PLEASE USE `export NXF_SINGULA
 - Minor updates to the base.config.
 - singularity pid setting is now false.
 - Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
-- Added `--production_mode`, this is specific to running FCS as a module. You'll also need to fill in the `module_name` arg for FCSGX.
+- The FCSGX module has been heavily patched when using `--profile production`, this is to support `module` and `modulecmd`.
 
 ### `Fixed`
 

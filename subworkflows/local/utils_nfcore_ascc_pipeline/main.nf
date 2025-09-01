@@ -82,7 +82,6 @@ workflow PIPELINE_INITIALISATION {
                     [
                         id: sample.id + '_' + type_of_assembly,
                         assembly_type: type_of_assembly,
-                        filter_cutoff: params.filter_cutoff,
                         single_end: true
                     ],
                     assembly_file
