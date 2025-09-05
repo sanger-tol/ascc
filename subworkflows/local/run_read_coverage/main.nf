@@ -28,7 +28,6 @@ workflow RUN_READ_COVERAGE {
                                 .combine(collection_of_reads)
 
 
-
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM
     // THEN RUN MINIMAP
@@ -70,15 +69,6 @@ workflow RUN_READ_COVERAGE {
         [[],[]]
     )
     ch_versions         = ch_versions.mix( SAMTOOLS_SORT.out.versions )
-
-
-    //
-    // MODULE: INDEX THE SORTED MAPPED BAM
-    //
-    SAMTOOLS_INDEX (
-        SAMTOOLS_SORT.out.bam
-    )
-    ch_versions         = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
 
     //
