@@ -22,6 +22,16 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - singularity pid setting is now false.
 - Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
 - The FCSGX module has been heavily patched when using `--profile production`, this is to support `module` and `modulecmd`.
+- The `--production` profile now contains a FCSGX module override linked to the above. Resources have been included otherwise FCSGX will use the nextflow defaults.
+- Changes to the resource allocation to improve support for large genomes. Changes are for the modules:
+  - BLAST_BLASTN
+  - BLAST_BLASTN_MOD
+  - DIAMOND_BLASTX
+  - TIARA_TIARA
+  - MINIMAP2_ALIGN_SE
+- Above changes also seperate out the logic for organellar genomes as they do not need the more complicated resource additions.
+- Removed the BTK config, this has started to cause a number of crashes to the nested blobtoolkit pipeline.
+- Remove unnecessary SAMTOOLS_INDEX from RUN_READ_COVERAGE.
 
 ### `Fixed`
 
@@ -33,6 +43,7 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - Changed instances of `projectDir` to `launchDir` for safety (In tests).
 - Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
 - Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
+- Updated resource notation to use e notation #134
 
 ### `Bugs`
 
@@ -49,7 +60,7 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 
 - Return free-disk-space to nf-test CI runners (suggestion by @prototaxites)
 - Updated test files to post-datacentre crash (Only affects internal sanger users).
-- Test and Production (this is sanger specific, please change if you want to use the same style) configs have been updated.
+- Test and Production (this is sanger specific, please change if you want to use the same style) configs have been updated. #106 #111
 - Update to Organellar Blast subworkflow to include organellar name in output.
 - Updated some scripts for logging and linting.
 - The AUTOFILTER_AND_CHECK_ASSEMBLY module has been added to the ORGANELLAR subworkflow, done to ensure that sanger-tol/ascc matches previously reported statistics.
@@ -70,7 +81,7 @@ Release 6 of sanger-tol/ascc, focusing on template upgrade and stability for san
 - RUN_COVERAGE was using a legacy Variable name
 - Bug where fcsgx was not generating output matching cobiontcheck (predecessor to ASCC), found to be caused by an incorrect threshold value.
 - AUTOFILTER scripts were adapted to make the trigger values accessible to the end-user.
-- Other fixes introduced a race condition for sanger-tol/btk. This is now fixed and v2 of sanger-tol/ascc will wholey remove them.
+- Other fixes introduced a race condition for sanger-tol/btk. This is now fixed and v2 of sanger-tol/ascc will wholey remove them. #83
 - Removed cpu and memory resource multipliers, it's not needed. If it crashes, it'll be for something else.
 
 ### `Bugs`
