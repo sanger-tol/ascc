@@ -34,14 +34,14 @@ authors:
 affiliations:
  - name: The Sanger Institute, Wellcome Genome Campus, UK
    index: 1
-date: 01 January 2025
+date: 01 December 2025
 bibliography: paper.bib
 
 ---
 
 # Summary
 
-When producing genome assemblies, a routine procedure is to check the assembled sequences for cobionts and contaminants. Numerous existing tools can be used for this purpose, however, each tool can produce spurious results. When dealing with assemblies from samples with a complex composition of species, it can be useful to run multiple tools for sequence identification in parallel and then compare their results. We have put together a Nextflow pipeline called Assembly Screen for Cobionts and Contaminants (ASCC) that collects a selection of taxonomic identification and decontamination tools in one pipeline. The pipeline contains Tiara, read mapping, BLAST and Kraken2 against the NCBI nt database, Diamond BLASTX against the NCBI nr and Uniprot databases, kmer counting and dimensionality reduction, BlobToolKit, FCS-GX, FCS-adaptor, VecScreen, a PacBio barcodes check and BLAST for detecting organellar sequences. Running each component of the pipeline is optional. The results of a run are collected as a BlobToolKit dataset and CSV tables. This pipeline is regularly used in the Tree of Life programme of the Wellcome Sanger Institute, running a large-scale assembly production pipeline.
+When producing genome assemblies, a routine procedure is to check the assembled sequences for cobionts and contaminants. Numerous existing tools can be used for this purpose, however, each tool can produce spurious results. When dealing with assemblies from samples with a complex composition of species, it can be necessary to run multiple tools for sequence identification in parallel and then compare their results. We have assembled the Nextflow pipeline, called Assembly Screen for Cobionts and Contaminants (ASCC), which collects a selection of taxonomic identification and decontamination tools into one pipeline. The pipeline contains Tiara, read mapping, BLAST and Kraken2 (using the NCBI nt database), Diamond BLASTX (using the NCBI nr and Uniprot databases), kmer counting and dimensionality reduction, the sanger-tol/blobtoolkit pipeline, FCS-GX, FCS-adaptor, VecScreen, a PacBio barcodes check and BLAST for detecting organellar sequences. The pipline has been designed to be highly customisable, allowing the end user to adapt the pipeline for their needs. The main results of the pipeline run are collected as a BlobToolKit dataset and CSV tables. This pipeline is now regularly used in the Tree of Life programme of the Wellcome Sanger Institute, having been used in the decontamination of thousands of assemblies, running a large-scale assembly production pipeline.
 
 # Statement of need
 
