@@ -14,7 +14,12 @@ import general_purpose_functions as gpf
 def main(fasta_path):
     fasta_data = gpf.read_fasta_in_chunks(fasta_path)
     results = [
-        (header.split()[0], "{:.6f}".format((seq.upper().count("G") + seq.upper().count("C")) / max(1, len(seq))))
+        (
+            header.split()[0],
+            "{:.6f}".format(
+                (seq.upper().count("G") + seq.upper().count("C")) / max(1, len(seq))
+            ),
+        )
         for header, seq in fasta_data
     ]
     for header, gc_content_string in results:

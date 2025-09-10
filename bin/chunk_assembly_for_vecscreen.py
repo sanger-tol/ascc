@@ -15,7 +15,10 @@ def process_record(record, threshold_length, overlap_length):
     if a scaffold is shorter than or equal to the specified threshold_length, it will not be chunked, and the chunk ID won't be attached.
     """
 
-    record_slices = [record[i : i + threshold_length + overlap_length] for i in range(0, len(record), threshold_length)]
+    record_slices = [
+        record[i : i + threshold_length + overlap_length]
+        for i in range(0, len(record), threshold_length)
+    ]
 
     chunks = []
     for slice_count, record_slice in enumerate(record_slices, start=1):
@@ -38,7 +41,9 @@ def generate_records_to_write(record, threshold_length, overlap_length):
             "",
             record_slice,
         )
-        for chunk_num, record_slice in enumerate(process_record(record, threshold_length, overlap_length), start=1)
+        for chunk_num, record_slice in enumerate(
+            process_record(record, threshold_length, overlap_length), start=1
+        )
     ]
 
 
@@ -50,11 +55,19 @@ def main(fasta_input_file, fasta_output_file, threshold_length):
     minimum_record_size = 11
 
     try:
-        with open(fasta_input_file, "r") as fasta_input_handle, open(fasta_output_file, "w") as fasta_output_handle:
+        with open(fasta_input_file, "r") as fasta_input_handle, open(
+            fasta_output_file, "w"
+        ) as fasta_output_handle:
             for record in SeqIO.parse(fasta_input_handle, "fasta"):
                 if len(record) >= minimum_record_size:
-                    records_to_write = generate_records_to_write(record, threshold_length, overlap_length)
-                    SeqIO.write([chunk[2] for chunk in records_to_write], fasta_output_handle, "fasta")
+                    records_to_write = generate_records_to_write(
+                        record, threshold_length, overlap_length
+                    )
+                    SeqIO.write(
+                        [chunk[2] for chunk in records_to_write],
+                        fasta_output_handle,
+                        "fasta",
+                    )
 
     except Exception as e:
         print("An error occurred: {}".format(e))
@@ -63,8 +76,15 @@ def main(fasta_input_file, fasta_output_file, threshold_length):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("fasta_input_file", type=str, help="Path to input FASTA file")
-    parser.add_argument("fasta_output_file", type=str, help="Path for FASTA output file")
-    parser.add_argument("--threshold_length", type=int, default=500000, help="Threshold length for chunking")
+    parser.add_argument(
+        "fasta_output_file", type=str, help="Path for FASTA output file"
+    )
+    parser.add_argument(
+        "--threshold_length",
+        type=int,
+        default=500000,
+        help="Threshold length for chunking",
+    )
     parser.add_argument("-v", "--version", action="version", version="1.0")
     args = parser.parse_args()
     main(args.fasta_input_file, args.fasta_output_file, args.threshold_length)

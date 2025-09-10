@@ -1,12 +1,13 @@
 lint:
+  actions_awsfulltest: false
   files_exist:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
-    - .github/ISSUE_TEMPLATE/config.yml
     - .github/workflows/awstest.yml
     - .github/workflows/awsfulltest.yml
+    - .github/ISSUE_TEMPLATE/config.yml
     - conf/igenomes.config
     - lib/nfcore_external_java_deps.jar
     - lib/NfcoreSchema.groovy
@@ -17,6 +18,7 @@ lint:
     - LICENCE
     - .github/CONTRIBUTING.md
     - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/ISSUE_TEMPLATE/feature_request.yml
     - .github/workflows/branch.yml
     - .github/workflows/linting_comment.yml
     - .github/workflows/linting.yml
@@ -25,10 +27,13 @@ lint:
     - gitignore
     - assets/nf-core-ascc_logo_light.png
     - assets/email_template.html
+    - assets/email_template.txt
+    - assets/sendmail_template.txt
+    - docs/README.md
     - docs/images/nf-core-ascc_logo_light.png
     - docs/images/nf-core-ascc_logo_dark.png
-  multiqc_config:
-    - report_comment
+    - .prettierignore
+  multiqc_config: false
   nextflow_config:
     - manifest.name
     - manifest.homePage
@@ -36,9 +41,18 @@ lint:
     - params.schema_ignore_params
     - params.validationSchemaIgnoreParams
   template_strings: false
-nf_core_version: 2.14.1
+nf_core_version: 3.3.2
 repository_type: pipeline
 template:
-  prefix: sanger-tol
-  skip:
+  author: DLBPointon, eeaunin
+  description: Assembly Screen for Cobionts and Contaminants
+  force: false
+  is_nfcore: false
+  name: ascc
+  org: sanger-tol
+  outdir: .
+  skip_features:
     - igenomes
+    - fastqc
+    - multiqc
+  version: 0.3.0

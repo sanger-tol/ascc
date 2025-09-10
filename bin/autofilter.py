@@ -7,7 +7,7 @@ import sys
 import argparse
 import textwrap
 
-VERSION = "V1.0.0"
+VERSION = "V1.0.2"
 
 DESCRIPTION = """
 -------------------------------------
@@ -33,9 +33,15 @@ def parse_args():
         description=textwrap.dedent(DESCRIPTION),
     )
     parser.add_argument("fasta", type=str, help="Path to the assembly FASTA file")
-    parser.add_argument("-t", "--tiara", type=str, help="Path to the Tiara summary file")
-    parser.add_argument("-s", "--fcsgx_summary", type=str, help="Path to the fcs-gx_summary.csv file")
-    parser.add_argument("--out_prefix", type=str, help="Prefix for output files", default="assembly")
+    parser.add_argument(
+        "-t", "--tiara", type=str, help="Path to the Tiara summary file"
+    )
+    parser.add_argument(
+        "-s", "--fcsgx_summary", type=str, help="Path to the fcs-gx_summary.csv file"
+    )
+    parser.add_argument(
+        "--out_prefix", type=str, help="Prefix for output files", default="assembly"
+    )
     # parser.add_argument(
     #    "-c", "--fcs_gx_and_tiara_summary", type=str, help="Path to the fcs-gx_and_tiara_combined_summary.csv file"
     # )
@@ -46,9 +52,14 @@ def parse_args():
         help="Path to the assembly_filtering_removed_sequences.txt file",
         default="assembly_filtering_removed_sequences.txt",
     )
-    parser.add_argument("-i", "--taxid", type=int, help="NCBI taxonomy ID of the species")
     parser.add_argument(
-        "-n", "--ncbi_rankedlineage_path", type=str, help="Path to the rankedlineage.dmp of NCBI taxonomy"
+        "-i", "--taxid", type=int, help="NCBI taxonomy ID of the species"
+    )
+    parser.add_argument(
+        "-n",
+        "--ncbi_rankedlineage_path",
+        type=str,
+        help="Path to the rankedlineage.dmp of NCBI taxonomy",
     )
     parser.add_argument(
         "--tiara_action_mode",
@@ -72,13 +83,17 @@ def get_domain_from_taxid(query_taxid, rankedlineage_path):
     for line in rankedlineage_data:
         split_line = line.split("|")
         split_line = [n.strip() for n in split_line]
-        assert len(split_line) == 11
+        assert (
+            len(split_line) >= 11
+        ), f"Expected at least 11 columns in rankedlineage.dmp, got {len(split_line)}"  # This should no handle both new and old formats (as of April 2025)
         taxid = split_line[0]
         domain = split_line[9]
         if taxid == query_taxid:
             domain = split_line[9]
             if domain not in ("", "Archaea", "Bacteria", "Eukaryota", "Viruses"):
-                sys.stderr.write(f"Unrecognised value for domain-level taxonomy: {domain}")
+                sys.stderr.write(
+                    f"Unrecognised value for domain-level taxonomy: {domain}"
+                )
                 sys.exit(1)
             break
     if domain is None:
@@ -100,11 +115,25 @@ def process_tiara_results(tiara_results_path, target_domain):
     tiara_action_dict = dict()
 
     allowed_classif_dict = dict()
-    allowed_classif_dict[""] = ["archaea", "bacteria", "prokarya", "eukarya", "organelle", "unknown"]
+    allowed_classif_dict[""] = [
+        "archaea",
+        "bacteria",
+        "prokarya",
+        "eukarya",
+        "organelle",
+        "unknown",
+    ]
     allowed_classif_dict["Archaea"] = ["archaea", "prokarya", "unknown"]
     allowed_classif_dict["Bacteria"] = ["bacteria", "prokarya", "unknown"]
     allowed_classif_dict["Eukaryota"] = ["eukarya", "organelle", "unknown"]
-    allowed_classif_dict["Viruses"] = ["archaea", "bacteria", "prokarya", "eukarya", "organelle", "unknown"]
+    allowed_classif_dict["Viruses"] = [
+        "archaea",
+        "bacteria",
+        "prokarya",
+        "eukarya",
+        "organelle",
+        "unknown",
+    ]
     allowed_classif_list = allowed_classif_dict[target_domain]
 
     tiara_output = gpf.ll(tiara_results_path)
@@ -114,7 +143,14 @@ def process_tiara_results(tiara_results_path, target_domain):
         split_line = line.split()
         assert len(split_line) == 3
         tiara_class_fst_stage = split_line[1]
-        assert tiara_class_fst_stage in ("archaea", "bacteria", "prokarya", "eukarya", "organelle", "unknown")
+        assert tiara_class_fst_stage.lower() in (
+            "archaea",
+            "bacteria",
+            "prokarya",
+            "eukarya",
+            "organelle",
+            "unknown",
+        )
         tiara_action = "KEEP"
         if tiara_class_fst_stage not in allowed_classif_list:
             tiara_action = "EXCLUDE"
@@ -159,7 +195,7 @@ def filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path):
     fasta_data = gpf.read_fasta_in_chunks(assembly_path)
     for header, seq in fasta_data:
         if header not in scaffs_to_exclude:
-            out_list.append(">" + header)
+            out_list.append(f">{header}")
             split_seq = gpf.split_with_fixed_row_length(seq, 80)
             out_list.extend(split_seq)
         else:
@@ -199,6 +235,7 @@ def main():
     scaffs_to_exclude = list()
     scaffs = get_scaff_names(assembly_path)
     for scaff in scaffs:
+        combined_action_source = "NA"
         fcs_gx_action = "NA"
         tiara_action = "NA"
         if scaff in fcs_gx_action_dict:
@@ -225,14 +262,19 @@ def main():
             "combined_action_source": combined_action_source,
         }
     filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path)
-    gpf.export_list_as_line_break_separated_file(scaffs_to_exclude, excluded_seq_list_path)
+    gpf.export_list_as_line_break_separated_file(
+        scaffs_to_exclude, excluded_seq_list_path
+    )
 
     out_csv_list = list()
-    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action")
+    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action,combined_action_source")
     for scaff, scaff_properties in combined_action_dict.items():
         out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)
-    gpf.export_list_as_line_break_separated_file(out_csv_list, f"{args.out_prefix}_ABNORMAL_CHECK.csv")
+    #Output the Excluded sequence list in the csv
+    gpf.export_list_as_line_break_separated_file(
+        out_csv_list, f"{args.out_prefix}_ABNORMAL_CHECK.csv"
+    )
 
 
 if __name__ == "__main__":

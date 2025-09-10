@@ -1,0 +1,4 @@
+sample,assembly_type,assembly_file
+odCymConc1,PRIMARY,/lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/assembly/draft/odCymConc1.20241101/odCymConc1.20241101.fa.gz
+odCymConc1,HAPLO,/lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/assembly/draft/odCymConc1.20241101/odCymConc1.20241101.haplotigs.decontaminated.fa.gz
+odCymConc1,MITO,/lustre/scratch122/tol/data/d/8/a/6/e/b/Cymbastela_concentrica/assembly/draft/odCymConc1.20241101/odCymConc1-MT.fa.gz

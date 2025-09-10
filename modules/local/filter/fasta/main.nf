@@ -1,0 +1,50 @@
+process FILTER_FASTA {
+    tag "${meta.id}"
+    label 'process_low'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/python:3.9' :
+        'biocontainers/python:3.9' }"
+
+    input:
+    tuple val(meta), path(input_fasta)
+
+    output:
+    tuple val(meta), path("*_filtered.fasta"),  emit: fasta
+    path "versions.yml",                        emit: versions
+
+    script:
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    def args        = task.ext.args     ?: ''
+    def max_length  = task.ext.cutoff   ?: 1900000000 // This is the default value and maximum supported length of sequence per scaffold
+    """
+    sanitise_input_fasta_file.py \\
+        ${input_fasta} > ${prefix}_shortened.fasta
+
+    filter_fasta_by_length.py \\
+        ${args} \\
+        ${prefix}_shortened.fasta \\
+        ${max_length} > ${prefix}_filtered.fasta
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+        sanitise_input_fasta_file: \$(sanitise_input_fasta_file.py -v)
+        filter_fasta_by_length: \$(filter_fasta_by_length.py -v)
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
+    """
+    touch ${prefix}_filtered.fasta
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+        sanitise_input_fasta_file: \$(sanitise_input_fasta_file.py -v)
+        filter_fasta_by_length: \$(filter_fasta_by_length.py -v)
+    END_VERSIONS
+    """
+}

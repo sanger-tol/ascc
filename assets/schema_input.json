@@ -1,5 +1,5 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/assets/schema_input.json",
     "title": "sanger-tol/ascc pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -15,13 +15,13 @@
             },
             "assembly_type": {
                 "type": "string",
-                "errorMessage": "Not a valid assembly type, must be of [PRIMARY,HAPLOTYPE,MITO,PLASTID]"
+                "enum": ["PRIMARY", "HAPLO", "HAP1", "HAP2", "MITO", "PLASTID"]
             },
             "assembly_file": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.fa$",
+                "pattern": "^\\S+\\.(fa|fa.gz|fna|fna.gz|fasta|fasta.gz)$",
                 "errorMessage": "Fasta file representing the genome assembly to be cleaned."
             }
         },

@@ -4,35 +4,29 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CREATE_BTK_DATASET                            } from '../modules/local/create_btk_dataset'
-include { MERGE_BTK_DATASETS                            } from '../modules/local/merge_btk_datasets'
-include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc_merge_tables'
-include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofiltering'
-include { SANGER_TOL_BTK                                } from '../modules/local/sanger_tol_btk'
-include { GENERATE_SAMPLESHEET                          } from '../modules/local/generate_samplesheet'
+include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
+include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
+include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
+include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
-
-include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs'
-include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits'
-include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast'
-include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast'
-include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast'
-include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check'
-include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage'
-include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen'
-include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken'
-include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx'
-include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor'
-include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
-include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond.nf'
-
-include { paramsSummaryMap                              } from 'plugin/nf-validation'
-include { paramsSummaryMultiqc                          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
+include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
+include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
+include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
+include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
+include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
+include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
+include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
+include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
+include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
+include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
+include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
+include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,31 +39,29 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
-    validate_taxid_versions // Versions channel from main.nf
-    include_steps           // params.include_steps
-    exclude_steps           // params.exclude_steps
-    fcs_db                  // path(path)
+    fcs_ov                  // params.fcs_override
+    fcs_ss                  //
+    fcs_db                  // [path(path)]
+    reads
+    scientific_name         // val(name)
+    pacbio_database         // tuple [[meta.id], pacbio_database]
+    ncbi_taxonomy_path
+    ncbi_ranked_lineage_path
+    nt_database_path
+    diamond_nr_db_path
+    diamond_uniprot_db_path
+    taxid
+    nt_kraken_db_path
+    vecscreen_database_path
+    reads_path
+    reads_layout
+    reads_type
+    btk_lineages
+    btk_lineages_path
+    ch_barcodes
 
     main:
     ch_versions = Channel.empty()
-    ch_versions = ch_versions.mix(validate_taxid_versions)
-
-    //
-    // LOGIC: CONTROL OF THE INCLUDE AND EXCLUDE FLAGS
-    //      TODO: THESE SHOULD CREATE A SET OF INCLUDE - EXCLUDE
-    //
-    include_workflow_steps  = include_steps ? include_steps.split(",") : "ALL"
-    exclude_workflow_steps  = exclude_steps ? exclude_steps.split(",") : "NONE"
-
-    full_list               = ["essentials", "kmers", "tiara", "coverage", "nt_blast", "nr_diamond", "uniprot_diamond", "kraken", "fcs-gx", "fcs-adaptor", "vecscreen", "btk_busco", "pacbio_barcodes", "organellar_blast", "autofilter_assembly", "ALL", "NONE"]
-
-    if (!full_list.containsAll(include_workflow_steps) && !full_list.containsAll(exclude_workflow_steps)) {
-        exit 1, "There is an extra argument given on Command Line: \n Check contents of: $include_workflow_steps\nAnd $exclude_workflow_steps\nMaster list is: $full_list"
-    }
-
-    println "GENOMIC RUN -- INCLUDE STEPS INC.: $include_workflow_steps"
-    println "GENOMIC RUN -- EXCLUDE STEPS INC.: $exclude_workflow_steps"
-
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -78,10 +70,20 @@ workflow ASCC_GENOMIC {
 
 
     //
-    // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
+    // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
     //
-    if ( (include_workflow_steps.contains('essentials') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("essentials")) {
+    ch_samplesheet
+        .map { meta, sample ->
+            log.info "[ASCC info] GENOMIC WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
+        }
 
+
+    //
+    // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
+    //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
+    //
+
+    if ( params.run_essentials == "both" || params.run_essentials == "genomic" ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
@@ -90,21 +92,17 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
-
 
     } else {
-        log.warn("MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
-        reference_tuple_from_GG = ch_samplesheet // This is the reference genome input channel
-        ej_dot_genome           = []
-        ej_gc_coverage          = []
-        reference_tuple_w_seqkt = []
+        reference_tuple_from_GG = ch_samplesheet
+        ej_dot_genome           = Channel.empty()
+        ej_gc_coverage          = Channel.empty()
     }
 
 
-    if ( (include_workflow_steps.contains('kmers') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("kmers")) {
-
+    if ( params.run_kmers == "both" || params.run_kmers == "genomic" ) {
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
         //
@@ -124,65 +122,159 @@ workflow ASCC_GENOMIC {
             autoencoder_epochs_count
         )
         ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
+                                .map { it ->
+                                    [[id: it[0].id, process: "KMERS"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
     } else {
-        ch_kmers            = []
+        ch_kmers            = Channel.of( [[],[]] )
     }
 
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( include_workflow_steps.contains('tiara') && !exclude_workflow_steps.contains("tiara") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("tiara") ) {
+    if ( params.run_tiara == "both" || params.run_tiara == "genomic" ) {
         EXTRACT_TIARA_HITS (
             reference_tuple_from_GG
         )
         ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara.map{it[1]}
+        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara
+                                .map { it ->
+                                    [[id: it[0].id, process: "TIARA"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
     } else {
-        ch_tiara            = []
+        ch_tiara            = Channel.of( [[],[]] )
     }
 
 
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( include_workflow_steps.contains('nt_blast') && !exclude_workflow_steps.contains("nt_blast") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nt_blast")) {
+    if ( params.run_nt_blast == "both" || params.run_nt_blast == "genomic" ) {
         //
         // NOTE: ch_nt_blast needs to be set in two places incase it
         //          fails during the run
         //
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
-
         EXTRACT_NT_BLAST (
             reference_tuple_from_GG,
-            params.nt_database_path,
-            params.ncbi_accession_ids_folder,
-            params.ncbi_ranked_lineage_path
+            nt_database_path.first(),
+            ncbi_ranked_lineage_path.first()
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.map{it[1]}
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.map{it[1]}
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
 
     } else {
-        ch_nt_blast         = []
-        ch_blast_lineage    = []
+        ch_nt_blast         = Channel.of( [[],[]] )
+        ch_blast_lineage    = Channel.of( [[],[]] )
+        ch_btk_format       = Channel.of( [[],[]] )
     }
 
 
-    if ( include_workflow_steps.contains('organellar_blast') || include_workflow_steps.contains('ALL') ) {
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //
+    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "genomic" ) {
 
+        NR_DIAMOND (
+            reference_tuple_from_GG,
+            diamond_nr_db_path.first()
+        )
+        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        nr_full             = NR_DIAMOND.out.reformed
+                                .map { it ->
+                                    [[id: it[0].id, process: "NR-FULL"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        nr_hits             = NR_DIAMOND.out.hits_file
+                                .map { it ->
+                                    [[id: it[0].id, process: "NR-HITS"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+    } else {
+        nr_full             = Channel.of( [[],[]] )
+        nr_hits             = Channel.of( [[],[]] )
+    }
+
+
+    //
+    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
+    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "genomic" ) {
+
+        UP_DIAMOND (
+            reference_tuple_from_GG,
+            diamond_uniprot_db_path.first()
+        )
+        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        un_full             = UP_DIAMOND.out.reformed
+                                .map { it ->
+                                    [[id: it[0].id, process: "UN-FULL"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        un_hits             = UP_DIAMOND.out.hits_file
+                                .map { it ->
+                                    [[id: it[0].id, process: "UN-HITS"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+    } else {
+        un_full             = Channel.of( [[],[]] )
+        un_hits             = Channel.of( [[],[]] )
+    }
+
+
+    if ( params.run_organellar_blast == "both" || params.run_organellar_blast == "genomic" ) {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
         //
-        organellar_genomes
+        organellar_check = organellar_genomes
             .branch { meta, assembly ->
                 mito:       meta.assembly_type == "MITO"
                 plastid:    meta.assembly_type == "PLASTID"
                 invalid:    true    // if value but not of the above conditions
             }
-            .set { organellar_check }
+
 
         //
         // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
@@ -191,9 +283,8 @@ workflow ASCC_GENOMIC {
             reference_tuple_from_GG,
             organellar_check.mito
         )
-
-        ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
         ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+
 
         //
         // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
@@ -202,189 +293,330 @@ workflow ASCC_GENOMIC {
             reference_tuple_from_GG,
             organellar_check.plastid
         )
-        ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report.map{it[1]}
         ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report
+                                .map { it ->
+                                    [[id: it[0].id, process: "MITO"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report
+                                .map { it ->
+                                    [[id: it[0].id, process: "CHLORO"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
+
     } else {
-        ch_mito             = []
-        ch_chloro           = []
+        ch_mito             = Channel.of( [[],[]] )
+        ch_chloro           = Channel.of( [[],[]] )
     }
 
 
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( include_workflow_steps.contains('pacbio_barcodes') || include_workflow_steps.contains('ALL') ) {
-        PACBIO_BARCODE_CHECK (
-            reference_tuple_from_GG,
-            params.reads_path,
-            params.reads_type,
-            params.pacbio_barcode_file,
-            params.pacbio_barcode_names
-        )
+    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "genomic" ) {
 
+        reference_tuple_from_GG
+            .combine(pacbio_database)
+            .multiMap{
+                ref_meta, ref_data, pdb_meta, pdb_data ->
+                    reference: [ref_meta, ref_data]
+                    pacbio_db: [pdb_meta, pdb_data]
+            }
+            .set { duplicated_db }
+
+        PACBIO_BARCODE_CHECK (
+            duplicated_db.reference,
+            ch_barcodes,
+            duplicated_db.pacbio_db
+        )
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+
+    } else {
+        ch_barcode_check    = Channel.empty()
     }
 
 
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( include_workflow_steps.contains('fcs-adaptor') || include_workflow_steps.contains('ALL') ) {
+    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic" ) {
         RUN_FCSADAPTOR (
             reference_tuple_from_GG
         )
+        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
-        RUN_FCSADAPTOR.out.ch_euk
-            .map{it[1]}
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
+        //
+        ch_fcsadapt = RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
-            .set{ ch_fcsadapt }
+            .map { meta, file1, file2 ->
+                tuple(
+                    [id: meta.id, process: "FCS-Adaptor"],
+                    file1,
+                    file2
+                )
+            }
 
-        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     } else {
-        ch_fcsadapt         = []
+        ch_fcsadapt         = Channel.empty()
     }
 
 
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( include_workflow_steps.contains('fcs-gx') || include_workflow_steps.contains('ALL') ) {
-        RUN_FCSGX (
-            reference_tuple_from_GG,
-            fcs_db,
-            params.taxid,
-            params.ncbi_ranked_lineage_path
-        )
+    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ) {
 
-        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult.map{it[1]}
+        joint_channel = reference_tuple_from_GG
+            .combine(fcs_db)
+            .combine(taxid)
+            .combine(ncbi_ranked_lineage_path)
+            .multiMap { meta, ref, db, tax_id, tax_path ->
+                meta = [id: meta.id, taxid: meta.taxid]
+                reference: [meta, ref]
+                fcs_db_path: db
+                ncbi_tax_path: tax_path
+            }
+
+        RUN_FCSGX (
+            joint_channel.reference,
+            joint_channel.fcs_db_path,
+            joint_channel.ncbi_tax_path
+        )
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "FCSGX result"], file]
+                                }
+                                .ifEmpty { [[],[]] }
+
+    } else if ( params.fcs_override ) {
+        log.info("[ASCC info] Overriding Internal FCSGX")
+        ch_fcsgx            = fcs_ss
+
+        ch_fcsgx.view{"OVERRIDDEN_FCSGX: $it"}
     } else {
-        ch_fcsgx            = []
+        ch_fcsgx            = Channel.of( [[],[]] )
     }
 
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( include_workflow_steps.contains('coverage') || include_workflow_steps.contains('btk_busco') || include_workflow_steps.contains('ALL') ) {
+    //
+
+    if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
         RUN_READ_COVERAGE (
             reference_tuple_from_GG,
-            params.reads_path,
-            params.reads_type,
+            reads_path,
+            reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
         )
-        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.map{it[1]}
-        ch_bam              = RUN_READ_COVERAGE.out.bam_ch.map{it[1]}
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "Coverage"], file]
+                                }
+                                .ifEmpty { [[],[]] }
+
+        ch_bam              = RUN_READ_COVERAGE.out.bam_ch
+                                .map { meta, file ->
+                                    tuple([id: meta.id, process: "Mapped Bam"], file)
+                                }
+                                .ifEmpty { [[],[]] }
+
     } else {
-        ch_coverage         = []
-        ch_bam              = []
+        ch_coverage         = Channel.of( [[],[]] )
+        ch_bam              = Channel.of( [[],[]] )
     }
 
 
     //
-    // SUBWORKFLOW:
+    // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( include_workflow_steps.contains('vecscreen') || include_workflow_steps.contains('ALL') ) {
+    if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
         RUN_VECSCREEN (
             reference_tuple_from_GG,
-            params.vecscreen_database_path
+            vecscreen_database_path.first()
         )
-        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.map{it[1]}
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
+                                .map { it ->
+                                    [[id: it[0].id, process: "Vecscreen"], it[1]]
+                                }
+                                .ifEmpty { [[],[]] }
     } else {
-        ch_vecscreen        = []
+        ch_vecscreen        = Channel.empty()
     }
 
 
     //
-    // SUBWORKFLOW: Run the kraken classifier
+    // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( include_workflow_steps.contains('kraken') || include_workflow_steps.contains('ALL') ) {
+    if ( params.run_kraken == "both" || params.run_kraken == "genomic" ) {
+
         RUN_NT_KRAKEN(
             reference_tuple_from_GG,
-            params.nt_kraken_database_path,
-            params.ncbi_ranked_lineage_path
+            nt_kraken_db_path.first(),
+            ncbi_ranked_lineage_path.first()
         )
-        ch_kraken1          = RUN_NT_KRAKEN.out.classified.map{it[1]}
-        ch_kraken2          = RUN_NT_KRAKEN.out.report.map{it[1]}
-
-        // TODO: Channel is not getting populated even though the it is includes.
-        ch_kraken3          = RUN_NT_KRAKEN.out.lineage
-
         ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
+        ch_kraken1 = RUN_NT_KRAKEN.out.classified
+                        .map { it ->
+                            [[id: it[0].id, process: "Kraken 1"], it[1]]
+                        }
+                    .ifEmpty { [[],[]] }
+
+        ch_kraken2 = RUN_NT_KRAKEN.out.report
+                        .map { it ->
+                            [[id: it[0].id, process: "Kraken 2"], it[1]]
+                        }
+                    .ifEmpty { [[],[]] }
+
+        ch_kraken3 = RUN_NT_KRAKEN.out.lineage
+                        .map { it ->
+                            [[id: it[0].id, process: "Kraken 3"], it[1]]
+                        }
+                    .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1          = []
-        ch_kraken2          = []
-        ch_kraken3          = []
+        ch_kraken1 = Channel.empty()
+        ch_kraken2 = Channel.empty()
+        ch_kraken3 = Channel.empty()
     }
 
 
-    //
-    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    //
-    if ( include_workflow_steps.contains('nr_diamond') && !exclude_workflow_steps.contains("nr_diamond") || include_workflow_steps.contains('ALL') && !exclude_workflow_steps.contains("nr_diamond")) {
-        NR_DIAMOND (
-            reference_tuple_from_GG,
-            params.diamond_nr_database_path
-        )
-        nr_full             = NR_DIAMOND.out.reformed.map{it[1]}
-        nr_hits             = NR_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-    } else {
-        nr_hits             = []
-        nr_full             = []
-    }
+    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic" ) {
+
+        //
+        // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
+        //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
+        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
+        //
+        ch_genomic_cbtk_input = reference_tuple_from_GG
+            .map{ it -> tuple([
+                id: it[0].id,
+                taxid: it[0].taxid,
+                sci_name: it[0].sci_name,
+                process: "REFERENCE"], it[1])
+            }
+            .mix(
+                ej_dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
+                ch_kmers,
+                ch_tiara,
+                ch_nt_blast,
+                // Use the BLAST top hits for BTK
+                ch_btk_format,
+                ch_fcsgx,
+                ch_bam,
+                ch_coverage,
+                ch_kraken1,
+                ch_kraken2,
+                ch_kraken3,
+                nr_full,
+                un_full
+            )
+            .map { meta, file ->
+                [meta.id, [meta: meta, file: file]]
+            }
+            .filter { id, data -> id != [] }
+            .groupTuple()
+            .map { id, data ->
+                [id: id, data: data]
+            }
+
+        //
+        // LOGIC: LIST OF PROCESSES TO CHECK FOR
+        //
+        def processes = [
+            'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
+            'FCSGX result', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
+            'Kraken 1', 'Kraken 3'
+        ]
 
 
-    //
-    // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
-    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( (include_workflow_steps.contains('uniprot_diamond') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("uniprot_diamond") ) {
-        UP_DIAMOND (
-            reference_tuple_from_GG,
-            params.diamond_uniprot_database_path
-        )
-        un_full             = UP_DIAMOND.out.reformed.map{it[1]}
-        un_hits             = UP_DIAMOND.out.hits_file.map{it[1]}
-        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-    } else {
-        un_hits             = []
-        un_full             = []
-    }
+        //
+        // LOGIC: Create a channel for each process
+        //
+        def processChannels = processes.collectEntries { process ->
+            [(process): ch_genomic_cbtk_input
+                .map { sample ->
+                    def data = sample.data.find { it.meta.process == process }
+                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+                }
+            ]
+        }
 
-    if ( (include_workflow_steps.contains('btk_dataset') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("btk_dataset")) {
-        ch_dot_genome           = ej_dot_genome.map{it[1]}
+
+        //
+        // LOGIC: Combine all channels using a series of combine operations
+        //
+        def combined_channel = processChannels['REFERENCE']
+        processes.tail().each { process ->
+            combined_channel = combined_channel.combine(processChannels[process], by: 0)
+        }
 
 
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
         //
         CREATE_BTK_DATASET (
-            reference_tuple_from_GG,
-            ch_dot_genome,
-            ch_kmers,
-            ch_tiara,
-            ch_nt_blast,
-            ch_fcsgx,
-            ch_bam,
-            ch_coverage,
-            ch_kraken1,
-            ch_kraken2,
-            ch_kraken3,
-            nr_full,
-            un_full,
-            Channel.fromPath(params.ncbi_taxonomy_path).first()
+            combined_channel,
+            ncbi_taxonomy_path.first(),
+            scientific_name
+
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+
+        create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
+        create_btk_dataset      = CREATE_BTK_DATASET.out.btk_datasets
+    } else {
+        create_summary          = Channel.empty()
+        create_btk_dataset      = Channel.empty()
     }
 
+
     //
-    // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
+    // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
+    //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
-    if ( include_workflow_steps.contains('tiara') && include_workflow_steps.contains('fcs-gx') && include_workflow_steps.contains("autofilter_assembly") || include_workflow_steps.contains('ALL') ) {
+    if (
+        ( params.run_tiara == "both" || params.run_tiara == "genomic" ) &&
+        ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) &&
+        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic" )
+    ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
         //          - We can't just combine on meta.id as some of the Channels have other data
@@ -393,44 +625,33 @@ workflow ASCC_GENOMIC {
         //              Thankfully taxid is a param so easy enough to add back in.
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
-        reference_tuple_from_GG
-            .map{meta, file ->
-                tuple([id: meta.id], file)
-            }
-            .set{ ref_tuple }
 
-        EXTRACT_TIARA_HITS.out.ch_tiara
-            .map{meta, file ->
-                tuple([id: meta.id], file)
-            }
-            .set{ tiara_tuple }
-
-        RUN_FCSGX.out.fcsgxresult
-            .map{meta, file ->
-                tuple([id: meta.id], file)
-            }
-            .set{ fcs_tuple }
-
-        ref_tuple
-            .combine(tiara_tuple, by: 0) // Essentially merge on meta, which the above standardises
-            .combine(fcs_tuple, by: 0)
-            .combine(Channel.fromPath(params.ncbi_ranked_lineage_path))
-            .set{ auto_filt_input }
-
-        //
-        // LOGIC: NOW MULTIMAP THE CHANNELS INTO CONSTITUENT CHANNELS SO THAT WE CAN RUN
-        //          THE AUTOFILTER
-        //
-        auto_filt_input
-            .combine(Channel.of(params.taxid))
+        autofilter_input_formatted = reference_tuple_from_GG
+            .map{ it -> tuple([id: it[0].id], it[1])}
+            .combine(
+                ch_tiara
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
+                ch_fcsgx
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
+                ncbi_ranked_lineage_path
+            )
+            .combine(
+                taxid
+            )
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
-                    reference: tuple([id: meta.id, taxid: thetaxid], ref)
-                    tiara_file: tuple(meta, tiara)
-                    fcs_file: tuple(meta, fcs)
-                    ncbi_rank: ncbi
+                    def new_meta = [id: meta.id, taxid: thetaxid]
+                    reference:  tuple(new_meta, ref)
+                    tiara_file: tuple(new_meta, tiara)
+                    fcs_file:   tuple(new_meta, fcs)
+                    ncbi_rank:  ncbi
             }
-            .set{ autofilter_input_formatted}
 
         //
         // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
@@ -447,188 +668,350 @@ workflow ASCC_GENOMIC {
         //
         // LOGIC: BRANCH THE CHANNEL ON WHETHER OR NOT THERE IS ABNORMAL CONTAMINATION IN THE
         //          OUTPUT FILE.
-        //
-        AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-            .map { file -> file.text.trim() }
-            .branch { it ->
-                run_btk: "ABNORMAL" ? it.contains("YES_ABNORMAL"): false
-                dont_run: []
+        //          CHANGE OUTPUT NAME TO BE REFERENCE NAME AND THEN ALARM FILE
+        btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map { meta, file -> [meta, file.text.trim()] }
+            .branch { meta, data ->
+                log.info("[ASCC info] Run for ${meta.id} has:\n${data}\n")
+
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
+                dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
-            .set { btk_bool }
 
+        btk_bool_run_btk        = btk_bool.run_btk
 
-        ch_versions         = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+        ch_autofilt_alarm_file   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+            .map{ meta, file ->
+                tuple(
+                    [id: meta.id], file
+                )
+            }
+
+        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+        ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
+        ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
+
+        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_assem   = []
-        ch_autofilt_indicator = []
+        btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
+        ch_autofilt_alarm_file  = Channel.empty()
+        ch_autofilt_removed_seqs= Channel.empty()
+        ch_autofilt_assem       = Channel.empty()
+        ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_fcs_tiara   = Channel.empty()
+        ch_autofilt_raw_report  = Channel.empty()
     }
 
 
-    if ( !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') && btk_busco_run_mode == "conditional" && include_workflow_steps.contains("autofilter_assembly") && btk_bool.run_btk == "ABNORMAL" || !exclude_workflow_steps.contains("btk_busco") && include_workflow_steps.contains('btk_busco') || btk_busco_run_mode == "mandatory" ||  include_workflow_steps.contains('btk_busco') ) {
+    //
+    // LOGIC: DETERMINE WHETHER BLOBTOOLKIT SHOULD RUN BASED ON CONDITIONALS
+    //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
-        //
-        // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
-        //          USE IN THE BTK PIPELINE
-        //
+    run_btk_conditional = reference_tuple_from_GG
+        | map { meta, file ->
+                tuple([id: meta.id, taxid: meta.taxid] , file)
+            }
+        // below is combined into the tuple to enforce the block to only run when channel is present.
+        | combine ( btk_bool_run_btk
+                        .map{ meta, data ->
+                            def joined_content = data
+                                    .replaceAll(/\s*\|\s*/, "-")     // Replace " | " with "-"
+                                    .replaceAll(/\s+/, "-")          // Replace remaining spaces with "-"
+                                    .replaceAll(/_+/, "_")           // Keep underscores as they are
+                                    .replaceAll(/-+/, "-")           // Clean up multiple dashes
+                            tuple(
+                                [id: meta.id, taxid: meta.taxid],
+                                joined_content
+                            )
+                        },
+                by: [0]
+            )
+        | branch { meta, assembly, data ->
+            def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
+            def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
-        GENERATE_SAMPLESHEET (
-            RUN_READ_COVERAGE.out.bam_ch
+            def ignore_autofilter       = params.btk_busco_run_mode == "mandatory" && btk_requested
+            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && data.contains("YES")
+
+            run_btk: (ignore_autofilter || not_mandatory_btk)
+            skip_btk: true
+        }
+
+    run_btk_conditional.skip_btk
+        .map { meta, file, data ->
+            log.warn "[ASCC WARNING]: CONTAMINATION THRESHOLD NOT MET"
+            log.warn "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
+            log.warn "\t- You can verify here: $file"
+        }
+
+    if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
+        log.info "[ASCC info] run_autofilter_assembly is off, but run_btk_busco != off"
+        log.info "This will stop blobtoolkit from running unless you restart with:"
+        log.info "    `--btk_busco_run_mode mandatory`"
+    }
+
+    // Noticed a race condition, this should fix that.
+    //
+    run_btk_conditional.run_btk
+        .map { meta, file, data -> [meta.id, meta, file] }
+        .join(
+            ch_autofilt_alarm_file
+                .map { meta, file ->
+                    [meta.id, meta, file]
+                }
         )
-        ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
-
-        //
-        // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
-        //
-        GENERATE_SAMPLESHEET.out.csv
-            .map{ meta, csv ->
-                tuple(
-                    [ id: meta.id ],
-                    csv
-                )
-            }
-            .set {coverage_id}
-
-        reference_tuple_from_GG
-            .map{ meta, ref ->
-                tuple(
-                    [ id: meta.id ],
-                    ref
-                )
-            }
-            .combine(coverage_id, by: 0)
-            .multiMap { meta_1, ref, csv ->
-                reference: [meta_1, ref]
-                samplesheet: csv
-            }
-            .set { combined_input }
+        .map { id, ref_meta, ref_file, alarm_meta, alarm_file ->
+            def merged_meta = ref_meta + alarm_meta
+            [merged_meta, ref_file, alarm_file]
+        }
+        .set { combined_ch }
 
 
-        //
-        // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
-        //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
-        //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
-        //              This will also eventually check for the above run_btk boolean from
-        //              autofilter
-        SANGER_TOL_BTK (
-            combined_input.reference,
-            combined_input.samplesheet,
-            params.diamond_uniprot_database_path,
-            params.nt_database_path,
-            params.diamond_uniprot_database_path,
-            params.ncbi_taxonomy_path,
-            params.busco_lineages_folder,
-            params.busco_lineages,
-            params.taxid,
-        )
-        ch_versions         = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+    //
+    // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
+    //          USE IN THE BTK PIPELINE
+    //
+    //
+    GENERATE_SAMPLESHEET (
+        combined_ch,
+        reads_path.collect(),
+        reads_layout.first()
+    )
+    ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
-        //
-        // LOGIC: STRIP THE META OUT OF THE REFERENCE AND CSV SO WE CAN COMBINE ON META
-        //
-        reference_tuple_from_GG
-            .map{ meta, file ->
-                tuple([id: meta.id], file)
-            }
-            .set{ new_gg }
-
-        GENERATE_SAMPLESHEET.out.csv
-            .map{ meta, file ->
-                tuple([id: meta.id], file)
-            }
-            .set{ new_csv }
+    //
+    // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
+    //
+    btk_samplesheet = GENERATE_SAMPLESHEET.out.csv
+        .map{ meta, csv, indicator ->
+            tuple(
+                [ id: meta.id ],
+                csv,
+                indicator
+            )
+        }
 
 
-        //
-        // LOGIC: COMBINE ALL THE REQUIRED CHANNELS TOGETHER INTO A MAP FOR NF-CASCADE VERSION
-        //          OF SANGER_TOL_BTK TO PARSE INTO THE INPUT PARAMS
-        //
-        //new_gg
-        //    .combine(new_csv, by: 0)
-        //    .combine(Channel.of(params.diamond_uniprot_database_path))
-        //    .combine(Channel.of(params.nt_database_path))
-        //    .combine(Channel.of(params.diamond_uniprot_database_path))
-        //    .combine(Channel.of(params.ncbi_taxonomy_path))
-        //    .combine(Channel.of(params.busco_lineages_folder))
-        //    .combine(Channel.of(params.busco_lineages))
-        //    .combine(Channel.of(params.taxid))
-        //    .map{
-        //        meta, reference, samplesheet, prot_db, nt_db, x_db, ncbi_taxdump, busco_folder, busco_lineage_vals, taxid ->
-        //        [
-        //            input: samplesheet,
-        //            fasta: reference,
-        //            blastp: prot_db,
-        //            blastn: nt_db,
-        //            blastx: x_db,
-        //            taxdump: ncbi_taxdump,
-        //            busco: busco_folder,
-        //            busco_lineages: busco_lineage_vals,
-        //            taxon: taxid,
-        //            blastx_outext: "txt",
-        //            use_work_dir_as_temp: true
-        //
-        //        ]
-        //    }
-        //    .set{ pipeline_input }
+    //
+    // So autofilter needs to be in a "Shreodingers cat" situation
+    // It can either exist or not but both need to be able to run.
+    // WITH AUTOFILTER
+    // we can bind this file into the required inputs
+    // this is to avoid a possible race condition which a generic fcs_gx (no meta)
+    // will trigger btk to start running however if the PRIMARY passes AUTOFILTER
+    // but HAPLO completes the other required steps
+    // then HAPLO will be triggered for BTK not PRIMARY which would be correct
+    // WITHOUT AUTOFILTER
+    // an empty tuple [[id: "NA"], file]
+    combined_input = run_btk_conditional.run_btk
+        .map{
+            it -> tuple(
+                [id:it[0].id],
+                it[1]
+            )
+        }
+        .combine(btk_samplesheet, by: 0)
 
-        //
-        // PIPELINE: SANGER_TOL_BTK_CASCADE USES NF-CASCADE WRITTEN BY MAHESH
-        //
-        //SANGER_TOL_BTK_CASCADE(
-        //    "sanger-tol/blobtoolkit",
-        //    "-r 0.6.0 -profile sanger,singularity",
-        //    [],
-        //    pipeline_input,
-        //    []
-        //)
+    combined_input
+        .map{ meta, ref, samplesheet, alarms ->
+            log.info("[ASCC info] BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n\t| ALM: ${alarms}\n")
+        }
 
+    //
+    // PIPELINE: PREPARE THE DATA FOR USE IN THE SANGER-TOL/BLOBTOOLKIT PIPELINE
+    //              WE ARE USING THE PIPELINE HERE AS A MODULE THIS REQUIRES IT
+    //              TO BE USED AS A AN INTERACTIVE JOB ON WHAT EVER EXECUTOR YOU ARE USING.
+    //              This will also eventually check for the above run_btk boolean from
+    //              autofilter
+    SANGER_TOL_BTK (
+        combined_input,
+        diamond_uniprot_db_path.first(),
+        nt_database_path.first(),
+        diamond_uniprot_db_path.first(),
+        ncbi_taxonomy_path.first(),
+        reads_path.collect(),
+        file("${projectDir}/assets/btk_config_files/btk_pipeline.config"),
+        btk_lineages_path.first(),
+        btk_lineages.first(),
+        taxid.first(),
+    )
+    ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
+
+
+if (
+        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" ) &&
+        ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" )
+    ) {
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
         //
+        merged_channel = create_btk_dataset
+            .map { meta, file -> [meta.id, [meta, file]] }
+            .join(
+                SANGER_TOL_BTK.out.dataset
+                    .map { meta, file ->
+                        [meta.id, [meta, file]]
+                })
+            .map { id, ref, btk -> [ref[0], ref[1], btk[1]] }
+
         MERGE_BTK_DATASETS (
-            CREATE_BTK_DATASET.out.btk_datasets,
-            SANGER_TOL_BTK.out.dataset
+            merged_channel
         )
-        ch_versions         = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-        busco_merge_btk     = MERGE_BTK_DATASETS.out.busco_summary_tsv.map{it[1]}
+        ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+        merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {
-        busco_merge_btk     = []
+        busco_merge_btk         = Channel.empty()
+        merged_ds               = Channel.empty()
+
     }
 
+
+    //
+    // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
+    //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
+    //
+    if (
+        ( params.run_essentials == "both" || params.run_essentials == "genomic" ) &&
+        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" )
+    ) {
+
+        //
+        // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
+        //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
+        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
+        //
+        ascc_merged_data = ej_gc_coverage
+            .map{ it -> tuple([
+                id: it[0].id,
+                process: "GC_COV"], it[1])
+            }
+            .mix(
+                ej_dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
+                create_summary,
+                busco_merge_btk.map{ it -> tuple([id: it[0].id, process: "BUSCO_MERGE"], it[1])},
+                ch_kmers,
+                ch_tiara,
+                ch_fcsgx,
+                ch_coverage,
+                ch_kraken3,
+                ch_blast_lineage,
+                nr_hits,
+                un_hits
+            )
+            .map { meta, file ->
+                [meta.id, [meta: meta, file: file]]
+            }
+            .filter { id, data -> id != [] }
+            .groupTuple()
+            .map { id, data ->
+                [id: id, data: data]
+            }
+
+        def processes = [
+            'GC_COV', 'Coverage', 'TIARA',
+            'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
+            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+        ]
+
+        def processChannels = processes.collectEntries { process ->
+            [(process): ascc_merged_data
+                .map { sample ->
+                    def data = sample.data.find { it.meta.process == process }
+                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+                }
+            ]
+        }
+
+        def ascc_combined_channels = processChannels['GC_COV']
+        processes.tail().each { process ->
+            ascc_combined_channels = ascc_combined_channels
+                                    .combine(processChannels[process], by: 0)
+        }
 
         //
         // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
         //
-    if ( (include_workflow_steps.contains('merge_tables') || include_workflow_steps.contains('ALL')) && !exclude_workflow_steps.contains("merge_tables") ) {
-
         ASCC_MERGE_TABLES (
-            ej_gc_coverage,                                   // FROM -- GC_COVERAGE.tsv
-            ch_coverage,                                      // FROM -- RUN_COVERAGE.tsv[0]
-            ch_tiara,                                         // FROM -- TIARA.classifications[0]
-            [],                                               // BACTERIAL KRAKEN -- NOT IN PIPELINE
-            ch_kraken3,                                       // FROM -- RUN_NT_KRAKEN.lineage[0]
-            ch_blast_lineage,                                 // FROM -- E_NT_BLAST.ch_blast_hits[0]
-            ch_kmers,                                         // FROM -- G_KMERS_PROF.combined_csv[0]
-            nr_hits,                                          // FROM -- NR_DIAMOND.reformed[0]
-            un_hits,                                          // FROM -- UP_DIAMOND.reformed[0]
-            [],                                               // MARKER SCAN -- NOT IN PIPELINE
-            [],                                               // CONTIGVIZ -- NOT IN PIPELINE
-            CREATE_BTK_DATASET.out.create_summary.map{it[1]}, // FROM -- CREATE_BTK_DATASET
-            busco_merge_btk,                                  // FROM -- M_BTK_DS.busco_summary_tsv[0]
-            ch_fcsgx                                          // FROM -- P_FCSGX_RESULT.fcsgxresult[0]
+            ascc_combined_channels.map { it[1..-1] } // Remove the first item in tuple (mapping key)
         )
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+
+        merged_table            = ASCC_MERGE_TABLES.out.merged_table
+        merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
+        merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
+
+    } else {
+        merged_table            = Channel.empty()
+        merged_extended_table   = Channel.empty()
+        merged_phylum_count     = Channel.empty()
     }
 
-    //
-    // Collate and save software versions
-    //
-    softwareVersionsToYAML(ch_versions)
-        .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_pipeline_software_mqc_versions.yml',
-            sort: true,
-            newLine: true
-        ).set { ch_collated_versions }
+    emit:
+    essential_reference         = reference_tuple_from_GG
+    essential_genome_file       = ej_dot_genome
+    essential_gc_cov            = ej_gc_coverage
+
+    kmer_data                   = ch_kmers
+
+    blast_output                = ch_nt_blast
+    blast_lineage               = ch_blast_lineage
+    blast_btk_formatted         = ch_btk_format
+
+    diamond_nr_blast_full       = nr_full
+    diamond_nr_blast_hits       = nr_hits
+
+    diamond_un_blast_full       = un_full
+    diamond_un_blast_hits       = un_hits
+
+    read_coverage_output        = ch_coverage
+    read_coverage_bam           = ch_bam
+
+    fcsadaptor_prok_euk         = ch_fcsadapt
+    fcsgx_output                = ch_fcsgx
+
+    organellar_blast_mito       = ch_mito
+    organellar_blast_chloro     = ch_chloro
+
+    pacbio_barcode_files        = ch_barcode_check // This is a collection of (params.barcode * [meta, file])
+
+    ascc_merged_table           = merged_table
+    ascc_merged_table_extended  = merged_extended_table
+    ascc_merged_table_phylum_c  = merged_phylum_count
+
+    merged_btk_ds_datasets      = merged_ds
+    merged_btk_ds_busco_summary = busco_merge_btk
+
+    // THESE ONES DON'T RELY ON THE NORMAL IF ELSE STRUCTURE OF THE OTHER
+    // SUBWORKFLOWS SO THERE'S NO "BACKUP" CHANNEL.
+    // sanger_tol_btk_dataset      = SANGER_TOL_BTK.out.dataset
+    // sanger_tol_btk_plots        = SANGER_TOL_BTK.out.plots
+    // sanger_tol_btk_summary_json = SANGER_TOL_BTK.out.summary_json
+    // sanger_tol_btk_busco_data   = SANGER_TOL_BTK.out.busco_data
+    // sanger_tol_btk_multiqc      = SANGER_TOL_BTK.out.multiqc_report
+    // sanger_tol_btk_pipeline_info= SANGER_TOL_BTK.out.pipeline_info
+
+    // generate_samplesheet_csv    = GENERATE_SAMPLESHEET.out.csv
+
+    autofilter_deconned_assm    = ch_autofilt_assem
+    autofilter_fcs_tiar_smry    = ch_autofilt_fcs_tiara
+    autofilter_removed_seqs     = ch_autofilt_removed_seqs
+    autofilter_alarm_file       = ch_autofilt_alarm_file
+    autofilter_indicator_file   = ch_autofilt_indicator
+    autofilter_raw_report       = ch_autofilt_raw_report
+
+    create_btk_ds_dataset       = create_btk_dataset
+    create_btk_ds_create_smry   = create_summary
+
+    kraken2_classified          = ch_kraken1
+    kraken2_report              = ch_kraken2
+    kraken2_lineage             = ch_kraken3
+
+    vecscreen_contam            = ch_vecscreen
+
+    tiara_output                = ch_tiara
+
+    versions                    = ch_versions
 }
 
 /*
