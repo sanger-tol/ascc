@@ -119,9 +119,6 @@ Uses BlastN to identify retained PacBio multiplexing barcode contamination in th
 <details markdown="1">
 <summary>Output files</summary>
 
-- `sorted_mapped_bam/`
-  `*.bam` - BAM file with aligned reads.
-
 - `average_coverage/`
   `*_average_coverage.txt` - Text file containing the coverage information for the genome
 
@@ -260,18 +257,6 @@ By default scaffolds above 1.9 Gb are removed from the assembly, as scaffolds of
 </details>
 
 Calculating the GC content of each sequence in the input genome.
-
-### Generate Genome
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `generate_genome/`
-  `*.genome` - An index-like file describing the input genome.
-
-</details>
-
-An index-like file containing the scaffold and scaffold length of the input genome.
 
 ### Get kmers Profile
 

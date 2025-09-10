@@ -1,12 +1,11 @@
 # sanger-tol/ascc
 
 [![GitHub Actions CI Status](https://github.com/sanger-tol/ascc/actions/workflows/nf-test.yml/badge.svg)](https://github.com/sanger-tol/ascc/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/sanger-tol/ascc/actions/workflows/linting.yml/badge.svg)](https://github.com/sanger-tol/ascc/actions/workflows/linting.yml)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![GitHub Actions Linting Status](https://github.com/sanger-tol/ascc/actions/workflows/linting.yml/badge.svg)](https://github.com/sanger-tol/ascc/actions/workflows/linting.yml)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.14883765-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.14883765)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.10.5-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
 [![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.2-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.2)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/sanger-tol/ascc)
@@ -19,10 +18,11 @@
 - A BlobToolKit dataset that can contain variables that are not present in BlobToolKit datasets produced by the BlobToolKit pipeline (https://github.com/sanger-tol/blobtoolkit) on its own. For example, ASCC can incorporate FCS-GX results into a BlobToolKit dataset.
 - Individual report files for adapter, PacBio barcode and organellar contaminants.
   The only required input file for ASCC is the assembly FASTA file. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species and comprehensive runs with assemblies with complex composition.
+  - Examples of these custom runs can be found in `conf/production.config` and `conf/tol_assembly.conf`.
 
 ![sanger-tol/ascc overview diagram](./docs/images/ASCC-diagram.png)
 
-The pipeline is in a raw state of development and has not yet been thorougly tested. Its components are functional, though, so it possible to run it.
+> The pipeline is in a state of development. Please report any Bugs as an issue.
 
 1. Run a selection of processes from the list below (pick any that you think will be useful).
 
@@ -46,7 +46,7 @@ The pipeline is in a raw state of development and has not yet been thorougly tes
 - CSV table of average coverage per phylum
 - Adapter and organellar contamination report files
 
-There is a Biodiversity Genomics Academy video that introduces the ASCC pipeline on Youtube: https://www.youtube.com/watch?v=jrqjbwrg9-c.
+There is a Biodiversity Genomics Academy video that introduces the ASCC pipeline on Youtube [HERE](https://www.youtube.com/watch?v=jrqjbwrg9-c).
 
 ## Installation of the databases
 
@@ -56,14 +56,12 @@ For testing the pipeline with tiny files, there is a script that downloads a sma
 
 ## Usage
 
-The pipeline uses a YAML file to specify the input file paths and parameters. A description of the YAML file contents is [here](./docs/usage.md).
+The pipeline uses a samplesheet and YAML file to specify the input file paths and parameters. A description of the YAML file contents is [here](./docs/usage.md) and an example can be found in the [GitHub tests](./assets/github_testing/github_test.yaml) along side an example [samplesheet](./assets/github_testing/samplesheet.csv).
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
 
 ```csv
 sample,assembly_type,assembly_file
@@ -73,8 +71,8 @@ test_sample1,MITO,/path/to/mitochondrial_assembly.fa
 test_sample1,PLASTID,/path/to/plastid_assembly.fa
 ```
 
-Each row represents an assembled haplotype or organelle of the sample. The sample ID (the first column) is up to the user to choose. `assembly_type` should be one of either `PRIMARY` (for primary assembly), `HAPLO` (for haplotigs assembly), `MITO` (for mitochondrial assembly) and `PLASTID` for plastid assembly.
-This setup assumes that you have an assembly where the primary contigs or scaffolds are in a separate file from the haplotype scaffolds or contigs. It also assumes that you have separated the organellar sequences out of the main assembly into separate files.
+Each row represents an assembled haplotype or organelle of the sample. The sample ID (the first column) is up to the user to choose. `assembly_type` should be one of either `PRIMARY` or `HAP1` (for the primary assembly), `HAPLO` or `HAP2` (for the haplotigs assembly), `MITO` (for the mitochondrial assembly) and `PLASTID` (for the plastid assembly).
+This setup assumes that you have an assembly where the primary contigs or scaffolds are in a separate file from the haplotype scaffolds or contigs. It also assumes that you have separated the organellar sequences out of the main assembly into separate files. Currently, the pipeline is expected to work on, at most, 2 haplotypes of 1 genome. Support for n assemblies will be provided with a future update.
 
 It is okay to leave out assembly components from the run. E.g. if your assembly does not have a mitochondrial sequence, you can leave the row with the `MITO` tag out. If your assembly does not have a plastid sequence, you can leave the row with the `PLASTID` tag out.
 The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md).
@@ -86,8 +84,6 @@ The documentation of the kmers dimensionality reduction is covered in separate m
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
 nextflow run sanger-tol/ascc \
    -profile <docker/singularity/.../institute> \
@@ -97,7 +93,7 @@ nextflow run sanger-tol/ascc \
 ```
 
 > [!WARNING]
-> If certain steps such as FCS-GX fail multiple times, especially when using Singularity containers then please use `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`. This is a known issue when some tools in singularity containers will have PID namespace conflicts and crash when anything else it attempting to access the same files. In our case the database files.
+> If certain steps such as FCS-GX fail multiple times, especially when using Singularity containers then please use `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`. This is a known issue when some tools in singularity containers will have PID namespace conflicts and crash when anything else it attempting to access the same files. In our case the database files. If this continues to crash, currently the only option is to install the FCS-GX tool locally, baremetal (without containers) and modify the pipeline to use this copy.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
@@ -110,7 +106,13 @@ A description of the output files of the pipeline can be found [here](./docs/out
 
 sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims) and [Will Eagles](https://github.com/weaglesBio). Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato).
 
-We thank [Michael Paulini](https://github.com/epaule), Camilla Santos, [Noah Gettle](https://github.com/gettl008) and [Ksenia Krasheninnikova](https://github.com/ksenia-krasheninnikova) for testing the pipeline.
+For their extensive help in testing the pipeline, we thank:
+
+- [Michael Paulini](https://github.com/epaule)
+- Camilla Santos
+- [Noah Gettle](https://github.com/gettl008)
+- [Ksenia Krasheninnikova](https://github.com/ksenia-krasheninnikova)
+- [Jim Downie](https://github.com/prototaxites)
 
 ## Contributions and Support
 
@@ -118,8 +120,7 @@ If you would like to contribute to this pipeline, please see the [contributing g
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use sanger-tol/ascc for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+If you use sanger-tol/ascc for your analysis, please cite it using the following doi: [10.5281/zenodo.14883765](https://doi.org/10.5281/zenodo.14883765)
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 

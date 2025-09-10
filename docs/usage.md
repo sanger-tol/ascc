@@ -9,6 +9,15 @@
 > [!WARNING]
 > If certain steps such as FCS-GX fail multiple times, especially when using Singularity containers then please use `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`. This is a known issue when some tools in singularity containers will have PID namespace conflicts and crash when anything else it attempting to access the same files. In our case the database files.
 
+The ASCC (Assembly Screen for Cobionts and Contaminants) pipeline is designed to run a number of tools in parrelel and provide summary reports to aid with decontamination.
+
+This includes 4 broad categories of tool to be used:
+
+- sanger-tol/blobtoolkit
+- Barcode scanning
+- Contaminant identification
+- Organellar sequence scanning
+
 ## Input files
 
 ### Full YAML
@@ -23,7 +32,7 @@ reads_path:
 reads_layout: Layout of the reads included in this run (SINGLE or PAIRED) this value should represent all input reads.
 reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
 pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
-pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
+pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: `bc2008,bc2009`. The barcode names exist in the barcode sequences database file (`/ascc/assets/pacbio_adaptors.fa`)
 kmer_length: kmer length for kmer counting (which is done using kcounter). Default: 7
 dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following: ["pca","umap","t-sne","isomap","lle_standard","lle_hessian","lle_modified","mds","se","random_trees","kernel_pca","pca_svd","autoencoder_sigmoid","autoencoder_linear","autoencoder_selu","autoencoder_relu","nmf"]. The default method is "pca". This field should be formatted as a YAML list, e.g. ["pca","random_trees"]
 nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database MUST have built-in taxonomy (this is a requirement since the pipeline no longer uses accession2taxid files). Should end with a trailing slash
@@ -39,6 +48,7 @@ diamond_nr_database_path: path to a Diamond database made from NCBI nr protein s
 seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
 seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
 n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
+filter_cutoff: A fasta filtering limit, scaffolds above this limit will be removed from analysis.
 
 // The below params can have values of ['both','genomic','organellar','off'] unless the default value here is 'genomic', in that case their values are ONLY ['genomic','off']
 // These flags control which proccesses are run in any particular run of the pipeline.
@@ -56,16 +66,16 @@ run_vecscreen: "both"
 run_btk_busco: "genomic"
 run_pacbio_barcodes: "both"
 run_organellar_blast: "genomic"
-run_autofilter_assembly: "genomic"
+run_autofilter_assembly: "both"
 run_create_btk_dataset: "both"
 run_merge_datasets: "genomic"
 ```
 
-When running the pipeline in a production environment, consider addopting a profile like system such as shown in `assets/production/*` and `conf/production.config`. This will mean adding a profile to the nextflowl.config file of the pipeline, if you have questions please open an issue on GitHub.
+When running the pipeline in a production environment, consider addopting a profile like system such as shown in `assets/production/*` and `conf/production.config`. This will mean adding a profile to the nextflowl.config file of the pipeline, yet it is a much cleaner way of executing your pipeline. if you have questions please open an issue on GitHub.
 
 ### Samplesheet
 
-```
+```csv
 sample,assembly_type,assembly_file
 asccTinyTest_V2,PRIMARY,/path/to/primary.fa{.gz} - essential
 asccTinyTest_V2,HAPLO,/path/to/haplo.fa{.gz} - if available
@@ -74,22 +84,24 @@ asccTinyTest_V2,PLASTID,/path/to/plastid.fa{.gz} - if available
 
 ```
 
+See `assets/github_testing/samplesheet.csv` for a usable example. The PRIMARY/HAPLO terms can also be replaced with HAP1/HAP2, although please note that this does not currently mean HAP3 onwards will be valid. We currently only expect 2 genomic assemblies.
+
 If you don't want to run any organellar jobs at all, rather than change all run\_{process} flags, you can use `--genomic_only`.
 
-### FCS samplesheet <ADVANCED USE ONLY>
+### FCS samplesheet - ADVANCED USE ONLY
 
-This only needs to be generated when running fcs-gx externally to ASCC and in conjuction with the flgs `--fcs_override` and `--fcs_override_samplesheet` parameters.
+This only needs to be generated when running fcs-gx externally to ASCC and in conjuction with the flags `--fcs_override` and `--fcs_override_samplesheet` parameters.
 
 The fcs_files denoted in the below example are the parsed fcs output which is a format required for processes post-fcs in ASCC.
 
-This samplesheet can be generated by the supplied script `bin/ascc_fcsgx_wrapper.py` which will filter the fasta, run fcs-gx and parse the output into the correct format. Failure to shortcut either of the python steps with lead to the pipeline failing or reporting incorrect contamination levels across the genome.
+This samplesheet can be generated by the supplied script `bin/ascc_fcsgx_wrapper.py` which will filter the fasta, run fcs-gx and parse the output into the correct format. Failure to shortcut either of the python scripts nested in this will lead to the pipeline failing or reporting incorrect contamination levels across the genome.
 
-```
+```csv
 sample,assembly_type,fcs_file
-asccTinyTest_V2,PRIMARY,/path/to/primary.fa{.gz} - essential
-asccTinyTest_V2,HAPLO,/path/to/haplo.fa{.gz} - if available
-asccTinyTest_V2,MITO,/path/to/mitochondrion.fa{.gz} - if available
-asccTinyTest_V2,PLASTID,/path/to/plastid.fa{.gz} - if available
+asccTinyTest_V2,PRIMARY,/path/to/primary.csv - essential
+asccTinyTest_V2,HAPLO,/path/to/haplo.csv - if available
+asccTinyTest_V2,MITO,/path/to/mitochondrion.csv - if available
+asccTinyTest_V2,PLASTID,/path/to/plastid.csv - if available
 
 ```
 
@@ -102,7 +114,7 @@ Usage:
 nextflow run sanger-tol/ascc \
     -params-file {INPUT YAML} \
     --outdir {OUTDIR} \
-    -profile singularity
+    -profile {PROFILES}
 ```
 
 This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
@@ -147,11 +159,13 @@ These flags can be used in the config.yaml to simplify the CLI.
 
 #### Run everything except specific components
 
-```
+By default, all valid flags are activated in the `nextflow.config` file so to turn off specific components you can do the following:
+
+```bash
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --run_vecscreen off --run_pacbio_barcodes off -profile singularity
 ```
 
-These flags can be used in the config.yaml to simplify the CLI.
+These flags can be modified in your own config.yaml to simplify the CLI.
 
 ### Simple output
 
@@ -161,18 +175,25 @@ Note that the pipeline will create the following files in your working directory
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
   - sample_{ASSEMBLY_TYPE}
-    - average_coverage/
-    - fcs_adaptor/
-    - filter-barcode/
-    - kraken2_data/
-    - sorted_mapped_bam/
-    - summarise_vecscreen_output/
-    - tiara_raw_output/
-    - merged_tables/
-    - sanger-tol-btk/
-    - autofilter/
-    - ascc_main_output/
-    - autofiltering_done_indicator_file.txt
+    - ascc_main_output/ # Contaminants of genome.
+    - autofilter/ # Report on contamination percentages and merged output from tiara and fcsgx.
+    - average_coverage/ # Average Coverage per scaffold.
+    - create_btk_dataset/ # Phase 1 BTK - artificial BTK dataset.
+    - fcs_adaptor/ # Both prok and euk output from fcs adaptor
+    - fcsgx_data/ # raw and parsed output from FCS_GX
+    - filter-barcode/ # txt file of potential barcode locations in assembly
+    - filtered_fasta/ # filtered fasta file (size filtering)
+    - gc_content/ # txt file of GC content across scaffold
+    - generate_samplesheet/ # FCS alarm file used to trigger BTK + BTK samplesheet
+    - merged_tables/ # Phase 2 BTK dataset - BTK output + additional analysis
+    - organelle_contamination_recommendations/ # Final organelle contamination output
+    - organelle_contamination_recommendations_ilTriFlam1_MITO/ # Organelle contamination intermediary files
+    - sanger-tol-btk/ # Output from BTK
+    - summarise_vecscreen_output/ # Vecscreen summary output
+    - tiara_raw_output/ # Tiara output files
+    - trailingns/ # Locations of runs of N
+    - autofiltering_done_indicator_file.txt # Indicates that the processes prior to Blobtoolkit have completed.
+  - worklow_completed.txt # Used to indicate successful pipeline completion in an automated fashion.
 .nextflow_log       # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
