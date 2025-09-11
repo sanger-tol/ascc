@@ -50,7 +50,9 @@ process SANGER_TOL_BTK {
     """
     mv $reference ${meta.id}.fasta
 
-    nextflow run /lustre/scratch124/tol/teams/tola/users/dp24/blobtoolkit/main.nf \\
+    nextflow run ${pipeline} \\
+        -r $pipeline_version \\
+        -c $blobtoolkit_config_file \\
         -profile ${profiles} \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
