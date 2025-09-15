@@ -51,9 +51,9 @@ When generating genome assemblies, a major issue is the taxonomic identification
 The ASCC (Assembly Screen for Cobionts and Contaminants) pipeline is designed to runrun multiple decontamination tools and then merge their results. One of the main outputs of the pipeline is a CSV (comma-separated values) file where the rows correspond to sequences in the assembly and the columns contain the classification results from the constituent tools.
 Most of the existing software tools for identifying sequences in assemblies or reads are focused on prokaryotic species only. These include CheckM (Parks et al. 2015), Anvi’o (Eren et al. 2021), CLARK (Ounit et al. 2015), and GUNC (Orakov et al. 2021). Bacterial metagenomics tools are often designed for short-read data. ASCC differs from bacterial metagenomics tools, as its main use cases involve long-read assemblies of eukaryotic target species that may or may not contain bacterial sequences.
 Some existing tools are meant for decontaminating genome assemblies but appear to be no longer maintained. An established and maintained tool used for identifying sequences in genome assemblies is BlobToolKit (Challis et al. 2020). One part of BlobToolKit is the BlobToolKit Pipeline (Diaz et al. 2023), which uses BUSCO (Simão et al. 2015), Diamond (Buchfink, Reuter, and Drost 2021) and BLAST (Sayers et al. 2022) to identify the taxonomic origin of sequences. Another part of the BlobToolKit ecosystem is the web app BlobToolKit Viewer, which uses the JSON output from the BlobToolKit Pipeline's to produce an interactive visualisation. ASCC expands upon the BlobToolKit Pipeline by offering additional modules and therefore additional annotations to the output.
-All individual components of the ASCC pipeline are optional when setting up a run. This allows for highly customised runs according to the assembly complexity and end-user needs, e.g. enabling lightweight runs where speed is essential. ASCC was developed using Nextflow (Di Tommaso et al. 2017) and follows the nf-core (Ewels et al. 2020) standards. This ensures adherence to pipeline development best practices and enables running the pipeline on a variety of compute platforms. While nf-core has existing pipelines for identifying species in reads (nf-core/mag (Krakau et al. 2022), nf-core/taxprofiler (Stamouli et al. 2023) and nf-core/detaxizer (Seidel et al. 2024)), there is currently no official nf-core pipeline for the decontamination of assemblies. The Nextflow decontamination pipeline CLEAN (https://github.com/rki-mf1/clean) (Lataretu et al. 2023) only uses read mapping for identification of contaminants.
-Some existing tools are meant for decontaminating genome assemblies but appear to be no longer maintained. An established and maintained tool used for identifying sequences in genome assemblies is BlobToolKit (Challis et al. 2020). One part of BlobToolKit is the BlobToolKit Pipeline (Diaz et al. 2023), which uses BUSCO (Simão et al. 2015), Diamond (Buchfink, Reuter, and Drost 2021) and BLAST (Sayers et al. 2022) to identify the taxonomic origin of sequences. Another part of the BlobToolKit ecosystem is the web app BlobToolKit Viewer, which uses the JSON output from the BlobToolKit Pipeline's to produce an interactive visualisation. ASCC expands upon the BlobToolKit Pipeline by offering additional modules and therefore additional annotations to the output.
-All individual components of the ASCC pipeline are optional when setting up a run. This allows for highly customised runs according to the assembly complexity and end-user needs, e.g. enabling lightweight runs where speed is essential. ASCC was developed using Nextflow (Di Tommaso et al. 2017) and follows the nf-core (Ewels et al. 2020) standards. This ensures adherence to pipeline development best practices and enables running the pipeline on a variety of compute platforms. While nf-core has existing pipelines for identifying species in reads (nf-core/mag (Krakau et al. 2022), nf-core/taxprofiler (Stamouli et al. 2023) and nf-core/detaxizer (Seidel et al. 2024)), there is currently no official nf-core pipeline for the decontamination of assemblies. The Nextflow decontamination pipeline CLEAN (https://github.com/rki-mf1/clean) (Lataretu et al. 2023) only uses read mapping for identification of contaminants.
+All individual components of the ASCC pipeline are optional when setting up a run. This allows for highly customised runs according to the assembly complexity and end-user needs, e.g. enabling lightweight runs where speed is essential. ASCC was developed using Nextflow (Di Tommaso et al. 2017) and follows the nf-core (Ewels et al. 2020) standards. This ensures adherence to pipeline development best practices and enables running the pipeline on a variety of compute platforms. While nf-core has existing pipelines for identifying species in reads (nf-core/mag (Krakau et al. 2022), nf-core/taxprofiler (Yates et al. 2023) and nf-core/detaxizer (Seidel et al. 2024)), there is currently no official nf-core pipeline for the decontamination of assemblies. The Nextflow decontamination pipeline CLEAN (Lataretu et al. 2023) only uses read mapping for identification of contaminants.
+Some existing tools are meant for decontaminating genome assemblies but appear to be no longer maintained. An established and maintained tool used for identifying sequences in genome assemblies is BlobToolKit (Challis et al. 2020). One part of BlobToolKit is the BlobToolKit Pipeline (Sims et al. 2025), which uses BUSCO (Simão et al. 2015), Diamond (Buchfink, Reuter, and Drost 2021) and BLAST (Sayers et al. 2022) to identify the taxonomic origin of sequences. Another part of the BlobToolKit ecosystem is the web app BlobToolKit Viewer, which uses the JSON output from the BlobToolKit Pipeline's to produce an interactive visualisation. ASCC expands upon the BlobToolKit Pipeline by offering additional modules and therefore additional annotations to the output.
+
 ASCC is currently used in the Tree of Life programme at the Wellcome Sanger Institute for decontamination of all produced assemblies, ranging from those assuming a single target species, to those generated from cobiont systems.
 
 
@@ -62,15 +62,14 @@ ASCC is currently used in the Tree of Life programme at the Wellcome Sanger Inst
 An overview of the components of the pipeline is shown in Figure 1.
 
 ## Inputs
-  The only essential input is an assembly FASTA file. The pipeline can take reads (both long and short reads) as an input and map them with minimap2 (Li 2018) to determine coverage, these reads are also used in the BlobToolKit pipeline, for more indepth analysis. ASCC also accepts organellar FASTA files as input to use in the detection of organellar contamination in a nuclear genome assembly (using BLAST) as well as some basic analysis to identify any contamination in the organellar genome. Version 1 of the ASCC pipeline will take a `params.yaml` detailing
-  The only essential input is an assembly FASTA file. The pipeline can take reads (both long and short reads) as an input and map them with minimap2 (Li 2018) to determine coverage, these reads are also used in the BlobToolKit pipeline, for more indepth analysis. ASCC also accepts organellar FASTA files as input to use in the detection of organellar contamination in a nuclear genome assembly (using BLAST) as well as some basic analysis to identify any contamination in the organellar genome. Version 1 of the ASCC pipeline will take a `params.yaml` detailing
+The only essential input is an assembly FASTA file, multiple assemblies can be provided where there are primary, haplotype, mitochondrial and plastid assemblies (the requirement is that the assemblies belong to the same sample). The pipeline can take reads (both long and short reads) as an input and map them with minimap2 (Li 2018) to determine coverage, these reads are also used in the BlobToolKit pipeline, for more indepth analysis. ASCC also accepts organellar FASTA files as input to use in the detection of organellar contamination in a nuclear genome assembly (using BLAST) as well as some basic analysis to identify any contamination in the organellar genome. Version 1 of the ASCC pipeline will take a `params.yaml` detailing the assembly information, database locations and various software paramters.
 
 ## Data processing
 Below are brief descriptions of the components of ASCC, as shown in Figure 1. FCS-GX (Astashyn et al. 2024) is NCBI's software for detecting contaminant species in assemblies using a cross-species genome aligner. FCS-adaptor (Astashyn et al. 2023) and VecScreen (NCBI 2001) are tools from NCBI for detecting adapter contamination. VecScreen is older than FCS-adaptor but its advantage over FCS-adaptor is that it allows the user to specify a custom database of adapter sequences. ASCC can use BLAST to detect contamination of the assembly with user-provided barcode sequences (a collection of common PacBio barcode sequences are supplied with the pipeline). Tiara (Karlicki, Antonowicz, and Karnkowska 2022) uses a neural network for domain-level taxonomic classification of sequences and the detection of organellar sequences.
-ASCC can run the BlobToolKit pipeline. It can also run BLAST against the NCBI nt database and Diamond BLASTX against the NCBI nr and Uniprot (UniProt Consortium 2023) databases separately from the BlobToolKit Pipeline. With default settings, runs using ASCC's own BLAST and Diamond processes are faster and more lightweight compared to the BlobToolKit Pipeline. Besides BLAST against the NCBI nt database, ASCC can run Kraken (Wood, Lu, and Langmead 2019) with the nt database. Kraken uses kmer matches to identify sequences and is faster than BLAST. ASCC also has a component for kmer counting and dimensionality reduction of the kmer counts (using kcounter, Camargo. 2020), scikit-learn (Pedregosa et al. 2011) and Tensorflow (Martín Abadi et al. 2015).
+ASCC can run the BlobToolKit pipeline. It can also run BLAST against the NCBI nt database and Diamond BLASTX against the NCBI nr and Uniprot (UniProt Consortium 2023) databases separately from the BlobToolKit Pipeline. With default settings, runs using ASCC's own BLAST and Diamond processes are faster and more lightweight compared to the BlobToolKit Pipeline. Besides BLAST against the NCBI nt database, ASCC can run Kraken (Wood, Lu, and Langmead 2019) with the nt database. Kraken uses kmer matches to identify sequences and is faster than BLAST. ASCC also has a component for kmer counting and dimensionality reduction of the kmer counts (using kcounter, Camargo. 2020), scikit-learn (Pedregosa et al. 2011) and Tensorflow (Abadi et al. 2015).
 
 ## Outputs
-The outputs depend on which of sub-workflows of the pipeline were run, by default this is set as ALL subworkflows. The key results from the pipeline are gathered as a CSV table and can be converted into a BlobToolKit dataset. BlobToolKit allows the user to incorporate custom variables into BlobToolKit datasets and then display them in BlobToolKit Viewer. ASCC makes use of this, creating BlobToolKit datasets that contain results from tools that are not a part of the BlobToolKit Pipeline. Running the BlobToolKit Pipeline is not required for making a BlobToolKit dataset with ASCC: it is possible to make a BlobToolKit dataset just using results from other components of ASCC.
+The outputs depend on which of sub-workflows of the pipeline were run, by default, this is set as ALL subworkflows. The key results from the pipeline are gathered as a CSV table and can be converted into a BlobToolKit dataset. BlobToolKit allows the user to incorporate custom variables into BlobToolKit datasets and then display them in BlobToolKit Viewer. ASCC makes use of this, creating BlobToolKit datasets that contain results from tools that are not a part of the BlobToolKit Pipeline. Running the BlobToolKit Pipeline is not required for making a BlobToolKit dataset with ASCC: it is possible to make a BlobToolKit dataset just using results from other components of ASCC.
 If the required inputs are present, the pipeline can try to derive a phylum-level consensus classification from the outputs of multiple tools and report the estimated coverage per phylum. The adapter and organellar contamination reports are collected as plain text files.
 
 # Availability and usage
@@ -78,17 +77,30 @@ ASCC and instructions for running it are available on GitHub at https://github.c
 
 # Citations
 
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
+- `@FCSgx` -> "(Astashyn et al. 2024)"
+- `@FCSadaptor` -> "(Astashyn et al. 2023)"
+- `@Buchfink_Reuter_Drost_2021` -> "(Buchfink, Reuter, and Drost. 2021)"
+- `@Camargo` -> "Camargo. 2020"
+- `@blobtoolkit` -> "(Challis et al. 2020)"
+- `@btk_nxf` -> "(Sims et al. 2025)"
+- `@Nextflow` -> "(Di Tommaso et al. 2017)"
+- `@anvio` -> "(Eren et al. 2021)"
+- `@nf-core` -> "(Ewels et al. 2020)"
+- `@tiara` -> "(Karlicki, Antonowicz, and Karnkowska. 2022)"
+- `@nf-core-mag` -> "(Krakau et al. 2022)"
+- `@CLEAN` -> "(Lataretu et al. 2023)"
+- `@minimap` -> "(Li. 2018)"
+- `@tensorflow` -> "(Abadi et al. 2015)"
+- `@vecscreen` -> "(NCBI. 2001)"
+- `@gunc` -> "(Orakov et al. 2021)"
+- `@clark` -> "(Ounit et al. 2015)"
+- `@checkm` -> "(Parks et al. 2015)"
+- `@scikit` -> "(Pedregosa et al. 2011)"
+- `@ncbi_db` -> "(Sayers et al. 2022)"
+- `@detaxiser` -> "(Seidel et al. 2024)"
+- `@busco` -> "(Simão et al. 2015)"
+- `@taxprofiler` -> "(Yates et al. 2023)"
+- `@kraken2` -> "(Wood, Lu, and Langmead 2019)"
 
 # Figures
 
