@@ -22,7 +22,9 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - singularity pid setting is now false.
 - Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
 - The FCSGX module has been heavily patched when using `--profile production`, this is to support `module` and `modulecmd`.
-- The `--production` profile now contains a FCSGX module override linked to the above. Resources have been included otherwise FCSGX will use the nextflow defaults.
+- The `--production` profile now contains a FCSGX module override linked to the above.
+  - Resources have been included otherwise FCSGX will use the nextflow defaults.
+  - Queue for FCSGX has been changed to `oversubscribed` in the `production.config`.
 - Changes to the resource allocation to improve support for large genomes. Changes are for the modules:
   - BLAST_BLASTN
   - BLAST_BLASTN_MOD
