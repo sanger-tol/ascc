@@ -151,7 +151,9 @@ These flags can be used in the config.yaml to simplify the CLI, by default all a
 nextflow run sanger-tol/ascc --input config.yaml --outdir results --run_vecscreen off --run_pacbio_barcodes off -profile singularity
 ```
 
-These flags can be used in the config.yaml to simplify the CLI. For advanced users, that understand the process of either adding a new config or modifyig an existing config, you can add a custom config file such as `-profile production` to minimise the CLI command. In a case of using the `production.config`, your input data should look like the contents of the `./assets/production_testing/*` folder.
+These flags can be used in the config.yaml to simplify the CLI.
+For advanced users, that understand the process of either adding a new config or modifyig an existing config, you can add a custom config file such as `-profile production` to minimise the CLI command.
+In a case of using the `production.config`, your input data should look like the contents of the `./assets/production_testing/*` folder.
 
 ### Simple output
 
@@ -187,7 +189,9 @@ work                # Directory containing the nextflow working files
 
 ### Updating the pipeline
 
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
+When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version.
+When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since.
+To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
 nextflow pull sanger-tol/ascc
