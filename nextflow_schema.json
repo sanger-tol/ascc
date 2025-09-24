@@ -191,6 +191,12 @@
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
+                "run_sourmash": {
+                    "type": "string",
+                    "description": "Run sourmash for additional taxonomic sorting",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
                 "run_kmers": {
                     "type": "string",
                     "description": "Run kmer jobs on assebmlies",
