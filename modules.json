@@ -15,6 +15,11 @@
                         "git_sha": "c7a7f06819adcf6f922e11b47f308b7c74484d67",
                         "installed_by": ["modules"]
                     },
+                    "cat/cat": {
+                        "branch": "master",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "installed_by": ["modules"]
+                    },
                     "custom/getchromsizes": {
                         "branch": "master",
                         "git_sha": "49f4e50534fe4b64101e62ea41d5dc43b1324358",
@@ -107,6 +112,11 @@
                     "seqkit/sliding": {
                         "branch": "master",
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "installed_by": ["modules"]
+                    },
+                    "sourmash/sketch": {
+                        "branch": "master",
+                        "git_sha": "30c7adaae047db8e06f71386eb6059fdd1ea6b13",
                         "installed_by": ["modules"]
                     },
                     "tiara/tiara": {
