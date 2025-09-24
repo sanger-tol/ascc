@@ -56,7 +56,7 @@ workflow PE_MAPPING {
         illumina_input.bool_cigar_paf,
         illumina_input.bool_cigar_bam
     )
-    ch_versions = ch_versions.mix(MINIMAP2_ALIGN_ILLUMINA.out.versions)
+    ch_versions     = ch_versions.mix(MINIMAP2_ALIGN_ILLUMINA.out.versions)
 
 
     MINIMAP2_ALIGN_ILLUMINA.out.bam
@@ -72,25 +72,14 @@ workflow PE_MAPPING {
     //
     SAMTOOLS_MERGE(
         collected_files_for_merge,
-        reference_tuple,
+        reference_data_tuple,
+        [[],[]],
         [[],[]]
     )
-    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
+    ch_versions     = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
+
 
     emit:
-    versions           = ch_versions
-    mapped_bam         = SAMTOOLS_MERGE.out.bam
-}
-
-process GrabFiles {
-    tag "${meta.id}"
-    executor 'local'
-
-    input:
-    tuple val(meta), path("in")
-
-    output:
-    tuple val(meta), path("in/*.{fa,fasta}.{gz}")
-
-    "true"
+    versions        = ch_versions
+    mapped_bam      = SAMTOOLS_MERGE.out.bam
 }

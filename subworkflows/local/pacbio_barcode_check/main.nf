@@ -5,8 +5,6 @@
 //
 // MODULE IMPORT BLOCK
 //
-include { CHECK_BARCODE       } from '../../../modules/local/check/barcode/main'
-include { BLAST_MAKEBLASTDB   } from '../../../modules/nf-core/blast/makeblastdb/main'
 include { BLAST_BLASTN        } from '../../../modules/nf-core/blast/blastn/main'
 include { FILTER_BARCODE      } from '../../../modules/local/filter/barcode/main'
 
@@ -38,6 +36,7 @@ workflow PACBIO_BARCODE_CHECK {
         .unique()
         .set {barcode_list}
 
+
     //
     // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE
     //
@@ -50,6 +49,7 @@ workflow PACBIO_BARCODE_CHECK {
         filter_input
     )
     ch_versions     = ch_versions.mix(FILTER_BARCODE.out.versions)
+
 
     emit:
     filtered        = FILTER_BARCODE.out.debarcoded

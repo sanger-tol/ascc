@@ -1,7 +1,12 @@
-// MODULE IMPORT BLOCK
+//
+// NF-CORE MODULE IMPORT
+//
 include { BLAST_BLASTN                      } from '../../../modules/nf-core/blast/blastn/main'
-
 include { SEQKIT_SLIDING                    } from '../../../modules/nf-core/seqkit/sliding/main'
+
+//
+// LOCAL MODULE IMPORT
+//
 include { BLAST_CHUNK_TO_FULL               } from '../../../modules/local/blast/chunk_to_full/main'
 include { REFORMAT_FULL_OUTFMT6             } from '../../../modules/local/reformat/full_outfmt6/main'
 include { BLAST_GET_TOP_HITS                } from '../../../modules/local/blast/get_top_hits/main'
@@ -36,7 +41,10 @@ workflow EXTRACT_NT_BLAST {
     //
     BLAST_BLASTN (
         SEQKIT_SLIDING.out.fastx,
-        ch_blast
+        ch_blast,
+        [],
+        [],
+        []
     )
     ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 

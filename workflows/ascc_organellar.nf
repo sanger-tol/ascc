@@ -11,7 +11,6 @@ include { ESSENTIAL_JOBS                                } from '../subworkflows/
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'

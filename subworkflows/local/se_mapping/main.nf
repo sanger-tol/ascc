@@ -10,6 +10,7 @@ workflow SE_MAPPING {
     ch_versions     = Channel.empty()
     ch_align_bams   = Channel.empty()
 
+
     //
     // LOGIC: MAKE MINIMAP INPUT CHANNEL AND MAKE BRANCHES BASED ON INPUT READ TYPE
     //
@@ -52,6 +53,7 @@ workflow SE_MAPPING {
             minimap_se_input.cigar_pf,
             minimap_se_input.cigar_bm
     )
+    ch_versions = ch_versions.mix(MINIMAP2_ALIGN_SE.out.versions)
 
 
     //
@@ -70,6 +72,7 @@ workflow SE_MAPPING {
     //
     SAMTOOLS_MERGE(
         collected_files_for_merge,
+        reference_data_tuple,
         [[],[]],
         [[],[]]
     )

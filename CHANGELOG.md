@@ -3,7 +3,8 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - Red Spider-Boat [ ##/08/2024]
+
+## [0.5.0] - Red Spider-Boat [ ##/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -34,6 +35,8 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - Above changes also seperate out the logic for organellar genomes as they do not need the more complicated resource additions.
 - Removed the BTK config, this has started to cause a number of crashes to the nested blobtoolkit pipeline.
 - Remove unnecessary SAMTOOLS_INDEX from RUN_READ_COVERAGE.
+- `SAMTOOLS_FAIDX` now outputs a `.sizes` file so `CUSTOM_CHROMSIZES` has been removed.
+- Remove Legacy `GrabFiles` function.
 
 ### `Fixed`
 
@@ -46,6 +49,7 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
 - Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
 - Updated resource notation to use e notation #134
+- Removed nf-core modules which arn't actually in use.
 
 ### `Bugs`
 

@@ -4,8 +4,8 @@ process KRAKEN2_KRAKEN2 {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-8706a1dd73c6cc426e12dd4dd33a5e917b3989ae:c8cbdc8ff4101e6745f8ede6eb5261ef98bdaff4-0' :
-        'biocontainers/mulled-v2-8706a1dd73c6cc426e12dd4dd33a5e917b3989ae:c8cbdc8ff4101e6745f8ede6eb5261ef98bdaff4-0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/29/29ed8f68315625eca61a3de9fcb7b8739fe8da23f5779eda3792b9d276aa3b8f/data' :
+        'community.wave.seqera.io/library/kraken2_coreutils_pigz:45764814c4bb5bf3' }"
 
     input:
     tuple val(meta), path(reads)
@@ -24,15 +24,15 @@ process KRAKEN2_KRAKEN2 {
     task.ext.when == null || task.ext.when
 
     script:
-    def args                        = task.ext.args ?: ''
-    def prefix                      = task.ext.prefix ?: "${meta.id}"
-    def paired                      = meta.single_end ? "" : "--paired"
-    def classified                  = meta.single_end ? "${prefix}.classified.fastq"   : "${prefix}.classified#.fastq"
-    def unclassified                = meta.single_end ? "${prefix}.unclassified.fastq" : "${prefix}.unclassified#.fastq"
-    def classified_option           = save_output_fastqs ? "--classified-out ${classified}" : ""
-    def unclassified_option         = save_output_fastqs ? "--unclassified-out ${unclassified}" : ""
-    def readclassification_option   = save_reads_assignment ? "--output ${prefix}.kraken2.classifiedreads.txt" : "--output /dev/null"
-    def compress_reads_command      = save_output_fastqs ? "pigz -p $task.cpus *.fastq" : ""
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def paired = meta.single_end ? "" : "--paired"
+    def classified = meta.single_end ? "${prefix}.classified.fastq"   : "${prefix}.classified#.fastq"
+    def unclassified = meta.single_end ? "${prefix}.unclassified.fastq" : "${prefix}.unclassified#.fastq"
+    def classified_option = save_output_fastqs ? "--classified-out ${classified}" : ""
+    def unclassified_option = save_output_fastqs ? "--unclassified-out ${unclassified}" : ""
+    def readclassification_option = save_reads_assignment ? "--output ${prefix}.kraken2.classifiedreads.txt" : "--output /dev/null"
+    def compress_reads_command = save_output_fastqs ? "pigz -p $task.cpus *.fastq" : ""
 
     """
     kraken2 \\
@@ -58,8 +58,8 @@ process KRAKEN2_KRAKEN2 {
     stub:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def paired       = meta.single_end ? "" : "--paired"
-    def classified   = meta.single_end ? "${prefix}.classified.fastq.gz"   : "${prefix}.classified_1.fastq.gz ${prefix}.classified_2.fastq.gz"
+    def paired = meta.single_end ? "" : "--paired"
+    def classified = meta.single_end ? "${prefix}.classified.fastq.gz"   : "${prefix}.classified_1.fastq.gz ${prefix}.classified_2.fastq.gz"
     def unclassified = meta.single_end ? "${prefix}.unclassified.fastq.gz" : "${prefix}.unclassified_1.fastq.gz ${prefix}.unclassified_2.fastq.gz"
     def readclassification_option = save_reads_assignment ? "--output ${prefix}.kraken2.classifiedreads.txt" : "--output /dev/null"
     def compress_reads_command = save_output_fastqs ? "pigz -p $task.cpus *.fastq" : ""
