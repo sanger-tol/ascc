@@ -89,7 +89,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
     //              SCAFFOLDS IN ASSEMBLY
     //
-    if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
+    if ( params.run_sourmash == "both" || params.run_sourmash == "organellar" ) {
 
         reference_tuple_from_GG
             .map { meta, file ->
