@@ -3,7 +3,37 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - Red Spider-Boat [ ##/08/2024]
+## [0.6.0] - Red Watch [ ##/##/2025 ]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to compliment FCSGX and Tiara.
+
+### `Added`
+
+- `RUN_SOURMASH` subworkflow
+- Addition of `run_sourmash` config option
+- Addition of @zilov as contributor
+
+### Dependencies
+
+| Module               | Old Version | New Versions |
+| -------------------- | ----------- | ------------ |
+| CAT_CAT              |             |              |
+| SOURMASH_SKETCH      |             |              |
+| SOURMASH_MULTISEARCH |             |              |
+| PARSE_SOURMASH       |             |              |
+
+### Parameters
+
+// NOT YET ADDED sourmash_dblist IN CONFIGS
+
+| Old Parameter | New Parameter     |
+| ------------- | ----------------- |
+| NA            | --run_sourmash    |
+| NA            | --sourmash_dblist |
+
+## [0.5.0] - Red Spider-Boat [ ##/08/2025 ]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
