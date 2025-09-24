@@ -13,6 +13,7 @@ include { GENERATE_SAMPLESHEET                          } from '../modules/local
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
@@ -99,6 +100,33 @@ workflow ASCC_GENOMIC {
         reference_tuple_from_GG = ch_samplesheet
         ej_dot_genome           = Channel.empty()
         ej_gc_coverage          = Channel.empty()
+    }
+
+    //
+    // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
+    //              SCAFFOLDS IN ASSEMBLY
+    //
+    if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
+
+        reference_tuple_from_GG
+            .map { meta, file ->
+                def meta2 = [] // Inject meta data for sourmash runs
+                [meta2, file]
+            }
+            .set { sourmash_reference }
+
+        ch_dbs = Channel.empty()
+        RUN_SOURMASH (
+            sourmash_reference,
+            ch_dbs
+        )
+
+        // This will be used for btk input if we decide to go that route
+        ch_sourmash         = Channel.of( [[],[]] )
+        ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+
+    } else {
+        ch_sourmash         = Channel.of( [[],[]] )
     }
 
 

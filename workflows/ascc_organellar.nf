@@ -8,6 +8,7 @@ include { CREATE_BTK_DATASET                            } from '../modules/local
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
@@ -81,6 +82,34 @@ workflow ASCC_ORGANELLAR {
         ej_dot_genome           = Channel.empty()
         ej_gc_coverage          = Channel.empty()
         reference_tuple_w_seqkt = Channel.empty()
+    }
+
+
+    //
+    // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
+    //              SCAFFOLDS IN ASSEMBLY
+    //
+    if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
+
+        reference_tuple_from_GG
+            .map { meta, file ->
+                def meta2 = [] // Inject meta data for sourmash runs
+                [meta2, file]
+            }
+            .set { sourmash_reference }
+
+        ch_dbs = Channel.empty()
+        RUN_SOURMASH (
+            sourmash_reference,
+            ch_dbs
+        )
+
+        // This will be used for btk input if we decide to go that route
+        ch_sourmash         = Channel.of( [[],[]] )
+        ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+
+    } else {
+        ch_sourmash         = Channel.of( [[],[]] )
     }
 
 
