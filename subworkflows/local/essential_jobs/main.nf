@@ -8,7 +8,7 @@ include { TRAILINGNS        } from '../../../modules/local/trailingns/trailingns
 //
 // LOCAL SUBWORKFLOW IMPORTS
 //
-include { GENERATE_GENOME                               } from '../../../subworkflows/local/generate_genomes/main'
+include { GENERATE_GENOME   } from '../../../subworkflows/local/generate_genomes/main'
 
 
 workflow ESSENTIAL_JOBS {

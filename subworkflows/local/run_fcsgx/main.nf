@@ -1,3 +1,6 @@
+//
+// MODULE IMPORT BLOCK
+//
 include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
 include { FCSGX_RUNGX           } from '../../../modules/nf-core/fcsgx/rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../../modules/local/fcsgx/parse_results/main'

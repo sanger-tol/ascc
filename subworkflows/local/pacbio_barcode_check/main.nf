@@ -1,8 +1,4 @@
 //
-// PACBIO_BARCODE_CHECK IDENTIFIED LOCATIONS OF BARCODE SEQUENCES IN THE INPUT ASSEMBLY
-//
-
-//
 // MODULE IMPORT BLOCK
 //
 include { BLAST_BLASTN        } from '../../../modules/nf-core/blast/blastn/main'

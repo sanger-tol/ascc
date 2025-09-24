@@ -1,5 +1,3 @@
-#!/usr/bin/env nextflow
-
 //
 // MODULE IMPORT BLOCK
 //

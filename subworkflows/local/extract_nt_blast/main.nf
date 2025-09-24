@@ -1,16 +1,16 @@
 //
 // NF-CORE MODULE IMPORT
 //
-include { BLAST_BLASTN                      } from '../../../modules/nf-core/blast/blastn/main'
-include { SEQKIT_SLIDING                    } from '../../../modules/nf-core/seqkit/sliding/main'
+include { BLAST_BLASTN          } from '../../../modules/nf-core/blast/blastn/main'
+include { SEQKIT_SLIDING        } from '../../../modules/nf-core/seqkit/sliding/main'
 
 //
 // LOCAL MODULE IMPORT
 //
-include { BLAST_CHUNK_TO_FULL               } from '../../../modules/local/blast/chunk_to_full/main'
-include { REFORMAT_FULL_OUTFMT6             } from '../../../modules/local/reformat/full_outfmt6/main'
-include { BLAST_GET_TOP_HITS                } from '../../../modules/local/blast/get_top_hits/main'
-include { GET_LINEAGE_FOR_TOP               } from '../../../modules/local/get/lineage_for_top/main'
+include { BLAST_CHUNK_TO_FULL   } from '../../../modules/local/blast/chunk_to_full/main'
+include { REFORMAT_FULL_OUTFMT6 } from '../../../modules/local/reformat/full_outfmt6/main'
+include { BLAST_GET_TOP_HITS    } from '../../../modules/local/blast/get_top_hits/main'
+include { GET_LINEAGE_FOR_TOP   } from '../../../modules/local/get/lineage_for_top/main'
 
 workflow EXTRACT_NT_BLAST {
     take:
@@ -36,6 +36,7 @@ workflow EXTRACT_NT_BLAST {
     SEQKIT_SLIDING ( input_genome )
     ch_versions             = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
+
     //
     // MODULE: BLASTS THE INPUT GENOME AGAINST A LOCAL NCBI DATABASE
     //
@@ -53,6 +54,7 @@ workflow EXTRACT_NT_BLAST {
             meta.id
         }
         .set { id }
+
 
     //
     // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
@@ -72,6 +74,7 @@ workflow EXTRACT_NT_BLAST {
                 )
             }
         .set { blast_results }
+
 
     //
     // MODULE: CONVERT CHUNK_COORDINATES TO FULL_COORINDATES

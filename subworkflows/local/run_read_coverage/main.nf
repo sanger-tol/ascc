@@ -1,7 +1,18 @@
+//
+// LOCAL SUBWORKFLOW IMPORTS
+//
 include { SE_MAPPING                                    } from '../se_mapping/main'
 include { PE_MAPPING                                    } from '../pe_mapping/main'
+
+//
+// NF-CORE MODULE IMPORTS
+//
 include { SAMTOOLS_SORT                                 } from '../../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_DEPTH                                } from '../../../modules/nf-core/samtools/depth/main'
+
+//
+// LOCAL MODULE IMPORTS
+//
 include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE               } from '../../../modules/local/samtools/depth_average_coverage/main'
 
 workflow RUN_READ_COVERAGE {
