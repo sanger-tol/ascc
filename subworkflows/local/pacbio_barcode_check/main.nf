@@ -18,7 +18,10 @@ workflow PACBIO_BARCODE_CHECK {
     //
     BLAST_BLASTN (
         reference_tuple,
-        barcode_database
+        barcode_database,
+        [],
+        [],
+        []
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
