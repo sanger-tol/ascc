@@ -64,6 +64,9 @@ workflow ORGANELLAR_BLAST {
     BLAST_BLASTN (
         ref_and_db.reference_tuple,
         ref_and_db.blastdb_tuple
+        [],
+        [],
+        []
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
