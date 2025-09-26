@@ -23,7 +23,6 @@ process SED_SED {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ubuntu: \$(ubuntu --version | sed 's/Ubuntu //g')
         coreutils: $VERSION
     END_VERSIONS
     """
@@ -36,7 +35,6 @@ process SED_SED {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ubuntu: \$(ubuntu --version | sed 's/Ubuntu //g')
         coreutils: $VERSION
     END_VERSIONS
     """

@@ -41,7 +41,7 @@ process KMER_COUNT_DIM_REDUCTION {
         scikit-learn: \$(python3 -c "import sklearn; print(sklearn.__version__)")
         umap-learn: $UMAP_VERSION
         matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
-        kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
+        kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version)
     END_VERSIONS
     """
 
