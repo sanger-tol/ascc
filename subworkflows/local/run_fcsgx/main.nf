@@ -1,3 +1,6 @@
+//
+// MODULE IMPORT BLOCK
+//
 include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
 include { FCSGX_RUNGX           } from '../../../modules/nf-core/fcsgx/rungx/main'
 include { PARSE_FCSGX_RESULT    } from '../../../modules/local/fcsgx/parse_results/main'
@@ -60,6 +63,7 @@ workflow RUN_FCSGX {
         ncbi_rankedlineage_path
     )
     ch_versions     = ch_versions.mix( PARSE_FCSGX_RESULT.out.versions )
+
 
     emit:
     fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult

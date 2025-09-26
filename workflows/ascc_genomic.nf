@@ -12,14 +12,14 @@ include { SANGER_TOL_BTK                                } from '../modules/local
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
+include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
+
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
@@ -141,11 +141,11 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     if ( params.run_tiara == "both" || params.run_tiara == "genomic" ) {
-        EXTRACT_TIARA_HITS (
+        TIARA_TIARA (
             reference_tuple_from_GG
         )
-        ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara
+        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+        ch_tiara            = TIARA_TIARA.out.classifications
                                 .map { it ->
                                     [[id: it[0].id, process: "TIARA"], it[1]]
                                 }

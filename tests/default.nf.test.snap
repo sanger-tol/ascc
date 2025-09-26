@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            121,
+            118,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -32,11 +32,8 @@
                     "python": "3.9.13",
                     "create_btk_dataset": "3.0.0"
                 },
-                "CUSTOM_GETCHROMSIZES": {
-                    "getchromsizes": 1.21
-                },
                 "DIAMOND_BLASTX": {
-                    "diamond": "2.1.8"
+                    "diamond": "2.1.12"
                 },
                 "DIAMOND_BLAST_CHUNK_TO_FULL": {
                     "python": "3.9.1",
@@ -57,7 +54,6 @@
                     "filter_barcode_blast_results": 1.0
                 },
                 "FILTER_COMMENTS": {
-                    "ubuntu": null,
                     "coreutils": 9.1
                 },
                 "FILTER_FASTA": {
@@ -76,7 +72,7 @@
                 "GET_KMER_COUNTS": {
                     "python": "3.10.12",
                     "kcounter": "0.1.1",
-                    "general_purpose_functions.py": null,
+                    "general_purpose_functions.py": "1.0.0",
                     "get_kmers_counts.py": 1.0
                 },
                 "GET_LARGEST_SCAFFOLD": {
@@ -86,7 +82,7 @@
                 "GET_LINEAGE_FOR_KRAKEN": {
                     "python": "3.11.0",
                     "pandas": "1.5.2",
-                    "general_purpose_functions.py": null,
+                    "general_purpose_functions.py": "1.0.0",
                     "get_lineage_for_kraken_results.py": 1.0
                 },
                 "GET_LINEAGE_FOR_TOP": {
@@ -94,7 +90,7 @@
                     "get_lineage_for_top": "1.0.0"
                 },
                 "GNU_SORT": {
-                    "coreutils": 9.3
+                    "coreutils": 9.5
                 },
                 "KMER_COUNT_DIM_REDUCTION": {
                     "python": "3.11.8",
@@ -108,10 +104,10 @@
                 "KMER_COUNT_DIM_REDUCTION_COMBINE_CSV": {
                     "python": "3.11.0",
                     "pandas": "1.5.2",
-                    "kmer_count_dim_reduction_combine_csv.py": null
+                    "kmer_count_dim_reduction_combine_csv.py": 1.0
                 },
                 "KRAKEN2_KRAKEN2": {
-                    "kraken2": "2.1.3",
+                    "kraken2": "2.1.6",
                     "pigz": 2.8
                 },
                 "NCBITOOLS_VECSCREEN": {
@@ -133,10 +129,12 @@
                     "convert_to_hits": "2.0.0"
                 },
                 "SAMTOOLS_DICT": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
+                },
+                "SAMTOOLS_FAIDX": {
+                    "samtools": "1.22.1"
                 },
                 "SED_SED": {
-                    "ubuntu": null,
                     "coreutils": 9.1
                 },
                 "SEQKIT_SLIDING": {
@@ -677,6 +675,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-09-12T11:54:51.307372533"
+        "timestamp": "2025-09-26T14:19:57.800043262"
     }
 }

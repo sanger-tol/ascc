@@ -3,11 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - Red Spider-Boat [ ##/08/2024]
+## [0.5.0] - Red Spider-Boat [ ##/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
-Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
+Release 7 of sanger-tol/ascc, focusing on the 3.3.2 template upgrade and stability for sanger production.
 
 ### `Notes`
 
@@ -15,16 +15,16 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 
 ### `Added`
 
-- Template update to 3.3.2.
+- Template update to 3.3.2 (#155)
 - Added pipeline-level nf-test testing which is now running as standard CI.
 - Corrected versioning in the .nextflow.log.
-- Minor updates to the base.config.
+- Minor updates to the base.config (#158)
 - singularity pid setting is now false.
 - Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
 - The FCSGX module has been heavily patched when using `--profile production`, this is to support `module` and `modulecmd`.
 - The `--production` profile now contains a FCSGX module override linked to the above.
   - Resources have been included otherwise FCSGX will use the nextflow defaults.
-  - Queue for FCSGX has been changed to `oversubscribed` in the `production.config`.
+  - Queue for FCSGX has been changed to `oversubscribed` in the `production.config` (#162)
 - Changes to the resource allocation to improve support for large genomes. Changes are for the modules:
   - BLAST_BLASTN
   - BLAST_BLASTN_MOD
@@ -34,6 +34,10 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - Above changes also seperate out the logic for organellar genomes as they do not need the more complicated resource additions.
 - Removed the BTK config, this has started to cause a number of crashes to the nested blobtoolkit pipeline.
 - Remove unnecessary SAMTOOLS_INDEX from RUN_READ_COVERAGE.
+- `SAMTOOLS_FAIDX` now outputs a `.sizes` file so `CUSTOM_CHROMSIZES` has been removed.
+- Remove Legacy `GrabFiles` function (#163).
+- Updating modules to most recent version available on nf-core (#163, #162).
+- Updated Snapshots to reflect version changes (#163)
 
 ### `Fixed`
 
@@ -45,7 +49,9 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - Changed instances of `projectDir` to `launchDir` for safety (In tests).
 - Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
 - Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
-- Updated resource notation to use e notation #134
+- Updated resource notation to use e notation (#134)
+- Removed nf-core modules which arn't actually in use (#164)
+- Updated version outputs from modules previously reporting `null` (#164)
 
 ### `Bugs`
 

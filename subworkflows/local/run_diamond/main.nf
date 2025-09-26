@@ -1,5 +1,12 @@
+//
+// NF-CORE MODULE IMPORT
+//
 include { SEQKIT_SLIDING                                      } from '../../../modules/nf-core/seqkit/sliding/main'
 include { DIAMOND_BLASTX                                      } from '../../../modules/nf-core/diamond/blastx/main'
+
+//
+// LOCAL MODULE IMPORTS
+//
 include { BLAST_CHUNK_TO_FULL as DIAMOND_BLAST_CHUNK_TO_FULL  } from '../../../modules/local/blast/chunk_to_full/main'
 include { REFORMAT_TO_HITS_FILE                               } from '../../../modules/local/reformat/to_hits_file/main'
 include { REFORMAT_DIAMOND_OUTFMT6                            } from '../../../modules/local/reformat/diamond_outfmt6/main'
