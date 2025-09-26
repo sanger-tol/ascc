@@ -75,7 +75,8 @@ workflow RUN_READ_COVERAGE {
     //
     SAMTOOLS_SORT (
         ch_align_bam,
-        [[],[]]
+        [[],[]],
+        "csi"
     )
     ch_versions         = ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
