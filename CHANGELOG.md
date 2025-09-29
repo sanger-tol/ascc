@@ -3,7 +3,47 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - Red Spider-Boat [ ##/10/2025]
+## [0.5.1] - Red Spider-Boat (H1) [29/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 8 of sanger-tol/ascc, focusing on a module update and some minor structural updates.
+
+### `Added`
+
+- `SAMTOOLS_FAIDX` now outputs a `.sizes` file so `CUSTOM_CHROMSIZES` has been removed.
+- Remove Legacy `GrabFiles` function (#163).
+- Updating modules to most recent version available on nf-core (#163, #162).
+- Updated Snapshots to reflect version changes (#163)
+
+### `Fixed`
+
+- Removed nf-core modules which arn't actually in use (#164)
+- Updated version outputs from modules previously reporting `null` (#164)
+
+### `Bugs`
+
+- Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
+- tiara, fcsgx, autofilter must always be activated.
+
+### Dependencies
+
+| Module               | Old Version               | New Versions |
+| -------------------- | ------------------------- | ------------ |
+| SAMTOOLS_FAIDX       | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_SORT        | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_MERGE       | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_DICT        | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_DEPTH       | 1.21.1                    | 1.22.1       |
+| KRAKEN2_KRAKEN2      | 2.1.4                     | 2.1.6        |
+| BLASTN               | 2.15.0                    | 2.16.0       |
+| BLAST_MAKEBLASTDB    | 2.15.0                    | 2.16.9       |
+| DIAMOND_BLASTX       | 2.1.8                     | 2.1.12       |
+| GNU_SORT             | 9.3                       | 9.5          |
+| SEQKIT_SLIDER        | 2.8.1                     | 2.8.0        |
+| CUSTOM_GETCHROMSIZES | samtools:1.21--h50ea8bc_0 | REMOVED      |
+
+## [0.5.0] - Red Spider-Boat [05/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -34,10 +74,6 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.2 template upgrade and stabili
 - Above changes also seperate out the logic for organellar genomes as they do not need the more complicated resource additions.
 - Removed the BTK config, this has started to cause a number of crashes to the nested blobtoolkit pipeline.
 - Remove unnecessary SAMTOOLS_INDEX from RUN_READ_COVERAGE.
-- `SAMTOOLS_FAIDX` now outputs a `.sizes` file so `CUSTOM_CHROMSIZES` has been removed.
-- Remove Legacy `GrabFiles` function (#163).
-- Updating modules to most recent version available on nf-core (#163, #162).
-- Updated Snapshots to reflect version changes (#163)
 
 ### `Fixed`
 
@@ -50,8 +86,6 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.2 template upgrade and stabili
 - Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
 - Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
 - Updated resource notation to use e notation (#134)
-- Removed nf-core modules which arn't actually in use (#164)
-- Updated version outputs from modules previously reporting `null` (#164)
 
 ### `Bugs`
 
