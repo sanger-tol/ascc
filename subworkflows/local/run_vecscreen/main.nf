@@ -1,6 +1,6 @@
-#!/usr/bin/env nextflow
+//
 // MODULE IMPORT BLOCK
-
+//
 include { CHUNK_ASSEMBLY_FOR_VECSCREEN  }   from '../../../modules/local/vecscreen/chunk_assembly/main'
 include { NCBITOOLS_VECSCREEN           }   from '../../../modules/nf-core/ncbitools/vecscreen/main'
 include { FILTER_VECSCREEN_RESULTS      }   from '../../../modules/local/filter/vecscreen_results/main'
@@ -9,7 +9,7 @@ include { SUMMARISE_VECSCREEN_OUTPUT    }   from '../../../modules/local/vecscre
 
 workflow RUN_VECSCREEN {
     take:
-    reference_tuple             // val(meta), path(fasta)
+    reference_tuple       // val(meta), path(fasta)
     vecscreen_database    // val(db_path)
 
     main:
@@ -31,6 +31,7 @@ workflow RUN_VECSCREEN {
         )
     }
     .set { vecscreen_database_tuple }
+
 
     //
     // MODULE: RUNS NCBI VECSCREEN
@@ -60,6 +61,7 @@ workflow RUN_VECSCREEN {
         FILTER_VECSCREEN_RESULTS.out.filtered_vecscreen_outfile
     )
     ch_versions                 = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
+
 
     emit:
     vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination

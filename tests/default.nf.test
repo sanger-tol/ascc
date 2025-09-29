@@ -9,6 +9,9 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
 
+    // Test profile arguments
+    config "../conf/test.config"
+
     test("-profile test") {
 
         setup {
@@ -170,11 +173,9 @@ nextflow_pipeline {
                                         ])
             def autofilter_warn_txt = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofiltering_done_indicator_file.txt"])
 
-            def autofilter_files    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/autofilter/*autofiltered.fasta"])
-            def autofilter_txt      = getAllFilesFromDir(params.outdir, include: [
-                                            "asccTinyTest_V2_*/autofilter/*.csv",
-                                            "asccTinyTest_V2_*/autofilter/*.txt"
-                                        ])
+            def autofilter_files    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofilter/*_autofiltered.fasta"])
+            def autofilter_txt      = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofilter/*.{txt,csv}"])
+
             def create_btk_dataset  = getAllFilesFromDir(params.outdir,
                                         include: [
                                             "asccTinyTest_V2_*/create_btk_dataset/btk_datasets_CBD/*.{yaml,json}"

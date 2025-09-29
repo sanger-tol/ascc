@@ -3,7 +3,6 @@
 //
 include { CHECK_BARCODE     } from '../../../modules/local/check/barcode/main'
 include { BLAST_MAKEBLASTDB } from '../../../modules/nf-core/blast/makeblastdb/main'
-include { BLAST_BLASTN      } from '../../../modules/nf-core/blast/blastn/main'
 
 
 workflow PREPARE_BLASTDB {
