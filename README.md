@@ -85,8 +85,6 @@ The documentation of the kmers dimensionality reduction is covered in separate m
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
 nextflow run sanger-tol/ascc \
    -profile <docker/singularity/.../institute> \
@@ -107,9 +105,11 @@ A description of the output files of the pipeline can be found [here](./docs/out
 
 ## Credits
 
-sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims) and [Will Eagles](https://github.com/weaglesBio). Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato).
+sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims) and [Will Eagles](https://github.com/weaglesBio).
 
-We thank [Michael Paulini](https://github.com/epaule), Camilla Santos, [Noah Gettle](https://github.com/gettl008) and [Ksenia Krasheninnikova](https://github.com/ksenia-krasheninnikova) for testing the pipeline.
+Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato).
+
+We thank [Michael Paulini](https://github.com/epaule), Camilla Santos, [Noah Gettle](https://github.com/gettl008), [Ksenia Krasheninnikova](https://github.com/ksenia-krasheninnikova) and [Jim Downie](https://github.com/prototaxites) for testing the pipeline.
 
 ## Contributions and Support
 
@@ -117,8 +117,7 @@ If you would like to contribute to this pipeline, please see the [contributing g
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use sanger-tol/ascc for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+If you use sanger-tol/ascc for your analysis, please cite it using the following doi: [10.5281/zenodo.16754459](https://doi.org/10.5281/zenodo.16754459)
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
