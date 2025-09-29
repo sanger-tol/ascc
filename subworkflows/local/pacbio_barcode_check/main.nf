@@ -1,12 +1,6 @@
 //
-// PACBIO_BARCODE_CHECK IDENTIFIED LOCATIONS OF BARCODE SEQUENCES IN THE INPUT ASSEMBLY
-//
-
-//
 // MODULE IMPORT BLOCK
 //
-include { CHECK_BARCODE       } from '../../../modules/local/check/barcode/main'
-include { BLAST_MAKEBLASTDB   } from '../../../modules/nf-core/blast/makeblastdb/main'
 include { BLAST_BLASTN        } from '../../../modules/nf-core/blast/blastn/main'
 include { FILTER_BARCODE      } from '../../../modules/local/filter/barcode/main'
 
@@ -24,7 +18,10 @@ workflow PACBIO_BARCODE_CHECK {
     //
     BLAST_BLASTN (
         reference_tuple,
-        barcode_database
+        barcode_database,
+        [],
+        [],
+        []
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
@@ -38,6 +35,7 @@ workflow PACBIO_BARCODE_CHECK {
         .unique()
         .set {barcode_list}
 
+
     //
     // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE
     //
@@ -50,6 +48,7 @@ workflow PACBIO_BARCODE_CHECK {
         filter_input
     )
     ch_versions     = ch_versions.mix(FILTER_BARCODE.out.versions)
+
 
     emit:
     filtered        = FILTER_BARCODE.out.debarcoded

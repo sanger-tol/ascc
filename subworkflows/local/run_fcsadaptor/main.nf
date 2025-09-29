@@ -1,7 +1,5 @@
-#!/usr/bin/env nextflow
-
 //
-// MODULE IMPORT BLOCK
+// NF-CORE MODULE IMPORTS
 //
 include { FCS_FCSADAPTOR as FCS_FCSADAPTOR_PROK } from '../../../modules/nf-core/fcs/fcsadaptor/main'
 include { FCS_FCSADAPTOR as FCS_FCSADAPTOR_EUK  } from '../../../modules/nf-core/fcs/fcsadaptor/main'

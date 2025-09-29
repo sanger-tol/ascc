@@ -1,3 +1,6 @@
+//
+// MODULE IMPORT BLOCK
+//
 include { MINIMAP2_ALIGN as MINIMAP2_ALIGN_SE        } from '../../../modules/nf-core/minimap2/align/main'
 include { SAMTOOLS_MERGE                             } from '../../../modules/nf-core/samtools/merge/main'
 
@@ -9,6 +12,7 @@ workflow SE_MAPPING {
     main:
     ch_versions     = Channel.empty()
     ch_align_bams   = Channel.empty()
+
 
     //
     // LOGIC: MAKE MINIMAP INPUT CHANNEL AND MAKE BRANCHES BASED ON INPUT READ TYPE
@@ -52,6 +56,7 @@ workflow SE_MAPPING {
             minimap_se_input.cigar_pf,
             minimap_se_input.cigar_bm
     )
+    ch_versions = ch_versions.mix(MINIMAP2_ALIGN_SE.out.versions)
 
 
     //

@@ -20,7 +20,8 @@ process GET_LINEAGE_FOR_KRAKEN {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix = args.ext.prefix ?: "${meta.id}"
+    def GENERAL_FUNCTIONS   = "1.0.0"
+    def prefix              = args.ext.prefix ?: "${meta.id}"
     """
     get_lineage_for_kraken_results.py \\
         $kraken_file \\
@@ -32,13 +33,14 @@ process GET_LINEAGE_FOR_KRAKEN {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
-        general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+        general_purpose_functions.py: $GENERAL_FUNCTIONS
         get_lineage_for_kraken_results.py: \$(get_lineage_for_kraken_results.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
     stub:
-    def prefix = args.ext.prefix ?: "${meta.id}"
+    def GENERAL_FUNCTIONS   = "1.0.0"
+    def prefix              = args.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}_nt_kraken_lineage_file.txt
 
@@ -46,7 +48,7 @@ process GET_LINEAGE_FOR_KRAKEN {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         pandas: \$(pip list | grep "pandas" | sed 's/[[:blank:]]//g' | sed 's/pandas//g')
-        general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+        general_purpose_functions.py: $GENERAL_FUNCTIONS
         get_lineage_for_kraken_results.py: \$(get_lineage_for_kraken_results.py --version | cut -d' ' -f2)
     END_VERSIONS
     """

@@ -15,6 +15,7 @@ workflow GET_KMERS_PROFILE {
     main:
     ch_versions     = Channel.empty()
 
+
     //
     // LOGIC: REFACTORING REFERENCE TUPLE
     //
@@ -27,6 +28,7 @@ workflow GET_KMERS_PROFILE {
         }
         .set { modified_input }
 
+
     //
     // MODULE: PRODUCE KMER COUNTS (USING KCOUNTER)
     //
@@ -35,6 +37,7 @@ workflow GET_KMERS_PROFILE {
         kmer_size            // val kmer_size
     )
     ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
+
 
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
@@ -58,6 +61,7 @@ workflow GET_KMERS_PROFILE {
         }
         .set{ dim_reduction }
 
+
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS
     //
@@ -69,6 +73,7 @@ workflow GET_KMERS_PROFILE {
     )
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION.out.versions)
 
+
     //
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
     //
@@ -77,6 +82,7 @@ workflow GET_KMERS_PROFILE {
         .groupTuple(by: [0])
         .set { collected_files_for_combine }
 
+
     //
     // MODULE: COMBINE OUTPUTS OF MULTIPLE METHODS
     //
@@ -84,6 +90,7 @@ workflow GET_KMERS_PROFILE {
         collected_files_for_combine
     )
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
+
 
     emit:
     combined_csv = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
