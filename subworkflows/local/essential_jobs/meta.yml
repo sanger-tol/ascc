@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "ESSENTIAL_JOBS"
+description: Essential jobs generating statistics on the input assembly
+keywords:
+  - gc content
+  - scaffold sizes
+  - fasta filtering
+  - training N content
+  - essential statistics
+components:
+  - filter/fasta
+  - gc/content
+  - generate_genomes
+  - trailingns/trailingns
+input:
+  - input_ref:
+      type: file
+      description: |
+        Reference assembly file
+
+        Structure: [meta, reads]
+output:
+  - reference_tuple_from_GG:
+      type: file
+      description: |
+        The reference assembly.
+
+        Structure: [meta, fasta]
+  - reference_with_seqkit:
+      type: file
+      description: |
+        The reference processed by seqkit.
+
+        Structure: [meta, fasta]
+  - trailingns_report:
+      type: file
+      description: |
+        Text file describing locations and lengths of N.
+
+        Structure: [meta, report]
+  - dot_genome:
+      type: file
+      description: |
+        Text file describing scaffolds and their lengths.
+
+        Structure: [meta, sizes]
+  - dot_genome:
+      type: file
+      description: |
+        Text file describing scaffolds and their gc content.
+
+        Structure: [meta, report]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@DLBPointon"
+maintainers:
+  - "@DLBPointon"
