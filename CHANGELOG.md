@@ -13,7 +13,15 @@ Release 9 of sanger-tol/ascc, a modification to FCS_ADAPTOR and configs.
 
 - Patch to `FCS_ADAPTOR` to avoid the use of `/tmp`
 - Update `SANGER_TOL_BLOBTOOLKIT` in `base.config` to use 1200.MB rather than `process_low`'s 12.GB
+- Updated the script `abnormal_contamination_check.py` in the module `AUTOFILTER_AND_CHECK_ASSEMBLY`
+  - This adds reporting for the number of `REVIEW/INFO` tags output by FCS as an alarm paramter to trigger SANGER_TOL_BLOBTOOLKIT
 - Updated ro-crate, tests, and CHANGELOG.
+
+### `Dependencies`
+
+| Module                        | Old Version                           | New Versions                          |
+| ----------------------------- | ------------------------------------- | ------------------------------------- |
+| AUTOFILTER_AND_CHECK_ASSEMBLY | abnormal_contamination_check.py:1.1.0 | abnormal_contamination_check.py:1.2.0 |
 
 ## [0.5.1] - Red Spider-Boat (H1) [29/10/2025]
 
@@ -38,7 +46,7 @@ Release 8 of sanger-tol/ascc, focusing on a module update and some minor structu
 - Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
 - tiara, fcsgx, autofilter must always be activated.
 
-### Dependencies
+### `Dependencies`
 
 | Module               | Old Version               | New Versions |
 | -------------------- | ------------------------- | ------------ |
