@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - Red Spider-Boat (H2) [30/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 9 of sanger-tol/ascc, a modification to FCS_ADAPTOR.
+
+### `Added`
+
+- Patch to `FCS_ADAPTOR` to avoid the use of `/tmp`
+- Update `SANGER_TOL_BLOBTOOLKIT` in `base.config` to use 1200.MB rather than `process_low`'s 12.GB
+- Updates
+
 ## [0.5.1] - Red Spider-Boat (H1) [29/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
