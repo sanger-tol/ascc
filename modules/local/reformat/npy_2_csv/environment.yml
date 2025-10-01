@@ -1,8 +1,8 @@
-name: kmer_count_dim_reduction_combine_csv
+name: reformat_npy_2_csv
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
   - python=3.9
-  - pandas=1.5.2
+  - numpy=1.21.0
