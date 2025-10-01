@@ -667,6 +667,10 @@ workflow ASCC_ORGANELLAR {
         // Reference FASTA from essentials
         ch_reference_file = reference_tuple_from_GG
 
+        // FASTA sanitation and length-filter logs from essentials
+        ch_fasta_sanitation_log       = (params.run_essentials == "both" || params.run_essentials == "organellar") ? ESSENTIAL_JOBS.out.filter_fasta_sanitation_log : Channel.of([[id: "empty"],[]])
+        ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "organellar") ? ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log : Channel.of([[id: "empty"],[]])
+
         // BTK dataset placeholder (organellar: not created by default)
         ch_btk_dataset = Channel.of([[id: "empty"],[]])
 
@@ -681,8 +685,8 @@ workflow ASCC_ORGANELLAR {
             Channel.of([[id: "empty"],[]]), // phylum_counts placeholder
             ch_kmers_results,
             ch_reference_file,
-            Channel.of([[id: "empty"],[]]), // fasta_sanitation_log placeholder
-            Channel.of([[id: "empty"],[]]), // fasta_length_filtering_log placeholder
+            ch_fasta_sanitation_log,
+            ch_fasta_length_filtering_log,
             ch_jinja_templates,
             ch_samplesheet_path,
             ch_params_file,
