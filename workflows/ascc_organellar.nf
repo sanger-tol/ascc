@@ -19,6 +19,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,6 +82,83 @@ workflow ASCC_ORGANELLAR {
         ej_dot_genome           = Channel.empty()
         ej_gc_coverage          = Channel.empty()
         reference_tuple_w_seqkt = Channel.empty()
+    }
+
+
+    //
+    // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
+    //  Gate with params.run_html_report to avoid altering default behavior.
+    //  Many inputs are optional; provide placeholders when upstream steps are disabled.
+    //
+    if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
+        // Inline-conditional channels for inputs that may be disabled
+        ch_barcode_results = (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar") ?
+            PACBIO_BARCODE_CHECK.out.filtered :
+            Channel.of([[id: "empty"],[]])
+
+        ch_fcs_adaptor_euk = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ?
+            RUN_FCSADAPTOR.out.ch_euk :
+            Channel.of([[id: "empty"],[]])
+
+        ch_fcs_adaptor_prok = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar") ?
+            RUN_FCSADAPTOR.out.ch_prok :
+            Channel.of([[id: "empty"],[]])
+
+        ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "organellar") ?
+            ESSENTIAL_JOBS.out.trailingns_report :
+            Channel.of([[id: "empty"],[]])
+
+        // Filter/length logs are not exported by ESSENTIAL_JOBS in dev; pass placeholders
+        ch_fasta_sanitation_log       = Channel.of([[id: "empty"],[]])
+        ch_fasta_length_filtering_log = Channel.of([[id: "empty"],[]])
+
+        ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "organellar") ?
+            RUN_VECSCREEN.out.vecscreen_contam :
+            Channel.of([[id: "empty"],[]])
+
+        // Placeholders for features not wired in dev yet
+        ch_autofilter_results = Channel.of([[id: "empty"],[]])
+        ch_merged_table       = Channel.of([[id: "empty"],[]])
+        ch_kmers_results      = Channel.of([[id: "empty"],[]])
+
+        // Dev subworkflow does not emit raw FCS-GX report/taxonomy; pass placeholders
+        ch_fcsgx_report_txt   = Channel.of([[],[]])
+        ch_fcsgx_taxonomy_rpt = Channel.of([[],[]])
+
+        // Create channels for the input samplesheet and optional params file
+        ch_samplesheet_path = Channel.fromPath(params.input)
+        ch_params_file      = (params.containsKey('params_file') && params.params_file) ? Channel.fromPath(params.params_file) : Channel.value([])
+
+        // Jinja templates and CSS files
+        ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+        ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+
+        // Reference FASTA from essentials
+        ch_reference_file = reference_tuple_from_GG
+
+        // Generate report
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_results,
+            ch_fcs_adaptor_euk,
+            ch_fcs_adaptor_prok,
+            ch_trim_ns_results,
+            ch_vecscreen_results,
+            ch_autofilter_results,
+            ch_merged_table,
+            Channel.of([[id: "empty"],[]]), // phylum_counts placeholder
+            ch_kmers_results,
+            ch_reference_file,
+            ch_fasta_sanitation_log,
+            ch_fasta_length_filtering_log,
+            ch_jinja_templates,
+            ch_samplesheet_path,
+            ch_params_file,
+            ch_fcsgx_report_txt,
+            ch_fcsgx_taxonomy_rpt,
+            Channel.of([[id: "empty"],[]]), // btk_dataset placeholder
+            ch_css_files
+        )
+        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
 
