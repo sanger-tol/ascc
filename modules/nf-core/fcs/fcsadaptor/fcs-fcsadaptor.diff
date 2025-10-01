@@ -1,0 +1,22 @@
+Changes in component 'nf-core/fcs/fcsadaptor'
+'modules/nf-core/fcs/fcsadaptor/meta.yml' is unchanged
+'modules/nf-core/fcs/fcsadaptor/environment.yml' is unchanged
+Changes in 'fcs/fcsadaptor/main.nf':
+--- modules/nf-core/fcs/fcsadaptor/main.nf
++++ modules/nf-core/fcs/fcsadaptor/main.nf
+@@ -43,6 +43,10 @@
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     def FCSADAPTOR_VERSION = '0.5.0' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+     """
++    mkdir ./adaptor_tmp
++    TMPDIR=./adaptor_tmp
++    echo \$TMPDIR
++
+     av_screen_x \\
+         -o output/ \\
+         $args \\
+
+'modules/nf-core/fcs/fcsadaptor/tests/main.nf.test' is unchanged
+'modules/nf-core/fcs/fcsadaptor/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/fcs/fcsadaptor/tests/tags.yml' is unchanged
+************************************************************

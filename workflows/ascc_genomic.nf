@@ -831,6 +831,7 @@ workflow ASCC_GENOMIC {
         ncbi_taxonomy_path.first(),
         reads_path.collect(),
         file("${projectDir}/assets/btk_config_files/btk_pipeline.config"),
+        file("${projectDir}/assets/btk_config_files/btk_trace.config"),
         btk_lineages_path.first(),
         btk_lineages.first(),
         taxid.first(),

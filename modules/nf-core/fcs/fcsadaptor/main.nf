@@ -43,6 +43,10 @@ process FCS_FCSADAPTOR {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def FCSADAPTOR_VERSION = '0.5.0' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
+    mkdir ./adaptor_tmp
+    TMPDIR=./adaptor_tmp
+    echo \$TMPDIR
+
     av_screen_x \\
         -o output/ \\
         $args \\
