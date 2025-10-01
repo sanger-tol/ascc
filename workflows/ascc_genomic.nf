@@ -27,6 +27,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -132,8 +133,11 @@ workflow ASCC_GENOMIC {
                                     [[id: it[0].id, process: "KMERS"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
+        // Provide kmers results directories for HTML report
+        ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
     } else {
         ch_kmers            = Channel.of( [[],[]] )
+        ch_kmers_results    = Channel.of([[id: "empty"],[]])
     }
 
 
@@ -946,6 +950,85 @@ if (
         merged_table            = Channel.empty()
         merged_extended_table   = Channel.empty()
         merged_phylum_count     = Channel.empty()
+    }
+
+    //
+    // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
+    //  Gate with params.run_html_report to avoid altering default behavior.
+    //
+    if ( params.run_html_report == "both" || params.run_html_report == "genomic" ) {
+        // Barcode results
+        ch_barcode_results = (params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "genomic") ?
+            ch_barcode_check :
+            Channel.of([[id: "empty"],[]])
+
+        // FCS adaptor outputs
+        ch_fcs_adaptor_euk = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic") ?
+            RUN_FCSADAPTOR.out.ch_euk :
+            Channel.of([[id: "empty"],[]])
+        ch_fcs_adaptor_prok = (params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic") ?
+            RUN_FCSADAPTOR.out.ch_prok :
+            Channel.of([[id: "empty"],[]])
+
+        // Essentials + vecscreen
+        ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "genomic") ?
+            ESSENTIAL_JOBS.out.trailingns_report :
+            Channel.of([[id: "empty"],[]])
+        ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "genomic") ?
+            ch_vecscreen :
+            Channel.of([[id: "empty"],[]])
+
+        // FASTA sanitation and length filtering logs
+        ch_fasta_sanitation_log       = (params.run_essentials == "both" || params.run_essentials == "genomic") ? ESSENTIAL_JOBS.out.filter_fasta_sanitation_log : Channel.of([[id: "empty"],[]])
+        ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "genomic") ? ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log : Channel.of([[id: "empty"],[]])
+
+        // Other optional inputs as placeholders for now
+        ch_autofilter_results = Channel.of([[id: "empty"],[]])
+        ch_merged_table       = Channel.of([[id: "empty"],[]])
+        ch_phylum_counts      = Channel.of([[id: "empty"],[]])
+
+        // FCS-GX raw reports (not emitted by RUN_FCSGX subworkflow)
+        ch_fcsgx_report_txt   = Channel.of([[],[]])
+        ch_fcsgx_taxonomy_rpt = Channel.of([[],[]])
+
+        // BTK dataset (if created)
+        ch_btk_dataset = (params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic") ?
+            (create_btk_dataset ?: Channel.of([[id: "empty"],[]])) :
+            Channel.of([[id: "empty"],[]])
+
+        // Samplesheet/params file
+        ch_samplesheet_path = Channel.fromPath(params.input)
+        ch_params_file      = (params.containsKey('params_file') && params.params_file) ? Channel.fromPath(params.params_file) : Channel.value([])
+
+        // Templates and CSS
+        ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+        ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+
+        // Reference FASTA
+        ch_reference_file = reference_tuple_from_GG
+
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_results,
+            ch_fcs_adaptor_euk,
+            ch_fcs_adaptor_prok,
+            ch_trim_ns_results,
+            ch_vecscreen_results,
+            ch_autofilter_results,
+            ch_merged_table,
+            ch_phylum_counts,
+            ch_kmers_results,
+            ch_reference_file,
+            ch_fasta_sanitation_log,
+            ch_fasta_length_filtering_log,
+            ch_jinja_templates,
+            ch_samplesheet_path,
+            ch_params_file,
+            ch_fcsgx_report_txt,
+            ch_fcsgx_taxonomy_rpt,
+            ch_btk_dataset,
+            ch_css_files
+        )
+        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
     emit:
