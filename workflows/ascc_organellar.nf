@@ -19,6 +19,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 /*
@@ -621,6 +622,53 @@ workflow ASCC_ORGANELLAR {
     versions                    = ch_versions
 
     //
+    // MERGE TABLES FOR ORGANELLAR: build inputs and run ASCC_MERGE_TABLES
+    //   This populates merged contamination table and phylum coverage for reports
+    //
+    def org_processes = [
+        'GC_COV', 'Coverage', 'TIARA', 'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS',
+        'NR-HITS', 'UN-HITS', 'C_BTK_SUM', 'BUSCO_MERGE', 'FCSGX result'
+    ]
+
+    def org_processChannels = org_processes.collectEntries { [(it): Channel.of([[],[]])] }
+
+    org_processChannels['GC_COV']           = ej_gc_coverage
+                                              .map { it -> [[id: it[0].id, process: 'GC_COV'], it[1]] }
+                                              .map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['Coverage']         = Channel.of([[],[]]).map { it -> [[id: it[0].id, process: 'Coverage'], it[1]] }.map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['TIARA']            = ch_tiara.map { it -> [[id: it[0].id, process: 'TIARA'], it[1]] }.map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['Kraken 3']         = (this.binding.hasVariable('ch_kraken3') ? ch_kraken3 : Channel.of([[],[]]))
+                                              .map { it -> [[id: it[0].id, process: 'Kraken 3'], it[1]] }
+                                              .map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['NT-BLAST-LINEAGE'] = (this.binding.hasVariable('ch_blast_lineage') ? ch_blast_lineage : Channel.of([[],[]]))
+                                              .map { it -> [[id: it[0].id, process: 'NT-BLAST-LINEAGE'], it[1]] }
+                                              .map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['KMERS']            = Channel.of([[],[]]).map { it -> [[id: it[0].id, process: 'KMERS'], it[1]] }.map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['NR-HITS']          = (this.binding.hasVariable('nr_hits') ? nr_hits : Channel.of([[],[]]))
+                                              .map { it -> [[id: it[0].id, process: 'NR-HITS'], it[1]] }
+                                              .map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['UN-HITS']          = (this.binding.hasVariable('un_hits') ? un_hits : Channel.of([[],[]]))
+                                              .map { it -> [[id: it[0].id, process: 'UN-HITS'], it[1]] }
+                                              .map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['C_BTK_SUM']        = Channel.of([[],[]]).map { it -> [[id: it[0].id, process: 'C_BTK_SUM'], it[1]] }.map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['BUSCO_MERGE']      = Channel.of([[],[]]).map { it -> [[id: it[0].id, process: 'BUSCO_MERGE'], it[1]] }.map { meta, file -> [meta.id, meta, file] }
+    org_processChannels['FCSGX result']     = (this.binding.hasVariable('ch_fcsgx') ? ch_fcsgx : Channel.of([[],[]]))
+                                              .map { it -> [[id: it[0].id, process: 'FCSGX result'], it[1]] }
+                                              .map { meta, file -> [meta.id, meta, file] }
+
+    def org_combined_channels = org_processChannels['GC_COV']
+    org_processes.tail().each { process ->
+        org_combined_channels = org_combined_channels.combine(org_processChannels[process], by: 0)
+    }
+
+    ASCC_MERGE_TABLES (
+        org_combined_channels.map { it[1..-1] }
+    )
+    ch_versions               = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+    org_merged_table          = ASCC_MERGE_TABLES.out.merged_table
+    org_merged_phylum_count   = ASCC_MERGE_TABLES.out.phylum_counts
+
+    //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
     //  Gate with params.run_html_report to avoid altering default behavior.
     //  Use existing channels; substitute placeholders where features are disabled or not wired.
@@ -647,14 +695,18 @@ workflow ASCC_ORGANELLAR {
             ch_vecscreen :
             Channel.of([[id: "empty"],[]])
 
-        // Placeholders for features not wired in dev yet
-        ch_autofilter_results = Channel.of([[id: "empty"],[]])
-        ch_merged_table       = Channel.of([[id: "empty"],[]])
+        // Autofilter summary (ABNORMAL_CHECK.csv) when module is enabled; else placeholder
+        ch_autofilter_results = (
+            ( params.run_tiara == "both" || params.run_tiara == "organellar" ) &&
+            ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) &&
+            ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "organellar" )
+        ) ? ch_autofilt_fcs_tiara : Channel.of([[id: "empty"],[]])
+        ch_merged_table       = org_merged_table ?: Channel.of([[id: "empty"],[]])
         ch_kmers_results      = Channel.of([[id: "empty"],[]])
 
-        // Dev subworkflow does not emit raw FCS-GX report/taxonomy; pass placeholders
-        ch_fcsgx_report_txt   = Channel.of([[],[]])
-        ch_fcsgx_taxonomy_rpt = Channel.of([[],[]])
+        // FCS-GX raw outputs (if module executed), else placeholders
+        ch_fcsgx_report_txt   = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") && !params.fcs_override ? RUN_FCSGX.out.fcsgx_report_txt : Channel.of([[],[]])
+        ch_fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") && !params.fcs_override ? RUN_FCSGX.out.fcsgx_taxonomy_rpt : Channel.of([[],[]])
 
         // Create channels for the input samplesheet and optional params file
         ch_samplesheet_path = Channel.fromPath(params.input)
@@ -682,7 +734,7 @@ workflow ASCC_ORGANELLAR {
             ch_vecscreen_results,
             ch_autofilter_results,
             ch_merged_table,
-            Channel.of([[id: "empty"],[]]), // phylum_counts placeholder
+            org_merged_phylum_count ?: Channel.of([[id: "empty"],[]]),
             ch_kmers_results,
             ch_reference_file,
             ch_fasta_sanitation_log,
