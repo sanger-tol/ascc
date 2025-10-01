@@ -10,6 +10,7 @@ process SANGER_TOL_BTK {
     path tax_dump
     path( "input_pacbio_files/*" )
     path blobtoolkit_config_file
+    path blobtoolkit_trace_config
     val busco_lineages_folder
     val busco_lineages
     val taxon
@@ -24,12 +25,13 @@ process SANGER_TOL_BTK {
     path "versions.yml",                                                    emit: versions
 
     script:
-    def prefix              =   task.ext.prefix         ?:  "${meta.id}"
-    def args                =   task.ext.args           ?:  ""
-    def profiles            =   task.ext.profiles       ?:  ""
-    def get_version         =   task.ext.version_data   ?:  "UNKNOWN - SETTING NOT SET"
-    def pipeline            =   task.ext.pipeline       ?: "sanger-tol/blobtoolkit"
-    def pipeline_version    =   task.ext.version        ?: "0.8.0"
+    def prefix              =   task.ext.prefix             ?: "${meta.id}"
+    def args                =   task.ext.args               ?: ""
+    def profiles            =   task.ext.profiles           ?: ""
+    def get_version         =   task.ext.version_data       ?: "UNKNOWN - SETTING NOT SET"
+    def pipeline            =   task.ext.pipeline           ?: "sanger-tol/blobtoolkit"
+    def pipeline_version    =   task.ext.version            ?: "0.8.0"
+    def trace_config        =   blobtoolkit_trace_config    ? "-c ${blobtoolkit_trace_config}" : ""
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -53,6 +55,7 @@ process SANGER_TOL_BTK {
     nextflow run ${pipeline} \\
         -r $pipeline_version \\
         -c $blobtoolkit_config_file \\
+        ${trace_config} \\
         -profile ${profiles} \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\

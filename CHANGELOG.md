@@ -16,6 +16,8 @@ Release 9 of sanger-tol/ascc, a modification to FCS_ADAPTOR and configs.
 - Updated the script `abnormal_contamination_check.py` in the module `AUTOFILTER_AND_CHECK_ASSEMBLY`
   - This adds reporting for the number of `REVIEW/INFO` tags output by FCS as an alarm paramter to trigger SANGER_TOL_BLOBTOOLKIT
 - Updated ro-crate, tests, and CHANGELOG.
+- Now the pipeline is quite stable in production, there is the aim to once again start collecting resource statistics.
+  - Updated `trace` scope output for ASCC and BLOBTOOLKIT (via `assets/btk_config_files/btk_trace.config`)
 
 ### `Dependencies`
 
