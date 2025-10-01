@@ -152,7 +152,7 @@
                     "trim_Ns.py": 1.0
                 },
                 "Workflow": {
-                    "sanger-tol/ascc": "v0.5.1"
+                    "sanger-tol/ascc": "v0.5.2"
                 }
             },
             [
@@ -443,10 +443,10 @@
             [
                 "asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "fcs-gx_alarm_indicator_file.txt:md5,5e2adbeffcb565e1d205959c9f9ab9c0",
+                "fcs-gx_alarm_indicator_file.txt:md5,912dc11ad86f82d2020f152411fec508",
                 "asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "fcs-gx_alarm_indicator_file.txt:md5,53dee101b5b088caf0a40e4c774aaa80"
+                "fcs-gx_alarm_indicator_file.txt:md5,4e51ff92a0dd9a35d81b02e5d2b8b627"
             ],
             true,
             [
