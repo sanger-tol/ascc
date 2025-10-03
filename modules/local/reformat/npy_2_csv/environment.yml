@@ -1,0 +1,8 @@
+name: reformat_npy_2_csv
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy=1.21.0

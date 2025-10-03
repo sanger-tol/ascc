@@ -18,7 +18,7 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}-${meta.organelle}"
     """
-    organelle_contamination_recommendation.py \\
+    $baseDir/bin/organelle_contamination_recommendation.py \\
         --input "${files}" \\
         --output ${prefix}.contamination_recommendation
 

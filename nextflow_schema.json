@@ -215,6 +215,12 @@
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
+                "run_html_report": {
+                    "type": "string",
+                    "description": "Run HTML report generation on assemblies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "off"
+                },
                 "run_nr_diamond": {
                     "type": "string",
                     "description": "Run nr_diamond jobs on assebmlies",
