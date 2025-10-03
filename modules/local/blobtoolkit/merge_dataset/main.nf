@@ -26,7 +26,7 @@ process MERGE_BTK_DATASETS {
     """
     mkdir -p merged_datasets/
 
-    merge_btk_datasets.py \\
+    $baseDir/bin/merge_btk_datasets.py \\
         -m $create_btk_datasets \\
         -o ./merged_btk_datasets \\
         -b $btk_busco_datasets \\

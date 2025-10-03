@@ -16,7 +16,7 @@ process VALIDATE_TAXID {
 
     script:
     """
-    find_taxid_in_taxdump.py \\
+    $baseDir/bin/find_taxid_in_taxdump.py \\
         $taxid \\
         ${ncbi_taxonomy_path}/nodes.dmp
 

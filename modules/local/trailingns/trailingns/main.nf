@@ -21,7 +21,7 @@ process TRAILINGNS {
     def prefix  = args.ext.prefix   ?: "${meta.id}"
     def args    = args.ext.args     ?: ""
     """
-    trim_Ns.py $fasta_input_file ${prefix}_trim_Ns ${args}
+    $baseDir/bin/trim_Ns.py $fasta_input_file ${prefix}_trim_Ns ${args}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
