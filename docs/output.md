@@ -24,6 +24,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Sanger-TOL BTK](#sanger-tol-btk)
 - [Merge BTK datasets](#merge-btk-datasets)
 - [ASCC Merge Tables](#ascc-merge-tables)
+- [HTML Report](#html-report)
 - [Pipeline information](#pipeline-information)
 
 ### Processes that produce intermediate outputs:
@@ -215,6 +216,18 @@ If a set of prerequisite steps have been run (nt BLAST, nr Diamond, Uniprot Diam
 </details>
 
 Merge Tables merged the summary reports from a number of modules in order to create a single set of reports.
+
+### HTML Report
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<sample_id>_<assembly_type>/html_report/report/site/`
+  - `<sample_id>_<assembly_type>.html` - HTML report presenting results from pipeline components that were run. The report consolidates outputs into a single document with tabs for different analyses. Content depends on which pipeline steps were executed (e.g. if only FCS-GX and Tiara were run, only those results will appear in the report). Results are primarily displayed as tables.
+
+</details>
+
+The HTML report is generated when `--run_html_report` is set to `both`, `genomic`, or `organellar`. It collects results from all pipeline components that were run and presents them in one place.
 
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 

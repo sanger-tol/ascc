@@ -59,6 +59,7 @@ run_organellar_blast: "genomic"
 run_autofilter_assembly: "genomic"
 run_create_btk_dataset: "both"
 run_merge_datasets: "genomic"
+run_html_report: "both"
 ```
 
 When running the pipeline in a production environment, consider addopting a profile like system such as shown in `assets/production/*` and `conf/production.config`. This will mean adding a profile to the nextflowl.config file of the pipeline, if you have questions please open an issue on GitHub.
