@@ -3,6 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### `Added`
+
+- HTML report generation with Jinja2 templates consolidating pipeline results
+- Support for `--run_html_report` parameter to control HTML report generation
+- kmer-counter Rust binary for k-mer counting (from PR #132)
+- npy_2_csv.py script for converting NPY output to CSV format
+
 ## [0.5.1] - Red Spider-Boat (H1) [29/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
