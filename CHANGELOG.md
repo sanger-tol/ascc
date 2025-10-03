@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.2] - Red Spider-Boat (H2) [30/10/2025]
+## [0.5.2] - Red Spider-Boat (H2) [06/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -18,12 +18,14 @@ Release 9 of sanger-tol/ascc, a modification to FCS_ADAPTOR and configs.
 - Updated ro-crate, tests, and CHANGELOG.
 - Now the pipeline is quite stable in production, there is the aim to once again start collecting resource statistics.
   - Updated `trace` scope output for ASCC and BLOBTOOLKIT (via `assets/btk_config_files/btk_trace.config`)
+- Updating `SANGER_TOL_BTK` to 0.9.0 (Scyther)
 
 ### `Dependencies`
 
 | Module                        | Old Version                           | New Versions                          |
 | ----------------------------- | ------------------------------------- | ------------------------------------- |
 | AUTOFILTER_AND_CHECK_ASSEMBLY | abnormal_contamination_check.py:1.1.0 | abnormal_contamination_check.py:1.2.0 |
+| SANGER_TOL_BTK                | 0.8.0                                 | 0.9.0                                 |
 
 ## [0.5.1] - Red Spider-Boat (H1) [29/10/2025]
 
