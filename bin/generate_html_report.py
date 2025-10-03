@@ -355,6 +355,7 @@ def main():
     # Parse FCS-GX report files into metadata and tables
     fcs_gx_report_metadata = None
     fcs_gx_report_table = None
+    fcsgx_override_note = None
     if args.fcs_gx_report_txt and os.path.exists(args.fcs_gx_report_txt):
         print(
             f"Processing FCS-GX report file: {args.fcs_gx_report_txt}", file=sys.stderr
@@ -433,6 +434,19 @@ def main():
         )
         phylum_coverage_data = load_phylum_coverage_data(phylum_coverage_file)
 
+    # Determine fcs_override flag from params if available and set note when raw files are missing
+    fcs_override_flag = False
+    try:
+        if params_dict and isinstance(params_dict, dict):
+            fcs_override_flag = bool(params_dict.get("fcs_override", False))
+    except Exception:
+        fcs_override_flag = False
+
+    if fcs_override_flag and not (fcs_gx_report_metadata or fcs_gx_report_table or fcs_gx_taxonomy_metadata):
+        fcsgx_override_note = (
+            "FCS-GX was run externally (--fcs_override). Full raw report files were not provided to the pipeline, so the detailed FCS-GX tabs are omitted."
+        )
+
     # Prepare data for the report
     data = prepare_report_data(
         reference_summary=reference_summary,
@@ -454,6 +468,7 @@ def main():
         fcs_gx_report_table=fcs_gx_report_table,
         fcs_gx_taxonomy_metadata=fcs_gx_taxonomy_metadata,
         fcs_gx_taxonomy_table=fcs_gx_taxonomy_table,
+        fcsgx_override_note=fcsgx_override_note,
         timestamp=pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
         version=args.pipeline_version,  # Use the passed pipeline version
         meta=meta,  # Pass meta object

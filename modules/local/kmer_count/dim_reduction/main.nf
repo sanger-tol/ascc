@@ -31,7 +31,7 @@ process KMER_COUNT_DIM_REDUCTION {
     mkdir -p $dir_name
 
     # Run the dimensionality reduction and save the output in the directory
-    kmer_count_dim_reduction.py \\
+    $baseDir/bin/kmer_count_dim_reduction.py \\
         $kmer_counts_file \\
         $dir_name \\
         --selected_methods $dimensionality_reduction_method \\

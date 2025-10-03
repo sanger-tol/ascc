@@ -20,7 +20,7 @@ process SUMMARISE_VECSCREEN_OUTPUT {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    summarise_vecscreen_output.py ${vecscreen_filtered_outfile} > ${prefix}.vecscreen_contamination
+    $baseDir/bin/summarise_vecscreen_output.py ${vecscreen_filtered_outfile} > ${prefix}.vecscreen_contamination
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

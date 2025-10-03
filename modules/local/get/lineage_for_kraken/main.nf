@@ -23,7 +23,7 @@ process GET_LINEAGE_FOR_KRAKEN {
     def GENERAL_FUNCTIONS   = "1.0.0"
     def prefix              = args.ext.prefix ?: "${meta.id}"
     """
-    get_lineage_for_kraken_results.py \\
+    $baseDir/bin/get_lineage_for_kraken_results.py \\
         $kraken_file \\
         $ncbi_rankedlineage_path \\
         nt \\

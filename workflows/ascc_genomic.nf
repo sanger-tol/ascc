@@ -341,7 +341,7 @@ workflow ASCC_GENOMIC {
             ch_barcodes,
             duplicated_db.pacbio_db
         )
-        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     } else {
@@ -972,7 +972,7 @@ if (
 
         // Essentials + vecscreen
         ch_trim_ns_results = (params.run_essentials == "both" || params.run_essentials == "genomic") ?
-            ESSENTIAL_JOBS.out.trailingns_report :
+            ESSENTIAL_JOBS.out.trailing_ns_report :
             Channel.of([[id: "empty"],[]])
         ch_vecscreen_results = (params.run_vecscreen == "both" || params.run_vecscreen == "genomic") ?
             ch_vecscreen :
@@ -982,14 +982,20 @@ if (
         ch_fasta_sanitation_log       = (params.run_essentials == "both" || params.run_essentials == "genomic") ? ESSENTIAL_JOBS.out.filter_fasta_sanitation_log : Channel.of([[id: "empty"],[]])
         ch_fasta_length_filtering_log = (params.run_essentials == "both" || params.run_essentials == "genomic") ? ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log : Channel.of([[id: "empty"],[]])
 
-        // Other optional inputs as placeholders for now
-        ch_autofilter_results = Channel.of([[id: "empty"],[]])
-        ch_merged_table       = Channel.of([[id: "empty"],[]])
-        ch_phylum_counts      = Channel.of([[id: "empty"],[]])
+        // Autofilter summary (ABNORMAL_CHECK.csv) when module is enabled; else placeholder
+        ch_autofilter_results = (
+            ( params.run_tiara == "both" || params.run_tiara == "genomic" ) &&
+            ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) &&
+            ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic" )
+        ) ? ch_autofilt_fcs_tiara : Channel.of([[id: "empty"],[]])
 
-        // FCS-GX raw reports (not emitted by RUN_FCSGX subworkflow)
-        ch_fcsgx_report_txt   = Channel.of([[],[]])
-        ch_fcsgx_taxonomy_rpt = Channel.of([[],[]])
+        // Merged contamination table and phylum coverage for cobiont/coverage tabs
+        ch_merged_table  = merged_table ?: Channel.of([[id: "empty"],[]])
+        ch_phylum_counts = merged_phylum_count ?: Channel.of([[id: "empty"],[]])
+
+        // FCS-GX raw reports (exposed by RUN_FCSGX), placeholders if override/disabled
+        ch_fcsgx_report_txt   = (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ? RUN_FCSGX.out.fcsgx_report_txt : Channel.of([[],[]])
+        ch_fcsgx_taxonomy_rpt = (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ? RUN_FCSGX.out.fcsgx_taxonomy_rpt : Channel.of([[],[]])
 
         // BTK dataset (if created)
         ch_btk_dataset = (params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic") ?

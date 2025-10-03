@@ -69,6 +69,7 @@ def prepare_report_data(
     fcs_gx_report_table=None,
     fcs_gx_taxonomy_metadata=None,
     fcs_gx_taxonomy_table=None,
+    fcsgx_override_note=None,
     timestamp=None,
     version=DEFAULT_VERSION,
     meta=None,  # Meta parameter
@@ -157,6 +158,7 @@ def prepare_report_data(
         "fcs_gx_report_table": fcs_gx_report_table,
         "fcs_gx_taxonomy_metadata": fcs_gx_taxonomy_metadata,
         "fcs_gx_taxonomy_table": fcs_gx_taxonomy_table,
+        "fcsgx_override_note": fcsgx_override_note,
         "timestamp": timestamp,
         "version": version,
         "meta": meta,

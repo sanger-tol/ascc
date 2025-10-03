@@ -2,6 +2,11 @@
 <h2>FCS-GX Reports</h2>
 <div class="narrow-text-container">
 <p>FCS-GX (Foreign Contamination Screen with cross-species aligner) is NCBI software that detects contaminants in genome assemblies using cross-species alignment. It uses its own database provided by NCBI to identify sequences that may originate from species other than the target organism. The reports show potential contaminant locations and their taxonomic classification.</p>
+{% if fcsgx_override_note %}
+    <div class="no-data-message">
+        <p>{{ fcsgx_override_note }}</p>
+    </div>
+{% endif %}
 </div>
 
 {# FCS-GX Report Section #}

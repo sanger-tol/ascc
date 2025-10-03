@@ -18,7 +18,7 @@ process BLAST_CHUNK_TO_FULL {
     def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
-    blast_hit_chunk_coords_to_full_coords.py ${chunked} ${args} > ${meta.id}_full_coords.tsv
+    $baseDir/bin/blast_hit_chunk_coords_to_full_coords.py ${chunked} ${args} > ${meta.id}_full_coords.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

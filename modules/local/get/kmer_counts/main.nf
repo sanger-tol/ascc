@@ -22,7 +22,7 @@ process GET_KMER_COUNTS {
     def KMERCOUNTER_VERSION = "0.1.2"
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    kmer-counter -f $input_fasta -k $kmer_size -o ${prefix}_kmer_counts.npy
+    $baseDir/bin/kmer-counter -f $input_fasta -k $kmer_size -o ${prefix}_kmer_counts.npy
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

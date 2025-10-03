@@ -117,14 +117,17 @@
             <td style="background-color: {{ af_color }};">{{ af_status }}</td>
         </tr>
 
-        {# FCS-GX #}
-        {% if not fcs_gx_report_content or fcs_gx_report_content == "FCS-GX check was not run." %}
+        {# FCS-GX - check for both old content format and new table/metadata format #}
+        {% if not fcs_gx_report_content and not fcs_gx_report_table and not fcs_gx_report_metadata %}
             {% set gx_color = '#94a3b8' %}
             {% set gx_status = 'Not run' %}
-        {% elif 'EXCLUDE' in fcs_gx_report_content %}
+        {% elif fcs_gx_report_content == "FCS-GX check was not run." %}
+            {% set gx_color = '#94a3b8' %}
+            {% set gx_status = 'Not run' %}
+        {% elif (fcs_gx_report_content and 'EXCLUDE' in fcs_gx_report_content) or (fcs_gx_report_table and 'EXCLUDE' in fcs_gx_report_table|string) %}
             {% set gx_color = '#ef4444' %}
             {% set gx_status = 'Issue detected' %}
-        {% elif 'TRIM' in fcs_gx_report_content or 'FIX' in fcs_gx_report_content or 'REVIEW' in fcs_gx_report_content or 'REVIEW_RARE' in fcs_gx_report_content or 'INFO' in fcs_gx_report_content %}
+        {% elif (fcs_gx_report_content and ('TRIM' in fcs_gx_report_content or 'FIX' in fcs_gx_report_content or 'REVIEW' in fcs_gx_report_content or 'REVIEW_RARE' in fcs_gx_report_content or 'INFO' in fcs_gx_report_content)) or (fcs_gx_report_table and ('TRIM' in fcs_gx_report_table|string or 'FIX' in fcs_gx_report_table|string or 'REVIEW' in fcs_gx_report_table|string or 'REVIEW_RARE' in fcs_gx_report_table|string or 'INFO' in fcs_gx_report_table|string)) %}
             {% set gx_color = '#eab308' %} {# vibrant yellow #}
             {% set gx_status = 'Warning' %}
         {% else %}
