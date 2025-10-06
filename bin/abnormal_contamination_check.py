@@ -7,7 +7,7 @@ import pathlib
 import argparse
 import textwrap
 
-VERSION = "V1.1.0"
+VERSION = "V1.2.0"
 
 DESCRIPTION = """
 -------------------------------------
@@ -43,6 +43,7 @@ def parse_args():
     parser.add_argument("-l", "--alarm_length_removed", type=int, help="Length of removed sequence is greater than default, greater than this will trip the alarm.", default=1e7)
     parser.add_argument("-s", "--alarm_scaff_length", type=int, help="Length of largest scaffold removed to trip alarm.", default=1.8e6)
     parser.add_argument("-t", "--alarm_scaff_percent_removed", type=float, help="Percentage of Scaffolds set for removal from assembly to trip the alarm.", default=10.0)
+    parser.add_argument("-r", "--review_info", type=int, help="Number of REVIEW/INFO to the trigger alarm", default=0)
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
 
@@ -98,19 +99,23 @@ def main():
     lengths_removed = list()
     scaffolds_removed = 0
     scaffold_count = len(seq_dict)
+    review_info = 0
 
     for seq_name in seq_dict:
         seq_len = seq_dict[seq_name]["seq_len"]
         if seq_dict[seq_name]["fcs_gx_action"] == "EXCLUDE":
             lengths_removed.append(seq_len)
             scaffolds_removed += 1
+        if seq_dict[seq_name]["fcs_gx_action"] in ["REVIEW", "INFO"]:
+            review_info += 1
         total_assembly_length += seq_len
 
     alarm_threshold_for_parameter = {
         "TOTAL_LENGTH_REMOVED": args.alarm_length_removed,
         "PERCENTAGE_LENGTH_REMOVED": args.alarm_percentage,
         "LARGEST_SCAFFOLD_REMOVED": args.alarm_scaff_length,
-        "PERCENTAGE_SCAFFOLDS_REMOVED": args.alarm_scaff_percent_removed
+        "PERCENTAGE_SCAFFOLDS_REMOVED": args.alarm_scaff_percent_removed,
+        "REVIEW_OR_INFO": args.review_info
     }
 
     report_dict = {
@@ -119,6 +124,7 @@ def main():
         "LARGEST_SCAFFOLD_REMOVED": max(lengths_removed, default=0),
         "SCAFFOLDS_REMOVED": scaffolds_removed,
         "PERCENTAGE_SCAFFOLDS_REMOVED": 100 * scaffolds_removed / scaffold_count,
+        "REVIEW_OR_INFO": review_info
     }
 
     # Seperated out to ensure that the file is written in one go and doesn't confuse Nextflow
