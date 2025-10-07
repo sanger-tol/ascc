@@ -66,8 +66,11 @@ workflow RUN_FCSGX {
 
 
     emit:
-    fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
-    genomedict     = samtools_reference
-    versions       = ch_versions
+    fcsgxresult        = PARSE_FCSGX_RESULT.out.fcsgxresult
+    genomedict         = samtools_reference
+    // Expose raw FCS-GX outputs for HTML report tabs
+    fcsgx_report_txt   = FCSGX_RUNGX.out.fcsgx_report
+    fcsgx_taxonomy_rpt = FCSGX_RUNGX.out.taxonomy_report
+    versions           = ch_versions
 
 }

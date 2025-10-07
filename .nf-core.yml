@@ -1,5 +1,7 @@
 lint:
   actions_awsfulltest: false
+  merge_markers:
+    - bin/kmer-counter
   files_exist:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-ascc_logo_light.png
