@@ -17,7 +17,7 @@ process REFORMAT_DIAMOND_OUTFMT6 {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/reformat_diamond_outfmt6.py ${diamond_blast} > ${prefix}_diamond_outfmt6.tsv
+    reformat_diamond_outfmt6.py ${diamond_blast} > ${prefix}_diamond_outfmt6.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

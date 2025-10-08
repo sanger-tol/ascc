@@ -16,7 +16,7 @@ process CHECK_NT_BLAST_TAXONOMY {
 
     script:
     """
-    $baseDir/bin/check_nt_blast_taxonomy.py --db_path ${nt_blast_db_path}
+    check_nt_blast_taxonomy.py --db_path ${nt_blast_db_path}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

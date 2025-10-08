@@ -17,7 +17,7 @@ process REFORMAT_FULL_OUTFMT6 {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/reformat_blast_outfmt6.py ${full_blast} > ${prefix}_outfmt6.tsv
+    reformat_blast_outfmt6.py ${full_blast} > ${prefix}_outfmt6.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -29,13 +29,13 @@ process FILTER_FASTA {
     // Conditionally add the max header length argument
     def max_header_arg = check_fcs_header_len ? "--max_header_len 50" : ""
     """
-    $baseDir/bin/sanitise_input_fasta_file.py \\
+    sanitise_input_fasta_file.py \\
         ${input_fasta} \\
         ${max_header_arg} \\
         --log_file fasta_sanitation.json \\
         --max_detailed_changes 0 > ${prefix}_shortened.fasta
 
-    $baseDir/bin/filter_fasta_by_length.py \\
+    filter_fasta_by_length.py \\
         ${args} \\
         ${prefix}_shortened.fasta \\
         ${max_length} \\

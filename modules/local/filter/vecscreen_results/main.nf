@@ -21,7 +21,7 @@ process FILTER_VECSCREEN_RESULTS {
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def args        = task.ext.args ?: ''
     """
-    $baseDir/bin/VSlistTo1HitPerLine.py ${args} ${vecscreen_outfile} > ${prefix}_vecscreen.grepped.out
+    VSlistTo1HitPerLine.py ${args} ${vecscreen_outfile} > ${prefix}_vecscreen.grepped.out
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

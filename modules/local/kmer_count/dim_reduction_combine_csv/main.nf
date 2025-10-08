@@ -20,7 +20,7 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
     script:
     def prefix = args.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/kmer_count_dim_reduction_combine_csv.py \\
+    kmer_count_dim_reduction_combine_csv.py \\
         -o ${prefix}_kmers_dim_reduction_embeddings_combined.csv \\
         -i $input_files
 

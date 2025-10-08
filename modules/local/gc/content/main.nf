@@ -17,7 +17,7 @@ process GC_CONTENT {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/gc_content.py ${fasta} > ${prefix}-GC_CONTENT.txt
+    gc_content.py ${fasta} > ${prefix}-GC_CONTENT.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

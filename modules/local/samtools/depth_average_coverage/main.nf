@@ -18,7 +18,7 @@ process SAMTOOLS_DEPTH_AVERAGE_COVERAGE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/samtools_depth_average_coverage.py $depth > ${prefix}_average_coverage.txt
+    samtools_depth_average_coverage.py $depth > ${prefix}_average_coverage.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
