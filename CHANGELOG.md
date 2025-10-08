@@ -3,6 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - Red Notebook [##/##/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 10 of sanger-tol/ascc, addition of a report generator.
+
+### `Added`
+- Reporting for the pipeline output into a more human readable output (html).
+- Updated the naming of various outputs inorder to standardise them.
+
+### `Dependencies`
+
+| Module                        | Old Version                           | New Versions                          |
+| ----------------------------- | ------------------------------------- | ------------------------------------- |
+| AUTOFILTER_AND_CHECK_ASSEMBLY | abnormal_contamination_check.py:1.1.0 | abnormal_contamination_check.py:1.2.0 |
+
 ## [0.5.2] - Red Spider-Boat (H2) [06/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.

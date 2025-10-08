@@ -17,7 +17,7 @@ process REFORMAT_TO_HITS_FILE {
     script:
     def args    =   task.ext.args   ?: ""
     """
-    $baseDir/bin/convert_to_hits.py $blast_full $args
+    convert_to_hits.py $blast_full $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

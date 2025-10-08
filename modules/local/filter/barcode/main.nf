@@ -18,7 +18,7 @@ process FILTER_BARCODE {
     def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
-    $baseDir/bin/filter_barcode_blast_results.py \\
+    filter_barcode_blast_results.py \\
         --input ${fasta} \\
         --barcode ${barcodes} \\
         --blast ${blast_data} \\

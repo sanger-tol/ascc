@@ -21,12 +21,12 @@ process REFORMAT_NPY_2_CSV {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/npy_2_csv.py -f $fasta -k $kmer_size -n $npy -o ${prefix}_KMER_COUNTS.csv
+    npy_2_csv.py -f $fasta -k $kmer_size -n $npy -o ${prefix}_KMER_COUNTS.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        npy_2_csv.py: \$($baseDir/bin/npy_2_csv.py --version | cut -d' ' -f2)
+        npy_2_csv.py: \$(npy_2_csv.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
@@ -38,7 +38,7 @@ process REFORMAT_NPY_2_CSV {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        npy_2_csv.py: \$($baseDir/bin/npy_2_csv.py --version | cut -d' ' -f2)
+        npy_2_csv.py: \$(npy_2_csv.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 }

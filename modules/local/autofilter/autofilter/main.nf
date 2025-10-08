@@ -26,7 +26,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     def args    = task.ext.args     ?: ""
     """
-    $baseDir/bin/autofilter.py \\
+    autofilter.py \\
         $reference \\
         --taxid $meta.taxid \\
         --tiara $tiara_txt \\
@@ -35,7 +35,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         --ncbi_rankedlineage_path $ncbi_rankedlineage \\
         ${args} \\
 
-    $baseDir/bin/abnormal_contamination_check.py \\
+    abnormal_contamination_check.py \\
         $reference \\
         ${prefix}_ABNORMAL_CHECK.csv \\
         --out_prefix ${prefix}
