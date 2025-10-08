@@ -102,7 +102,7 @@ process GENERATE_HTML_REPORT {
         python: \$(python --version | sed 's/Python //g')
         jinja2: \$(python -c 'import jinja2; print(jinja2.__version__)')
         pandas: \$(python -c 'import pandas; print(pandas.__version__)')
-        generate_html_report: \$(python generate_html_report.py --version 2>&1 | sed 's/.*version //g')
+        generate_html_report: \$(generate_html_report.py --version 2>&1 | sed 's/.*version //g')
     END_VERSIONS
     """
 }
