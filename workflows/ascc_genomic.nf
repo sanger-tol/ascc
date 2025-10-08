@@ -770,9 +770,9 @@ workflow ASCC_GENOMIC {
 
     run_btk_conditional.skip_btk
         .map { meta, file, data ->
-            log.log "[ASCC WARNING]: CONTAMINATION THRESHOLD NOT MET"
-            log.log "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
-            log.log "\t- You can verify here: $file"
+            log.info "[ASCC WARNING]: CONTAMINATION THRESHOLD NOT MET"
+            log.info "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
+            log.info "\t- You can verify here: $file"
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
