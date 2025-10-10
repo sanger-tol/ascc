@@ -3,6 +3,17 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 10 of sanger-tol/ascc, a bug fix for the btk trace.config file.
+
+### `Fixed`
+
+- host_name should have been hostname
+- missing double quotation mark in string
+
 ## [0.5.2] - Red Spider-Boat (H2) [06/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
