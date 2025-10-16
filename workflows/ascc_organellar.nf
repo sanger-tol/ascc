@@ -709,6 +709,9 @@ workflow ASCC_ORGANELLAR {
 
     if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
 
+        // Placeholders for channels not generated in organellar subworkflow
+        ch_kmers_results = Channel.of( [[],[]] )
+
         // Samplesheet/params file
         ch_samplesheet_path = Channel.fromPath(params.input)
         ch_params_file      = (params.containsKey('params_file') && params.params_file) ? Channel.fromPath(params.params_file) : Channel.value([])
@@ -724,8 +727,8 @@ workflow ASCC_ORGANELLAR {
             ej_trailing_ns,
             ch_vecscreen,
             ch_autofilt_fcs_tiara,
-            merged_table,
-            merged_phylum_count,
+            org_merged_table,
+            org_merged_phylum_count,
             ch_kmers_results,
             ej_reference_tuple,
             ej_fasta_sanitation_log,
