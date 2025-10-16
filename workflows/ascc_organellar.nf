@@ -645,8 +645,9 @@ workflow ASCC_ORGANELLAR {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        //
-        //
+        busco_merge_btk = Channel.of( [[],[]] )
+        ch_kmers = Channel.of( [[],[]] )
+
         ascc_merged_data = ej_gc_coverage
             .map{ meta, file -> tuple([
                 id: meta.id,
@@ -655,6 +656,8 @@ workflow ASCC_ORGANELLAR {
             .mix(
                 ej_dot_genome,
                 ch_create_summary,
+                busco_merge_btk,
+                ch_kmers,
                 ch_tiara,
                 ch_fcsgx,
                 ch_coverage,
@@ -672,11 +675,12 @@ workflow ASCC_ORGANELLAR {
                 [id: id, data: data]
             }
 
-        def processes = [
-            'GC_COV', 'Coverage', 'TIARA',
-            'Kraken 3', 'NT-BLAST-LINEAGE', 'NR-HITS', 'UN-HITS',
-            'C_BTK_SUM','FCSGX result'
-        ]
+            def processes = [
+                'GC_COV', 'Coverage', 'TIARA',
+                'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
+                'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+            ]
+
 
         def processChannels = processes.collectEntries { process ->
             [(process): ascc_merged_data
