@@ -74,7 +74,12 @@ workflow ASCC_ORGANELLAR {
 
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ it ->
+                                    tuple(
+                                        [id: it[0].id, process: "GENOME"],
+                                        it[1]
+                                    )
+                                }
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
         ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
         ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
@@ -84,9 +89,9 @@ workflow ASCC_ORGANELLAR {
         log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         ej_reference_tuple      = ch_samplesheet
-        ej_seqkit_reference     = Channel.of()
-        ej_dot_genome           = Channel.empty()
-        ej_gc_coverage          = Channel.empty()
+        ej_seqkit_reference     = ch_samplesheet
+        ej_dot_genome           = Channel.of( [[],[]] )
+        ej_gc_coverage          = Channel.of( [[],[]] )
         ej_trailing_ns          = Channel.of( [[],[]] )
         ej_fasta_sanitation_log = Channel.of( [[],[]] )
         ej_fasta_filter_log     = Channel.of( [[],[]] )
@@ -170,7 +175,7 @@ workflow ASCC_ORGANELLAR {
     } else {
         ch_fcsadapt_euk     = Channel.of( [[],[]] )
         ch_fcsadapt_prok    = Channel.of( [[],[]] )
-        ch_fcsadapt         = Channel.empty()
+        ch_fcsadapt         = Channel.of( [[],[]] )
     }
 
 
@@ -318,9 +323,9 @@ workflow ASCC_ORGANELLAR {
                         }
                     .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1 = Channel.empty()
-        ch_kraken2 = Channel.empty()
-        ch_kraken3 = Channel.empty()
+        ch_kraken1 = Channel.of( [[],[]] )
+        ch_kraken2 = Channel.of( [[],[]] )
+        ch_kraken3 = Channel.of( [[],[]] )
     }
 
 
@@ -542,7 +547,7 @@ workflow ASCC_ORGANELLAR {
                                     }
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
     } else {
-        ch_create_summary       = Channel.empty()
+        ch_create_summary       = Channel.of( [[],[]] )
         ch_create_btk_dataset   = Channel.of( [[],[]] )
     }
 
@@ -618,12 +623,12 @@ workflow ASCC_ORGANELLAR {
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_alarm_file  = Channel.empty()
-        ch_autofilt_removed_seqs= Channel.empty()
-        ch_autofilt_assem       = Channel.empty()
-        ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_alarm_file  = Channel.of( [[],[]] )
+        ch_autofilt_removed_seqs= Channel.of( [[],[]] )
+        ch_autofilt_assem       = Channel.of( [[],[]] )
+        ch_autofilt_indicator   = Channel.of( [[],[]] )
         ch_autofilt_fcs_tiara   = Channel.of( [[],[]] )
-        ch_autofilt_raw_report  = Channel.empty()
+        ch_autofilt_raw_report  = Channel.of( [[],[]] )
     }
 
     //
@@ -640,6 +645,8 @@ workflow ASCC_ORGANELLAR {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
+        //
+        //
         ascc_merged_data = ej_gc_coverage
             .map{ meta, file -> tuple([
                 id: meta.id,
@@ -648,8 +655,6 @@ workflow ASCC_ORGANELLAR {
             .mix(
                 ej_dot_genome,
                 ch_create_summary,
-                busco_merge_btk,
-                ch_kmers,
                 ch_tiara,
                 ch_fcsgx,
                 ch_coverage,
@@ -669,8 +674,8 @@ workflow ASCC_ORGANELLAR {
 
         def processes = [
             'GC_COV', 'Coverage', 'TIARA',
-            'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
-            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+            'Kraken 3', 'NT-BLAST-LINEAGE', 'NR-HITS', 'UN-HITS',
+            'C_BTK_SUM','FCSGX result'
         ]
 
         def processChannels = processes.collectEntries { process ->

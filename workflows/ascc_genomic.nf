@@ -106,8 +106,8 @@ workflow ASCC_GENOMIC {
         log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         ej_reference_tuple = ch_samplesheet
-        ej_dot_genome           = Channel.empty()
-        ej_gc_coverage          = Channel.empty()
+        ej_dot_genome           = Channel.of( [[],[]] )
+        ej_gc_coverage          = Channel.of( [[],[]] )
         ej_trailing_ns          = Channel.of( [[],[]] )
         ej_fasta_sanitation_log = Channel.of( [[],[]] )
         ej_fasta_filter_log     = Channel.of( [[],[]] )
@@ -392,7 +392,7 @@ workflow ASCC_GENOMIC {
     } else {
         ch_fcsadapt_euk     = Channel.of( [[],[]] )
         ch_fcsadapt_prok    = Channel.of( [[],[]] )
-        ch_fcsadapt         = Channel.empty()
+        ch_fcsadapt         = Channel.of( [[],[]] )
     }
 
 
@@ -540,9 +540,9 @@ workflow ASCC_GENOMIC {
                         }
                     .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1 = Channel.empty()
-        ch_kraken2 = Channel.empty()
-        ch_kraken3 = Channel.empty()
+        ch_kraken1 = Channel.of( [[],[]] )
+        ch_kraken2 = Channel.of( [[],[]] )
+        ch_kraken3 = Channel.of( [[],[]] )
     }
 
 
@@ -634,7 +634,7 @@ workflow ASCC_GENOMIC {
                                     }
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
     } else {
-        ch_create_summary       = Channel.empty()
+        ch_create_summary       = Channel.of( [[],[]] )
         ch_create_btk_dataset   = Channel.of( [[],[]] )
     }
 
@@ -725,12 +725,12 @@ workflow ASCC_GENOMIC {
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
         btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
-        ch_autofilt_alarm_file  = Channel.empty()
-        ch_autofilt_removed_seqs= Channel.empty()
-        ch_autofilt_assem       = Channel.empty()
-        ch_autofilt_indicator   = Channel.empty()
+        ch_autofilt_alarm_file  = Channel.of( [[],[]] )
+        ch_autofilt_removed_seqs= Channel.of( [[],[]] )
+        ch_autofilt_assem       = Channel.of( [[],[]] )
+        ch_autofilt_indicator   = Channel.of( [[],[]] )
         ch_autofilt_fcs_tiara   = Channel.of( [[],[]] )
-        ch_autofilt_raw_report  = Channel.empty()
+        ch_autofilt_raw_report  = Channel.of( [[],[]] )
     }
 
 
@@ -898,8 +898,8 @@ if (
                                     }
         merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {
-        busco_merge_btk         = Channel.empty()
-        merged_ds               = Channel.empty()
+        busco_merge_btk         = Channel.of( [[],[]] )
+        merged_ds               = Channel.of( [[],[]] )
 
     }
 
