@@ -11,9 +11,8 @@ include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
-
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
-include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
+// include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
 include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
@@ -25,6 +24,7 @@ include { RUN_READ_COVERAGE                             } from '../subworkflows/
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
 include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_SOURMASH                                  } from "../subworkflows/local/run_sourmash/main"
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
@@ -102,10 +102,10 @@ workflow ASCC_GENOMIC {
         ej_gc_coverage          = Channel.empty()
     }
 
-    //
+
     // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
-    //              SCAFFOLDS IN ASSEMBLY
-    //
+    //             SCAFFOLDS IN ASSEMBLY
+
     if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
 
         reference_tuple_from_GG
