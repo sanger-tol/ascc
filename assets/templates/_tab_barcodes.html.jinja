@@ -1,8 +1,12 @@
+{% from "_macros.html.jinja" import source_files %}
+
 <div class="narrow-table-wrapper">
 <h2>PacBio Barcodes Check</h2>
 <div class="narrow-text-container">
 <p>This check uses BlastN to identify retained PacBio multiplexing barcode contamination in the assembly. PacBio barcodes are used to multiplex samples during sequencing, and remnants of these barcodes can sometimes remain in the final assembly. The results show any barcode sequences found in the genome.</p>
 </div>
+
+{{ source_files(barcode_file) }}
 
 {% if barcodes_check_data and "No contamination was found" in barcodes_check_data %}
 <div class="success-container">

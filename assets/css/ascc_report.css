@@ -239,6 +239,66 @@ tr:hover {
   color: #718096;
 }
 
+/* Source files UI */
+.source-files-container {
+  margin: 0.6em 0 1em 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+.source-files-line {
+  background: #f3f6fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: "Roboto Mono", monospace;
+  /* Ensure very long paths wrap within the box */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  word-wrap: break-word;
+  display: block;
+  width: 100%;
+}
+.source-files-label {
+  color: #4a5568;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+.source-file-path-block { display: block; width: 100%; }
+.source-file-path {
+  cursor: text; /* Make it clear this is selectable text, not a link */
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.source-files-summary {
+  cursor: default; /* Avoid link-like cursor on the summary header */
+}
+.source-files-list code {
+  cursor: text;
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Stronger wrapping rules to prevent overflow in single-file display */
+.source-files-line code,
+.source-file-path {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important; /* modern browsers */
+  word-wrap: break-word !important;   /* legacy support */
+  word-break: break-all !important;   /* ensure break inside long tokens */
+  max-width: 100% !important;
+  display: block !important;
+  width: 100% !important;
+}
+
 /* DataTables customization */
 .dataTables_wrapper .dataTables_length,
 .dataTables_wrapper .dataTables_filter,
@@ -782,4 +842,67 @@ code {
   white-space: normal !important;
   word-wrap: break-word !important;
   padding: 12px 8px !important;
+}
+
+/* Source files display styling */
+.source-files-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 1em auto 1.5em auto;
+  padding: 10px 15px;
+  background-color: #f0f4f8;
+  border-left: 4px solid #2c5282;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.source-files-details {
+  cursor: pointer;
+}
+
+.source-files-summary {
+  font-weight: 500;
+  color: #2c5282;
+  user-select: none;
+  list-style: none;
+  outline: none;
+}
+
+.source-files-summary::-webkit-details-marker {
+  display: none;
+}
+
+.source-files-summary code {
+  background-color: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.95em;
+  color: #1a202c;
+  word-break: break-all;
+}
+
+.source-files-list {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #cbd5e0;
+}
+
+.source-files-list ul {
+  margin: 5px 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.source-files-list li {
+  margin: 5px 0;
+  color: #4a5568;
+}
+
+.source-files-list code {
+  background-color: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.95em;
+  color: #1a202c;
+  word-break: break-all;
 }

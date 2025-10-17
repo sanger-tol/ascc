@@ -78,6 +78,21 @@ def prepare_report_data(
     btk_included=None,  # Whether BlobToolKit dataset creation was included in the run
     btk_published_path=None,  # Path being checked for the BlobToolKit dataset
     launch_dir=None,  # Directory from which the workflow was launched
+    # Source file paths
+    reference_file=None,
+    samplesheet_file=None,
+    params_file=None,
+    barcode_file=None,
+    fcs_adaptor_files=None,
+    trim_ns_file=None,
+    vecscreen_file=None,
+    autofilter_file=None,
+    merged_table_file=None,
+    phylum_coverage_file=None,
+    kmers_dir=None,
+    fasta_sanitation_files=None,
+    fcs_gx_report_file=None,
+    fcs_gx_taxonomy_file=None,
 ):
     """Prepare data for the HTML report.
 
@@ -171,6 +186,21 @@ def prepare_report_data(
         "has_coverage_content": has_coverage_content,
         "has_kmers_content": has_kmers_content,
         "has_cobiont_content": has_cobiont_content,
+        # Source file paths
+        "reference_file": reference_file,
+        "samplesheet_file": samplesheet_file,
+        "params_file": params_file,
+        "barcode_file": barcode_file,
+        "fcs_adaptor_files": fcs_adaptor_files,
+        "trim_ns_file": trim_ns_file,
+        "vecscreen_file": vecscreen_file,
+        "autofilter_file": autofilter_file,
+        "merged_table_file": merged_table_file,
+        "phylum_coverage_file": phylum_coverage_file,
+        "kmers_dir": kmers_dir,
+        "fasta_sanitation_files": fasta_sanitation_files,
+        "fcs_gx_report_file": fcs_gx_report_file,
+        "fcs_gx_taxonomy_file": fcs_gx_taxonomy_file,
     }
 
     return data

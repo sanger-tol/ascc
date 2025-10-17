@@ -1,3 +1,5 @@
+{% from "_macros.html.jinja" import source_files %}
+
 <div class="narrow-table-wrapper">
 <h2>FCS-GX Reports</h2>
 <div class="narrow-text-container">
@@ -8,6 +10,15 @@
     </div>
 {% endif %}
 </div>
+
+{% set fcs_gx_files = [] %}
+{% if fcs_gx_report_file %}
+    {% set _ = fcs_gx_files.append(fcs_gx_report_file) %}
+{% endif %}
+{% if fcs_gx_taxonomy_file %}
+    {% set _ = fcs_gx_files.append(fcs_gx_taxonomy_file) %}
+{% endif %}
+{{ source_files(fcs_gx_files) }}
 
 {# FCS-GX Report Section #}
 <h3>FCS-GX Report ({{ sample_name }}{% if assembly_component %}_{{ assembly_component }}{% endif %}.fcs_gx_report.txt)</h3>

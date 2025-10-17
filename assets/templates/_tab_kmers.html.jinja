@@ -1,8 +1,12 @@
+{% from "_macros.html.jinja" import source_files %}
+
 <div class="narrow-table-wrapper">
 <h2>K-mer Analysis</h2>
 <div class="narrow-text-container">
-<p>K-mer analysis counts the frequency of short nucleotide sequences (k-mers) in each sequence of the assembly. Dimensionality reduction techniques are then applied to these counts to visualize patterns. Sequences originating from the same species typically cluster together in these visualizations, helping to identify potential contamination or cobionts. Various dimensionality reduction methods (PCA, UMAP, t-SNE, etc.) are available to provide different perspectives on the data.</p>
+<p>K-mer analysis counts the frequency of short nucleotide sequences (k-mers) in each sequence of the assembly. Dimensionality reduction techniques are then applied to these counts to visualise patterns. Sequences originating from the same species typically cluster together in these visualisations, helping to identify potential contamination or cobionts. Various dimensionality reduction methods (PCA, UMAP, t-SNE, etc.) are available to provide different perspectives on the data.</p>
 </div>
+
+{{ source_files(kmers_dir, "K-mer results directory") }}
 
 {% if kmer_length %}
 <div class="notice-container">

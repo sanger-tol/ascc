@@ -33,7 +33,7 @@ process GENERATE_HTML_REPORT {
     path(css_files_list, stageAs: "css/*") // CSS files to include in the report
 
     output:
-    tuple val(meta), path("report/site/*"), emit: report
+    tuple val(meta), path("report/site/*.html"), emit: report
     path "versions.yml", emit: versions
 
     when:
@@ -41,8 +41,24 @@ process GENERATE_HTML_REPORT {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    // Use the reference FASTA file passed as a parameter
-    def reference_file = reference_fasta ? "--reference ${reference_fasta}" : ""
+
+    // Build CLI args using staged file paths (readers). Include only if present.
+    def reference_file         = reference_fasta             ? "--reference ${reference_fasta}" : ""
+    def barcode_arg            = barcode_results             ? "--barcode_file ${barcode_results}" : ""
+    def fcs_euk_arg            = fcs_adaptor_euk             ? "--fcs_adaptor_euk_file ${fcs_adaptor_euk}" : ""
+    def fcs_prok_arg           = fcs_adaptor_prok            ? "--fcs_adaptor_prok_file ${fcs_adaptor_prok}" : ""
+    def trim_ns_arg            = trim_ns_results             ? "--trim_ns_file ${trim_ns_results}" : ""
+    def vecscreen_arg          = vecscreen_results           ? "--vecscreen_file ${vecscreen_results}" : ""
+    def autofilter_arg         = autofilter_results          ? "--autofilter_file ${autofilter_results}" : ""
+    def merged_table_arg       = merged_table                ? "--merged_table_file ${merged_table}" : ""
+    def phylum_coverage_arg    = phylum_counts               ? "--phylum_coverage_file ${phylum_counts}" : ""
+    def fasta_sanitation_arg   = fasta_sanitation_log        ? "--fasta_sanitation_log ${fasta_sanitation_log}" : ""
+    def fasta_length_filtering_arg = fasta_length_filtering_log ? "--fasta_length_filtering_log ${fasta_length_filtering_log}" : ""
+    def samplesheet_arg        = samplesheet                 ? "--samplesheet ${samplesheet}" : ""
+    def params_file_arg        = params_file                 ? "--params_file ${params_file}" : ""
+    def fcs_gx_report_arg      = fcs_gx_report_txt           ? "--fcs_gx_report_txt ${fcs_gx_report_txt}" : ""
+    def fcs_gx_taxonomy_arg    = fcs_gx_taxonomy_rpt         ? "--fcs_gx_taxonomy_rpt ${fcs_gx_taxonomy_rpt}" : ""
+
     // Convert params_json to a properly escaped string for command line
     def params_json_arg = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
     """
@@ -62,25 +78,27 @@ process GENERATE_HTML_REPORT {
     python $baseDir/bin/generate_html_report.py \\
         --output_dir report \\
         --template_dir report/site/templates \\
-        --barcode_dir barcodes \\
-        --fcs_dir fcs \\
-        --trim_ns_dir trailingns \\
-        --vecscreen_dir vecscreen \\
-        --autofilter_dir autofilter \\
-        --merged_dir merged \\
-        --coverage_dir coverage \\
+        $barcode_arg \\
+        $fcs_euk_arg \\
+        $fcs_prok_arg \\
+        $trim_ns_arg \\
+        $vecscreen_arg \\
+        $autofilter_arg \\
+        $merged_table_arg \\
+        $phylum_coverage_arg \\
         --kmers_dir kmers \\
         $reference_file \\
-        --fasta_sanitation_log fasta_sanitation/fasta_sanitation.json \\
-        --fasta_length_filtering_log fasta_length_filtering/fasta_length_filtering.json \\
-        --samplesheet $samplesheet \\
-        ${params_file ? "--params_file $params_file" : ""} \\
+        $fasta_sanitation_arg \\
+        $fasta_length_filtering_arg \\
+        $samplesheet_arg \\
+        $params_file_arg \\
         $params_json_arg \\
-        --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt \\
-        --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt \\
+        $fcs_gx_report_arg \\
+        $fcs_gx_taxonomy_arg \\
         --btk_published_path "${params.outdir}/${meta.id}/create_btk_dataset/btk_datasets_CBD" \\
         --btk_included "${params.run_create_btk_dataset == 'both' || (params.run_create_btk_dataset == 'genomic' && params.genomic_only) || (params.run_create_btk_dataset == 'organellar' && !params.genomic_only)}" \\
         --launch_dir "${workflow.launchDir}" \\
+        --outdir "${params.outdir}" \\
         --pipeline_version ${workflow.manifest.version} \\
         --output_prefix $prefix
 
@@ -105,7 +123,7 @@ process GENERATE_HTML_REPORT {
 
 
     # Run the report generation script (stub mode)
-    echo "Would run python $baseDir/bin/generate_html_report.py --pipeline_version ${workflow.manifest.version} --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt with samplesheet $samplesheet ${params_file ? "and params file $params_file" : ""} and FASTA sanitation logs"
+    echo "Would run python $baseDir/bin/generate_html_report.py --pipeline_version ${workflow.manifest.version} --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt with samplesheet $samplesheet ${params_file ? 'and params file ' + params_file : ''} and FASTA sanitation logs"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,0 +1,31 @@
+{# Macro for displaying source file paths #}
+{% macro source_files(files, label="Source file") %}
+    {% if files %}
+        {% set is_list = files is iterable and files is not mapping and files is not string %}
+        {% set count = files|length if is_list else 1 %}
+
+        <div class="source-files-container">
+        {% if count == 1 %}
+            {# For a single file, render label on one line and the path on the next #}
+            <div class="source-files-line">
+                <div class="source-files-label">{{ label }}:</div>
+                <div class="source-file-path-block">
+                    <code class="source-file-path" style="display:block;width:100%;white-space:normal;overflow-wrap:anywhere;word-wrap:break-word;word-break:break-all;">{{ files[0] if is_list else files }}</code>
+                </div>
+            </div>
+        {% else %}
+            {# For multiple files, use <details> with a summary and a list #}
+            <details class="source-files-details">
+                <summary class="source-files-summary">{{ label }}s ({{ count }} files)</summary>
+                <div class="source-files-list">
+                    <ul>
+                    {% for file in files %}
+                        <li><code class="source-file-path">{{ file }}</code></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </details>
+        {% endif %}
+        </div>
+    {% endif %}
+{% endmacro %}

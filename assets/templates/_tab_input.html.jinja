@@ -1,3 +1,5 @@
+{% from "_macros.html.jinja" import source_files %}
+
 <div class="narrow-table-wrapper">
 <h2>Input Files</h2>
 <div class="narrow-text-container">
@@ -6,6 +8,7 @@
 
 {% if samplesheet_data is defined and samplesheet_data %}
     <h3>Input Samplesheet</h3>
+    {{ source_files(samplesheet_file) }}
     <div class="table-responsive">
         <div class="table-wrapper">
             {{ samplesheet_data }}
@@ -15,6 +18,7 @@
 
 {% if yaml_params_data is defined and yaml_params_data %}
     <h3>Input Parameters</h3>
+    {{ source_files(params_file) }}
     <div class="table-responsive">
         <div class="table-wrapper">
             {{ yaml_params_data }}
@@ -23,6 +27,7 @@
 {% endif %}
 
 <h3>Assembly Statistics</h3>
+{{ source_files(reference_file, "Assembly file") }}
 {% if reference_summary %}
     {{ reference_summary }}
 {% else %}

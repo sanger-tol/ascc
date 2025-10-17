@@ -54,31 +54,32 @@ def main():
         "--reference", help="Reference genome file for assembly statistics"
     )
     parser.add_argument(
-        "--barcode_dir", help="Directory containing PacBio barcode results"
+        "--barcode_file", help="Published path to PacBio barcode results file"
     )
-    parser.add_argument("--fcs_dir", help="Directory containing FCS-Adaptor results")
-    parser.add_argument("--trim_ns_dir", help="Directory containing trim Ns results")
+    parser.add_argument("--fcs_adaptor_euk_file", help="Published path to FCS-Adaptor eukaryotic results file")
+    parser.add_argument("--fcs_adaptor_prok_file", help="Published path to FCS-Adaptor prokaryotic results file")
+    parser.add_argument("--trim_ns_file", help="Published path to trim Ns results file")
     parser.add_argument(
-        "--vecscreen_dir", help="Directory containing vecscreen results"
-    )
-    parser.add_argument(
-        "--autofilter_dir", help="Directory containing autofiltering results"
+        "--vecscreen_file", help="Published path to vecscreen results file"
     )
     parser.add_argument(
-        "--merged_dir", help="Directory containing merged table results"
+        "--autofilter_file", help="Published path to autofiltering results file"
     )
     parser.add_argument(
-        "--coverage_dir", help="Directory containing phylum coverage data"
+        "--merged_table_file", help="Published path to merged table results file"
     )
     parser.add_argument(
-        "--kmers_dir", help="Directory containing k-mer profile results"
+        "--phylum_coverage_file", help="Published path to phylum coverage data file"
     )
-    parser.add_argument("--fasta_sanitation_log", help="FASTA sanitation log file")
     parser.add_argument(
-        "--fasta_length_filtering_log", help="FASTA length filtering log file"
+        "--kmers_dir", help="Staged path to k-mer profile results directory"
     )
-    parser.add_argument("--samplesheet", help="Input samplesheet CSV file")
-    parser.add_argument("--params_file", help="Input parameters YAML file")
+    parser.add_argument("--fasta_sanitation_log", help="Published path to FASTA sanitation log file")
+    parser.add_argument(
+        "--fasta_length_filtering_log", help="Published path to FASTA length filtering log file"
+    )
+    parser.add_argument("--samplesheet", help="Published path to input samplesheet CSV file")
+    parser.add_argument("--params_file", help="Published path to input parameters YAML file")
     parser.add_argument(
         "--params_json", help="JSON string containing the params object"
     )
@@ -99,6 +100,10 @@ def main():
         "--launch_dir", help="Directory from which the workflow was launched"
     )
     parser.add_argument(
+        "--outdir",
+        help="Pipeline output directory (relative to launch_dir), e.g. 'test_01'",
+    )
+    parser.add_argument(
         "--output_prefix",
         default=DEFAULT_OUTPUT_PREFIX,
         help="Prefix for the output HTML file",
@@ -114,74 +119,30 @@ def main():
     output_html = os.path.join(args.output_dir, "site", f"{args.output_prefix}.html")
     os.makedirs(os.path.dirname(output_html), exist_ok=True)
 
-    # Find files in directories
-    barcode_file = None
-    if args.barcode_dir and os.path.exists(args.barcode_dir):
-        barcode_files = find_files_in_dir(args.barcode_dir, extension=".txt")
-        if barcode_files:
-            barcode_file = barcode_files[0]
-
-    fcs_euk_file = None
-    fcs_prok_file = None
-    if args.fcs_dir and os.path.exists(args.fcs_dir):
-        fcs_files = find_files_in_dir(args.fcs_dir)
-        for f in fcs_files:
-            if "euk" in f.lower():
-                fcs_euk_file = f
-            elif "prok" in f.lower():
-                fcs_prok_file = f
-
-    trim_ns_file = None
-    if args.trim_ns_dir and os.path.exists(args.trim_ns_dir):
-        # Remove extension=".txt" to find any file
-        trim_ns_files = find_files_in_dir(args.trim_ns_dir)
-        if trim_ns_files:
-            trim_ns_file = trim_ns_files[0]  # Take the first file found
-
-    vecscreen_file = None
-    if args.vecscreen_dir and os.path.exists(args.vecscreen_dir):
-        # Remove extension=".txt" to find any file
-        vecscreen_files = find_files_in_dir(args.vecscreen_dir)
-        if vecscreen_files:
-            vecscreen_file = vecscreen_files[0]  # Take the first file found
-
-    autofilter_file = None
-    if args.autofilter_dir and os.path.exists(args.autofilter_dir):
-        autofilter_files = find_files_in_dir(args.autofilter_dir, extension=".csv")
-        if autofilter_files:
-            autofilter_file = autofilter_files[0]
-
-    merged_table_file = None
-    if args.merged_dir and os.path.exists(args.merged_dir):
-        merged_files = find_files_in_dir(
-            args.merged_dir, extension=".tsv"
-        ) or find_files_in_dir(args.merged_dir, extension=".csv")
-        if merged_files:
-            merged_table_file = merged_files[0]
-
-    # Find FASTA sanitation log files
-    fasta_sanitation_log_file = None
-    fasta_length_filtering_log_file = None
-    if args.fasta_sanitation_log and os.path.exists(args.fasta_sanitation_log):
-        fasta_sanitation_log_file = args.fasta_sanitation_log
-    if args.fasta_length_filtering_log and os.path.exists(
-        args.fasta_length_filtering_log
-    ):
-        fasta_length_filtering_log_file = args.fasta_length_filtering_log
+    # Staged input paths to READ data from
+    barcode_read = args.barcode_file if args.barcode_file else None
+    fcs_euk_read = args.fcs_adaptor_euk_file if args.fcs_adaptor_euk_file else None
+    fcs_prok_read = args.fcs_adaptor_prok_file if args.fcs_adaptor_prok_file else None
+    trim_ns_read = args.trim_ns_file if args.trim_ns_file else None
+    vecscreen_read = args.vecscreen_file if args.vecscreen_file else None
+    autofilter_read = args.autofilter_file if args.autofilter_file else None
+    merged_table_read = args.merged_table_file if args.merged_table_file else None
+    fasta_sanitation_log_read = args.fasta_sanitation_log if args.fasta_sanitation_log else None
+    fasta_length_filtering_log_read = args.fasta_length_filtering_log if args.fasta_length_filtering_log else None
 
     # Debug output
-    print(f"Found barcode file: {barcode_file}", file=sys.stderr)
-    print(f"Found FCS euk file: {fcs_euk_file}", file=sys.stderr)
-    print(f"Found FCS prok file: {fcs_prok_file}", file=sys.stderr)
-    print(f"Found trim Ns file: {trim_ns_file}", file=sys.stderr)
-    print(f"Found vecscreen file: {vecscreen_file}", file=sys.stderr)
-    print(f"Found autofilter file: {autofilter_file}", file=sys.stderr)
-    print(f"Found merged table file: {merged_table_file}", file=sys.stderr)
+    print(f"Found barcode file (staged): {barcode_read}", file=sys.stderr)
+    print(f"Found FCS euk file (staged): {fcs_euk_read}", file=sys.stderr)
+    print(f"Found FCS prok file (staged): {fcs_prok_read}", file=sys.stderr)
+    print(f"Found trim Ns file (staged): {trim_ns_read}", file=sys.stderr)
+    print(f"Found vecscreen file (staged): {vecscreen_read}", file=sys.stderr)
+    print(f"Found autofilter file (staged): {autofilter_read}", file=sys.stderr)
+    print(f"Found merged table file (staged): {merged_table_read}", file=sys.stderr)
     print(
-        f"Found FASTA sanitation log file: {fasta_sanitation_log_file}", file=sys.stderr
+        f"Found FASTA sanitation log file: {fasta_sanitation_log_read}", file=sys.stderr
     )
     print(
-        f"Found FASTA length filtering log file: {fasta_length_filtering_log_file}",
+        f"Found FASTA length filtering log file: {fasta_length_filtering_log_read}",
         file=sys.stderr,
     )
     print(f"Kmers directory: {args.kmers_dir}", file=sys.stderr)
@@ -206,62 +167,10 @@ def main():
         else:
             print("Could not extract sample name from samplesheet", file=sys.stderr)
 
-    # Look for phylum coverage data file after sample_name is set
-    phylum_coverage_file = None
-    # First check the coverage_dir if it exists
-    if args.coverage_dir and os.path.exists(args.coverage_dir) and sample_name:
-        phylum_coverage_pattern = f"{sample_name}_phylum_counts_and_coverage.csv"
-        # First try to find a file specific to this sample
-        phylum_coverage_files = [
-            f
-            for f in find_files_in_dir(args.coverage_dir, extension=".csv")
-            if os.path.basename(f) == phylum_coverage_pattern
-        ]
-
-        # If not found, fall back to any phylum coverage file
-        if not phylum_coverage_files:
-            phylum_coverage_files = [
-                f
-                for f in find_files_in_dir(args.coverage_dir, extension=".csv")
-                if os.path.basename(f).endswith("_phylum_counts_and_coverage.csv")
-            ]
-
-        if phylum_coverage_files:
-            phylum_coverage_file = phylum_coverage_files[0]
-            print(
-                f"Found phylum coverage file in coverage_dir: {phylum_coverage_file}",
-                file=sys.stderr,
-            )
-
-    # If not found in coverage_dir, fall back to merged_dir for backward compatibility
-    if (
-        not phylum_coverage_file
-        and args.merged_dir
-        and os.path.exists(args.merged_dir)
-        and sample_name
-    ):
-        phylum_coverage_pattern = f"{sample_name}_phylum_counts_and_coverage.csv"
-        # First try to find a file specific to this sample
-        phylum_coverage_files = [
-            f
-            for f in find_files_in_dir(args.merged_dir, extension=".csv")
-            if os.path.basename(f) == phylum_coverage_pattern
-        ]
-
-        # If not found, fall back to any phylum coverage file
-        if not phylum_coverage_files:
-            phylum_coverage_files = [
-                f
-                for f in find_files_in_dir(args.merged_dir, extension=".csv")
-                if os.path.basename(f).endswith("_phylum_counts_and_coverage.csv")
-            ]
-
-        if phylum_coverage_files:
-            phylum_coverage_file = phylum_coverage_files[0]
-            print(
-                f"Found phylum coverage file in merged_dir: {phylum_coverage_file}",
-                file=sys.stderr,
-            )
+    # Get phylum coverage file path directly from argument
+    phylum_coverage_file = args.phylum_coverage_file if args.phylum_coverage_file else None
+    if phylum_coverage_file:
+        print(f"Found phylum coverage file: {phylum_coverage_file}", file=sys.stderr)
 
     # Load parameters from either JSON or YAML file
     yaml_params_data = None
@@ -295,46 +204,46 @@ def main():
 
     # Load FASTA sanitation logs if provided
     fasta_sanitation_data = None
-    if fasta_sanitation_log_file or fasta_length_filtering_log_file:
+    if fasta_sanitation_log_read or fasta_length_filtering_log_read:
         print(f"Processing FASTA sanitation log files", file=sys.stderr)
         fasta_sanitation_data = load_fasta_sanitation_log(
-            fasta_sanitation_log_file, fasta_length_filtering_log_file
+            fasta_sanitation_log_read, fasta_length_filtering_log_read
         )
 
     # Load data from files
     barcodes_check_data = (
-        load_barcode_check_results(barcode_file)
-        if barcode_file
+        load_barcode_check_results(barcode_read)
+        if barcode_read
         else "No barcode check results found."
     )
     fcs_adaptor_euk_report_data = (
-        load_fcs_adaptor_results_as_table(fcs_euk_file)
-        if fcs_euk_file
+        load_fcs_adaptor_results_as_table(fcs_euk_read)
+        if fcs_euk_read
         else "No FCS-Adaptor eukaryotic results found."
     )
     fcs_adaptor_prok_report_data = (
-        load_fcs_adaptor_results_as_table(fcs_prok_file)
-        if fcs_prok_file
+        load_fcs_adaptor_results_as_table(fcs_prok_read)
+        if fcs_prok_read
         else "No FCS-Adaptor prokaryotic results found."
     )
     trim_Ns_data = (
-        load_trim_Ns_results(trim_ns_file)
-        if trim_ns_file
+        load_trim_Ns_results(trim_ns_read)
+        if trim_ns_read
         else "No trim Ns results found."
     )
     vecscreen_data = (
-        load_vecscreen_results_as_table(vecscreen_file)
-        if vecscreen_file
+        load_vecscreen_results_as_table(vecscreen_read)
+        if vecscreen_read
         else "No vecscreen results found."
     )
     autofiltering_data = (
-        load_autofiltering_results_as_table(autofilter_file)
-        if autofilter_file
+        load_autofiltering_results_as_table(autofilter_read)
+        if autofilter_read
         else "No autofiltering results found."
     )
     contamination_check_merged_table_data = (
-        load_contamination_check_merged_table(merged_table_file)
-        if merged_table_file
+        load_contamination_check_merged_table(merged_table_read)
+        if merged_table_read
         else "No contamination check merged table found."
     )
     # Handle kmers directory more robustly
@@ -427,12 +336,42 @@ def main():
 
     # Load phylum coverage data if available
     phylum_coverage_data = None
-    if phylum_coverage_file:
+    phylum_coverage_read = args.phylum_coverage_file if args.phylum_coverage_file else None
+    if phylum_coverage_read:
         print(
-            f"Loading phylum coverage data from: {phylum_coverage_file}",
+            f"Loading phylum coverage data from: {phylum_coverage_read}",
             file=sys.stderr,
         )
-        phylum_coverage_data = load_phylum_coverage_data(phylum_coverage_file)
+        phylum_coverage_data = load_phylum_coverage_data(phylum_coverage_read)
+
+    # Helper to compute published display paths from staged inputs
+    def publish_path(subdir, read_path):
+        if not read_path:
+            return None
+        base = os.path.basename(read_path)
+        if not base:
+            return None
+        if args.outdir and args.output_prefix:
+            rel = os.path.join(args.outdir, args.output_prefix, subdir, base)
+            return os.path.join(args.launch_dir, rel) if args.launch_dir else rel
+        return None
+
+    # Build display paths for templates (published locations)
+    barcode_disp = publish_path("filter_barcode", barcode_read)
+    fcs_euk_disp = publish_path("fcs_adaptor", fcs_euk_read)
+    fcs_prok_disp = publish_path("fcs_adaptor", fcs_prok_read)
+    trim_ns_disp = publish_path("trailingns", trim_ns_read)
+    vecscreen_disp = publish_path("summarise_vecscreen_output", vecscreen_read)
+    autofilter_disp = publish_path("autofilter", autofilter_read)
+    merged_table_disp = publish_path("ascc_main_output", merged_table_read)
+    phylum_coverage_disp = publish_path("ascc_main_output", phylum_coverage_read)
+    reference_disp = publish_path("filtered_fasta", args.reference) if args.reference else None
+    fasta_sanitation_disp = publish_path("filtered_fasta", fasta_sanitation_log_read)
+    fasta_length_filtering_disp = publish_path("filtered_fasta", fasta_length_filtering_log_read)
+    kmers_dir_disp = None
+    if args.outdir and args.output_prefix:
+        rel_dir = os.path.join(args.outdir, args.output_prefix, "kmer_data")
+        kmers_dir_disp = os.path.join(args.launch_dir, rel_dir) if args.launch_dir else rel_dir
 
     # Determine fcs_override flag from params if available and set note when raw files are missing
     fcs_override_flag = False
@@ -477,10 +416,28 @@ def main():
         btk_included=btk_included,  # Pass BlobToolKit included flag
         btk_published_path=btk_published_path,  # Pass BlobToolKit published path for debugging
         launch_dir=launch_dir,  # Pass launch directory for debugging
+        # Source file display paths (published locations)
+        reference_file=reference_disp,
+        samplesheet_file=(params_dict.get("input") if params_dict and params_dict.get("input") else (args.samplesheet if args.samplesheet else None)),
+        params_file=args.params_file if args.params_file else None,
+        barcode_file=barcode_disp,
+        fcs_adaptor_files=[p for p in [fcs_euk_disp, fcs_prok_disp] if p],
+        trim_ns_file=trim_ns_disp,
+        vecscreen_file=vecscreen_disp,
+        autofilter_file=autofilter_disp,
+        merged_table_file=merged_table_disp,
+        phylum_coverage_file=phylum_coverage_disp,
+        kmers_dir=kmers_dir_disp,
+        fasta_sanitation_files=[p for p in [fasta_sanitation_disp, fasta_length_filtering_disp] if p],
+        fcs_gx_report_file=publish_path("fcsgx_data", args.fcs_gx_report_txt) if args.fcs_gx_report_txt else None,
+        fcs_gx_taxonomy_file=publish_path("fcsgx_data", args.fcs_gx_taxonomy_rpt) if args.fcs_gx_taxonomy_rpt else None,
     )
 
-    # Render the HTML report
-    render_html_report(data, args.template_dir, output_html)
+    # Render the HTML report and fail if not produced
+    ok = render_html_report(data, args.template_dir, output_html)
+    if not ok or not os.path.exists(output_html):
+        print(f"Error: HTML report was not generated at {output_html}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

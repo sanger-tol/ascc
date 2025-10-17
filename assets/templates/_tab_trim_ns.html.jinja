@@ -1,7 +1,12 @@
+{% from "_macros.html.jinja" import source_files %}
+
 <div class="narrow-table-wrapper">
 <h2>Trimming of Trailing Ns</h2>
 <div class="narrow-text-container">
 <p>Trailing Ns are sequences of N nucleotides (representing unknown bases) that appear at the beginning or end of contigs or scaffolds. This analysis identifies sequences with trailing Ns that should be trimmed from the assembly. If the sequence remaining after trimming is shorter than 200 bp, the script recommends removing it entirely from the assembly.</p>
 </div>
+
+{{ source_files(trim_ns_file) }}
+
 {{ trim_Ns_data }}
 </div>

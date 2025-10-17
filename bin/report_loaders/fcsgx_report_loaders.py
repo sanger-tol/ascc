@@ -27,7 +27,7 @@ def load_fcsgx_results(file_path):
         return "FCS-GX check was not run."
     if os.path.getsize(file_path) == 0:
         print(f"FCS-GX file is empty: {file_path}", file=sys.stderr)
-        return "FCS-GX check was run, but no issues were found."
+        return "FCS-GX check was run and no issues were found."
     try:
         with open(file_path, "r") as f:
             data = f.read()
@@ -37,7 +37,7 @@ def load_fcsgx_results(file_path):
                 f"FCS-GX file contains only whitespace or header: {file_path}",
                 file=sys.stderr,
             )
-            return "FCS-GX check was run, but no issues were found."
+            return "FCS-GX check was run and no issues were found."
         # Add debug output
         print(
             f"Successfully loaded FCS-GX data from {file_path}, content length: {len(data)}",

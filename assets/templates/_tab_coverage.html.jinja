@@ -1,3 +1,5 @@
+{% from "_macros.html.jinja" import source_files %}
+
 <div class="narrow-table-wrapper">
 <h2>Coverage per Phylum</h2>
 
@@ -6,6 +8,8 @@
 
 <p><em>Note: Read type and layout information can be found in the Input tab under Input Parameters.</em></p>
 </div>
+
+{{ source_files(phylum_coverage_file) }}
 
 {{ coverage_per_phylum_data }}
 </div>
