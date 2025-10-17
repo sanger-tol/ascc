@@ -266,7 +266,10 @@ tr:hover {
   margin-right: 6px;
   margin-bottom: 4px;
 }
-.source-file-path-block { display: block; width: 100%; }
+.source-file-path-block {
+  display: block;
+  width: 100%;
+}
 .source-file-path {
   cursor: text; /* Make it clear this is selectable text, not a link */
   display: inline-block;
@@ -292,8 +295,8 @@ tr:hover {
 .source-file-path {
   white-space: normal !important;
   overflow-wrap: anywhere !important; /* modern browsers */
-  word-wrap: break-word !important;   /* legacy support */
-  word-break: break-all !important;   /* ensure break inside long tokens */
+  word-wrap: break-word !important; /* legacy support */
+  word-break: break-all !important; /* ensure break inside long tokens */
   max-width: 100% !important;
   display: block !important;
   width: 100% !important;
@@ -846,14 +849,15 @@ code {
 
 /* Source files display styling */
 .source-files-container {
-  width: 100%;
-  max-width: 100%;
+  width: 960px;
+  max-width: 960px;
   margin: 1em auto 1.5em auto;
   padding: 10px 15px;
   background-color: #f0f4f8;
   border-left: 4px solid #2c5282;
   border-radius: 4px;
   font-size: 0.85em;
+  box-sizing: border-box;
 }
 
 .source-files-details {
