@@ -93,7 +93,7 @@ def load_trim_Ns_results(file_path):
         return "Trailing Ns check was not run."
     if os.path.getsize(file_path) == 0:
         print(f"Trailing Ns file is empty: {file_path}", file=sys.stderr)
-        return "Trailing Ns check was run, but no issues were found."
+        return '<div class="success-container">Trailing Ns check was run, but no issues were found.</div>'
 
     data_rows = []
     comments = []
@@ -146,7 +146,7 @@ def load_trim_Ns_results(file_path):
                     + "\n".join(comments)
                     + "</code></pre>"
                 )
-        return "Trailing Ns check was run, but no issues were found."
+        return '<div class="success-container">Trailing Ns check was run, but no issues were found.</div>'
 
     try:
         # Create DataFrame and HTML table for actions
@@ -296,7 +296,7 @@ def load_vecscreen_results_as_table(file_path):
         return "VecScreen check was not run."
     if os.path.getsize(file_path) == 0:
         print(f"VecScreen file is empty: {file_path}", file=sys.stderr)
-        return "VecScreen check was run, but no vector contamination was detected."
+        return '<div class="success-container">VecScreen check was run, but no vector contamination was detected.</div>'
 
     try:
         # Read the file content
@@ -306,7 +306,7 @@ def load_vecscreen_results_as_table(file_path):
         # If the file is empty or contains only whitespace, return the "No data" message
         if not content:
             print(f"VecScreen file contains no data: {file_path}", file=sys.stderr)
-            return "VecScreen check was run, but no vector contamination was detected."
+            return '<div class="success-container">VecScreen check was run, but no vector contamination was detected.</div>'
 
         # Parse the space-separated data into a list of dictionaries
         data_rows = []
@@ -333,7 +333,7 @@ def load_vecscreen_results_as_table(file_path):
                 f"VecScreen file contains no valid data rows: {file_path}",
                 file=sys.stderr,
             )
-            return "VecScreen check was run, but no vector contamination was detected."
+            return '<div class="success-container">VecScreen check was run, but no vector contamination was detected.</div>'
 
         # Convert to DataFrame
         df = pd.DataFrame(data_rows)
@@ -432,7 +432,7 @@ def load_autofiltering_results_as_table(file_path):
         return "Autofiltering check was not run."
     if os.path.getsize(file_path) == 0:
         print(f"Autofiltering file is empty: {file_path}", file=sys.stderr)
-        return "Autofiltering check was run, but no filtering was performed."
+        return '<div class="success-container">Autofiltering check was run, but no filtering was performed.</div>'
 
     try:
         # First, try to read the CSV file normally
@@ -454,7 +454,7 @@ def load_autofiltering_results_as_table(file_path):
                     f"Autofiltering file has insufficient data: {file_path}",
                     file=sys.stderr,
                 )
-                return "Autofiltering check was run, but no filtering was performed."
+                return '<div class="success-container">Autofiltering check was run, but no filtering was performed.</div>'
 
             # Check if header and data have different number of columns
             header_cols = len(lines[0].strip().split(","))
@@ -494,7 +494,7 @@ def load_autofiltering_results_as_table(file_path):
         # If the DataFrame is empty, return the "No data" message
         if df.empty:
             print(f"Autofiltering file contains no data: {file_path}", file=sys.stderr)
-            return "Autofiltering check was run, but no filtering was performed."
+            return '<div class="success-container">Autofiltering check was run, but no filtering was performed.</div>'
 
         # Convert DataFrame to HTML table with simple styling (no DataTables)
         table_html = df.to_html(
