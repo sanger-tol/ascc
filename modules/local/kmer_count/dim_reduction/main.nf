@@ -15,7 +15,8 @@ process KMER_COUNT_DIM_REDUCTION {
     val autoencoder_epochs_count
 
     output:
-    tuple val(meta), path('*_kmers_dim_reduction_embeddings.csv'),      emit: csv
+    tuple val(meta), path('*_kmers_dim_reduction_dir'),                 emit: kmers_dim_reduction_dir
+    tuple val(meta), path('./'),                                        emit: results_dir
     path "versions.yml",                                                emit: versions
 
     when:
@@ -24,11 +25,15 @@ process KMER_COUNT_DIM_REDUCTION {
     script:
     def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
+    def dir_name = "${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir"
     """
+    # Create the directory with the standardized naming convention
+    mkdir -p $dir_name
 
+    # Run the dimensionality reduction and save the output in the directory
     kmer_count_dim_reduction.py \\
         $kmer_counts_file \\
-        ${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_embeddings.csv \\
+        $dir_name \\
         --selected_methods $dimensionality_reduction_method \\
         --n_neighbors_setting $n_neighbors_setting \\
         --autoencoder_epochs_count $autoencoder_epochs_count
@@ -41,15 +46,17 @@ process KMER_COUNT_DIM_REDUCTION {
         scikit-learn: \$(python3 -c "import sklearn; print(sklearn.__version__)")
         umap-learn: $UMAP_VERSION
         matplotlib: \$(python3 -c 'import matplotlib; print(matplotlib.__version__)')
-        kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version)
+        kmer_count_dim_reduction.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
     stub:
     def UMAP_VERSION = "0.5.5"
     def prefix = args.ext.prefix ?: "${meta.id}"
+    def dir_name = "${prefix}_${dimensionality_reduction_method}_kmers_dim_reduction_dir"
     """
-    touch ${prefix}_kmers_dim_reduction_embeddings.csv
+    mkdir -p $dir_name
+    touch $dir_name/kmers_dim_reduction_embeddings.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ASCC run report{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=Source+Code+Pro:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="css/ascc_report.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+
+    {# Determine which sections have content #}
+    {% set has_input_content = (samplesheet_data is defined and samplesheet_data) or (yaml_params_data is defined and yaml_params_data) or (reference_summary is defined and reference_summary) %}
+    {% set has_assembly_content = reference_summary is defined and reference_summary %}
+    {% set has_barcodes_content = barcodes_check_data is defined and barcodes_check_data and barcodes_check_data != "No barcode check results found." and barcodes_check_data != "PacBio barcode check was not run." %}
+    {% set has_fcs_adaptor_content = (fcs_adaptor_euk_report_data is defined and fcs_adaptor_euk_report_data and fcs_adaptor_euk_report_data != "No FCS-adaptor eukaryotic results found." and fcs_adaptor_euk_report_data != "FCS-adaptor check was not run." and fcs_adaptor_euk_report_data != "FCS-adaptor check was run and no adaptor contamination was detected.") or (fcs_adaptor_prok_report_data is defined and fcs_adaptor_prok_report_data and fcs_adaptor_prok_report_data != "No FCS-adaptor prokaryotic results found." and fcs_adaptor_prok_report_data != "FCS-adaptor check was not run." and fcs_adaptor_prok_report_data != "FCS-adaptor check was run and no adaptor contamination was detected.") %}
+    {% set has_trim_ns_content = trim_Ns_data is defined and trim_Ns_data and trim_Ns_data != "No trim Ns results found." and trim_Ns_data != "Trailing Ns check was not run." and trim_Ns_data != "Trailing Ns check was run and no issues were found." %}
+    {% set has_vecscreen_content = vecscreen_data is defined and vecscreen_data and vecscreen_data != "No vecscreen results found." and vecscreen_data != "VecScreen check was not run." and vecscreen_data != "VecScreen check was run and no vector contamination was detected." %}
+    {% set has_autofiltering_content = autofiltering_data is defined and autofiltering_data and autofiltering_data != "No autofiltering results found." and autofiltering_data != "Autofiltering check was not run." and autofiltering_data != "Autofiltering check was run and no filtering was performed." %}
+    {% set has_coverage_content = coverage_per_phylum_data is defined and coverage_per_phylum_data %}
+    {% set has_cobiont_content = contamination_check_merged_table_data is defined and contamination_check_merged_table_data and contamination_check_merged_table_data != "No contamination check merged table found." %}
+    {% set has_kmers_content = kmers_results is defined and kmers_results %}
+    {% set has_fasta_sanitation_content = fasta_sanitation_data is defined and fasta_sanitation_data %}
+    {# Determine if FCS-GX tab should be enabled #}
+    {% set has_fcs_gx_content = (fcs_gx_report_content or fcs_gx_taxonomy_content or fcs_gx_report_metadata or fcs_gx_report_table or fcs_gx_taxonomy_metadata or fcs_gx_taxonomy_table) %}
+
+    <script>
+        // Array to track which tabs should be disabled (empty tabs)
+        var emptyTabs = [];
+        // Overview tab is always enabled (index 0)
+        {% if not has_input_content %}emptyTabs.push(1);{% endif %}
+        {% if not has_barcodes_content %}emptyTabs.push(2);{% endif %}
+        {% if not has_fcs_adaptor_content %}emptyTabs.push(3);{% endif %}
+        {% if not has_fcs_gx_content %}emptyTabs.push(4);{% endif %}
+        {% if not has_trim_ns_content %}emptyTabs.push(5);{% endif %}
+        {% if not has_vecscreen_content %}emptyTabs.push(6);{% endif %}
+        {% if not has_autofiltering_content %}emptyTabs.push(7);{% endif %}
+        {% if not has_coverage_content %}emptyTabs.push(8);{% endif %}
+        {% if not has_kmers_content %}emptyTabs.push(9);{% endif %}
+        {% if not has_cobiont_content %}emptyTabs.push(10);{% endif %}
+    </script>
+
+    <script>
+    $(document).ready( function () {
+        // Initialize main tabs
+        $("#tabs").tabs(); // Restore basic tab functionality
+
+        // Disable empty tabs
+        for (var i = 0; i < emptyTabs.length; i++) {
+            $("#tabs").tabs("disable", emptyTabs[i]);
+        }
+
+        // Initialize K-mer method tabs (if K-mer tab is not disabled)
+        if (!emptyTabs.includes(9)) { // Check if K-mer tab (index 9) is enabled
+            if ($("#kmer-methods-tabs").length) { // Check if the element exists
+                $("#kmer-methods-tabs").tabs();
+            }
+        }
+
+        // Common DataTable options for consistent behavior
+        var dataTableOptions = {
+            scrollX: true,
+            autoWidth: false,
+            responsive: false,
+            columnDefs: [
+                { targets: '_all', width: 'auto' }
+            ],
+            initComplete: function(settings, json) {
+                var api = this.api();
+                setTimeout(function() {
+                    api.columns.adjust();
+                }, 200);
+                setTimeout(function() {
+                    api.columns.adjust();
+                }, 500);
+                setTimeout(function() {
+                    api.columns.adjust();
+                }, 1000);
+            }
+        };
+
+        // Initialize DataTables
+        if ($('#cobiont_check_merged_table').length) {
+            $('#cobiont_check_merged_table').DataTable($.extend({}, dataTableOptions, {
+                scrollX: false,
+                scrollCollapse: false
+            }));
+        }
+
+
+
+        // Initialize DataTables for FCS-GX tables if they exist
+        if ($('#fcsgx_report_table').length) {
+            $('#fcsgx_report_table').DataTable($.extend({}, dataTableOptions, {
+                scrollX: false,
+                scrollCollapse: true,
+                pageLength: 25
+            }));
+        }
+
+        if ($('#fcsgx_taxonomy_table').length) {
+            $('#fcsgx_taxonomy_table').DataTable($.extend({}, dataTableOptions, {
+                scrollX: false,
+                scrollCollapse: false,
+                pageLength: 25
+            }));
+        }
+
+        // VecScreen and FCS-adaptor tables use plain HTML (no DataTables)
+        if ($('#barcodes_table').length) {
+            $('#barcodes_table').DataTable($.extend({}, dataTableOptions));
+        }
+
+        // Function to adjust all DataTables columns
+        function adjustAllTables() {
+            $('.dataTable').each(function() {
+                try {
+                    $(this).DataTable().columns.adjust();
+                } catch(e) {
+                    console.log("Error adjusting table:", e);
+                }
+            });
+        }
+
+        // Adjust column widths on window resize - using standard DataTables API
+        $(window).on('resize', function() {
+            adjustAllTables();
+        });
+
+        // Force adjustment after a delay to ensure proper initial rendering
+        setTimeout(function() {
+            adjustAllTables();
+        }, 500);
+
+
+
+        // Add tab navigation for anchor links
+        $(document).on('click', 'a[href^="#"][href$="-tab"]', function(e) {
+            e.preventDefault();
+            var tabId = $(this).attr('href');
+            var tabIndex = $('#tabs ul li a[href="' + tabId + '"]').parent().index();
+            if (tabIndex >= 0) {
+                $("#tabs").tabs("option", "active", tabIndex);
+            }
+        });
+
+        // Add more table initializations here as needed, checking for existence first
+    } );
+    </script>
+</head>
+<body>
+    {% block page_header %}
+        {# Child template can override this to add specific headers if needed #}
+    {% endblock %}
+
+    <div id="tabs">
+        {% block tab_list %}
+            {# Tab list (ul) from child template will go here #}
+        {% endblock %}
+
+        {% block tab_panels %}
+            {# Tab panels (divs with includes) from child template will go here #}
+        {% endblock %}
+    </div>
+
+    <div class="footer">
+        <p>Report generated: {{ timestamp }}</p>
+        <p>ASCC Pipeline Version: {{ version }}</p>
+    </div>
+
+    {# Optional block for additional scripts if needed later, though primary scripts are in head #}
+    {% block body_scripts %}{% endblock %}
+</body>
+</html>

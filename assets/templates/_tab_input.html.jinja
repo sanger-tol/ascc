@@ -1,0 +1,55 @@
+{% from "_macros.html.jinja" import source_files %}
+
+<div class="narrow-table-wrapper">
+<h2>Input Files</h2>
+<div class="narrow-text-container">
+<p>This section displays the input files and parameters used for the ASCC pipeline run, including the samplesheet, configuration parameters, and assembly statistics. The assembly statistics provide an overview of the genome assembly's size and composition.</p>
+</div>
+
+{% if samplesheet_data is defined and samplesheet_data %}
+    <h3>Input Samplesheet</h3>
+    {{ source_files(samplesheet_file) }}
+    <div class="table-responsive">
+        <div class="table-wrapper">
+            {{ samplesheet_data }}
+        </div>
+    </div>
+{% endif %}
+
+{% if yaml_params_data is defined and yaml_params_data %}
+    <h3>Input Parameters</h3>
+    {{ source_files(params_file) }}
+    <div class="table-responsive">
+        <div class="table-wrapper">
+            {{ yaml_params_data }}
+        </div>
+    </div>
+{% endif %}
+
+<h3>Assembly Statistics</h3>
+{{ source_files(reference_file, "Assembly file") }}
+{% if reference_summary %}
+    {{ reference_summary }}
+{% else %}
+    <p>No assembly statistics available.</p>
+{% endif %}
+
+{% if fasta_sanitation_data %}
+    <h3>FASTA Sanitation</h3>
+    {% if fasta_sanitation_data.has_issues %}
+        <div class="notice-container notice-error">
+            <p>Issues with the input FASTA file headers were detected.</p>
+        </div>
+    {% endif %}
+    {% if fasta_sanitation_data.filtered_by_length %}
+        <div class="notice-container notice-error">
+            <p>Some sequences were filtered by length.</p>
+        </div>
+    {% else %}
+        <div class="notice-container notice-success">
+            <p>No sequences were filtered by length.</p>
+        </div>
+    {% endif %}
+    {{ fasta_sanitation_data.html }}
+{% endif %}
+</div>

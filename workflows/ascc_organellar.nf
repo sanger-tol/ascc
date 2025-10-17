@@ -19,6 +19,8 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
+include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
+include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,19 +70,31 @@ workflow ASCC_ORGANELLAR {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
-        ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
-        reference_tuple_from_GG = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-        reference_tuple_w_seqkt = ESSENTIAL_JOBS.out.reference_with_seqkit
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
+        ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+
+        ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ it ->
+                                    tuple(
+                                        [id: it[0].id, process: "GENOME"],
+                                        it[1]
+                                    )
+                                }
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
+        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
+        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
+        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
     } else {
         log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
-        reference_tuple_from_GG = ch_samplesheet
-        ej_dot_genome           = Channel.empty()
-        ej_gc_coverage          = Channel.empty()
-        reference_tuple_w_seqkt = Channel.empty()
+        ej_reference_tuple      = ch_samplesheet
+        ej_seqkit_reference     = ch_samplesheet
+        ej_dot_genome           = Channel.of( [[],[]] )
+        ej_gc_coverage          = Channel.of( [[],[]] )
+        ej_trailing_ns          = Channel.of( [[],[]] )
+        ej_fasta_sanitation_log = Channel.of( [[],[]] )
+        ej_fasta_filter_log     = Channel.of( [[],[]] )
     }
 
 
@@ -89,7 +103,7 @@ workflow ASCC_ORGANELLAR {
     //
     if ( params.run_tiara == "both" || params.run_tiara == "organellar" ) {
         TIARA_TIARA (
-            reference_tuple_from_GG
+            ej_reference_tuple
         )
         ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
         ch_tiara            = TIARA_TIARA.out.classifications
@@ -105,9 +119,9 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar" ) {
+    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "genomic" ) {
 
-        reference_tuple_from_GG
+        ej_reference_tuple
             .combine(pacbio_database)
             .multiMap{
                 ref_meta, ref_data, pdb_meta, pdb_data ->
@@ -121,23 +135,31 @@ workflow ASCC_ORGANELLAR {
             ch_barcodes,
             duplicated_db.pacbio_db
         )
-        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.collect()
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     } else {
-        ch_barcode_check    = Channel.empty()
+        ch_barcode_check    = Channel.of( [[],[]] )
     }
 
 
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar" ) {
+    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic" ) {
         RUN_FCSADAPTOR (
-            reference_tuple_from_GG
+            ej_reference_tuple
         )
+        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
-        ch_fcsadapt = RUN_FCSADAPTOR.out.ch_euk
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
+        //
+        ch_fcsadapt_euk     = RUN_FCSADAPTOR.out.ch_euk
+        ch_fcsadapt_prok    = RUN_FCSADAPTOR.out.ch_prok
+
+        RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
             )
@@ -148,9 +170,12 @@ workflow ASCC_ORGANELLAR {
                     file2
                 )
             }
+            .set { ch_fcsadapt }
 
     } else {
-        ch_fcsadapt         = Channel.empty()
+        ch_fcsadapt_euk     = Channel.of( [[],[]] )
+        ch_fcsadapt_prok    = Channel.of( [[],[]] )
+        ch_fcsadapt         = Channel.of( [[],[]] )
     }
 
 
@@ -160,7 +185,7 @@ workflow ASCC_ORGANELLAR {
 
     if ( (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") & !params.fcs_override) {
 
-        joint_channel = reference_tuple_from_GG
+        joint_channel = ej_reference_tuple
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
@@ -177,18 +202,33 @@ workflow ASCC_ORGANELLAR {
             joint_channel.ncbi_tax_path
         )
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
+
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
-                                .map { it ->
-                                    [[id: it[0].id, process: "FCSGX result"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "FCSGX result"], file]
                                 }
                                 .ifEmpty { [[],[]] }
+        ch_fcsgx_report     = RUN_FCSGX.out.fcsgx_report_txt
+        ch_fcsgx_taxonomy   = RUN_FCSGX.out.fcsgx_taxonomy_rpt
 
-    } else if (params.fcs_override) {
-        log.info("[ASCC info] Overriding Internal FCSGX")
-        ch_fcsgx         = fcs_ss
-        ch_fcsgx.view{"[ASCC info] OVERRIDDEN_FCSGX: $it"}
+    } else if ( params.fcs_override ) {
+
+        ch_fcsgx            = fcs_ss
+        ch_fcsgx.map{ meta, file ->
+            log.info("[ASCC info] Overriding Internal FCSGX with ${file}")
+        }
+        ch_fcsgx_report     = Channel.of( [[],[]] )
+        ch_fcsgx_taxonomy   = Channel.of( [[],[]] )
+
     } else {
-        ch_fcsgx         = Channel.of( [[],[]] )
+        ch_fcsgx            = Channel.of( [[],[]] )
+        ch_fcsgx_report     = Channel.of( [[],[]] )
+        ch_fcsgx_taxonomy   = Channel.of( [[],[]] )
     }
 
 
@@ -198,20 +238,25 @@ workflow ASCC_ORGANELLAR {
     if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
 
         RUN_READ_COVERAGE (
-            reference_tuple_from_GG, // Again should this be the validated fasta?
+            ej_reference_tuple, // Again should this be the validated fasta?
             reads,
             reads_type,
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-                                .map { it ->
-                                    [[id: it[0].id, process: "Coverage"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "Coverage"], file]
                                 }
                                 .ifEmpty { [[],[]] }
 
         ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-                                .map { it ->
-                                    [[id: it[0].id, process: "Mapped Bam"], it[1]]
+                                .map { meta, file ->
+                                    tuple([id: meta.id, process: "Mapped Bam"], file)
                                 }
                                 .ifEmpty { [[],[]] }
 
@@ -225,19 +270,23 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
     if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
-
         RUN_VECSCREEN (
-            reference_tuple_from_GG, // Again should this be the validated fasta?
+            ej_reference_tuple,
             vecscreen_database_path.first()
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
                                 .map { it ->
                                     [[id: it[0].id, process: "Vecscreen"], it[1]]
                                 }
                                 .ifEmpty { [[],[]] }
     } else {
-        ch_vecscreen        = Channel.empty()
+        ch_vecscreen        = Channel.of( [[],[]] )
     }
 
     //
@@ -246,10 +295,16 @@ workflow ASCC_ORGANELLAR {
     if ( params.run_kraken == "both" || params.run_kraken == "genomic" ) {
 
         RUN_NT_KRAKEN(
-            reference_tuple_from_GG,
+            ej_reference_tuple,
             nt_kraken_db_path.first(),
             ncbi_ranked_lineage_path.first()
         )
+        ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+
+        //
+        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+        //
         ch_kraken1 = RUN_NT_KRAKEN.out.classified
                         .map { it ->
                             [[id: it[0].id, process: "Kraken 1"], it[1]]
@@ -268,17 +323,16 @@ workflow ASCC_ORGANELLAR {
                         }
                     .ifEmpty { [[],[]] }
     } else {
-        ch_kraken1 = Channel.empty()
-        ch_kraken2 = Channel.empty()
-        ch_kraken3 = Channel.empty()
-
+        ch_kraken1 = Channel.of( [[],[]] )
+        ch_kraken2 = Channel.of( [[],[]] )
+        ch_kraken3 = Channel.of( [[],[]] )
     }
 
 
     //
     // LOGIC: WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE IS OF AT LEAST LENGTH OF params.seqkit_window
     //
-    valid_length_fasta = reference_tuple_w_seqkt
+    valid_length_fasta = ej_seqkit_reference
         //
         // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         //
@@ -382,7 +436,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    //qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    // NOTE: Format is "qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles"
     if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "genomic" ) {
 
         UP_DIAMOND (
@@ -414,7 +468,7 @@ workflow ASCC_ORGANELLAR {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        ch_organellar_cbtk_input = reference_tuple_from_GG
+        ch_organellar_cbtk_input = ej_reference_tuple
             .map{ it -> tuple([
                 id: it[0].id,
                 taxid: it[0].taxid,
@@ -422,7 +476,7 @@ workflow ASCC_ORGANELLAR {
                 process: "REFERENCE"], it[1])
             }
             .mix(
-                ej_dot_genome.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
+                ej_reference_tuple.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
                 ch_tiara,
                 ch_nt_blast,
                 ch_btk_format,
@@ -487,11 +541,14 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
-        create_summary          = CREATE_BTK_DATASET.out.create_summary.map{ it -> tuple([id: it[0].id, process: "C_BTK_SUM"], it[1])}
-        create_btk_dataset      = CREATE_BTK_DATASET.out.btk_datasets
+        ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
+                                    .map{ meta, file ->
+                                        tuple([id: meta.id, process: "C_BTK_SUM"], file)
+                                    }
+        ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
     } else {
-        create_summary          = Channel.empty()
-        create_btk_dataset      = Channel.empty()
+        ch_create_summary       = Channel.of( [[],[]] )
+        ch_create_btk_dataset   = Channel.of( [[],[]] )
     }
 
 
@@ -513,7 +570,7 @@ workflow ASCC_ORGANELLAR {
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
 
-        autofilter_input_formatted = reference_tuple_from_GG
+        autofilter_input_formatted = ej_reference_tuple
             .map{ it -> tuple([id: it[0].id], it[1])}
             .combine(
                 ch_tiara
@@ -566,17 +623,139 @@ workflow ASCC_ORGANELLAR {
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_alarm_file  = Channel.empty()
-        ch_autofilt_removed_seqs= Channel.empty()
-        ch_autofilt_assem       = Channel.empty()
-        ch_autofilt_indicator   = Channel.empty()
-        ch_autofilt_fcs_tiara   = Channel.empty()
-        ch_autofilt_raw_report  = Channel.empty()
+        ch_autofilt_alarm_file  = Channel.of( [[],[]] )
+        ch_autofilt_removed_seqs= Channel.of( [[],[]] )
+        ch_autofilt_assem       = Channel.of( [[],[]] )
+        ch_autofilt_indicator   = Channel.of( [[],[]] )
+        ch_autofilt_fcs_tiara   = Channel.of( [[],[]] )
+        ch_autofilt_raw_report  = Channel.of( [[],[]] )
+    }
+
+    //
+    // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
+    //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
+    //
+    if (
+        ( params.run_essentials == "both" || params.run_essentials == "organellar" ) &&
+        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "organellar" )
+    ) {
+
+        //
+        // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
+        //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
+        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
+        //
+        busco_merge_btk = Channel.of( [[],[]] )
+        ch_kmers = Channel.of( [[],[]] )
+
+        ascc_merged_data = ej_gc_coverage
+            .map{ meta, file -> tuple([
+                id: meta.id,
+                process: "GC_COV"], file)
+            }
+            .mix(
+                ej_dot_genome,
+                ch_create_summary,
+                busco_merge_btk,
+                ch_kmers,
+                ch_tiara,
+                ch_fcsgx,
+                ch_coverage,
+                ch_kraken3,
+                ch_blast_lineage,
+                nr_hits,
+                un_hits
+            )
+            .map { meta, file ->
+                [meta.id, [meta: meta, file: file]]
+            }
+            .filter { id, data -> id != [] }
+            .groupTuple()
+            .map { id, data ->
+                [id: id, data: data]
+            }
+
+            def processes = [
+                'GC_COV', 'Coverage', 'TIARA',
+                'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
+                'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+            ]
+
+
+        def processChannels = processes.collectEntries { process ->
+            [(process): ascc_merged_data
+                .map { sample ->
+                    def data = sample.data.find { it.meta.process == process }
+                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+                }
+            ]
+        }
+
+        def ascc_combined_channels = processChannels['GC_COV']
+        processes.tail().each { process ->
+            ascc_combined_channels = ascc_combined_channels
+                                    .combine(processChannels[process], by: 0)
+        }
+
+        ASCC_MERGE_TABLES (
+            ascc_combined_channels.map { it[1..-1] }
+        )
+        ch_versions               = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
+        org_merged_table          = ASCC_MERGE_TABLES.out.merged_table
+        org_merged_phylum_count   = ASCC_MERGE_TABLES.out.phylum_counts
+
+    } else {
+        org_merged_table          = Channel.of( [[],[]] )
+        merged_extended_table     = Channel.empty()
+        org_merged_phylum_count   = Channel.of( [[],[]] )
+    }
+
+    //
+    // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
+    //  Gate with params.run_html_report to avoid altering default behavior.
+    //  Use existing channels; substitute placeholders where features are disabled or not wired.
+    //
+
+    if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
+
+        // Placeholders for channels not generated in organellar subworkflow
+        ch_kmers_results = Channel.of( [[],[]] )
+
+        // Samplesheet/params file
+        ch_samplesheet_path = Channel.fromPath(params.input)
+        ch_params_file      = (params.containsKey('params_file') && params.params_file) ? Channel.fromPath(params.params_file) : Channel.value([])
+
+        // Templates and CSS
+        ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+        ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_check,
+            ch_fcsadapt_euk,
+            ch_fcsadapt_prok,
+            ej_trailing_ns,
+            ch_vecscreen,
+            ch_autofilt_fcs_tiara,
+            org_merged_table,
+            org_merged_phylum_count,
+            ch_kmers_results,
+            ej_reference_tuple,
+            ej_fasta_sanitation_log,
+            ej_fasta_filter_log,
+            ch_jinja_templates,
+            ch_samplesheet_path,
+            ch_params_file,
+            ch_fcsgx_report,
+            ch_fcsgx_taxonomy,
+            ch_create_btk_dataset,
+            ch_css_files
+        )
+        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
     emit:
 
-    essential_reference         = reference_tuple_from_GG
+    essential_reference         = ej_reference_tuple
     essential_genome_file       = ej_dot_genome
     essential_gc_cov            = ej_gc_coverage
 
@@ -603,8 +782,8 @@ workflow ASCC_ORGANELLAR {
     autofilter_indicator_file   = ch_autofilt_indicator
     autofilter_raw_report       = ch_autofilt_raw_report
 
-    create_btk_ds_dataset       = create_btk_dataset
-    create_btk_ds_create_smry   = create_summary
+    create_btk_ds_dataset       = ch_create_btk_dataset
+    create_btk_ds_create_smry   = ch_create_summary
 
     kraken2_classified          = ch_kraken1
     kraken2_report              = ch_kraken2

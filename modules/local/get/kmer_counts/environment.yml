@@ -1,0 +1,7 @@
+name: get_kmer_counts
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # No conda dependencies needed - kmer-counter is provided as a binary
