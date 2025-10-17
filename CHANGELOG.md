@@ -24,6 +24,17 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 | -------------------- | ----------- | ------------ |
 | GENERATE_HTML_REPORT | NA          | 1.0          |
 
+## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 10 of sanger-tol/ascc, a bug fix for the btk trace.config file.
+
+### `Fixed`
+
+- host_name should have been hostname
+- missing double quotation mark in string
+
 ## [0.5.2] - Red Spider-Boat (H2) [06/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.

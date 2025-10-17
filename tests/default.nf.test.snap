@@ -153,7 +153,7 @@
                     "trim_Ns.py": 1.0
                 },
                 "Workflow": {
-                    "sanger-tol/ascc": "v0.5.2"
+                    "sanger-tol/ascc": "v0.5.3"
                 }
             },
             [
