@@ -50,7 +50,7 @@ process CREATE_BTK_DATASET {
     """
     mkdir -p btk_datasets_CBD/
 
-    $baseDir/bin/create_btk_dataset.py \\
+    create_btk_dataset.py \\
         -o btk_datasets_CBD \\
         -f ${reference} \\
         -d ./1/ \\

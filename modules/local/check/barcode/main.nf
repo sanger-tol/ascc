@@ -21,7 +21,7 @@ process CHECK_BARCODE {
     def args        = task.ext.args     ?: ''
     """
     OUTPUT=\$(\\
-        $baseDir/bin/pacbio_barcode_check.py \\
+        pacbio_barcode_check.py \\
             -b ${barcodes} \\
             -p in/ \\
             -m ${multiplex_csv})

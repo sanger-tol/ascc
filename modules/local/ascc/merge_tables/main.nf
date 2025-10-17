@@ -44,7 +44,7 @@ process ASCC_MERGE_TABLES {
     def fcs_gx                      = fcs_gx                    ? "-fg ${fcs_gx}"                   : ""
 
     """
-    $baseDir/bin/ascc_merge_tables.py \\
+    ascc_merge_tables.py \\
         --gc_cov $gc_content \\
         --sample_name $meta.id \\
         $coverage \\

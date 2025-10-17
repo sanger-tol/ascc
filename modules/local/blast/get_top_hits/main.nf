@@ -17,7 +17,7 @@ process BLAST_GET_TOP_HITS {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    $baseDir/bin/blast_get_top_hits.py ${outfmt6} > ${prefix}_tophits.tsv
+    blast_get_top_hits.py ${outfmt6} > ${prefix}_tophits.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

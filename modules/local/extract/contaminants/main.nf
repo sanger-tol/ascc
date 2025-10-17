@@ -19,7 +19,7 @@ process EXTRACT_CONTAMINANTS {
     def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
-    $baseDir/bin/extract_contaminants_by_type.py \\
+    extract_contaminants_by_type.py \\
         ${blast_data} \\
         --assembly_file ${fasta} \\
         --out_prefix ${prefix}

@@ -17,7 +17,7 @@ process GET_LINEAGE_FOR_TOP {
 
     script:
     """
-    $baseDir/bin/get_lineage_for_top.py --blast_tsv ${tophits} --taxdump ${ncbi_lineage_path} --output_csv ./${meta.id}_BLAST_results_with_lineage.csv --column_name_prefix nt_
+    get_lineage_for_top.py --blast_tsv ${tophits} --taxdump ${ncbi_lineage_path} --output_csv ./${meta.id}_BLAST_results_with_lineage.csv --column_name_prefix nt_
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
