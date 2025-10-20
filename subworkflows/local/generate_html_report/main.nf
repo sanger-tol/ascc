@@ -4,8 +4,7 @@ import groovy.json.JsonOutput
 workflow GENERATE_HTML_REPORT_WORKFLOW {
     take:
     barcode_results            // channel: [ val(meta), [ barcode_results ] ]
-    fcs_adaptor_euk            // channel: [ val(meta), [ fcs_adaptor_euk ] ]
-    fcs_adaptor_prok           // channel: [ val(meta), [ fcs_adaptor_prok ] ]
+    fcs_adaptor
     trim_ns_results            // channel: [ val(meta), [ trim_ns_results ] ]
     vecscreen_results          // channel: [ val(meta), [ vecscreen_results ] ]
     autofilter_results         // channel: [ val(meta), [ autofilter_results ] ]
@@ -26,125 +25,103 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     main:
     ch_versions = Channel.empty()
 
-
-    // Use mix instead of join to handle empty channels
-    // Create a channel keyed by meta.id containing the meta map
-    // First, check if barcode_results is empty or has the format [[id: "empty"],[]]
-    def meta_channel_by_id
-    if (barcode_results.ifEmpty(true)) {
-        // If barcode_results is empty, use reference_fasta as the source of meta
-        meta_channel_by_id = reference_fasta
-            .map { meta, files -> [meta.id, meta] } // Key by meta.id, value is meta map
-            .unique()
-    } else {
-        meta_channel_by_id = barcode_results
-            .filter { meta, files -> meta.id != "empty" } // Filter out empty placeholders
-            .map { meta, files -> [meta.id, meta] } // Key by meta.id, value is meta map
-            .unique()
-    }
-
-    // Map each input channel to a tuple keyed by meta.id, using empty list for missing files
-    meta_channel_by_id // Now starts with [id, meta]
-        .combine(barcode_results.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] }) // Key by meta.id
-        .combine(fcs_adaptor_euk.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] }) // Key by meta.id
-        .combine(fcs_adaptor_prok.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] }) // Key by meta.id
-        .combine(trim_ns_results.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-        .combine(vecscreen_results.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-        .combine(autofilter_results.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-        .combine(merged_table.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-        .combine(phylum_counts.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-        .combine(kmers_results.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-        .combine(reference_fasta.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] }) // Reference fasta should always have a valid meta
-        .combine(fasta_sanitation_log.map { obj ->
-            if (obj instanceof Map) {
-                return [obj.id, obj.file ?: []]
-            } else if (obj instanceof List && obj.size() >= 2) {
-                def meta = obj[0]
-                // Skip if meta.id is "empty"
-                if (meta.id == "empty") {
-                    return [null, []]
-                }
-                def files = obj[1]
-                return [meta.id ?: null, files ?: []]
-            } else {
-                return [null, []]
-            }
-        }.ifEmpty { [null, []] })
-        .combine(fasta_length_filtering_log.map { obj ->
-            if (obj instanceof Map) {
-                return [obj.id, obj.file ?: []]
-            } else if (obj instanceof List && obj.size() >= 2) {
-                def meta = obj[0]
-                // Skip if meta.id is "empty"
-                if (meta.id == "empty") {
-                    return [null, []]
-                }
-                def files = obj[1]
-                return [meta.id ?: null, files ?: []]
-            } else {
-                return [null, []]
-            }
-        }.ifEmpty { [null, []] })
-        // Handle fcsgx_report_txt and fcsgx_taxonomy_rpt channels which are already in the format [id, file]
-        .combine(fcsgx_report_txt.filter { obj ->
-            if (obj instanceof List && obj.size() >= 1) {
-                return obj[0] != "empty"
-            } else if (obj instanceof Map && obj.containsKey('id')) {
-                return obj.id != "empty"
-            } else {
-                return true
-            }
-        }.ifEmpty { [null, []] })
-        .combine(fcsgx_taxonomy_rpt.filter { obj ->
-            if (obj instanceof List && obj.size() >= 1) {
-                return obj[0] != "empty"
-            } else if (obj instanceof Map && obj.containsKey('id')) {
-                return obj.id != "empty"
-            } else {
-                return true
-            }
-        }.ifEmpty { [null, []] })
-        .combine(btk_dataset.filter { meta, files -> meta.id != "empty" }.map { meta, files -> [meta.id, files] }.ifEmpty { [null, []] })
-
-        // The map closure now receives id, meta, then pairs of id_dup, files for each combined channel
-        .map { id, meta, barcode_id_dup, barcode, fcs_euk_id_dup, fcs_euk, fcs_prok_id_dup, fcs_prok, trim_ns_id_dup, trim_ns, vecscreen_id_dup, vecscreen, autofilter_id_dup, autofilter, merged_id_dup, merged, phylum_id_dup, phylum, kmers_id_dup, kmers, ref_id_dup, ref, sanitation_id_dup, sanitation, length_filtering_id_dup, length_filtering, fcsgx_report_id_dup, fcsgx_report, fcsgx_tax_id_dup, fcsgx_tax, btk_id_dup, btk ->
-            // Ensure we handle potential nulls from ifEmpty
-            def final_barcode = barcode ?: []
-            def final_fcs_euk = fcs_euk ?: []
-            def final_fcs_prok = fcs_prok ?: []
-            def final_trim_ns = trim_ns ?: []
-            def final_vecscreen = vecscreen ?: []
-            def final_autofilter = autofilter ?: []
-            def final_merged = merged ?: []
-            def final_phylum = phylum ?: []
-            def final_kmers = kmers ?: []
-            def final_ref = ref ?: []
-            def final_sanitation = sanitation ?: []
-            def final_length_filtering = length_filtering ?: []
-            def final_fcsgx_report = fcsgx_report ?: []
-            def final_fcsgx_tax = fcsgx_tax ?: []
-            def final_btk = btk ?: []
-            // We only need the original meta map and the actual file data for the output tuple
-            tuple(meta, final_barcode, final_fcs_euk, final_fcs_prok, final_trim_ns, final_vecscreen, final_autofilter, final_merged, final_phylum, final_kmers, final_ref, final_sanitation, final_length_filtering, final_fcsgx_report, final_fcsgx_tax, final_btk)
+    fcs_adaptor
+        .multiMap { meta, file1, file2 ->
+            euk: [meta + [process: "FCS-Adaptor-EUK"], file1]
+            prok: [meta + [process: "FCS-Adaptor-PROK"], file2]
         }
-        .set { combined_inputs }
+        .set { fcs_adaptor_split }
 
+    barcode_results
+        .map{ meta, _file ->
+            def new_meta = meta + [process: "BARCODES"]
+            [new_meta, _file]
+        }.mix(
+            fcs_adaptor_split.euk,
+            fcs_adaptor_split.prok,
+            trim_ns_results
+                .map{ meta, _file ->
+                    def new_meta = meta + [process: "TRAILINGNS"]
+                    [new_meta, _file]
+                },
+            vecscreen_results,
+            autofilter_results
+                .map{ meta, _file ->
+                    def new_meta = meta + [process: "AUTOFILTER"]
+                    [new_meta, _file]
+                },
+            merged_table
+                .map{ meta, _file ->
+                    def new_meta = meta + [process: "MERGED_TABLE"]
+                    [new_meta, _file]
+                },
+            phylum_counts
+                .map{ meta, _file ->
+                    def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
+                    [new_meta, _file]
+                },
+            kmers_results,
+            reference_fasta,
+            fasta_sanitation_log,
+            fasta_length_filtering_log,
+            fcsgx_report_txt,
+            fcsgx_taxonomy_rpt,
+            btk_dataset
+        )
+        .map { meta, file ->
+            [meta.id, [meta: meta, file: file]]
+        }
+        .filter { id, data -> id != [] }
+        .groupTuple()
+        .map { id, data ->
+            [id: id, data: data]
+        }
+        .set { all_data }
+
+        def processes = [
+            'REFERENCE', 'REFERENCE_FILT_LOG', 'REFERENCE_SANI_LOG',
+            'TRAILING_NS', 'FCSGX_REPORT', 'FCSGX_TAX_REPORT',
+            'Vecscreen', 'KMER_RESULTS', "FCS-Adaptor-EUK", "FCS-Adaptor-PROK"
+        ]
+
+        def processChannels = processes.collectEntries { process ->
+            [(process): all_data
+                .map { sample ->
+                    def data = sample.data.find { it.meta.process == process }
+                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+                }
+            ]
+        }
+
+        def combined_channels = processChannels['REFERENCE']
+
+        processes.tail().each { process ->
+            combined_channels = combined_channels
+                                    .combine(processChannels[process], by: 0)
+        }
+
+        // samplesheet,
+        // params_file,
+        // jinja_templates_list,
+        // css_files_list
+
+        combined_channels.view{"DATA: $it"}
 
     // Convert params to JSON for passing to the HTML report
-    def paramsJson = JsonOutput.toJson(params)
+    //def paramsJson = JsonOutput.toJson(params)
 
-    // Generate HTML report
-    GENERATE_HTML_REPORT (
-        combined_inputs,
-        jinja_templates_list, // Pass the list of Jinja templates
-        samplesheet,
-        params_file,
-        paramsJson, // Note: combined_inputs now contains the fcsgx file paths
-        css_files_list // Pass the CSS files
-    )
-    ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
+    // // Generate HTML report
+    // GENERATE_HTML_REPORT (
+    //     combined_inputs,
+    //     jinja_templates_list, // Pass the list of Jinja templates
+    //     samplesheet,
+    //     params_file,
+    //     paramsJson, // Note: combined_inputs now contains the fcsgx file paths
+    //     css_files_list // Pass the CSS files
+    // )
+    // ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 
-    emit:
-    report    = GENERATE_HTML_REPORT.out.report
-    versions  = ch_versions
+    // emit:
+    // report    = GENERATE_HTML_REPORT.out.report
+    // versions  = ch_versions
 }

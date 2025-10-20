@@ -52,7 +52,10 @@ workflow ASCC {
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
     //
-    // TODO: FCS OVERRIDE VALUES NOW AVAILABLE
+    // TODO: HERE SHOULD BE HERE I SPLIT GENOMIC INTO CHANNELS
+
+    genomic_genomes.view{"GENOMES: $it"}
+
     GENOMIC (
         genomic_genomes,
         organellar_genomes,

@@ -33,7 +33,7 @@ workflow ASCC_ORGANELLAR {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     fcs_ov                  // params.fcs_override
-    fcs_ss                  //
+    fcs_samplesheet         // The FCS override samplesheet for override
     fcs_db                  // [path(path)]
     reads
     scientific_name         // val(name)
@@ -59,7 +59,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_samplesheet
         .map { meta, sample ->
-            log.info "[ASCC info] ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
+            log.info "[ASCC INFO]: ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
 
@@ -86,7 +86,7 @@ workflow ASCC_ORGANELLAR {
         ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
     } else {
-        log.warn("[ASCC warn] MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
 
         ej_reference_tuple      = ch_samplesheet
         ej_seqkit_reference     = ch_samplesheet
@@ -119,7 +119,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "genomic" ) {
+    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar" ) {
 
         ej_reference_tuple
             .combine(pacbio_database)
@@ -146,7 +146,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic" ) {
+    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar" ) {
         RUN_FCSADAPTOR (
             ej_reference_tuple
         )
@@ -210,7 +210,7 @@ workflow ASCC_ORGANELLAR {
         //
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
                                 .map { meta, file ->
-                                    [[id: meta.id, process: "FCSGX result"], file]
+                                    [[id: meta.id, process: "FCSGX_RESULT"], file]
                                 }
                                 .ifEmpty { [[],[]] }
         ch_fcsgx_report     = RUN_FCSGX.out.fcsgx_report_txt
@@ -218,9 +218,9 @@ workflow ASCC_ORGANELLAR {
 
     } else if ( params.fcs_override ) {
 
-        ch_fcsgx            = fcs_ss
+        ch_fcsgx            = fcs_samplesheet
         ch_fcsgx.map{ meta, file ->
-            log.info("[ASCC info] Overriding Internal FCSGX with ${file}")
+            log.info("[ASCC INFO]: Overriding Internal FCSGX with ${file}")
         }
         ch_fcsgx_report     = Channel.of( [[],[]] )
         ch_fcsgx_taxonomy   = Channel.of( [[],[]] )
@@ -235,10 +235,10 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
+    if ( params.run_coverage == "both" || params.run_coverage == "organellar" ) {
 
         RUN_READ_COVERAGE (
-            ej_reference_tuple, // Again should this be the validated fasta?
+            ej_reference_tuple,
             reads,
             reads_type,
         )
@@ -269,7 +269,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
+    if ( params.run_vecscreen == "both" || params.run_vecscreen == "organellar" ) {
         RUN_VECSCREEN (
             ej_reference_tuple,
             vecscreen_database_path.first()
@@ -292,7 +292,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( params.run_kraken == "both" || params.run_kraken == "genomic" ) {
+    if ( params.run_kraken == "both" || params.run_kraken == "organellar" ) {
 
         RUN_NT_KRAKEN(
             ej_reference_tuple,
@@ -359,7 +359,7 @@ workflow ASCC_ORGANELLAR {
 
     valid_length_fasta
         .map{ meta, file ->
-            log.info "[ASCC info] Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
+            log.info "[ASCC INFO]: Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
 
     //
@@ -368,7 +368,7 @@ workflow ASCC_ORGANELLAR {
     //              _AS WELL AS_
     //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
     //
-    if ( params.run_nt_blast == "both" || params.run_nt_blast == "genomic" ) {
+    if ( params.run_nt_blast == "both" || params.run_nt_blast == "organellar" ) {
 
         //
         //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
@@ -408,7 +408,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "genomic" ) {
+    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "organellar" ) {
 
         NR_DIAMOND (
             valid_length_fasta,
@@ -437,7 +437,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     // NOTE: Format is "qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles"
-    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "genomic" ) {
+    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "organellar" ) {
 
         UP_DIAMOND (
             valid_length_fasta,
@@ -461,7 +461,7 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic" ) {
+    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "organellar" ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
@@ -505,7 +505,7 @@ workflow ASCC_ORGANELLAR {
         //
         def processes = [
             'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
-            'FCSGX result', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
+            'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
             'Kraken 1', 'Kraken 3'
         ]
 
@@ -678,7 +678,7 @@ workflow ASCC_ORGANELLAR {
             def processes = [
                 'GC_COV', 'Coverage', 'TIARA',
                 'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
-                'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+                'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
             ]
 
 

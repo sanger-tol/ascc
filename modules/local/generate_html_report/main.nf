@@ -12,8 +12,7 @@ process GENERATE_HTML_REPORT {
     input:
     tuple val(meta),
         path(barcode_results,               stageAs: "barcodes/*"),
-        path(fcs_adaptor_euk,               stageAs: "fcs/*"),
-        path(fcs_adaptor_prok,              stageAs: "fcs/*"),
+        path(fcs_adaptor,                   stageAs: "fcs/*"),
         path(trim_ns_results,               stageAs: "trailingns/*"),
         path(vecscreen_results,             stageAs: "vecscreen/*"),
         path(autofilter_results,            stageAs: "autofilter/*"),
