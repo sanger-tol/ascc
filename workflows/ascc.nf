@@ -6,6 +6,8 @@
 include { ASCC_GENOMIC      as GENOMIC      } from './ascc_genomic'
 include { ASCC_ORGANELLAR   as ORGANELLAR   } from './ascc_organellar'
 
+include { DECONTAMINATE_FASTA               } from '../subworkflows/local/decontaminate_fasta'
+
 include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
 
@@ -106,6 +108,13 @@ workflow ASCC {
         )
         ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
     }
+
+
+    //
+    // SUBWORKFLOW: 
+    //
+
+
 
     //
     // Collate and save software versions
