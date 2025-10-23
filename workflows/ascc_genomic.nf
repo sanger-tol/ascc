@@ -106,24 +106,62 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
     //             SCAFFOLDS IN ASSEMBLY
 
+
+    //
+    // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION
+    //
+    def sourmashConfig = new SourmashDatabaseConfig()
+    def sourmash_databases = sourmashConfig.parseDatabaseConfig(params)
+
+    // Validate databases if Sourmash is enabled
+    if (params.run_sourmash == "both" || params.run_sourmash == "genomic") {
+        if (sourmash_databases.size() > 0) {
+            def validation = sourmashConfig.validateDatabases(sourmash_databases)
+
+            // Log warnings
+            validation.warnings.each { warning ->
+                log.warn "[ASCC Sourmash] ${warning}"
+            }
+
+            // Log summary if valid
+            if (validation.valid) {
+                sourmashConfig.logDatabaseSummary(sourmash_databases)
+            } else {
+                log.error "[ASCC Sourmash] Database validation failed. Sourmash will be skipped."
+                sourmash_databases = []
+            }
+        } else {
+            log.warn "[ASCC Sourmash] No Sourmash databases configured. Sourmash will be skipped."
+        }
+    }
+
+    // Create channel for Sourmash databases
+    ch_sourmash_databases = Channel.fromList(sourmash_databases)
+
+
     if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
 
-        reference_tuple_from_GG
-            .map { meta, file ->
-                def meta2 = [] // Inject meta data for sourmash runs
-                [meta2, file]
-            }
-            .set { sourmash_reference }
+        // Only run if databases are configured and validated
+        if (sourmash_databases.size() > 0) {
+            reference_tuple_from_GG
+                .map { meta, file ->
+                    def meta2 = [] // Inject meta data for sourmash runs
+                    [meta2, file]
+                }
+                .set { sourmash_reference }
 
-        ch_dbs = Channel.empty()
-        RUN_SOURMASH (
-            sourmash_reference,
-            ch_dbs
-        )
+            RUN_SOURMASH (
+                sourmash_reference,
+                ch_sourmash_databases
+            )
 
-        // This will be used for btk input if we decide to go that route
-        ch_sourmash         = Channel.of( [[],[]] )
-        ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+            // This will be used for btk input if we decide to go that route
+            ch_sourmash         = Channel.of( [[],[]] )
+            ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+        } else {
+            log.warn "[ASCC Sourmash] Skipping Sourmash: no valid databases configured"
+            ch_sourmash         = Channel.of( [[],[]] )
+        }
 
     } else {
         ch_sourmash         = Channel.of( [[],[]] )
