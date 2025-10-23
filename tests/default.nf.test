@@ -155,6 +155,26 @@ nextflow_pipeline {
                 diamond_uniprot_database_path   = "${launchDir}/DIAMOND/diamond.dmnd"
                 diamond_nr_database_path        = "${launchDir}/DIAMOND/diamond.dmnd"
 
+                // Sourmash databases (test files extracted from TEST_DATA archive)
+                sourmash_databases              = [
+                    [
+                        name: 'gtdb_k21_k31_k51_s200_batch_1',
+                        path: "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_1.zip",
+                        k_available: [21, 31, 51],
+                        k_for_search: 21,
+                        s: 200,
+                        assembly_taxa_db: "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db/gtdb_v226_sourmash_input_subset_taxa.csv"
+                    ],
+                    [
+                        name: 'gtdb_k21_k31_k51_s200_batch_2',
+                        path: "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_2.zip",
+                        k_available: [21, 31, 51],
+                        k_for_search: 21,
+                        s: 200,
+                        assembly_taxa_db: "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db/gtdb_v226_sourmash_input_subset_taxa.csv"
+                    ]
+                ]
+
                 // other params can be found in `/conf/test.config`
             }
         }
