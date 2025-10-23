@@ -146,6 +146,62 @@
                     "description": "Path to NR Diamond DB",
                     "fa_icon": "fas fa-file-lines"
                 },
+                "sourmash_databases": {
+                    "type": "array",
+                    "description": "List of Sourmash databases for taxonomic classification. Each database is a map with keys: name, path, k_available, k_for_search, s, assembly_taxa_db",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "Array of maps defining Sourmash databases. Each entry must contain: 'name' (unique identifier), 'path' (to .zip or .rocksdb file), 'k_available' (list of k-mer sizes in database), 'k_for_search' (single k-mer size to use for searching), 's' (scaled parameter), 'assembly_taxa_db' (path to taxonomy CSV). Example: [{name: 'vertebrate_k51', path: '/path/to/db.zip', k_available: [31, 51], k_for_search: 51, s: 200, assembly_taxa_db: '/path/to/taxa.csv'}]. Either this parameter or sourmash_db_config must be provided if run_sourmash is enabled.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Unique name for the database"
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "Path to database file (.zip or .rocksdb)"
+                            },
+                            "k_available": {
+                                "type": "array",
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "description": "List of k-mer sizes available in the database"
+                            },
+                            "k_for_search": {
+                                "type": "integer",
+                                "description": "Single k-mer size to use for multisearch"
+                            },
+                            "s": {
+                                "type": "integer",
+                                "description": "Scaled parameter for the database"
+                            },
+                            "assembly_taxa_db": {
+                                "type": "string",
+                                "description": "Path to assembly taxonomy database CSV"
+                            }
+                        },
+                        "required": ["name", "path", "k_available", "k_for_search", "s", "assembly_taxa_db"]
+                    }
+                },
+                "sourmash_db_config": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.csv$",
+                    "description": "Path to CSV file containing Sourmash database configuration",
+                    "fa_icon": "fas fa-file-csv",
+                    "help_text": "CSV file with columns: name, path, k_available, k_for_search, s, assembly_taxa_db. Each row defines one database. The k_available column should contain a JSON array string (e.g., '[31,51]'). If provided, this takes precedence over sourmash_databases parameter. See documentation for format details."
+                },
+                "sourmash_taxonomy_level": {
+                    "type": "string",
+                    "description": "Taxonomic level to use for target taxa extraction from NCBI taxonomy",
+                    "fa_icon": "fas fa-sitemap",
+                    "default": "order",
+                    "enum": ["class", "family", "order", "genus", "phylum"],
+                    "help_text": "The taxonomic rank to extract from NCBI taxonomy database using the sample's taxid. This determines the level at which target taxa will be identified for Sourmash filtering. Common values are 'order' (default) for broad taxonomic groups, or 'family'/'genus' for more specific classification."
+                },
                 "seqkit_sliding": {
                     "type": "integer",
                     "description": "Length of slide for Seqkit",
