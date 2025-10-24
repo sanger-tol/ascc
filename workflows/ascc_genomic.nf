@@ -143,28 +143,27 @@ workflow ASCC_GENOMIC {
 
         // Only run if databases are configured and validated
         if (sourmash_databases.size() > 0) {
-            reference_tuple_from_GG
-                .map { meta, file ->
-                    def meta2 = [] // Inject meta data for sourmash runs
-                    [meta2, file]
-                }
-                .set { sourmash_reference }
 
             RUN_SOURMASH (
-                sourmash_reference,
-                ch_sourmash_databases
+                reference_tuple_from_GG,
+                ch_sourmash_databases,
+                ncbi_ranked_lineage_path,
+                params.sourmash_taxonomy_level
             )
 
-            // This will be used for btk input if we decide to go that route
-            ch_sourmash         = Channel.of( [[],[]] )
-            ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+            // Output channels for downstream use
+            ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+            ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+            ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
         } else {
             log.warn "[ASCC Sourmash] Skipping Sourmash: no valid databases configured"
-            ch_sourmash         = Channel.of( [[],[]] )
+            ch_sourmash_summary     = Channel.of( [[],[]] )
+            ch_sourmash_non_target  = Channel.of( [[],[]] )
         }
 
     } else {
-        ch_sourmash         = Channel.of( [[],[]] )
+        ch_sourmash_summary     = Channel.of( [[],[]] )
+        ch_sourmash_non_target  = Channel.of( [[],[]] )
     }
 
 

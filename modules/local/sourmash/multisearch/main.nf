@@ -9,9 +9,7 @@ process SOURMASH_MULTISEARCH {
     //    'biocontainers/sourmash:4.9.4--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(signature), path(db)
-    val k
-    val s
+    tuple val(meta), path(signature), path(db), val(k), val(s)
 
     output:
     tuple val(meta), path("*multisearch_results.csv"), emit: multisearch_results
