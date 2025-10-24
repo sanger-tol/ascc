@@ -1,6 +1,14 @@
-// Class for parsing and managing Sourmash database configurations
-// Used in ASCC pipeline for handling multiple Sourmash databases
-
+/**
+ * Class for parsing and validating Sourmash database configurations
+ *
+ * This class is responsible for:
+ * 1. Parsing database configurations from CSV files or params.sourmash_databases
+ * 2. Validating database configurations (file existence, parameter validity)
+ * 3. Logging database configuration summary
+ *
+ *
+ * @see subworkflows/local/run_sourmash/main.nf for runtime logic
+ */
 class SourmashDatabaseConfig {
 
     /**
@@ -141,66 +149,6 @@ class SourmashDatabaseConfig {
     }
 
     /**
-     * Collect all unique k_for_search values from databases
-     * Used for generating sketch parameters
-     *
-     * @param databases List of database configurations
-     * @return List of unique k values, sorted
-     */
-    static List<Integer> collectUniqueK(List<Map> databases) {
-        return databases.collect { it.k_for_search }.unique().sort()
-    }
-
-    /**
-     * Get minimum scaled value from all databases
-     * Used for generating sketch parameters
-     *
-     * @param databases List of database configurations
-     * @return Minimum scaled value
-     */
-    static Integer getMinimumScaled(List<Map> databases) {
-        return databases.collect { it.s }.min()
-    }
-
-    /**
-     * Generate param-string for SOURMASH_SKETCH
-     * Format: "scaled=<min_s>,k=<k1>,k=<k2>,..."
-     *
-     * @param databases List of database configurations
-     * @return String for task.ext.args
-     */
-    static String generateSketchParams(List<Map> databases) {
-        def uniqueK = collectUniqueK(databases)
-        def minS = getMinimumScaled(databases)
-
-        def kParams = uniqueK.collect { "k=${it}" }.join(',')
-        return "dna --param-string 'scaled=${minS},${kParams}'"
-    }
-
-    /**
-     * Check for duplicate assembly_taxa_db paths
-     * Returns warning if multiple databases point to same taxa file
-     *
-     * @param databases List of database configurations
-     * @return List of duplicate paths
-     */
-    static List<String> checkDuplicateTaxaDB(List<Map> databases) {
-        def taxaPaths = databases.collect { it.assembly_taxa_db }
-        return taxaPaths.findAll { taxaPaths.count(it) > 1 }.unique()
-    }
-
-    /**
-     * Get unique assembly_taxa_db file paths
-     * Used for merging multiple taxa databases
-     *
-     * @param databases List of database configurations
-     * @return List of unique taxa DB paths
-     */
-    static List<String> getUniqueTaxaDBPaths(List<Map> databases) {
-        return databases.collect { it.assembly_taxa_db }.unique()
-    }
-
-    /**
      * Log database configuration summary
      * Prints formatted information about loaded databases
      *
@@ -212,15 +160,6 @@ class SourmashDatabaseConfig {
             log.info "  - ${db.name}: k=${db.k_for_search}, s=${db.s}"
             log.info "    DB: ${db.path}"
             log.info "    Taxa: ${db.assembly_taxa_db}"
-        }
-
-        def uniqueK = collectUniqueK(databases)
-        def minS = getMinimumScaled(databases)
-        log.info "[ASCC Sourmash] Sketch parameters: k=${uniqueK}, scaled=${minS}"
-
-        def duplicateTaxa = checkDuplicateTaxaDB(databases)
-        if (duplicateTaxa.size() > 0) {
-            log.warn "[ASCC Sourmash] Multiple databases share the same assembly_taxa_db: ${duplicateTaxa.join(', ')}"
         }
     }
 }
