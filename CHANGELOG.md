@@ -27,8 +27,8 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 | Module               | Old Version | New Versions |
 | -------------------- | ----------- | ------------ |
 | GENERATE_HTML_REPORT | NA          | 1.0          |
-| KMER_COUNTER         | | |
-| REFORMAT_NPY2CSV     | NA | 1.0.0 |
+| KMER_COUNTER         |             |              |
+| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
