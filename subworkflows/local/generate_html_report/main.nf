@@ -30,8 +30,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     //
     fcs_adaptor
         .multiMap { meta, file1, file2 ->
-            euk: [meta + [process: "FCS_ADAPTOR_EUK"], file1]
-            prok: [meta + [process: "FCS_ADAPTOR_PROK"], file2]
+            euk:    [meta + [process: "FCS_ADAPTOR_EUK"],   file1]
+            prok:   [meta + [process: "FCS_ADAPTOR_PROK"],  file2]
         }
         .set { fcs_adaptor_split }
 
@@ -40,14 +40,11 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
             def new_meta = meta + [process: "BARCODES"]
             [new_meta, _file]
         }.mix(
-            fcs_adaptor_split.euk,
-            fcs_adaptor_split.prok,
             trim_ns_results
                 .map{ meta, _file ->
                     def new_meta = meta + [process: "TRAILINGNS"]
                     [new_meta, _file]
                 },
-            vecscreen_results,
             autofilter_results
                 .map{ meta, _file ->
                     def new_meta = meta + [process: "AUTOFILTER"]
@@ -63,6 +60,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                     def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
                     [new_meta, _file]
                 },
+            // BELOW ALREADY HAVE PROCESS IN THEIR META
+            fcs_adaptor_split.euk,
+            fcs_adaptor_split.prok,
+            vecscreen_results,
             kmers_results,
             reference_fasta,
             fasta_sanitation_log,
@@ -128,18 +129,24 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                 }
 
                 // SORT DATA [meta, file] BY THE PROCESS ORDER
+                //
                 def sortedData = dataItems.sort { item, file ->
 
-                    def processName = null
-                    if (item instanceof List && item.size() > 0 && item[0] instanceof Map) {
-                        processName = item[0].process
-                    } else if (item instanceof Map) {
+                    // MAKE SURE ITEM IS THE META MAP
+                    // IF IT IS THEN IT WILL HAVE process
+                    if (item instanceof Map) {
                         processName = item.process
+                    } else {
+                        // IF NOT A MAP THEN THERE SIMPLY IS NO DATA
+                        processName = null
                     }
-                    // UNKNOWN PROCESSES
+
+                    // IF UNKNOWN PROCESSES SEND TO BACK OF CHANNEL
+                    // THIS SHOULD NEVER HAPPEN...
                     processOrder[processName] ?: 999
                 }
 
+                // CHANNEL OUTPUTS AS [META,[FILES]]
                 [[ id: id ], sortedData]
             }
             .map { item ->
@@ -152,7 +159,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     // Convert params to JSON for passing to the HTML report
     def paramsJson = JsonOutput.toJson(params)
 
-    // Generate HTML report
+    //
+    // MODULE: GENERATE A HTML REPORT FOR END USER
+    //
     GENERATE_HTML_REPORT (
         sorted_data,
         jinja_templates_list.first(),   // Pass the list of Jinja templates
