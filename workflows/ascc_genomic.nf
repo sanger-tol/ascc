@@ -377,9 +377,6 @@ workflow ASCC_GENOMIC {
         // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
         //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
         //
-        ch_fcsadapt_euk     = RUN_FCSADAPTOR.out.ch_euk
-        ch_fcsadapt_prok    = RUN_FCSADAPTOR.out.ch_prok
-
         RUN_FCSADAPTOR.out.ch_euk
             .combine(
                 RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
@@ -494,11 +491,11 @@ workflow ASCC_GENOMIC {
         //
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
                                 .map { it ->
-                                    [[id: it[0].id, process: "Vecscreen"], it[1]]
+                                    [[id: it[0].id, process: "VECSCREEN"], it[1]]
                                 }
-                                .ifEmpty { [[process: "Vecscreen"],[]] }
+                                .ifEmpty { [[process: "VECSCREEN"],[]] }
     } else {
-        ch_vecscreen        = Channel.of( [[process: "Vecscreen"],[]] )
+        ch_vecscreen        = Channel.of( [[process: "VECSCREEN"],[]] )
     }
 
 
@@ -913,12 +910,11 @@ if (
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
-        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[:],[]]
+        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[process: "PROCESS"],[]]
         //
         ascc_merged_data = ej_gc_coverage
-            .map{ meta, file -> tuple([
-                id: meta.id,
-                process: "GC_COV"], file)
+            .map{ meta, file ->
+                [[id: meta.id, process: "GC_COV"], file]
             }
             .mix(
                 ej_dot_genome,
@@ -1017,7 +1013,7 @@ if (
             ch_create_btk_dataset,
             ch_css_files.first()
         )
-        //ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+        ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
     emit:
