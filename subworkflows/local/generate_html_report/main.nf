@@ -148,8 +148,6 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
             }
             .set { sorted_data }
 
-        sorted_data.view{"all_data: $it"}
-
 
     // Convert params to JSON for passing to the HTML report
     def paramsJson = JsonOutput.toJson(params)

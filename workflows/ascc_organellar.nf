@@ -488,7 +488,7 @@ workflow ASCC_ORGANELLAR {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] }
+            .filter { id, data -> id != [] && id != null  }
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]
