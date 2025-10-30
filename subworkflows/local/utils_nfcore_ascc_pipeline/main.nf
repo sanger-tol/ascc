@@ -227,7 +227,7 @@ workflow PIPELINE_INITIALISATION {
             .groupTuple()
             .map {
                 meta, files ->
-                    def meta2 = meta + [process: "FCSGX result"]
+                    def meta2 = meta + [process: "FCSGX_RESULT"]
                     return [ meta2, files[0] ] // We are only expecting one fasta file per sample+haplo
             }
             .set { ch_fcs_samplesheet }

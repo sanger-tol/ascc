@@ -1,57 +1,19 @@
-process GENERATE_SAMPLESHEET {
+process GENERATE_BTK_SAMPLESHEET {
     tag "$meta.id"
     label "process_low"
-
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-    'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
-    'docker.io/ubuntu:20.04' }"
+    executor 'local'
 
     input:
-    tuple val(meta), path(reference), path(alarm_file)
-    path("input_pacbio_files/*")
-    val(reads_layout)
+    val(meta)
+    val(pacbio_path)
 
     output:
-    tuple val(meta),    path("samplesheet.csv"),    path(alarm_file),   emit: csv
-    path "versions.yml",                                                emit: versions
+    tuple val(meta),    path("btk_samplesheet.csv"), emit: csv
 
-    script:
-    def args    = task.ext.args     ?: ""
-    def VERSION = "1.1.0"
-    // TODO: THIS SHOULD BE FROM param.reads_type TO MAKE MORE DYNAMIC
-    """
-    echo "Run BTK"
-    echo "Running for $meta - $reference - $alarm_file"
-    echo "sample,datatype,datafile,library_layout" > pre_samplesheet.csv
-
-    reads_type="pacbio"
-
-    i=0
-    for file in input_pacbio_files/*; do
-        i=\$((i+1))
-        echo "Debug line: Processing file \$file -- T\$i --${reads_layout}"
-        echo "${meta.id}_T\$i,\$reads_type,\$PWD/\$file,${reads_layout}" >> pre_samplesheet.csv
-    done
-
-    echo "Debug: MOVE pre_samplesheet.csv to samplesheet.csv"
-
-    mv pre_samplesheet.csv samplesheet.csv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        generate_samplesheet: $VERSION
-    END_VERSIONS
-    """
-
-    stub:
-    def VERSION = "1.1.0"
-    """
-    touch samplesheet.csv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        generate_samplesheet: $VERSION
-    END_VERSIONS
-    """
+    exec:
+    def fasta_files = files(pacbio_path.resolve('*.fasta.gz'))
+    assert fasta_files.size() > 0
+    def samplesheet_entries = ["sample,datatype,datafile,library_layout"]
+    fasta_files.withIndex().each{ fa, idx -> samplesheet_entries << "${meta.id}_T${idx+1},pacbio,${fa},SINGLE" }
+    file(task.workDir.resolve("btk_samplesheet.csv")).text = samplesheet_entries.join("\n")
 }

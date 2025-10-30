@@ -51,8 +51,6 @@ workflow ASCC {
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
-    //
-    // TODO: FCS OVERRIDE VALUES NOW AVAILABLE
     GENOMIC (
         genomic_genomes,
         organellar_genomes,

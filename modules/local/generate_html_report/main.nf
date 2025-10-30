@@ -11,21 +11,21 @@ process GENERATE_HTML_REPORT {
 
     input:
     tuple val(meta),
-        path(barcode_results,               stageAs: "barcodes/*"),
-        path(fcs_adaptor_euk,               stageAs: "fcs/*"),
-        path(fcs_adaptor_prok,              stageAs: "fcs/*"),
-        path(trim_ns_results,               stageAs: "trailingns/*"),
-        path(vecscreen_results,             stageAs: "vecscreen/*"),
-        path(autofilter_results,            stageAs: "autofilter/*"),
-        path(merged_table,                  stageAs: "merged/*"),
-        path(phylum_counts,                 stageAs: "coverage/*"),
-        path(kmers_results,                 stageAs: "kmers/**"),
-        path(reference_fasta),
-        path(fasta_sanitation_log,          stageAs: "fasta_sanitation/*"),
-        path(fasta_length_filtering_log,    stageAs: "fasta_length_filtering/*"),
-        path(fcs_gx_report_txt,             stageAs: "fcsgx/*"),
-        path(fcs_gx_taxonomy_rpt,           stageAs: "fcsgx/*"),
-        path(btk_output_dir,                stageAs: "btk/*")
+        val(assm), path(reference_fasta),
+        val(barc), path(barcode_results,               stageAs: "barcodes/*"),
+        val(sani), path(fasta_sanitation_log,          stageAs: "fasta_sanitation/*"),
+        val(filt), path(fasta_length_filtering_log,    stageAs: "fasta_length_filtering/*"),
+        val(trim), path(trim_ns_results,               stageAs: "trailingns/*"),
+        val(fcsr), path(fcs_gx_report_txt,             stageAs: "fcsgx/*"),
+        val(fcst), path(fcs_gx_taxonomy_rpt,           stageAs: "fcsgx/*"),
+        val(vecs), path(vecscreen_results,             stageAs: "vecscreen/*"),
+        val(kmer), path(kmers_results,                 stageAs: "kmers/**"),
+        val(fcse), path(fcs_adaptor_euk,               stageAs: "fcs/*"),
+        val(fcsp), path(fcs_adaptor_prok,              stageAs: "fcs/*"),
+        val(auto), path(autofilter_results,            stageAs: "autofilter/*"),
+        val(merg), path(merged_table,                  stageAs: "merged/*"),
+        val(phyl), path(phylum_counts,                 stageAs: "coverage/*"),
+        val(btkd), path(btk_output_dir,                stageAs: "btk/*")
     path(jinja_templates_list,              stageAs: "templates/*")
     path(samplesheet)
     path(params_file)
