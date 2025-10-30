@@ -210,13 +210,14 @@ workflow ASCC_ORGANELLAR {
 
     } else if ( params.fcs_override ) {
 
-        ch_fcsgx            = fcs_samplesheet
-        ch_fcsgx.map{ meta, file ->
+        fcs_samplesheet.map{ meta, file ->
             log.info("[ASCC INFO]: Overriding Internal FCSGX with ${file}")
             def new_meta = meta + [process: "FCSGX_RESULT"]
             [new_meta, file]
 
         }
+        .set { ch_fcsgx }
+
         ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
         ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
@@ -488,7 +489,7 @@ workflow ASCC_ORGANELLAR {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] && id != null  }
+            .filter { id, data -> id != [] && id != null }
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]

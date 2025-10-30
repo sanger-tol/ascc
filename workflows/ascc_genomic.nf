@@ -9,7 +9,7 @@ include { MERGE_BTK_DATASETS                            } from '../modules/local
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
-include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
+include { GENERATE_BTK_SAMPLESHEET as GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
@@ -424,13 +424,14 @@ workflow ASCC_GENOMIC {
 
     } else if ( params.fcs_override ) {
 
-        ch_fcsgx            = fcs_samplesheet
-        ch_fcsgx.map{ meta, file ->
+        fcs_samplesheet.map{ meta, file ->
             log.info("[ASCC INFO]: Overriding Internal FCSGX with ${file}")
             def new_meta = meta + [process: "FCSGX_RESULT"]
             [new_meta, file]
 
         }
+        .set { ch_fcsgx }
+
         ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
         ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
@@ -567,7 +568,7 @@ workflow ASCC_GENOMIC {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] && id != null  }
+            .filter { id, data -> id != [] && id != null }
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]
@@ -795,24 +796,21 @@ workflow ASCC_GENOMIC {
     //
     // MODULE: THIS MODULE FORMATS THE INPUT DATA IN A SPECIFIC CSV FORMAT FOR
     //          USE IN THE BTK PIPELINE
-    //
+    //          EXEC MODULE PRODUCES NO VERSIONS
     //
     GENERATE_SAMPLESHEET (
-        combined_ch,
+        combined_ch.map{meta, ref, alarm -> [meta, ref]},
         reads_path.collect(),
-        reads_layout.first()
     )
-    ch_versions         = ch_versions.mix(GENERATE_SAMPLESHEET.out.versions)
 
     //
     // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
     //
     btk_samplesheet = GENERATE_SAMPLESHEET.out.csv
-        .map{ meta, csv, indicator ->
+        .map{ meta, csv ->
             tuple(
                 [ id: meta.id ],
-                csv,
-                indicator
+                csv
             )
         }
 
@@ -831,15 +829,15 @@ workflow ASCC_GENOMIC {
     combined_input = run_btk_conditional.run_btk
         .map{ meta, file, data ->
             tuple(
-                [id: meta],
+                [id: meta], // TODO: a bug?
                 file
             )
         }
         .combine(btk_samplesheet, by: 0)
 
     combined_input
-        .map{ meta, ref, samplesheet, alarms ->
-            log.info("[ASCC INFO]: BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n\t| ALM: ${alarms}\n")
+        .map{ meta, ref, samplesheet ->
+            log.info("[ASCC INFO]: BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n")
         }
 
     //
@@ -932,7 +930,7 @@ if (
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] && id != null}
+            .filter { id, data -> id != [] && id != null }
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]
