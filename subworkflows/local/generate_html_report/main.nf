@@ -130,21 +130,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
                 // SORT DATA [meta, file] BY THE PROCESS ORDER
                 //
-                def sortedData = dataItems.sort { item, file ->
-
-                    // MAKE SURE ITEM IS THE META MAP
-                    // IF IT IS THEN IT WILL HAVE process
-                    if (item instanceof Map) {
-                        processName = item.process
-                    } else {
-                        // IF NOT A MAP THEN THERE SIMPLY IS NO DATA
-                        processName = null
-                    }
-
-                    // IF UNKNOWN PROCESSES SEND TO BACK OF CHANNEL
-                    // THIS SHOULD NEVER HAPPEN...
-                    processOrder[processName] ?: 999
-                }
+                def sortedData = dataItems.sort { item, file -> processOrder[item.process] }
 
                 // CHANNEL OUTPUTS AS [META,[FILES]]
                 [[ id: id ], sortedData]
