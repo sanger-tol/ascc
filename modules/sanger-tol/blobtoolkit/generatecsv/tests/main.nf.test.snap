@@ -1,0 +1,101 @@
+{
+    "ont fasta.gz to csv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.samplesheet.csv:md5,b07de6dacdd5c4f314047496e3d32a1b"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,f7b11b15294a6105291c8c0be9118efb"
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.samplesheet.csv:md5,b07de6dacdd5c4f314047496e3d32a1b"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,f7b11b15294a6105291c8c0be9118efb"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.6"
+        },
+        "timestamp": "2025-11-04T10:29:33.472720703"
+    },
+    "multiple fasta.gz to csv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.samplesheet.csv:md5,0fe5576fba01adf31d602a1cf4a1a424"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,f7b11b15294a6105291c8c0be9118efb"
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.samplesheet.csv:md5,0fe5576fba01adf31d602a1cf4a1a424"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,f7b11b15294a6105291c8c0be9118efb"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.6"
+        },
+        "timestamp": "2025-11-04T11:31:54.67419855"
+    },
+    "pacbio fasta.gz to csv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.samplesheet.csv:md5,85f28ee33669df8cbe5c945988879e54"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,f7b11b15294a6105291c8c0be9118efb"
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.samplesheet.csv:md5,85f28ee33669df8cbe5c945988879e54"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,f7b11b15294a6105291c8c0be9118efb"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.6"
+        },
+        "timestamp": "2025-11-04T10:29:26.669387065"
+    }
+}
