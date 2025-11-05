@@ -1,10 +1,10 @@
 process GENERATE_BTK_SAMPLESHEET {
-    tag "$meta.id"
+    tag "${meta.id}"
     label "process_low"
     executor 'local'
 
     input:
-    val(meta)
+    tuple val(meta), path(reference)
     val(pacbio_path)
 
     output:
