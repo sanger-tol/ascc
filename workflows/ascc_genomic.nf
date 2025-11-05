@@ -9,7 +9,7 @@ include { MERGE_BTK_DATASETS                            } from '../modules/local
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
-include { GENERATE_BTK_SAMPLESHEET as GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
+include { BLOBTOOLKIT_GENERATECSV                       } from '../modules/sanger-tol/blobtoolkit/generatecsv/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
@@ -798,15 +798,25 @@ workflow ASCC_GENOMIC {
     //          USE IN THE BTK PIPELINE
     //          EXEC MODULE PRODUCES NO VERSIONS
     //
-    GENERATE_SAMPLESHEET (
-        combined_ch.map{meta, ref, alarm -> [meta, ref]},
-        reads_path.collect(),
+    combined_ch
+        .combine( reads_path.collect() )
+        .map { meta, ref, alarm, path_list ->
+            [[id:meta.id], path_list]
+        }
+        .set { ch_meta_reads }
+
+    BLOBTOOLKIT_GENERATECSV (
+        ch_meta_reads,
+        [[],[]],
+        [[],[],[]]
     )
+    ch_versions     = ch_versions.mix(BLOBTOOLKIT_GENERATECSV.out.versions)
+
 
     //
     // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
     //
-    btk_samplesheet = GENERATE_SAMPLESHEET.out.csv
+    btk_samplesheet = BLOBTOOLKIT_GENERATECSV.out.csv
         .map{ meta, csv ->
             tuple(
                 [ id: meta.id ],
@@ -829,7 +839,7 @@ workflow ASCC_GENOMIC {
     combined_input = run_btk_conditional.run_btk
         .map{ meta, file, data ->
             tuple(
-                [id: meta], // TODO: a bug?
+                [id: meta.id], // TODO: a bug?
                 file
             )
         }
@@ -860,7 +870,6 @@ workflow ASCC_GENOMIC {
         taxid.first(),
     )
     ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
-
 
 if (
         ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" ) &&
@@ -1003,13 +1012,13 @@ if (
             ej_reference_tuple,
             ej_fasta_sanitation_log,
             ej_fasta_filter_log,
-            ch_jinja_templates.first(),
+            ch_jinja_templates,
             ch_samplesheet_path,
             ch_params_file,
             ch_fcsgx_report,
             ch_fcsgx_taxonomy,
             ch_create_btk_dataset,
-            ch_css_files.first()
+            ch_css_files
         )
         ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
