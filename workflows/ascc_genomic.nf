@@ -59,6 +59,7 @@ workflow ASCC_GENOMIC {
     btk_lineages
     btk_lineages_path
     ch_barcodes
+    val_reads_per_chunk
 
     main:
     ch_versions = Channel.empty()
@@ -429,6 +430,7 @@ workflow ASCC_GENOMIC {
             reference_tuple_from_GG,
             reads_path,
             reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
+            val_reads_per_chunk
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 

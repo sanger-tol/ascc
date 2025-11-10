@@ -47,6 +47,7 @@ workflow ASCC_ORGANELLAR {
     reads_path
     reads_type
     ch_barcodes
+    val_reads_per_chunk
 
     main:
     ch_versions = Channel.empty()
@@ -201,6 +202,7 @@ workflow ASCC_ORGANELLAR {
             reference_tuple_from_GG, // Again should this be the validated fasta?
             reads,
             reads_type,
+            val_reads_per_chunk
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch

@@ -52,6 +52,7 @@ workflow SANGERTOL_ASCC {
     btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
     btk_lineages_path           // Path to the ODB10 lineages
     barcodes                    // ["barcode_1,barcode_2"]
+    val_reads_per_chunk         // int: number of reads per chunk to map when estimating coverage
 
     main:
 
@@ -81,7 +82,8 @@ workflow SANGERTOL_ASCC {
         reads_type,
         btk_lineages,
         btk_lineages_path,
-        barcodes
+        barcodes,
+        val_reads_per_chunk
     )
 }
 
@@ -133,7 +135,8 @@ workflow {
         Channel.of(params.reads_type),
         Channel.of(params.busco_lineages),
         Channel.fromPath(params.busco_lineages_folder),
-        PIPELINE_INITIALISATION.out.barcodes
+        PIPELINE_INITIALISATION.out.barcodes,
+        params.coverage_reads_per_chunk
     )
 
 
