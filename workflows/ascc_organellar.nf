@@ -196,7 +196,7 @@ workflow ASCC_ORGANELLAR {
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
+    if ( params.run_coverage == "both" || params.run_coverage == "organellar" ) {
 
         RUN_READ_COVERAGE (
             reference_tuple_from_GG, // Again should this be the validated fasta?
