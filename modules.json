@@ -97,7 +97,7 @@
                     },
                     "samtools/merge": {
                         "branch": "master",
-                        "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
+                        "git_sha": "c8be52dba1166c678e74cda9c3a3c221635c8bb1",
                         "installed_by": ["bam_samtools_merge_markdup", "modules"]
                     },
                     "samtools/sort": {
