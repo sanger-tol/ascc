@@ -62,7 +62,7 @@
                     "minimap2/index": {
                         "branch": "master",
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
-                        "installed_by": ["modules"]
+                        "installed_by": ["fastx_map_long_reads", "modules"]
                     },
                     "ncbitools/vecscreen": {
                         "branch": "master",
@@ -83,12 +83,22 @@
                     "samtools/faidx": {
                         "branch": "master",
                         "git_sha": "c8be52dba1166c678e74cda9c3a3c221635c8bb1",
-                        "installed_by": ["modules"]
+                        "installed_by": ["bam_samtools_merge_markdup", "modules"]
+                    },
+                    "samtools/index": {
+                        "branch": "master",
+                        "git_sha": "c8be52dba1166c678e74cda9c3a3c221635c8bb1",
+                        "installed_by": ["bam_samtools_merge_markdup"]
+                    },
+                    "samtools/markdup": {
+                        "branch": "master",
+                        "git_sha": "c8be52dba1166c678e74cda9c3a3c221635c8bb1",
+                        "installed_by": ["bam_samtools_merge_markdup"]
                     },
                     "samtools/merge": {
                         "branch": "master",
                         "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
-                        "installed_by": ["modules"]
+                        "installed_by": ["bam_samtools_merge_markdup", "modules"]
                     },
                     "samtools/sort": {
                         "branch": "master",
@@ -127,6 +137,36 @@
                     "utils_nfschema_plugin": {
                         "branch": "master",
                         "git_sha": "2fd2cd6d0e7b273747f32e465fdc6bcc3ae0814e",
+                        "installed_by": ["subworkflows"]
+                    }
+                }
+            }
+        },
+        "https://github.com/sanger-tol/nf-core-modules.git": {
+            "modules": {
+                "sanger-tol": {
+                    "fastxalign/minimap2align": {
+                        "branch": "main",
+                        "git_sha": "241222a54a12404eca54981ad933b303141dfa04",
+                        "installed_by": ["fastx_map_long_reads"]
+                    },
+                    "fastxalign/pyfastxindex": {
+                        "branch": "main",
+                        "git_sha": "241222a54a12404eca54981ad933b303141dfa04",
+                        "installed_by": ["fastx_map_long_reads"]
+                    }
+                }
+            },
+            "subworkflows": {
+                "sanger-tol": {
+                    "bam_samtools_merge_markdup": {
+                        "branch": "main",
+                        "git_sha": "30d0d3d309d1204e76c2118f1e036eea8df527dd",
+                        "installed_by": ["fastx_map_long_reads"]
+                    },
+                    "fastx_map_long_reads": {
+                        "branch": "main",
+                        "git_sha": "30d0d3d309d1204e76c2118f1e036eea8df527dd",
                         "installed_by": ["subworkflows"]
                     }
                 }

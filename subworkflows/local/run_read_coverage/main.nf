@@ -1,7 +1,7 @@
 //
 // LOCAL SUBWORKFLOW IMPORTS
 //
-include { SE_MAPPING                                    } from '../se_mapping/main'
+include { FASTX_MAP_LONG_READS as SE_MAPPING            } from '../../sanger-tol/fastx_map_long_reads/main'
 include { PE_MAPPING                                    } from '../pe_mapping/main'
 
 //
@@ -21,6 +21,7 @@ workflow RUN_READ_COVERAGE {
     reference_tuple          // Channel [ val(meta), path(file) ]
     reads
     platform                 // Channel val( str )
+    val_reads_per_chunk
 
     main:
     ch_versions     = Channel.empty()
@@ -49,17 +50,26 @@ workflow RUN_READ_COVERAGE {
         //
         // MODULE: RUN SINGLE END MAPPING ON THE REFERENCE AND LONGREAD DATA
         //
-        SE_MAPPING (
-            ref_and_data
+        ch_map_long_reads_input = ref_and_data
+            | multiMap { meta, reference, reads ->
+                reference: [ meta, reference ]
+                reads: [ meta, reads ]
+            }
+
+        SE_MAPPING(
+            ch_map_long_reads_input.reference,
+            ch_map_long_reads_input.reads,
+            val_reads_per_chunk,
+            true
         )
-        ch_versions     = ch_versions.mix(SE_MAPPING.out.versions)
-        ch_align_bam    = SE_MAPPING.out.mapped_bam
+        ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
+        ch_out_bam  = SE_MAPPING.out.bam
 
     }
     else if ( params.reads_type in ["illumina"] ) {
 
         //
-        // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND LONGREAD DATA
+        // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND SHORTREAD DATA
         //
         PE_MAPPING  (
             ref_and_data
@@ -67,25 +77,24 @@ workflow RUN_READ_COVERAGE {
         ch_versions     = ch_versions.mix(PE_MAPPING.out.versions)
         ch_align_bam    = PE_MAPPING.out.mapped_bam
 
+        //
+        // MODULE: SORT THE MAPPED BAM
+        //
+        SAMTOOLS_SORT (
+            ch_align_bam,
+            [[],[]],
+            "csi"
+        )
+        ch_versions = ch_versions.mix( SAMTOOLS_SORT.out.versions )
+        ch_out_bam  = SAMTOOLS_SORT.out.bam
     }
-
-
-    //
-    // MODULE: SORT THE MAPPED BAM
-    //
-    SAMTOOLS_SORT (
-        ch_align_bam,
-        [[],[]],
-        "csi"
-    )
-    ch_versions         = ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
 
     //
     // MODULE: GET READ DEPTH ACROSS THE GENOME
     //
     SAMTOOLS_DEPTH (
-        SAMTOOLS_SORT.out.bam,
+        ch_out_bam,
         [[],[]]
     )
     ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
