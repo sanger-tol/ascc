@@ -1,5 +1,7 @@
 include { GENERATE_HTML_REPORT } from '../../../modules/local/generate_html_report/main'
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 
 workflow GENERATE_HTML_REPORT_WORKFLOW {
     take:
@@ -25,6 +27,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     main:
     ch_versions = Channel.empty()
 
+    // Convert params to JSON for passing to the HTML report
+    def paramsJson = JsonOutput.toJson(params)
+
     //
     // LOGIC: COMBINE ALL INPUT CHANNELS AND ANNOTATE THEM WITH PROCESS TAGS
     //
@@ -42,7 +47,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         }.mix(
             trim_ns_results
                 .map{ meta, _file ->
-                    def new_meta = meta + [process: "TRAILINGNS"]
+                    def new_meta = meta + [process: "TRAILING_NS"]
                     [new_meta, _file]
                 },
             autofilter_results
@@ -89,10 +94,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
         // LIST OF EXPECTED INPUT DATA
         def processes = [
-            'REFERENCE',
-            'BARCODES', 'REFERENCE_FILT_LOG', 'REFERENCE_SANI_LOG',
-            'TRAILING_NS', 'FCSGX_REPORT', 'FCSGX_TAX_REPORT',
-            'VECSCREEN', 'KMER_RESULTS', "FCS_ADAPTOR_EUK",
+            "REFERENCE",
+            "BARCODES", "REFERENCE_FILT_LOG", "REFERENCE_SANI_LOG",
+            "TRAILING_NS", "FCSGX_REPORT", "FCSGX_TAX_REPORT",
+            "VECSCREEN", "KMER_RESULTS", "FCS_ADAPTOR_EUK",
             "FCS_ADAPTOR_PROK", "AUTOFILTER", "MERGED_TABLE",
             "MERGED_PHYLUM_COUNTS", "BTK_DATASET"
         ]
@@ -110,7 +115,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         }
 
         // SET THE KEY CHANNEL AND COMBINE EVERYTHING ELSE ON IT
-        def combined_channels = processChannels['REFERENCE']
+        def combined_channels = processChannels["REFERENCE"]
         processes.tail().each { process ->
             combined_channels = combined_channels
                                     .combine(processChannels[process], by: 0)
@@ -120,8 +125,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         // SORT THEM INTO THE GIVEN ORDER
         combined_channels
             .map { sample ->
-                def id = sample[0]  // First element is the common key
-                def dataItems = sample[1..-1]  // Rest are the actual data items
+                def id = sample[0]  // CREATE COMMON KEY
+                def dataItems = sample[1..-1]  // DATA CHANNELS
 
                 // CREATE A MAP ON THE PROCESSES LIST, THIS WILL BE TRUTH ORDER
                 def processOrder = processes.withIndex().collectEntries { proc, idx ->
@@ -130,31 +135,73 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
                 // SORT DATA [meta, file] BY THE PROCESS ORDER
                 //
-                def sortedData = dataItems.sort { item, file -> processOrder[item.process] }
+                def metaFilePairs = dataItems.collate(2)
+                def sortedData =  metaFilePairs
+                    .sort { metaFile ->
+                        processOrder[metaFile[0].process]
+                    }
+                    .collect()
 
-                // CHANNEL OUTPUTS AS [META,[FILES]]
+                // CHANNEL OUTPUTS AS [meta,[meta, file]]
                 [[ id: id ], sortedData]
             }
             .map { item ->
-                // FORCE INTO [[meta0], meta1, file1, meta2, file2...
-                [item[0]] + item[1]
+                // FLATTEN INTO [meta0, meta1, file1, meta2, file2...] KEEPING []
+                // THIS ALLOWS US TO USE INDEXES LATER ON
+                //
+                // START WITH SEED META
+                def result = [item[0]]
+
+                item[1].each { pair ->
+                    // SUB-META
+                    result.add(pair[0])
+
+                    // FILE or [], [] MUST BE PRESERVED
+                    result.add(pair[1])
+                }
+
+                return result
+            }
+            // SO WE HAVE THE SAME NUMBER OF INPUT CHANNELS TO PROCESS
+            .combine ( jinja_templates_list.map { [it] } )
+            .combine ( samplesheet )
+            .combine ( params_file.map { [it] } )
+            .combine ( channel.value(paramsJson) )
+            .combine ( css_files_list )
+
+            // CAN'T NAME THE ITEMS, SIMPLY TOO MANY TO INDEX IT IS
+            .multiMap { item ->
+                // META TO ACT AS SEED FOR LIST EXTENSION
+                def result = [item[0]]
+
+                // DATA FILES END UP NESTED, THIS PULLS THEM OUT OF THAT.
+                // USING -INDEX SHOULD MEAN IT'S OK TO ADD MORE IN FUTURE
+                // AS LONG AS IT IS IN THE PROCESS MAP... AND THE MODULE
+                def data_files = item[1..-6]
+                    .each { iter ->
+                        result.add(iter)
+                    }
+
+                data: result
+                jinja: item[-5]
+                samplesheet: item[-4]
+                params: item[-3]
+                json: item[-2]
+                css: item[-1]
             }
             .set { sorted_data }
 
-
-    // Convert params to JSON for passing to the HTML report
-    def paramsJson = JsonOutput.toJson(params)
 
     //
     // MODULE: GENERATE A HTML REPORT FOR END USER
     //
     GENERATE_HTML_REPORT (
-        sorted_data,
-        jinja_templates_list.first(),   // Pass the list of Jinja templates
-        samplesheet.first(),            // Channel of one
-        params_file.first(),            // Channel of one
-        paramsJson,                     // JSON string can be used multiple times
-        css_files_list.first()          // Channel of one (CSS files)
+        sorted_data.data,
+        sorted_data.jinja,      // Pass the list of Jinja templates
+        sorted_data.samplesheet,// Channel of one
+        sorted_data.params,     // Channel of one
+        sorted_data.json,       // JSON string can be used multiple times
+        sorted_data.css         // Channel of one (CSS files)
     )
     ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 

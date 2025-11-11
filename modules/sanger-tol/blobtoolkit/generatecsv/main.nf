@@ -1,5 +1,6 @@
 process BLOBTOOLKIT_GENERATECSV {
     tag "${meta.id ?: meta2.id ?: meta3.id}"
+    executor "local"
 
     input:
     tuple val(meta),    path(pacbio_files)

@@ -26,11 +26,11 @@ process GENERATE_HTML_REPORT {
         val(merg), path(merged_table,                  stageAs: "merged/*"),
         val(phyl), path(phylum_counts,                 stageAs: "coverage/*"),
         val(btkd), path(btk_output_dir,                stageAs: "btk/*")
-    path(jinja_templates_list,              stageAs: "templates/*")
+    path(jinja_templates_list,                         stageAs: "templates/*")
     path(samplesheet)
     path(params_file)
     val(params_json)
-    path(css_files_list, stageAs: "css/*")
+    path(css_files_list,                                stageAs: "css/*")
 
     output:
     tuple val(meta), path("report/site/*"), emit: report
