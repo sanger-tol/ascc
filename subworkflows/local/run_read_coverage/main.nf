@@ -51,6 +51,7 @@ workflow RUN_READ_COVERAGE {
         // MODULE: RUN SINGLE END MAPPING ON THE REFERENCE AND LONGREAD DATA
         //
         ch_map_long_reads_input = ref_and_data
+            | groupTuple(by: 0) // the reads are not a list so we get multiple input channels otherwise
             | multiMap { meta, reference, reads ->
                 reference: [ meta, reference ]
                 reads: [ meta, reads ]
