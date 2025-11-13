@@ -9,11 +9,7 @@ include { PE_MAPPING                                    } from '../pe_mapping/ma
 //
 include { SAMTOOLS_SORT                                 } from '../../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_DEPTH                                } from '../../../modules/nf-core/samtools/depth/main'
-
-//
-// LOCAL MODULE IMPORTS
-//
-include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE               } from '../../../modules/local/samtools/depth_average_coverage/main'
+include { COVERM_CONTIG                                 } from '../../../modules/nf-core/coverm/contig/main'
 
 workflow RUN_READ_COVERAGE {
 
@@ -90,28 +86,19 @@ workflow RUN_READ_COVERAGE {
         ch_out_bam  = SAMTOOLS_SORT.out.bam
     }
 
-
     //
     // MODULE: GET READ DEPTH ACROSS THE GENOME
     //
-    SAMTOOLS_DEPTH (
+    COVERM_CONTIG (
         ch_out_bam,
-        [[],[]]
+        [[],[]],
+        true,
+        false
     )
-    ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
-
-
-    //
-    // MODULE: COMPUTE THE AVERAGE COVERAGE ACROSS EACH SCAFFOLD
-    //
-    SAMTOOLS_DEPTH_AVERAGE_COVERAGE (
-        SAMTOOLS_DEPTH.out.tsv
-    )
-    ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
-
+    ch_versions         = ch_versions.mix(COVERM_CONTIG.out.versions)
 
     emit:
-    tsv_ch              = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
+    tsv_ch              = COVERM_CONTIG.out.coverage
     bam_ch              = ch_out_bam
     versions            = ch_versions
 }

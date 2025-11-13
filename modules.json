@@ -21,6 +21,11 @@
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"]
                     },
+                    "coverm/contig": {
+                        "branch": "master",
+                        "git_sha": "27e31681fdbf1e511257355a236037a8cd9c2b2e",
+                        "installed_by": ["modules"]
+                    },
                     "diamond/blastx": {
                         "branch": "master",
                         "git_sha": "c44e4bb090eb4c9136f6d3f786285e4a9000f38f",
@@ -147,12 +152,12 @@
                 "sanger-tol": {
                     "fastxalign/minimap2align": {
                         "branch": "main",
-                        "git_sha": "241222a54a12404eca54981ad933b303141dfa04",
+                        "git_sha": "8dde1442313b4f0a0902621eccbdfae6a2fdaae0",
                         "installed_by": ["fastx_map_long_reads"]
                     },
                     "fastxalign/pyfastxindex": {
                         "branch": "main",
-                        "git_sha": "241222a54a12404eca54981ad933b303141dfa04",
+                        "git_sha": "8dde1442313b4f0a0902621eccbdfae6a2fdaae0",
                         "installed_by": ["fastx_map_long_reads"]
                     }
                 }
@@ -166,7 +171,7 @@
                     },
                     "fastx_map_long_reads": {
                         "branch": "main",
-                        "git_sha": "30d0d3d309d1204e76c2118f1e036eea8df527dd",
+                        "git_sha": "8dde1442313b4f0a0902621eccbdfae6a2fdaae0",
                         "installed_by": ["subworkflows"]
                     }
                 }
