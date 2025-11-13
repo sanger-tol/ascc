@@ -66,11 +66,22 @@ workflow RUN_FCSGX {
 
 
     emit:
+
+    // Tag the processes which we may want to use later on
     fcsgxresult        = PARSE_FCSGX_RESULT.out.fcsgxresult
+                            .map { meta, file ->
+                                file ? [meta + [process: "FCSGX_RESULT"], file] : [[process: "FCSGX_RESULT"], []]
+                            }
     genomedict         = samtools_reference
     // Expose raw FCS-GX outputs for HTML report tabs
     fcsgx_report_txt   = FCSGX_RUNGX.out.fcsgx_report
+                            .map { meta, file ->
+                                file ? [meta + [process: "FCSGX_REPORT"], file] : [[process: "FCSGX_REPORT"], []]
+                            }
     fcsgx_taxonomy_rpt = FCSGX_RUNGX.out.taxonomy_report
+                            .map { meta, file ->
+                                file ? [meta + [process: "FCSGX_TAX_REPORT"], file] : [[process: "FCSGX_TAX_REPORT"], []]
+                            }
     versions           = ch_versions
 
 }
