@@ -1,0 +1,20 @@
+Changes in component 'sanger-tol/fastxalign/pyfastxindex'
+'modules/sanger-tol/fastxalign/pyfastxindex/environment.yml' is unchanged
+'modules/sanger-tol/fastxalign/pyfastxindex/meta.yml' is unchanged
+Changes in 'fastxalign/pyfastxindex/main.nf':
+--- modules/sanger-tol/fastxalign/pyfastxindex/main.nf
++++ modules/sanger-tol/fastxalign/pyfastxindex/main.nf
+@@ -1,6 +1,6 @@
+ process FASTXALIGN_PYFASTXINDEX {
+     tag "$meta.id"
+-    label 'process_high'
++    label 'process_single'
+ 
+     conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+
+'modules/sanger-tol/fastxalign/pyfastxindex/resources/usr/bin/slice_fasta.py' is unchanged
+'modules/sanger-tol/fastxalign/pyfastxindex/tests/main.nf.test.snap' is unchanged
+'modules/sanger-tol/fastxalign/pyfastxindex/tests/nextflow.config' is unchanged
+'modules/sanger-tol/fastxalign/pyfastxindex/tests/main.nf.test' is unchanged
+************************************************************
