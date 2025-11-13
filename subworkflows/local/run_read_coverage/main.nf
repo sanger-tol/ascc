@@ -49,8 +49,9 @@ workflow RUN_READ_COVERAGE {
         ch_map_long_reads_input = ref_and_data
             | groupTuple(by: [0, 1]) // the reads are not a list so we get multiple input channels otherwise
             | multiMap { meta, reference, reads ->
-                reference: [ meta, reference ]
-                reads: [ meta, reads ]
+                def meta_new = meta + [reference_size: reference.size()]
+                reference: [ meta_new, reference ]
+                reads: [ meta_new, reads ]
             }
 
         SE_MAPPING(
@@ -61,6 +62,7 @@ workflow RUN_READ_COVERAGE {
         )
         ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
         ch_out_bam  = SE_MAPPING.out.bam
+            | map { meta, bam -> [ meta - meta.subMap("reference_size"), bam ] }
 
     }
     else if ( params.reads_type in ["illumina"] ) {
