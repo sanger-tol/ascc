@@ -41,7 +41,12 @@
   > NCBI. 2001. “NCBI VecScreen.” NCBI VecScreen. October 5, 2001.
 
 - [Scikit-Learn]
-  Pedregosa, F., G. Varoquaux, A. Gramfort, and V. Michel. 2011. “Scikit-Learn: Machine Learning in Python. JMLR 12, 2825–2830 (2011).” Journal of Machine Learning Research 12 (October): 2825–30.
+
+  > Pedregosa, F., G. Varoquaux, A. Gramfort, and V. Michel. 2011. “Scikit-Learn: Machine Learning in Python. JMLR 12, 2825–2830 (2011).” Journal of Machine Learning Research 12 (October): 2825–30.
+
+- [CoverM]
+
+  > Aroney, S.T.N., Newell, R.J.P., Nissen, J.N., Camargo, A.P., Tyson, G.W., Woodcroft, B.J., 2025. CoverM: Read alignment statistics for metagenomics. https://doi.org/10.48550/arXiv.2501.11217
 
 ## Software packaging/containerisation tools
 

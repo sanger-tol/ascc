@@ -10,6 +10,7 @@ THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 ### `Added`
 
 - Use sanger-tol chunked mapping subworkflow for read mapping (by @prototaxites)
+- Use coverm's contig mode for contig depth estimation (by @prototaxites)
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
