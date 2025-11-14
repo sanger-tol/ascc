@@ -1,0 +1,4 @@
+query_name,query_md5,match_name,match_md5,containment,max_containment,jaccard,average_containment,intersect_hashes,ksize,scaled,moltype,cosine
+test_genome,abc123def456,GCF_000005845.2,hash1,0.95,0.95,0.90,0.95,1000,21,200,DNA,
+test_genome,abc123def456,GCA_000755165.2,hash2,0.15,0.15,0.10,0.15,150,21,200,DNA,
+test_genome,abc123def456,GCF_031323975.1,hash3,0.85,0.85,0.75,0.85,900,21,200,DNA,
