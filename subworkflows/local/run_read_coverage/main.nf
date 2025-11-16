@@ -8,7 +8,6 @@ include { PE_MAPPING                                    } from '../pe_mapping/ma
 // NF-CORE MODULE IMPORTS
 //
 include { SAMTOOLS_SORT                                 } from '../../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_DEPTH                                } from '../../../modules/nf-core/samtools/depth/main'
 include { COVERM_CONTIG                                 } from '../../../modules/nf-core/coverm/contig/main'
 
 workflow RUN_READ_COVERAGE {
