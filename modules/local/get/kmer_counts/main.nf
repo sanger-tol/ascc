@@ -3,7 +3,9 @@ process GET_KMER_COUNTS {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container 'https://depot.galaxyproject.org/singularity/kmer-counter:0.1.2--h4349ce8_0'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/kmer-counter:0.1.2--h4349ce8_0' :
+        'quay.io/biocontainers/kmer-counter:0.1.2--h4349ce8_0' }"
 
     input:
     tuple val(meta), path(input_fasta)
