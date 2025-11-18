@@ -72,7 +72,7 @@ process GENERATE_HTML_REPORT {
     mkdir -p kmers
 
     # Run the report generation script
-    python generate_html_report.py \\
+    generate_html_report.py \\
         --output_dir report \\
         --template_dir report/site/templates \\
         $barcode_arg \\
