@@ -1,7 +1,7 @@
-name: get_kmer_counts
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
 channels:
   - conda-forge
   - bioconda
-  - defaults
 dependencies:
-  # No conda dependencies needed - kmer-counter is provided as a binary
+  - bioconda::kmer-counter=0.1.2

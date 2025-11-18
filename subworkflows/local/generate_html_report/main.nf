@@ -1,7 +1,4 @@
 include { GENERATE_HTML_REPORT } from '../../../modules/local/generate_html_report/main'
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-
 
 workflow GENERATE_HTML_REPORT_WORKFLOW {
     take:
@@ -28,7 +25,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     ch_versions = Channel.empty()
 
     // Convert params to JSON for passing to the HTML report
-    def paramsJson = JsonOutput.toJson(params)
+    def paramsJson = groovy.json.JsonOutput.toJson(params)
 
     //
     // LOGIC: COMBINE ALL INPUT CHANNELS AND ANNOTATE THEM WITH PROCESS TAGS
@@ -41,10 +38,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .set { fcs_adaptor_split }
 
     barcode_results
-        .map{ meta, _file ->
-            def new_meta = meta + [process: "BARCODES"]
-            [new_meta, _file]
-        }.mix(
+        .mix(
             trim_ns_results
                 .map{ meta, _file ->
                     def new_meta = meta + [process: "TRAILING_NS"]
@@ -81,10 +75,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .map { meta, file ->
             [meta.id, [meta: meta, file: file]]
         }
-        // FILTER AWAY THE NULL CHANNEL
+        // BELOW SHOULD FILTER AWAY [] and null VALUE CHANNELS
         // THIS GETS MADE NOW THAT ALL CHANNELS HAVE PROCESS TAGS
         // IT FORCES THE CREATION OF THE NULL CHANNEL
-        .filter { id, data -> id != [] && id != null }
+        .filter { id, data -> id }
         // GROUP ON 'KEY' AND RE-MAP INTO A MORE SENSIBLE STRUCTURE
         .groupTuple()
         .map { id, data ->
@@ -116,9 +110,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
         // SET THE KEY CHANNEL AND COMBINE EVERYTHING ELSE ON IT
         def combined_channels = processChannels["REFERENCE"]
+
         processes.tail().each { process ->
             combined_channels = combined_channels
-                                    .combine(processChannels[process], by: 0)
+                .combine(processChannels[process], by: 0)
         }
 
         // ABOVE PROCESSES ARE NOT DETEMINISTIC, HOWEVER, WE SHOULD BE ABLE TO
@@ -163,11 +158,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                 return result
             }
             // SO WE HAVE THE SAME NUMBER OF INPUT CHANNELS TO PROCESS
-            .combine ( jinja_templates_list.map { [it] } )
             .combine ( samplesheet )
             .combine ( params_file.map { [it] } )
             .combine ( channel.value(paramsJson) )
-            .combine ( css_files_list )
 
             // CAN'T NAME THE ITEMS, SIMPLY TOO MANY TO INDEX IT IS
             .multiMap { item ->
@@ -177,17 +170,15 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                 // DATA FILES END UP NESTED, THIS PULLS THEM OUT OF THAT.
                 // USING -INDEX SHOULD MEAN IT'S OK TO ADD MORE IN FUTURE
                 // AS LONG AS IT IS IN THE PROCESS MAP... AND THE MODULE
-                def data_files = item[1..-6]
+                def data_files = item[1..-4]
                     .each { iter ->
                         result.add(iter)
                     }
 
                 data: result
-                jinja: item[-5]
-                samplesheet: item[-4]
-                params: item[-3]
-                json: item[-2]
-                css: item[-1]
+                samplesheet: item[-3]
+                params: item[-2]
+                json: item[-1]
             }
             .set { sorted_data }
 
@@ -197,11 +188,11 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     //
     GENERATE_HTML_REPORT (
         sorted_data.data,
-        sorted_data.jinja,      // Pass the list of Jinja templates
-        sorted_data.samplesheet,// Channel of one
-        sorted_data.params,     // Channel of one
-        sorted_data.json,       // JSON string can be used multiple times
-        sorted_data.css         // Channel of one (CSS files)
+        channel.fromPath("${projectDir}/assets/templates/*.jinja").collect(),   // Pass the list of Jinja templates
+        sorted_data.samplesheet,                                                // Channel of one
+        sorted_data.params,                                                     // Channel of one
+        sorted_data.json,                                                       // JSON string can be used multiple times
+        channel.fromPath("${projectDir}/assets/css/*.css").collect()            // Channel of one (CSS files)
     )
     ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 
