@@ -98,7 +98,7 @@ workflow ASCC_GENOMIC {
         ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
     } else {
-        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--include essentials`)")
+        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
 
         ej_reference_tuple      = ch_samplesheet
                                     .map{ it ->
@@ -356,11 +356,17 @@ workflow ASCC_GENOMIC {
             ch_barcodes,
             duplicated_db.pacbio_db
         )
-        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
+        PACBIO_BARCODE_CHECK.out.filtered.
+            map{ meta, _file ->
+                def new_meta = meta + [process: "BARCODES"]
+                [new_meta, _file]
+            }
+            .set { ch_barcode_check}
+
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
     } else {
-        ch_barcode_check    = Channel.of( [[:],[]] )
+        ch_barcode_check    = channel.of( [[process: "BARCODES"],[]] )
     }
 
 
@@ -992,9 +998,7 @@ if (
 
         // Samplesheet/params file
         ch_samplesheet_path = Channel.fromPath(params.input)
-        ch_params_file      = (
-            params.containsKey('params_file') && params.params_file
-            ) ? Channel.fromPath(params.params_file) : Channel.value([])
+        ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
 
         // Templates and CSS
         ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
