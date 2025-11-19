@@ -19,16 +19,21 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel.
 - Added process tags to all channels
   - caused an issue where combining channels will produce PRIMARY, HAPLOTYPE and null channels, ending pipeline execution, this requires filtering out null channels in some places.
+- Simplification of if/else blocks to filter contolled processes
+  - removes unnecessary codes and makes the code easier to read.
+- Simplification of data_mapper blocks in:
+  - generate_html_report
+  - sanger-tol-btk
 
 ### `Bugs`
 
 ### `Dependencies`
 
-| Module               | Old Version | New Versions |
-| -------------------- | ----------- | ------------ |
-| GENERATE_HTML_REPORT | NA          | 1.0          |
-| KMER_COUNTER         |             |              |
-| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
+| Module               | Old Version    | New Versions |
+| -------------------- | -------------- | ------------ |
+| GENERATE_HTML_REPORT | NA             | 1.0          |
+| KMER_COUNTER         | 1.0.0 (python) | 0.1.2 (rust) |
+| REFORMAT_NPY2CSV     | NA             | 1.0.0        |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
