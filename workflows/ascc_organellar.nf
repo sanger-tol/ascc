@@ -67,7 +67,7 @@ workflow ASCC_ORGANELLAR {
             log.info "[ASCC INFO]: ORGANELLAR WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
 
-    if ( !params.run_essentials in run_conditionals ) {
+    if ( !params.run_essentials in run_conditional ) {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
     }
 
@@ -76,7 +76,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //
     ESSENTIAL_JOBS(
-        ch_samplesheet.filter { meta, file -> params.run_essentials in run_conditionals }
+        ch_samplesheet.filter { meta, file -> params.run_essentials in run_conditional }
     )
     ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
