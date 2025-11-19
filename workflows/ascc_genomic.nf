@@ -66,8 +66,10 @@ workflow ASCC_GENOMIC {
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
+    //        run_conditional list
     //
     btk_busco_run_mode = params.btk_busco_run_mode ?: "conditional"
+    run_conditional = ["both", "genomic"]
 
 
     //
@@ -129,7 +131,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
     //
     GET_KMERS_PROFILE (
-        ej_reference_tuple.filter { meta, file -> params.run_kmers in ["both", "genomic"] },
+        ej_reference_tuple.filter { meta, file -> params.run_kmers in run_conditional },
         params.kmer_length,
         params.dimensionality_reduction_methods,
         autoencoder_epochs_count
@@ -158,7 +160,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     TIARA_TIARA (
-        ej_reference_tuple.filter { meta, file -> params.run_tiara in ["both", "genomic"] }
+        ej_reference_tuple.filter { meta, file -> params.run_tiara in run_conditional }
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
 
@@ -174,7 +176,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
     EXTRACT_NT_BLAST (
-        ej_reference_tuple.filter { meta, file -> params.run_nt_blast in ["both", "genomic"] },
+        ej_reference_tuple.filter { meta, file -> params.run_nt_blast in run_conditional },
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
     )
@@ -208,7 +210,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     NR_DIAMOND (
-        ej_reference_tuple.filter { meta, file -> params.run_nr_diamond in ["both", "genomic"] },
+        ej_reference_tuple.filter { meta, file -> params.run_nr_diamond in run_conditional },
         diamond_nr_db_path.first()
     )
     ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
@@ -236,7 +238,7 @@ workflow ASCC_GENOMIC {
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
 
     UP_DIAMOND (
-        ej_reference_tuple.filter { meta, file -> params.run_uniprot_diamond in ["both", "genomic"] },
+        ej_reference_tuple.filter { meta, file -> params.run_uniprot_diamond in run_conditional },
         diamond_uniprot_db_path.first()
     )
     ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
@@ -274,7 +276,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
     //
     MITO_ORGANELLAR_BLAST (
-        ej_reference_tuple.filter { meta, file -> params.run_organellar_blast in ["both", "genomic"] },
+        ej_reference_tuple.filter { meta, file -> params.run_organellar_blast in run_conditional },
         organellar_check.mito
     )
     ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
@@ -284,7 +286,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
     //
     PLASTID_ORGANELLAR_BLAST (
-        ej_reference_tuple.filter { meta, file -> params.run_organellar_blast in ["both", "genomic"] },
+        ej_reference_tuple.filter { meta, file -> params.run_organellar_blast in run_conditional },
         organellar_check.plastid
     )
     ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
@@ -314,7 +316,7 @@ workflow ASCC_GENOMIC {
 
     ej_reference_tuple
         .filter { meta, file ->
-            params.run_pacbio_barcodes in ["both", "genomic"]
+            params.run_pacbio_barcodes in run_conditional
         }
         .combine(pacbio_database)
         .multiMap{
@@ -344,7 +346,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
     RUN_FCSADAPTOR (
-        ej_reference_tuple.filter { meta, file -> params.run_fcs_adaptor in ["both", "genomic"]}
+        ej_reference_tuple.filter { meta, file -> params.run_fcs_adaptor in run_conditional}
     )
     ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
@@ -363,7 +365,7 @@ workflow ASCC_GENOMIC {
                 file2
             )
         }
-        .ifEmpty([[process: "FCS-Adaptor"],[]])
+        .ifEmpty([[process: "FCS-Adaptor"],[], []])
         .set { ch_fcsadapt }
 
 
@@ -375,7 +377,7 @@ workflow ASCC_GENOMIC {
 
         joint_channel = ej_reference_tuple
             .filter { meta, file ->
-                params.run_fcsgx in ["both", "genomic"]
+                params.run_fcsgx in run_conditional
             }
             .combine(fcs_db)
             .combine(taxid)
@@ -403,7 +405,7 @@ workflow ASCC_GENOMIC {
         ch_fcsgx_taxonomy   = RUN_FCSGX.out.fcsgx_taxonomy_rpt
                                 .ifEmpty([[process: "FCSGX_TAX_REPORT"],[]])
 
-    } else if ( params.fcs_override && params.run_fcsgx in ["both", "genomic"]) {
+    } else if ( params.fcs_override && params.run_fcsgx in run_conditional) {
 
         //
         // TODO: THIS NEEDS TO BE OUPUT TO RESULTS TOO
@@ -428,7 +430,7 @@ workflow ASCC_GENOMIC {
     //
 
     RUN_READ_COVERAGE (
-        ej_reference_tuple.filter { meta, file -> params.run_coverage in ["both", "genomic"]},
+        ej_reference_tuple.filter { meta, file -> params.run_coverage in run_conditional},
         reads_path,
         reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
     )
@@ -456,7 +458,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
     RUN_VECSCREEN (
-        ej_reference_tuple.filter { meta, file -> params.run_vecscreen in ["both", "genomic"]},
+        ej_reference_tuple.filter { meta, file -> params.run_vecscreen in run_conditional},
         vecscreen_database_path.first()
     )
     ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
@@ -477,7 +479,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
     RUN_NT_KRAKEN(
-        ej_reference_tuple.filter { meta, file -> params.run_kraken in ["both", "genomic"]},
+        ej_reference_tuple.filter { meta, file -> params.run_kraken in run_conditional},
         nt_kraken_db_path.first(),
         ncbi_ranked_lineage_path.first()
     )
@@ -515,7 +517,7 @@ workflow ASCC_GENOMIC {
     //
     ch_genomic_cbtk_input = ej_reference_tuple
         .filter { meta, file ->
-            params.run_create_btk_dataset in ["both", "genomic"]
+            params.run_create_btk_dataset in run_conditional
         }
         .mix(
             ej_dot_genome,
@@ -978,7 +980,7 @@ if (
         merged_table,
         merged_phylum_count,
         ch_kmers_results,
-        ej_reference_tuple.filter {meta, file -> params.run_html_report in ["both", "genomic"]},
+        ej_reference_tuple.filter {meta, file -> params.run_html_report in run_conditional},
         ej_fasta_sanitation_log,
         ej_fasta_filter_log,
         ch_jinja_templates,

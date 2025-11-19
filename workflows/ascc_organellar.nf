@@ -176,7 +176,7 @@ workflow ASCC_ORGANELLAR {
                 file2
             )
         }
-        .ifEmpty([[process: "FCS-Adaptor"],[]])
+        .ifEmpty([[process: "FCS-Adaptor"],[], []])
         .set { ch_fcsadapt }
 
 
@@ -495,7 +495,7 @@ workflow ASCC_ORGANELLAR {
     // LOGIC: Create a channel for each process
     //
     def processChannels_cbd = processes_cbd.collectEntries { process ->
-        [(process): ch_genomic_cbtk_input
+        [(process): ch_organellar_cbtk_input
             .map { sample ->
                 def data = sample.data.find { it.meta.process == process }
                 data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
