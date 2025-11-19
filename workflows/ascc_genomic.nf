@@ -422,6 +422,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
@@ -450,6 +451,7 @@ workflow ASCC_GENOMIC {
                             .ifEmpty { [[:],[]] }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
@@ -470,6 +472,7 @@ workflow ASCC_GENOMIC {
                             .ifEmpty { [[process: "VECSCREEN"],[]] }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
@@ -503,6 +506,7 @@ workflow ASCC_GENOMIC {
                 .ifEmpty { [[:],[]] }
 
 
+    // ----------------------------------------------
     //
     // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
     //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
@@ -834,6 +838,7 @@ workflow ASCC_GENOMIC {
     )
     ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
+
 if (
         ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" ) &&
         ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" )
@@ -924,10 +929,12 @@ if (
         }
 
         def ascc_combined_channels = processChannels_mbd['GC_COV']
+
         processes_mbd.tail().each { process ->
             ascc_combined_channels = ascc_combined_channels
                                     .combine(processChannels_mbd[process], by: 0)
         }
+
 
         //
         // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
@@ -947,42 +954,43 @@ if (
         merged_phylum_count     = Channel.of( [[:],[]] )
     }
 
+
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
     //              Gate with params.run_html_report to avoid altering default behavior.
     //
-    if ( params.run_html_report == "both" || params.run_html_report == "genomic" ) {
 
-        // Samplesheet/params file
-        ch_samplesheet_path = Channel.fromPath(params.input)
-        ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
+    // Samplesheet/params file
+    ch_samplesheet_path = Channel.fromPath(params.input)
+    ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
 
-        // Templates and CSS
-        ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-        ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+    // Templates and CSS
+    ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+    ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
-        GENERATE_HTML_REPORT_WORKFLOW (
-            ch_barcode_check,
-            ch_fcsadapt,
-            ej_trailing_ns,
-            ch_vecscreen,
-            ch_autofilt_fcs_tiara,
-            merged_table,
-            merged_phylum_count,
-            ch_kmers_results,
-            ej_reference_tuple,
-            ej_fasta_sanitation_log,
-            ej_fasta_filter_log,
-            ch_jinja_templates,
-            ch_samplesheet_path,
-            ch_params_file,
-            ch_fcsgx_report,
-            ch_fcsgx_taxonomy,
-            ch_create_btk_dataset,
-            ch_css_files
-        )
-        ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
-    }
+    GENERATE_HTML_REPORT_WORKFLOW (
+        ch_barcode_check,
+        ch_fcsadapt,
+        ej_trailing_ns,
+        ch_vecscreen,
+        ch_autofilt_fcs_tiara,
+        merged_table,
+        merged_phylum_count,
+        ch_kmers_results,
+        ej_reference_tuple.filter {meta, file -> params.run_html_report in ["both", "genomic"]},
+        ej_fasta_sanitation_log,
+        ej_fasta_filter_log,
+        ch_jinja_templates,
+        ch_samplesheet_path,
+        ch_params_file,
+        ch_fcsgx_report,
+        ch_fcsgx_taxonomy,
+        ch_create_btk_dataset,
+        ch_css_files
+    )
+    ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+
 
     emit:
     essential_reference         = ej_reference_tuple
