@@ -28,7 +28,7 @@ process KMER_COUNT_DIM_REDUCTION_COMBINE_CSV {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
-        kmer_count_dim_reduction_combine_csv.py: \$(kmer_count_dim_reduction_combine_csv.py --version)
+        kmer_count_dim_reduction_combine_csv.py: \$(kmer_count_dim_reduction.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 

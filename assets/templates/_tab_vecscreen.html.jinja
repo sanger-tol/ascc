@@ -1,0 +1,12 @@
+{% from "_macros.html.jinja" import source_files %}
+
+<div class="narrow-table-wrapper">
+<h2>VecScreen</h2>
+<div class="narrow-text-container">
+<p>VecScreen is a tool for detecting adapter and vector contamination in genome assemblies. It's an older tool than FCS-adaptor, but its advantage is that it can use a custom database of contaminant sequences made by the user, whereas FCS-adaptor comes with its built-in database. The results show potential vector contaminant locations in the assembly.</p>
+</div>
+
+{{ source_files(vecscreen_file) }}
+
+{{ vecscreen_data }}
+</div>

@@ -1,0 +1,912 @@
+/* Ensure Cobiont and FCS-GX headers always visible (DataTables) */
+#cobiont_check_merged_table thead,
+#fcsgx_report_table thead,
+#fcsgx_taxonomy_table thead {
+  display: table-header-group !important;
+}
+#cobiont_check_merged_table,
+#fcsgx_report_table,
+#fcsgx_taxonomy_table {
+  table-layout: auto !important;
+}
+
+/* Plain HTML tables (no DataTables) - ensure headers are always visible */
+#autofiltering_plain_table thead,
+#vecscreen_plain_table thead,
+#fcs_adaptor_plain_table thead {
+  display: table-header-group !important;
+}
+#autofiltering_plain_table,
+#vecscreen_plain_table,
+#fcs_adaptor_plain_table {
+  table-layout: auto !important;
+  width: 100% !important;
+}
+/* Base styles */
+body {
+  font-family: "Roboto", sans-serif;
+  line-height: 1.6;
+  color: #333;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+/* Headers */
+h1,
+h2,
+h3 {
+  color: #2c5282; /* Dark blue */
+  margin-top: 1.5em;
+  padding-bottom: 0.3em;
+  margin-bottom: 0.8em;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2em;
+  margin-top: 0.5em;
+  margin-bottom: 0.2em;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1.5em;
+  margin-top: 0;
+  margin-bottom: 1.5em;
+  border-bottom: none;
+  color: #4a5568;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", "Source Code Pro", "IBM Plex Mono", monospace;
+  font-size: 0.9em;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+th {
+  background-color: #2c5282;
+  color: white;
+  font-weight: bold;
+  text-align: left;
+  padding: 12px;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Light white border for headers */
+}
+
+th:last-child {
+  border-right: none;
+}
+
+td {
+  padding: 12px;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0; /* Light gray border for cells */
+  white-space: normal;
+  word-break: break-word;
+  word-wrap: break-word;
+}
+
+td:last-child {
+  border-right: none;
+}
+
+tr:nth-child(even) {
+  background-color: #f7fafc;
+}
+
+tr:hover {
+  background-color: #ebf4ff;
+}
+
+/* Tabs styling - with stronger overrides for jQuery UI */
+#tabs {
+  background-color: #ffffff;
+  border: none !important;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Override jQuery UI borders */
+.ui-widget-content {
+  border: none !important;
+}
+
+.ui-widget-header {
+  border: none !important;
+  background: #f8fafc !important;
+}
+
+#tabs .ui-tabs-nav {
+  background-color: #f8fafc;
+  border: none !important;
+  border-bottom: none !important;
+  border-radius: 8px 8px 0 0;
+  padding: 0.8em 0.8em 0;
+  display: flex; /* Use Flexbox */
+  flex-wrap: wrap; /* Allow wrapping */
+  justify-content: flex-start; /* Align items to the start (left) */
+  list-style: none; /* Ensure no list bullets */
+}
+
+#tabs .ui-tabs-nav li {
+  margin: 0.2em 0.2em 0 0;
+  border-radius: 5px 5px 0 0;
+  border: 1px solid #e2e8f0 !important;
+  border-bottom: none !important;
+  background-color: #cbd5e0;
+  /* display: inline-block; No longer needed with flex */
+}
+
+#tabs .ui-tabs-nav li a {
+  color: #2c5282;
+  padding: 0.5em 1em;
+}
+
+#tabs .ui-tabs-nav li.ui-tabs-active {
+  background-color: #2c5282;
+  border-bottom-color: #2c5282 !important;
+  border-color: #2c5282 !important;
+}
+
+#tabs .ui-tabs-nav li.ui-tabs-active a {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+#tabs .ui-tabs-panel {
+  padding: 1em;
+  background-color: #fff;
+}
+
+/* Nested tabs styling for K-mer methods */
+#kmer-methods-tabs {
+  margin-top: 20px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#kmer-methods-tabs .ui-tabs-nav {
+  background-color: #f8fafc;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 0.8em 0.8em 0;
+  padding-left: 350px !important; /* Align with table content using absolute positioning */
+}
+
+#kmer-methods-tabs .ui-tabs-nav li {
+  margin: 0.2em 0.2em 0 0;
+  border-radius: 5px 5px 0 0;
+  font-size: 0.9em;
+}
+
+#kmer-methods-tabs .ui-tabs-nav li a {
+  color: #2c5282;
+  padding: 0.4em 0.8em;
+}
+
+#kmer-methods-tabs .ui-tabs-nav li.ui-tabs-active {
+  background-color: #2c5282;
+  border-bottom-color: #2c5282;
+  border-color: #2c5282 !important;
+}
+
+#kmer-methods-tabs .ui-tabs-nav li.ui-tabs-active a {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+#kmer-methods-tabs .ui-tabs-panel {
+  padding: 1em;
+  background-color: #fff;
+}
+
+/* Disabled tab styling */
+#tabs .ui-tabs-nav li.ui-state-disabled {
+  opacity: 0.7;
+  background-color: #f0f0f0;
+}
+
+#tabs .ui-tabs-nav li.ui-state-disabled a {
+  color: #4a5568 !important; /* Darker gray for better readability */
+  cursor: not-allowed;
+}
+
+/* Add a visual indicator that the tab is disabled */
+#tabs .ui-tabs-nav li.ui-state-disabled:after {
+  content: " (no data)";
+  font-size: 0.8em;
+  color: #8898aa;
+}
+
+/* Footer */
+.footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 0.8em;
+  color: #718096;
+}
+
+/* Source files UI */
+.source-files-container {
+  margin: 0.6em 0 1em 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+.source-files-line {
+  background: #f3f6fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: "Roboto Mono", monospace;
+  /* Ensure very long paths wrap within the box */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  word-wrap: break-word;
+  display: block;
+  width: 100%;
+}
+.source-files-label {
+  color: #4a5568;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+.source-file-path-block {
+  display: block;
+  width: 100%;
+}
+.source-file-path {
+  cursor: text; /* Make it clear this is selectable text, not a link */
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.source-files-summary {
+  cursor: default; /* Avoid link-like cursor on the summary header */
+}
+.source-files-list code {
+  cursor: text;
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Stronger wrapping rules to prevent overflow in single-file display */
+.source-files-line code,
+.source-file-path {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important; /* modern browsers */
+  word-wrap: break-word !important; /* legacy support */
+  word-break: break-all !important; /* ensure break inside long tokens */
+  max-width: 100% !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+/* DataTables customization */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+  color: #4a5568;
+  font-family: "Roboto", sans-serif;
+  margin-bottom: 10px;
+}
+
+/* Enhanced vertical dividers for DataTables */
+.dataTables_wrapper table.dataTable tbody td {
+  border-right: 1px solid #e2e8f0 !important; /* Ensure vertical dividers are visible */
+}
+
+.dataTables_wrapper table.dataTable thead th {
+  border-right: 1px solid rgba(255, 255, 255, 0.3) !important; /* Light white border for headers */
+}
+
+/* Last column should not have right border */
+.dataTables_wrapper table.dataTable tbody td:last-child,
+.dataTables_wrapper table.dataTable thead th:last-child {
+  border-right: none !important;
+}
+
+/* Specific styling for DataTables (FCS-GX and Cobiont tables) */
+#fcsgx_report_table tbody td,
+#fcsgx_taxonomy_table tbody td,
+#cobiont_check_merged_table tbody td {
+  border-right: 1px solid #e2e8f0 !important; /* Ensure vertical dividers are visible */
+}
+
+#fcsgx_report_table thead th,
+#fcsgx_taxonomy_table thead th,
+#cobiont_check_merged_table thead th {
+  border-right: 1px solid rgba(255, 255, 255, 0.3) !important; /* Light white border for headers */
+}
+
+/* Specific styling for plain HTML tables */
+#autofiltering_plain_table tbody td,
+#vecscreen_plain_table tbody td,
+#fcs_adaptor_plain_table tbody td {
+  border-right: 1px solid #e2e8f0 !important; /* Ensure vertical dividers are visible */
+}
+
+#autofiltering_plain_table thead th,
+#vecscreen_plain_table thead th,
+#fcs_adaptor_plain_table thead th {
+  border-right: 1px solid rgba(255, 255, 255, 0.3) !important; /* Light white border for headers */
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: #edf2f7;
+  border-color: #e2e8f0;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+}
+
+/* Fix for table header alignment issues */
+.dataTables_wrapper table.dataTable {
+  table-layout: fixed;
+  width: 100% !important;
+}
+
+/* Ensure consistent styling for header and body cells */
+.dataTables_wrapper table.dataTable thead th,
+.dataTables_wrapper table.dataTable tbody td {
+  box-sizing: border-box;
+  padding: 12px;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dataTables_wrapper table.dataTable thead th {
+  background-color: #2c5282;
+  color: white;
+}
+
+.dataTables_wrapper table.dataTable thead th:last-child,
+.dataTables_wrapper table.dataTable tbody td:last-child {
+  border-right: none;
+}
+
+/* Ensure header and body cells align properly */
+.dataTables_wrapper table.dataTable thead th {
+  width: auto !important;
+  white-space: nowrap;
+  padding: 12px 8px;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+/* Fix for coverage table headers */
+#coverage_table th {
+  padding: 12px 8px;
+  white-space: normal;
+  word-break: break-word;
+  height: auto;
+  vertical-align: top;
+}
+
+/* Section anchors for navigation */
+section {
+  scroll-margin-top: 20px;
+}
+
+/* Method tabs styling */
+.method-tab {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.method-header {
+  background-color: #f0f4f8;
+  padding: 15px;
+  margin: -20px -20px 20px -20px;
+  border-radius: 8px 8px 0 0;
+}
+
+.method-name {
+  color: #2c5282;
+  margin: 0;
+}
+
+.result-section {
+  margin-top: 25px;
+  padding-top: 15px;
+}
+
+/* Force horisontal scrolling for tables that need it */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto; /* Use auto instead of scroll to only show scrollbar when needed */
+  display: block;
+  margin-bottom: 1.5em;
+  border: none;
+  border-radius: 8px;
+  padding-bottom: 15px; /* Space for scrollbar */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
+}
+
+/* Make table wider than container to force scrolling for specific tables */
+.table-responsive table {
+  width: 100%; /* Default to 100% width */
+  margin-bottom: 0;
+}
+
+/* Special styling for FASTA sanitation tables */
+.fasta-sanitation-table {
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.fasta-sanitation-table table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+/* Alert styling */
+.alert-danger,
+.alert-success {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.alert-danger {
+  background-color: #fed7d7;
+  color: #9b2c2c;
+  border: none;
+}
+
+.alert-success {
+  background-color: #c6f6d5;
+  color: #276749;
+  border: none;
+}
+
+/* Outer container for additional structure */
+.outer-container {
+  width: 100%;
+  position: relative;
+}
+
+/* Table wrapper for proper overflow handling */
+.table-wrapper {
+  overflow-x: visible;
+  min-width: 100%;
+}
+
+/* Overview table specific styling */
+table.overview-table {
+  width: 600px;
+  max-width: 600px;
+  margin: 0 auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+table.overview-table th {
+  background-color: #2c5282;
+  color: white;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+table.overview-table td {
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+table.overview-table td:first-child {
+  width: 350px;
+  max-width: 350px;
+  white-space: normal;
+  padding-right: 20px;
+}
+
+table.overview-table td:last-child {
+  width: 150px;
+  text-align: center;
+  font-weight: bold;
+  color: black;
+}
+
+/* Ensure DataTables doesn't break the container */
+.dataTables_wrapper {
+  width: 100%;
+  overflow: visible;
+}
+
+/* Explicit striped rows styling */
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f7fafc;
+}
+
+.table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #ffffff;
+}
+
+/* Ensure DataTables doesn't override our striping */
+.dataTables_wrapper .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f7fafc !important;
+}
+
+.dataTables_wrapper .table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #ffffff !important;
+}
+
+/* Visualization styling */
+.visualization-container {
+  max-width: 600px;
+  margin: 0 auto;
+  border: none;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.visualization-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Narrow table class for simpler tables */
+table.narrow-table {
+  width: 960px;
+  max-width: 960px;
+  margin: 0 auto;
+  table-layout: fixed;
+}
+
+/* Apply narrow-table class to tables inside this wrapper */
+.narrow-table-wrapper table {
+  width: 960px;
+  max-width: 960px;
+  margin: 0 auto;
+  table-layout: fixed;
+}
+
+/* Center headings inside narrow-table-wrapper */
+.narrow-table-wrapper h2,
+.narrow-table-wrapper h3,
+.narrow-table-wrapper h4 {
+  text-align: center;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+}
+
+/* Container for explanatory text and notices */
+.narrow-text-container {
+  width: 960px;
+  max-width: 960px;
+  margin: 0 auto 1.5em auto;
+  padding: 15px 20px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  line-height: 1.6;
+}
+
+/* Style for notices and messages */
+.notice-container {
+  width: 960px;
+  max-width: 960px;
+  margin: 1em auto;
+  padding: 15px 20px;
+  background-color: #e5e7eb; /* Gray background for neutral messages */
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  line-height: 1.6;
+  text-align: center;
+  display: block; /* Ensure block display */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Success container for no contamination messages */
+.success-container {
+  width: 960px;
+  max-width: 960px;
+  margin: 1em auto;
+  padding: 15px 20px;
+  background-color: #d1fae5; /* Light green background */
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  line-height: 1.6;
+  text-align: center;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Ensure notices in specific tabs have correct width and centering */
+.narrow-table-wrapper .notice-container,
+.narrow-table-wrapper .success-container,
+.narrow-table-wrapper div.notice-error,
+.narrow-table-wrapper div.notice-success,
+.narrow-table-wrapper div[class*="notice-"],
+.narrow-table-wrapper p[class*="notice-"],
+.narrow-table-wrapper div.alert-danger,
+.narrow-table-wrapper div.alert-success,
+.narrow-table-wrapper div h4 + div.notice-container,
+.narrow-table-wrapper div h4 + div.success-container,
+.narrow-table-wrapper div h4 + div.notice-error,
+.narrow-table-wrapper div h4 ~ div[class*="notice-"] {
+  width: 960px !important;
+  max-width: 960px !important;
+  margin: 1em auto !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  padding: 15px 20px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  display: block !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  float: none !important;
+  clear: both !important;
+}
+
+/* Specific overrides for notice-error and notice-success backgrounds */
+.narrow-table-wrapper .notice-error,
+.narrow-table-wrapper div[class*="notice-error"],
+.narrow-table-wrapper p[class*="notice-error"],
+.narrow-table-wrapper div.alert-danger {
+  background-color: #fed7d7 !important; /* Light red background */
+  color: #9b2c2c !important;
+}
+
+.narrow-table-wrapper .notice-success,
+.narrow-table-wrapper div[class*="notice-success"],
+.narrow-table-wrapper p[class*="notice-success"],
+.narrow-table-wrapper div.alert-success {
+  background-color: #c6f6d5 !important; /* Light green background */
+  color: #276749 !important;
+}
+
+/* Error notice */
+.notice-error {
+  background-color: #fed7d7; /* Light red background */
+  color: #9b2c2c;
+}
+
+/* Success notice */
+.notice-success {
+  background-color: #c6f6d5; /* Light green background */
+  color: #276749;
+}
+
+/* No data message styling */
+.no-data-message {
+  width: 960px;
+  max-width: 960px;
+  margin: 1em auto;
+  text-align: center;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  background-color: #e5e7eb; /* Gray background for neutral messages */
+  color: #374151; /* Darker gray text */
+  display: block;
+  box-sizing: border-box;
+}
+
+.no-data-message p {
+  margin: 0;
+}
+
+/* File path display styling */
+.file-path {
+  word-break: break-all;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* Special handling for Sequence ID columns */
+#trim_ns_table th:nth-child(2),
+#trim_ns_warnings_table th:nth-child(1) {
+  width: auto !important; /* Allow Sequence ID columns to expand */
+}
+
+#trim_ns_table th:not(:nth-child(2)),
+#trim_ns_warnings_table th:not(:nth-child(1)) {
+  width: 100px !important; /* Fixed width for other columns */
+}
+
+/* Add tooltip-like behavior for very long sequence IDs */
+#trim_ns_table td:nth-child(2),
+#trim_ns_warnings_table td:nth-child(1) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px; /* Maximum width before truncation */
+}
+
+#trim_ns_table td:nth-child(2):hover,
+#trim_ns_warnings_table td:nth-child(1):hover {
+  overflow: visible;
+  white-space: normal;
+  word-break: break-all;
+  background-color: #f8fafc;
+  position: relative;
+  z-index: 1;
+}
+
+/* Pre tag styling for code blocks */
+pre {
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+  overflow-x: auto; /* Add horisontal scrollbar if needed */
+  max-width: 100%; /* Ensure it doesn't exceed container width */
+  background-color: #f8f8f8; /* Light gray background */
+  padding: 15px; /* Add some padding */
+  border-radius: 8px; /* Rounded corners */
+  border: none; /* No border */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+code {
+  font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", "Source Code Pro", "IBM Plex Mono", monospace;
+  font-size: 0.9em;
+}
+
+/* Center h5 headings in K-mer analysis sections */
+.narrow-table-wrapper h5 {
+  text-align: center;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+}
+
+/* Specific styling for phylum coverage table - make it wider to accommodate long headers */
+#phylum_coverage_table {
+  width: 1200px !important; /* Wider than standard 960px */
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  table-layout: fixed !important;
+}
+
+/* Override narrow-table-wrapper constraints for phylum coverage table */
+.narrow-table-wrapper #phylum_coverage_table {
+  width: 1200px !important;
+  max-width: 1200px !important;
+}
+
+/* Specific column width adjustments for phylum coverage table */
+#phylum_coverage_table th:nth-child(1),
+#phylum_coverage_table td:nth-child(1) {
+  width: 200px; /* phylum column */
+  min-width: 200px;
+}
+
+#phylum_coverage_table th:nth-child(2),
+#phylum_coverage_table td:nth-child(2) {
+  width: 220px; /* classification_source column - extra space for long header */
+  min-width: 220px;
+}
+
+#phylum_coverage_table th:nth-child(3),
+#phylum_coverage_table td:nth-child(3) {
+  width: 180px; /* number_of_sequences column */
+  min-width: 180px;
+}
+
+#phylum_coverage_table th:nth-child(4),
+#phylum_coverage_table td:nth-child(4) {
+  width: 150px; /* mean_coverage column */
+  min-width: 150px;
+}
+
+#phylum_coverage_table th:nth-child(5),
+#phylum_coverage_table td:nth-child(5) {
+  width: 120px; /* span_mb column */
+  min-width: 120px;
+}
+
+/* Ensure phylum coverage table headers don't wrap */
+#phylum_coverage_table th {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding: 12px 8px !important;
+}
+
+/* Allow content in data cells to wrap normally */
+#phylum_coverage_table td {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  padding: 12px 8px !important;
+}
+
+/* Source files display styling */
+.source-files-container {
+  width: 960px;
+  max-width: 960px;
+  margin: 1em auto 1.5em auto;
+  padding: 10px 15px;
+  background-color: #f0f4f8;
+  border-left: 4px solid #2c5282;
+  border-radius: 4px;
+  font-size: 0.85em;
+  box-sizing: border-box;
+}
+
+.source-files-details {
+  cursor: pointer;
+}
+
+.source-files-summary {
+  font-weight: 500;
+  color: #2c5282;
+  user-select: none;
+  list-style: none;
+  outline: none;
+}
+
+.source-files-summary::-webkit-details-marker {
+  display: none;
+}
+
+.source-files-summary code {
+  background-color: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.95em;
+  color: #1a202c;
+  word-break: break-all;
+}
+
+.source-files-list {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #cbd5e0;
+}
+
+.source-files-list ul {
+  margin: 5px 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.source-files-list li {
+  margin: 5px 0;
+  color: #4a5568;
+}
+
+.source-files-list code {
+  background-color: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.95em;
+  color: #1a202c;
+  word-break: break-all;
+}

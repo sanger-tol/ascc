@@ -193,103 +193,109 @@
                 },
                 "run_essentials": {
                     "type": "string",
-                    "description": "Run essential jobs on assebmlies",
+                    "description": "Run essential jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_kmers": {
                     "type": "string",
-                    "description": "Run kmer jobs on assebmlies",
+                    "description": "Run kmer jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_tiara": {
                     "type": "string",
-                    "description": "Run tiara jobs on assebmlies",
+                    "description": "Run tiara jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_coverage": {
                     "type": "string",
-                    "description": "Run coverage jobs on assebmlies",
+                    "description": "Run coverage jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_nt_blast": {
                     "type": "string",
-                    "description": "Run nt_blast jobs on assebmlies",
+                    "description": "Run nt_blast jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
+                "run_html_report": {
+                    "type": "string",
+                    "description": "Run HTML report generation on assemblies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "off"
+                },
                 "run_nr_diamond": {
                     "type": "string",
-                    "description": "Run nr_diamond jobs on assebmlies",
+                    "description": "Run nr_diamond jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_uniprot_diamond": {
                     "type": "string",
-                    "description": "Run uniprot_diamond jobs on assebmlies",
+                    "description": "Run uniprot_diamond jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_kraken": {
                     "type": "string",
-                    "description": "Run kraken jobs on assebmlies",
+                    "description": "Run kraken jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_fcsgx": {
                     "type": "string",
-                    "description": "Run fcsgx jobs on assebmlies",
+                    "description": "Run fcsgx jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_fcs_adaptor": {
                     "type": "string",
-                    "description": "Run fcs_adaptor jobs on assebmlies",
+                    "description": "Run fcs_adaptor jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_vecscreen": {
                     "type": "string",
-                    "description": "Run vecscreen jobs on assebmlies",
+                    "description": "Run vecscreen jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_btk_busco": {
                     "type": "string",
-                    "description": "Run btk_busco jobs on assebmlies",
+                    "description": "Run btk_busco jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_pacbio_barcodes": {
                     "type": "string",
-                    "description": "Run pacbio_barcodes jobs on assebmlies",
+                    "description": "Run pacbio_barcodes jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_organellar_blast": {
                     "type": "string",
-                    "description": "Run organellar_blast jobs on assebmlies",
+                    "description": "Run organellar_blast jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_autofilter_assembly": {
                     "type": "string",
-                    "description": "Run autofilter_assembly jobs on assebmlies",
+                    "description": "Run autofilter_assembly jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_create_btk_dataset": {
                     "type": "string",
-                    "description": "Run create_btk_dataset jobs on assebmlies",
+                    "description": "Run create_btk_dataset jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_merge_datasets": {
                     "type": "string",
-                    "description": "Run merge_datasets jobs on assebmlies",
+                    "description": "Run merge_datasets jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
