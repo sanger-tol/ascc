@@ -54,7 +54,7 @@ workflow ASCC_ORGANELLAR {
     ch_versions     = Channel.empty()
 
     //
-    // LOGIC: SET run_conditionals AS THE TYPICAL REQUIREMENTS TO RUN PROCESS
+    // LOGIC: SET run_conditional AS THE TYPICAL REQUIREMENTS TO RUN PROCESS
     //
     run_conditional = ["both", "organellar"]
 
@@ -114,7 +114,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     TIARA_TIARA (
-        ej_reference_tuple.filter { meta, file -> params.run_tiara in ["both", "organellar"] }
+        ej_reference_tuple.filter { meta, file -> params.run_tiara in run_conditional }
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
 
@@ -132,7 +132,7 @@ workflow ASCC_ORGANELLAR {
 
     ej_reference_tuple
         .filter { meta, file ->
-            params.run_pacbio_barcodes in ["both", "organellar"]
+            params.run_pacbio_barcodes in run_conditional
         }
         .combine(pacbio_database)
         .multiMap{
@@ -162,7 +162,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
     RUN_FCSADAPTOR (
-        ej_reference_tuple.filter { meta, file -> params.run_fcs_adaptor in ["both", "organellar"]}
+        ej_reference_tuple.filter { meta, file -> params.run_fcs_adaptor in run_conditional}
     )
     ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
@@ -193,7 +193,7 @@ workflow ASCC_ORGANELLAR {
 
         joint_channel = ej_reference_tuple
             .filter { meta, file ->
-                params.run_fcsgx in ["both", "organellar"]
+                params.run_fcsgx in run_conditional
             }
             .combine(fcs_db)
             .combine(taxid)
@@ -246,7 +246,7 @@ workflow ASCC_ORGANELLAR {
     //
 
     RUN_READ_COVERAGE (
-        ej_reference_tuple.filter { meta, file -> params.run_coverage in ["both", "genomic"]},
+        ej_reference_tuple.filter { meta, file -> params.run_coverage in run_conditional },
         reads_path,
         reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
     )
@@ -274,7 +274,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
     RUN_VECSCREEN (
-        ej_reference_tuple.filter { meta, file -> params.run_vecscreen in ["both", "genomic"]},
+        ej_reference_tuple.filter { meta, file -> params.run_vecscreen in run_conditional},
         vecscreen_database_path.first()
     )
     ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
@@ -295,7 +295,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
     RUN_NT_KRAKEN(
-        ej_reference_tuple.filter { meta, file -> params.run_kraken in ["both", "genomic"]},
+        ej_reference_tuple.filter { meta, file -> params.run_kraken in run_conditional},
         nt_kraken_db_path.first(),
         ncbi_ranked_lineage_path.first()
     )
@@ -371,7 +371,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
     EXTRACT_NT_BLAST (
-        valid_length_fasta.filter { meta, file -> params.run_nt_blast in ["both", "genomic"] },
+        valid_length_fasta.filter { meta, file -> params.run_nt_blast in run_conditional },
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
     )
@@ -400,7 +400,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     NR_DIAMOND (
-        valid_length_fasta.filter { meta, file -> params.run_nr_diamond in ["both", "genomic"] },
+        valid_length_fasta.filter { meta, file -> params.run_nr_diamond in run_conditional },
         diamond_nr_db_path.first()
     )
     ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
@@ -428,7 +428,7 @@ workflow ASCC_ORGANELLAR {
     //
     // NOTE: Format is "qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles"
     UP_DIAMOND (
-        valid_length_fasta.filter { meta, file -> params.run_uniprot_diamond in ["both", "genomic"] },
+        valid_length_fasta.filter { meta, file -> params.run_uniprot_diamond in run_conditional },
         diamond_uniprot_db_path.first()
     )
     ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
@@ -453,7 +453,7 @@ workflow ASCC_ORGANELLAR {
     //
     ch_organellar_cbtk_input = ej_reference_tuple
         .filter { meta, file ->
-            params.run_create_btk_dataset in ["both", "genomic"]
+            params.run_create_btk_dataset in run_conditional
         }
         .map{ it -> tuple([
             id: it[0].id,
