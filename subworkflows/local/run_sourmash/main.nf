@@ -39,7 +39,6 @@ workflow RUN_SOURMASH {
     // Collect all databases into a list to compute k and s parameters
     sourmash_databases
         .collect()
-        .tap { ch_all_databases }
         .map { db_list ->
             // Compute sketch parameters from database configuration
             def uniqueK = db_list.collect { it.k_for_search }.unique().sort()
@@ -48,9 +47,13 @@ workflow RUN_SOURMASH {
             def sketch_args = "dna -p scaled=${minS},${kParams}"
 
             log.info "[RUN_SOURMASH] Computed sketch parameters: ${sketch_args}"
-            sketch_args
+            [sketch_args, db_list]  // Return both sketch params and db_list
         }
-        .set { ch_sketch_params }
+        .set { ch_sketch_and_dbs }
+
+    // Split into separate channels
+    ch_sketch_params = ch_sketch_and_dbs.map { it[0] }
+    ch_all_databases = ch_sketch_and_dbs.map { it[1] }
 
     //
     // MODULE: CREATE SOURMASH SKETCH FOR INPUT ASSEMBLY
@@ -173,11 +176,14 @@ workflow RUN_SOURMASH {
     //
     // MODULE: PARSE SOURMASH OUTPUT
     //
+    // Extract assembly_taxa_db file and target_taxa value
+    ch_taxa_db_file = CAT_TAXA_DB.out.file_out.map { meta, file -> file }
+    ch_target_taxa_val = ch_results_with_target.map { meta, results, target_taxa -> target_taxa }
 
     PARSE_SOURMASH (
         ch_results_with_target.map { meta, results, target_taxa -> [meta, results] },
-        CAT_TAXA_DB.out.file_out.map { meta, file -> file }.first(),
-        ch_results_with_target.map { meta, results, target_taxa -> target_taxa }.first()
+        ch_taxa_db_file,
+        ch_target_taxa_val
     )
     ch_versions = ch_versions.mix(PARSE_SOURMASH.out.versions)
 
