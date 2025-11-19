@@ -114,299 +114,269 @@ workflow ASCC_GENOMIC {
     }
 
 
-    if ( params.run_kmers == "both" || params.run_kmers == "genomic" ) {
-        //
-        // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
-        //
-        ej_reference_tuple
-            .map { meta, file ->
-                file.countFasta() * 3
-            }
-            .set {autoencoder_epochs_count}
-
-        //
-        // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
-        //
-        GET_KMERS_PROFILE (
-            ej_reference_tuple,
-            params.kmer_length,
-            params.dimensionality_reduction_methods,
-            autoencoder_epochs_count
-        )
-        ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
-                                .map { it ->
-                                    [[id: it[0].id, process: "KMERS"], it[1]]
-                                }
-                                .ifEmpty { [[process: "KMERS"],[]] }
-        // Provide kmers results directories for HTML report
-        ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
-                                .map { it ->
-                                    [[id: it[0].id, process: "KMER_RESULTS"], it[1]]
-                                }
-                                .ifEmpty { [[process: "KMER_RESULTS"],[]] }
-    } else {
-        ch_kmers            = Channel.of( [[process: "KMERS"],[]] )
-        ch_kmers_results    = Channel.of( [[process: "KMER_RESULTS"],[]] )
-    }
+    // ----------------------------------------------
+    //
+    // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
+    //
+    ej_reference_tuple
+        .map { meta, file ->
+            file.countFasta() * 3
+        }
+        .set {autoencoder_epochs_count}
 
 
+    //
+    // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
+    //
+    GET_KMERS_PROFILE (
+        ej_reference_tuple.filter { meta, file -> params.run_kmers in ["both", "genomic"] },
+        params.kmer_length,
+        params.dimensionality_reduction_methods,
+        autoencoder_epochs_count
+    )
+    ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
+                            .map { it ->
+                                [[id: it[0].id, process: "KMERS"], it[1]]
+                            }
+                            .ifEmpty { [[process: "KMERS"],[]] }
+    // Provide kmers results directories for HTML report
+    ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
+                            .map { it ->
+                                [[id: it[0].id, process: "KMER_RESULTS"], it[1]]
+                            }
+                            .ifEmpty { [[process: "KMER_RESULTS"],[]] }
+
+
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( params.run_tiara == "both" || params.run_tiara == "genomic" ) {
-        TIARA_TIARA (
-            ej_reference_tuple
-        )
-        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
-        ch_tiara            = TIARA_TIARA.out.classifications
-                                .map { it ->
-                                    [[id: it[0].id, process: "TIARA"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-    } else {
-        ch_tiara            = Channel.of( [[:],[]] )
-    }
+    TIARA_TIARA (
+        ej_reference_tuple.filter { meta, file -> params.run_tiara in ["both", "genomic"] }
+    )
+    ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+
+    ch_tiara            = TIARA_TIARA.out.classifications
+                            .map { it ->
+                                [[id: it[0].id, process: "TIARA"], it[1]]
+                            }
+                            .ifEmpty { [[process: "TIARA"],[]] }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( params.run_nt_blast == "both" || params.run_nt_blast == "genomic" ) {
-        //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run
-        //
-        EXTRACT_NT_BLAST (
-            ej_reference_tuple,
-            nt_database_path.first(),
-            ncbi_ranked_lineage_path.first()
-        )
-        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    EXTRACT_NT_BLAST (
+        ej_reference_tuple.filter { meta, file -> params.run_nt_blast in ["both", "genomic"] },
+        nt_database_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
+                            .map { it ->
+                                [[id: it[0].id, process: "NT-BLAST"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
+    ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
+                            .map { it ->
+                                [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
-        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        ch_nt_blast         = Channel.of( [[:],[]] )
-        ch_blast_lineage    = Channel.of( [[:],[]] )
-        ch_btk_format       = Channel.of( [[:],[]] )
-    }
+    ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
+                            .map { it ->
+                                [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "genomic" ) {
+    NR_DIAMOND (
+        ej_reference_tuple.filter { meta, file -> params.run_nr_diamond in ["both", "genomic"] },
+        diamond_nr_db_path.first()
+    )
+    ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
 
-        NR_DIAMOND (
-            ej_reference_tuple,
-            diamond_nr_db_path.first()
-        )
-        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    nr_full             = NR_DIAMOND.out.reformed
+                            .map { it ->
+                                [[id: it[0].id, process: "NR-FULL"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        nr_full             = NR_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "NR-FULL"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        nr_hits             = NR_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "NR-HITS"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        nr_full             = Channel.of( [[:],[]] )
-        nr_hits             = Channel.of( [[:],[]] )
-    }
+    nr_hits             = NR_DIAMOND.out.hits_file
+                            .map { it ->
+                                [[id: it[0].id, process: "NR-HITS"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
-    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "genomic" ) {
 
-        UP_DIAMOND (
-            ej_reference_tuple,
-            diamond_uniprot_db_path.first()
-        )
-        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
+    UP_DIAMOND (
+        ej_reference_tuple.filter { meta, file -> params.run_uniprot_diamond in ["both", "genomic"] },
+        diamond_uniprot_db_path.first()
+    )
+    ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        un_full             = UP_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-FULL"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    un_full             = UP_DIAMOND.out.reformed
+                            .map { it ->
+                                [[id: it[0].id, process: "UN-FULL"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
-        un_hits             = UP_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-HITS"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-    } else {
-        un_full             = Channel.of( [[:],[]] )
-        un_hits             = Channel.of( [[:],[]] )
-    }
+    un_hits             = UP_DIAMOND.out.hits_file
+                            .map { it ->
+                                [[id: it[0].id, process: "UN-HITS"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
-    if ( params.run_organellar_blast == "both" || params.run_organellar_blast == "genomic" ) {
-        //
-        // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
-        //
-        organellar_check = organellar_genomes
-            .branch { meta, assembly ->
-                mito:       meta.assembly_type == "MITO"
-                plastid:    meta.assembly_type == "PLASTID"
-                invalid:    true    // if value but not of the above conditions
-            }
+    // ----------------------------------------------
+    //
+    // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
+    //
+    organellar_check = organellar_genomes
+        .branch { meta, assembly ->
+            mito:       meta.assembly_type == "MITO"
+            plastid:    meta.assembly_type == "PLASTID"
+            invalid:    true    // if value but not of the above conditions
+        }
 
 
-        //
-        // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
-        //
-        MITO_ORGANELLAR_BLAST (
-            ej_reference_tuple,
-            organellar_check.mito
-        )
-        ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+    //
+    // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME
+    //
+    MITO_ORGANELLAR_BLAST (
+        ej_reference_tuple.filter { meta, file -> params.run_organellar_blast in ["both", "genomic"] },
+        organellar_check.mito
+    )
+    ch_versions         = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
 
 
-        //
-        // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
-        //
-        PLASTID_ORGANELLAR_BLAST (
-            ej_reference_tuple,
-            organellar_check.plastid
-        )
-        ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    //
+    // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME
+    //
+    PLASTID_ORGANELLAR_BLAST (
+        ej_reference_tuple.filter { meta, file -> params.run_organellar_blast in ["both", "genomic"] },
+        organellar_check.plastid
+    )
+    ch_versions         = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report
-                                .map { it ->
-                                    [[id: it[0].id, process: "MITO"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_mito             = MITO_ORGANELLAR_BLAST.out.organelle_report
+                            .map { it ->
+                                [[id: it[0].id, process: "MITO"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
-        ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report
-                                .map { it ->
-                                    [[id: it[0].id, process: "CHLORO"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        ch_mito             = Channel.of( [[:],[]] )
-        ch_chloro           = Channel.of( [[:],[]] )
-    }
+    ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report
+                            .map { it ->
+                                [[id: it[0].id, process: "CHLORO"], it[1]]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "genomic" ) {
 
-        ej_reference_tuple
-            .combine(pacbio_database)
-            .multiMap{
-                ref_meta, ref_data, pdb_meta, pdb_data ->
-                    reference: [ref_meta, ref_data]
-                    pacbio_db: [pdb_meta, pdb_data]
-            }
-            .set { duplicated_db }
+    ej_reference_tuple
+        .filter { meta, file ->
+            params.run_pacbio_barcodes in ["both", "genomic"]
+        }
+        .combine(pacbio_database)
+        .multiMap{
+            ref_meta, ref_data, pdb_meta, pdb_data ->
+                reference: [ref_meta, ref_data]
+                pacbio_db: [pdb_meta, pdb_data]
+        }
+        .set { duplicated_db }
 
-        PACBIO_BARCODE_CHECK (
-            duplicated_db.reference,
-            ch_barcodes,
-            duplicated_db.pacbio_db
-        )
-        PACBIO_BARCODE_CHECK.out.filtered.
-            map{ meta, _file ->
-                def new_meta = meta + [process: "BARCODES"]
-                [new_meta, _file]
-            }
-            .set { ch_barcode_check}
+    PACBIO_BARCODE_CHECK (
+        duplicated_db.reference,
+        ch_barcodes,
+        duplicated_db.pacbio_db
+    )
+    ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
 
-        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-
-    } else {
-        ch_barcode_check    = channel.of( [[process: "BARCODES"],[]] )
-    }
+    ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
+                            .map{ meta, _file ->
+                                def new_meta = meta + [process: "BARCODES"]
+                                [new_meta, _file]
+                            }
+                            .ifEmpty([[process: "BARCODES"],[]])
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "genomic" ) {
-        RUN_FCSADAPTOR (
-            ej_reference_tuple
+    RUN_FCSADAPTOR (
+        ej_reference_tuple.filter { meta, file -> params.run_fcs_adaptor in ["both", "genomic"]}
+    )
+    ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
+    //
+    RUN_FCSADAPTOR.out.ch_euk
+        .combine(
+            RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
         )
-        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
-        //
-        RUN_FCSADAPTOR.out.ch_euk
-            .combine(
-                RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
+        .map { meta, file1, file2 ->
+            tuple(
+                [id: meta.id, process: "FCS-Adaptor"],
+                file1,
+                file2
             )
-            .map { meta, file1, file2 ->
-                tuple(
-                    [id: meta.id, process: "FCS-Adaptor"],
-                    file1,
-                    file2
-                )
-            }
-            .set { ch_fcsadapt }
-
-    } else {
-        ch_fcsadapt         = Channel.of( [[process: "FCS-Adaptor"],[]] )
-    }
+        }
+        .ifEmpty([[process: "FCS-Adaptor"],[]])
+        .set { ch_fcsadapt }
 
 
+    // ----------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ) {
+    if ( !params.fcs_override ) {
 
         joint_channel = ej_reference_tuple
+            .filter { meta, file ->
+                params.run_fcsgx in ["both", "genomic"]
+            }
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
@@ -425,11 +395,19 @@ workflow ASCC_GENOMIC {
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
 
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
+                                .ifEmpty([[process: "FCSGX_RESULT"],[]])
+
         ch_fcsgx_report     = RUN_FCSGX.out.fcsgx_report_txt
+                                .ifEmpty([[process: "FCSGX_REPORT"],[]])
+
         ch_fcsgx_taxonomy   = RUN_FCSGX.out.fcsgx_taxonomy_rpt
+                                .ifEmpty([[process: "FCSGX_TAX_REPORT"],[]])
 
-    } else if ( params.fcs_override ) {
+    } else if ( params.fcs_override && params.run_fcsgx in ["both", "genomic"]) {
 
+        //
+        // TODO: THIS NEEDS TO BE OUPUT TO RESULTS TOO
+        //
         fcs_samplesheet.map{ meta, file ->
             log.info("[ASCC INFO]: Overriding Internal FCSGX with ${file}")
             def new_meta = meta + [process: "FCSGX_RESULT"]
@@ -441,203 +419,182 @@ workflow ASCC_GENOMIC {
         ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
         ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
-    } else {
-        ch_fcsgx            = Channel.of( [[process: "FCSGX_RESULT"],[]] )
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
     }
 
 
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.run_coverage == "both" || params.run_coverage == "genomic" ) {
 
-        RUN_READ_COVERAGE (
-            ej_reference_tuple,
-            reads_path,
-            reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
-        )
-        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    RUN_READ_COVERAGE (
+        ej_reference_tuple.filter { meta, file -> params.run_coverage in ["both", "genomic"]},
+        reads_path,
+        reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
+    )
+    ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "Coverage"], file]
-                                }
-                                .ifEmpty { [[:],[]] }
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
+                            .map { meta, file ->
+                                [[id: meta.id, process: "Coverage"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
 
-        ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-                                .map { meta, file ->
-                                    tuple([id: meta.id, process: "Mapped Bam"], file)
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        ch_coverage         = Channel.of( [[:],[]] )
-        ch_bam              = Channel.of( [[:],[]] )
-    }
+    ch_bam              = RUN_READ_COVERAGE.out.bam_ch
+                            .map { meta, file ->
+                                tuple([id: meta.id, process: "Mapped Bam"], file)
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( params.run_vecscreen == "both" || params.run_vecscreen == "genomic" ) {
-        RUN_VECSCREEN (
-            ej_reference_tuple,
-            vecscreen_database_path.first()
-        )
-        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    RUN_VECSCREEN (
+        ej_reference_tuple.filter { meta, file -> params.run_vecscreen in ["both", "genomic"]},
+        vecscreen_database_path.first()
+    )
+    ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
-                                .map { it ->
-                                    [[id: it[0].id, process: "VECSCREEN"], it[1]]
-                                }
-                                .ifEmpty { [[process: "VECSCREEN"],[]] }
-    } else {
-        ch_vecscreen        = Channel.of( [[process: "VECSCREEN"],[]] )
-    }
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
+                            .map { it ->
+                                [[id: it[0].id, process: "VECSCREEN"], it[1]]
+                            }
+                            .ifEmpty { [[process: "VECSCREEN"],[]] }
 
 
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( params.run_kraken == "both" || params.run_kraken == "genomic" ) {
+    RUN_NT_KRAKEN(
+        ej_reference_tuple.filter { meta, file -> params.run_kraken in ["both", "genomic"]},
+        nt_kraken_db_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
 
-        RUN_NT_KRAKEN(
-            ej_reference_tuple,
-            nt_kraken_db_path.first(),
-            ncbi_ranked_lineage_path.first()
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_kraken1 = RUN_NT_KRAKEN.out.classified
+                    .map { it ->
+                        [[id: it[0].id, process: "Kraken 1"], it[1]]
+                    }
+                .ifEmpty { [[:],[]] }
+
+    ch_kraken2 = RUN_NT_KRAKEN.out.report
+                    .map { it ->
+                        [[id: it[0].id, process: "Kraken 2"], it[1]]
+                    }
+                .ifEmpty { [[:],[]] }
+
+    ch_kraken3 = RUN_NT_KRAKEN.out.lineage
+                    .map { it ->
+                        [[id: it[0].id, process: "Kraken 3"], it[1]]
+                    }
+                .ifEmpty { [[:],[]] }
+
+
+    //
+    // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
+    //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
+    //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[:],[]]
+    //
+    //
+    ch_genomic_cbtk_input = ej_reference_tuple
+        .filter { meta, file ->
+            params.run_create_btk_dataset in ["both", "genomic"]
+        }
+        .mix(
+            ej_dot_genome,
+            ch_kmers,
+            ch_tiara,
+            ch_nt_blast,
+            // Use the BLAST top hits for BTK
+            ch_btk_format,
+            ch_fcsgx,
+            ch_bam,
+            ch_coverage,
+            ch_kraken1,
+            ch_kraken2,
+            ch_kraken3,
+            nr_full,
+            un_full
         )
-        ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_kraken1 = RUN_NT_KRAKEN.out.classified
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 1"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-
-        ch_kraken2 = RUN_NT_KRAKEN.out.report
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 2"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-
-        ch_kraken3 = RUN_NT_KRAKEN.out.lineage
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 3"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-    } else {
-        ch_kraken1 = Channel.of( [[:],[]] )
-        ch_kraken2 = Channel.of( [[:],[]] )
-        ch_kraken3 = Channel.of( [[:],[]] )
-    }
+        .map { meta, file ->
+            [meta.id, [meta: meta, file: file]]
+        }
+        .filter { id, data -> id != [] && id != null }
+        .groupTuple()
+        .map { id, data ->
+            [id: id, data: data]
+        }
 
 
-    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic" ) {
+    //
+    // LOGIC: LIST OF PROCESSES TO CHECK FOR
+    //
+    def processes = [
+        'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
+        'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
+        'Kraken 1', 'Kraken 3'
+    ]
 
-        //
-        // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
-        //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
-        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[:],[]]
-        //
-        //
-        ch_genomic_cbtk_input = ej_reference_tuple
-            .mix(
-                ej_dot_genome,
-                ch_kmers,
-                ch_tiara,
-                ch_nt_blast,
-                // Use the BLAST top hits for BTK
-                ch_btk_format,
-                ch_fcsgx,
-                ch_bam,
-                ch_coverage,
-                ch_kraken1,
-                ch_kraken2,
-                ch_kraken3,
-                nr_full,
-                un_full
-            )
-            .map { meta, file ->
-                [meta.id, [meta: meta, file: file]]
+
+    //
+    // LOGIC: Create a channel for each process
+    //
+    def processChannels = processes.collectEntries { process ->
+        [(process): ch_genomic_cbtk_input
+            .map { sample ->
+                def data = sample.data.find { it.meta.process == process }
+                data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
             }
-            .filter { id, data -> id != [] && id != null }
-            .groupTuple()
-            .map { id, data ->
-                [id: id, data: data]
-            }
-
-
-        //
-        // LOGIC: LIST OF PROCESSES TO CHECK FOR
-        //
-        def processes = [
-            'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
-            'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
-            'Kraken 1', 'Kraken 3'
         ]
-
-
-        //
-        // LOGIC: Create a channel for each process
-        //
-        def processChannels = processes.collectEntries { process ->
-            [(process): ch_genomic_cbtk_input
-                .map { sample ->
-                    def data = sample.data.find { it.meta.process == process }
-                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
-                }
-            ]
-        }
-
-
-        //
-        // LOGIC: Combine all channels using a series of combine operations
-        //
-        def combined_channel = processChannels['REFERENCE']
-
-        processes.tail().each { process ->
-            combined_channel = combined_channel.combine(processChannels[process], by: 0)
-        }
-
-
-        //
-        // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
-        //
-        CREATE_BTK_DATASET (
-            combined_channel,
-            ncbi_taxonomy_path.first(),
-            scientific_name
-
-        )
-        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
-
-        ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
-                                    .map{ meta, file ->
-                                        tuple([id: meta.id, process: "C_BTK_SUM"], file)
-                                    }
-        ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
-                                    .map{ meta, _file ->
-                                        def new_meta = meta + [process: "BTK_DATASET"]
-                                        [new_meta, _file]
-                                    }
-    } else {
-        ch_create_summary       = Channel.of( [[process: "C_BTK_SUM"],[]] )
-        ch_create_btk_dataset   = Channel.of( [[process: "BTK_DATASET"],[]] )
     }
+
+
+    //
+    // LOGIC: Combine all channels using a series of combine operations
+    //
+    def combined_channel = processChannels['REFERENCE']
+
+    processes.tail().each { process ->
+        combined_channel = combined_channel.combine(processChannels[process], by: 0)
+    }
+
+
+    //
+    // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
+    //
+    CREATE_BTK_DATASET (
+        combined_channel,
+        ncbi_taxonomy_path.first(),
+        scientific_name
+
+    )
+    ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
+
+    ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
+                                .map{ meta, file ->
+                                    tuple([id: meta.id, process: "C_BTK_SUM"], file)
+                                }
+                                .ifEmpty { [[process: "C_BTK_SUM"],[]] }
+
+    ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
+                                .map{ meta, _file ->
+                                    def new_meta = meta + [process: "BTK_DATASET"]
+                                    [new_meta, _file]
+                                }
+                                .ifEmpty { [[process: "BTK_DATASET"],[]] }
 
 
     //
