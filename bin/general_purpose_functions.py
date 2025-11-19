@@ -35,6 +35,7 @@ import sys
 import subprocess
 import signal
 from datetime import datetime
+import argparse
 
 
 def l(path):
@@ -252,3 +253,8 @@ def get_file_paths(in_folder_path, extension):
 def main():
     # Placeholder for accessing version.
     pass
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-v", "--version", action="version", version="1.0")

@@ -3,6 +3,33 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - Red Notebook [##/##/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 10 of sanger-tol/ascc, addition of a report generator.
+
+### `Added`
+
+- Reporting for the pipeline output into a more human readable output (html) @eaunin
+- Standardised some channel names
+- Standardised log info and warning calls
+- Changed the main method of kmer counting for memory efficiency
+  - Also added a module to re-generate the kmer string
+- Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel.
+- Added process tags to all channels
+  - caused an issue where combining channels will produce PRIMARY, HAPLOTYPE and null channels, ending pipeline execution, this requires filtering out null channels in some places.
+
+### `Bugs`
+
+### `Dependencies`
+
+| Module               | Old Version | New Versions |
+| -------------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT | NA          | 1.0          |
+| KMER_COUNTER         |             |              |
+| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
+
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.

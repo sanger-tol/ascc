@@ -131,6 +131,17 @@
                     }
                 }
             }
+        },
+        "https://github.com/sanger-tol/nf-core-modules": {
+            "modules": {
+                "sanger-tol": {
+                    "blobtoolkit/generatecsv": {
+                        "branch": "main",
+                        "git_sha": "ac5ce1a5a808dd78a115a1a88719c1ea31554667",
+                        "installed_by": ["modules"]
+                    }
+                }
+            }
         }
     }
 }
