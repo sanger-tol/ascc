@@ -542,7 +542,7 @@ workflow ASCC_GENOMIC {
     //
     // LOGIC: LIST OF PROCESSES TO CHECK FOR
     //
-    def processes = [
+    def processes_cbd = [
         'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
         'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
         'Kraken 1', 'Kraken 3'
@@ -552,7 +552,7 @@ workflow ASCC_GENOMIC {
     //
     // LOGIC: Create a channel for each process
     //
-    def processChannels = processes.collectEntries { process ->
+    def processChannels_cbd = processes_cbd.collectEntries { process ->
         [(process): ch_genomic_cbtk_input
             .map { sample ->
                 def data = sample.data.find { it.meta.process == process }
@@ -565,10 +565,10 @@ workflow ASCC_GENOMIC {
     //
     // LOGIC: Combine all channels using a series of combine operations
     //
-    def combined_channel = processChannels['REFERENCE']
+    def combined_channel = processChannels_cbd['REFERENCE']
 
-    processes.tail().each { process ->
-        combined_channel = combined_channel.combine(processChannels[process], by: 0)
+    processes_cbd.tail().each { process ->
+        combined_channel = combined_channel.combine(processChannels_cbd[process], by: 0)
     }
 
 
@@ -908,13 +908,13 @@ if (
                 [id: id, data: data]
             }
 
-        def processes = [
+        def processes_mbd = [
             'GC_COV', 'Coverage', 'TIARA',
             'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
             'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
         ]
 
-        def processChannels = processes.collectEntries { process ->
+        def processChannels_mbd = processes_mbd.collectEntries { process ->
             [(process): ascc_merged_data
                 .map { sample ->
                     def data = sample.data.find { it.meta.process == process }
@@ -923,10 +923,10 @@ if (
             ]
         }
 
-        def ascc_combined_channels = processChannels['GC_COV']
-        processes.tail().each { process ->
+        def ascc_combined_channels = processChannels_mbd['GC_COV']
+        processes_mbd.tail().each { process ->
             ascc_combined_channels = ascc_combined_channels
-                                    .combine(processChannels[process], by: 0)
+                                    .combine(processChannels_mbd[process], by: 0)
         }
 
         //
