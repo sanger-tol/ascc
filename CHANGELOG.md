@@ -21,6 +21,10 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
   - caused an issue where combining channels will produce PRIMARY, HAPLOTYPE and null channels, ending pipeline execution, this requires filtering out null channels in some places.
 - Simplification of if/else blocks to filter contolled processes
   - removes unnecessary codes and makes the code easier to read.
+- Refactoring of subworkflows for clearer code.
+  - `essential_jobs`
+  - `run_fcsgx`
+- Change `Channel` to `channel` to conform to strict syntax.
 - Simplification of data_mapper blocks in:
   - generate_html_report
   - sanger-tol-btk
