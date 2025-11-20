@@ -23,9 +23,9 @@ workflow RUN_READ_COVERAGE {
     platform                 // Channel val( str )
 
     main:
-    ch_versions     = Channel.empty()
-    ch_align_bam    = Channel.empty()
-    ch_refer_bam    = Channel.empty()
+    ch_versions     = channel.empty()
+    ch_align_bam    = channel.empty()
+    ch_refer_bam    = channel.empty()
 
 
     //

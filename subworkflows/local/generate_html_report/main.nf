@@ -40,26 +40,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     barcode_results
         .mix(
             trim_ns_results
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "TRAILING_NS"]
-                    [new_meta, _file]
-                },
             autofilter_results
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "AUTOFILTER"]
-                    [new_meta, _file]
-                },
             merged_table
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "MERGED_TABLE"]
-                    [new_meta, _file]
-                },
             phylum_counts
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
-                    [new_meta, _file]
-                },
-            // BELOW ALREADY HAVE PROCESS IN THEIR META
             fcs_adaptor_split.euk,
             fcs_adaptor_split.prok,
             vecscreen_results,

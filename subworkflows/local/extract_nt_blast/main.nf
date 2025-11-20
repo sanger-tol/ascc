@@ -19,7 +19,7 @@ workflow EXTRACT_NT_BLAST {
     ncbi_lineage_path       // Channel.fromPath( lineage_path )
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
     blastn_db_path
         .map { it ->

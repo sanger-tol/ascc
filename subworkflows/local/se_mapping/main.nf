@@ -10,8 +10,8 @@ workflow SE_MAPPING {
     reference_data_tuple     // Channel [ val(meta), path(file), path(file) ]
 
     main:
-    ch_versions     = Channel.empty()
-    ch_align_bams   = Channel.empty()
+    ch_versions     = channel.empty()
+    ch_align_bams   = channel.empty()
 
 
     //

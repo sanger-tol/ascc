@@ -10,7 +10,7 @@ workflow ESSENTIAL_JOBS {
     input_ref   // Channel [ val(meta), path(file) ]
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
 
     //
@@ -41,8 +41,19 @@ workflow ESSENTIAL_JOBS {
         new_input_fasta,
         run_fcs_adaptor
     )
-    ch_versions             = ch_versions.mix(FILTER_FASTA.out.versions)
+    ch_versions                     = ch_versions.mix(FILTER_FASTA.out.versions)
 
+    filter_fasta_sanitation_log     = FILTER_FASTA.out.sanitation_log
+                                        .map{ meta, _file ->
+                                            def new_meta = meta + [process: "REFERENCE_SANI_LOG"]
+                                            [new_meta, _file]
+                                        }
+
+    filter_length_filtering_log     = FILTER_FASTA.out.length_filtering_log
+                                        .map{ meta, _file ->
+                                            def new_meta = meta + [process: "REFERENCE_FILT_LOG"]
+                                            [new_meta, _file]
+                                        }
 
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
@@ -62,6 +73,17 @@ workflow ESSENTIAL_JOBS {
     )
     ch_versions             = ch_versions.mix(GENERATE_GENOME.out.versions)
 
+    reference_tuple_from_GG = GENERATE_GENOME.out.reference_tuple
+                                .map{ meta, _file ->
+                                    def new_meta = meta + [process: "REFERENCE"]
+                                    [new_meta, _file]
+                                }
+
+    dot_genome              = GENERATE_GENOME.out.dot_genome
+                                .map{ meta, _file ->
+                                    def new_meta = meta + [process: "GENOME"]
+                                    [new_meta, _file]
+                                }
 
     //
     // SUBWORKFLOW: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOME
@@ -73,28 +95,12 @@ workflow ESSENTIAL_JOBS {
 
 
     emit:
-    reference_tuple_from_GG             = GENERATE_GENOME.out.reference_tuple
-                                            .map{ meta, _file ->
-                                                def new_meta = meta + [process: "REFERENCE"]
-                                                [new_meta, _file]
-                                            }
+    reference_tuple_from_GG
     reference_with_seqkit               = new_input_fasta
-    dot_genome                          = GENERATE_GENOME.out.dot_genome
-                                            .map{ meta, _file ->
-                                                def new_meta = meta + [process: "GENOME"]
-                                                [new_meta, _file]
-                                            }
+    dot_genome
     gc_content_txt                      = GC_CONTENT.out.txt
     trailing_ns_report                  = TRAILINGNS_CHECK.out.trailing_ns_report
-    filter_fasta_sanitation_log         = FILTER_FASTA.out.sanitation_log
-                                            .map{ meta, _file ->
-                                                def new_meta = meta + [process: "REFERENCE_SANI_LOG"]
-                                                [new_meta, _file]
-                                            }
-    filter_fasta_length_filtering_log   = FILTER_FASTA.out.length_filtering_log
-                                            .map{ meta, _file ->
-                                                def new_meta = meta + [process: "REFERENCE_FILT_LOG"]
-                                                [new_meta, _file]
-                                            }
+    filter_fasta_sanitation_log
+    filter_fasta_length_filtering_log   = filter_length_filtering_log
     versions                            = ch_versions
 }

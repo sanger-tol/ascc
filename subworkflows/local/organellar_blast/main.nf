@@ -21,7 +21,7 @@ workflow ORGANELLAR_BLAST {
     organellar_tuple    // tuple([organelle], organellar_fasta)
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     reference_tuple
         .combine(organellar_tuple)

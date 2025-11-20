@@ -13,7 +13,7 @@ workflow RUN_FCSGX {
     ncbi_rankedlineage_path // Channel path(file)
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // MODULE: Use SAMTOOLS_DICT to get origin file and md5sum of each sequence
@@ -40,7 +40,17 @@ workflow RUN_FCSGX {
         [],
         "production" in workflow.profile.tokenize(',')
     )
-    ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
+    ch_versions         = ch_versions.mix( FCSGX_RUNGX.out.versions )
+
+    fcsgx_report_txt    = FCSGX_RUNGX.out.fcsgx_report
+                            .map { meta, file ->
+                                file ? [meta + [process: "FCSGX_REPORT"], file] : [[process: "FCSGX_REPORT"], []]
+                            }
+
+    fcsgx_taxonomy_rpt  = FCSGX_RUNGX.out.taxonomy_report
+                            .map { meta, file ->
+                                file ? [meta + [process: "FCSGX_TAX_REPORT"], file] : [[process: "FCSGX_TAX_REPORT"], []]
+                            }
 
 
     //
@@ -64,24 +74,18 @@ workflow RUN_FCSGX {
     )
     ch_versions     = ch_versions.mix( PARSE_FCSGX_RESULT.out.versions )
 
+    fcsgxresult     = PARSE_FCSGX_RESULT.out.fcsgxresult
+                        .map { meta, file ->
+                            file ? [meta + [process: "FCSGX_RESULT"], file] : [[process: "FCSGX_RESULT"], []]
+                        }
+
 
     emit:
 
-    // Tag the processes which we may want to use later on
-    fcsgxresult        = PARSE_FCSGX_RESULT.out.fcsgxresult
-                            .map { meta, file ->
-                                file ? [meta + [process: "FCSGX_RESULT"], file] : [[process: "FCSGX_RESULT"], []]
-                            }
+    fcsgxresult
     genomedict         = samtools_reference
-    // Expose raw FCS-GX outputs for HTML report tabs
-    fcsgx_report_txt   = FCSGX_RUNGX.out.fcsgx_report
-                            .map { meta, file ->
-                                file ? [meta + [process: "FCSGX_REPORT"], file] : [[process: "FCSGX_REPORT"], []]
-                            }
-    fcsgx_taxonomy_rpt = FCSGX_RUNGX.out.taxonomy_report
-                            .map { meta, file ->
-                                file ? [meta + [process: "FCSGX_TAX_REPORT"], file] : [[process: "FCSGX_TAX_REPORT"], []]
-                            }
+    fcsgx_report_txt
+    fcsgx_taxonomy_rpt
     versions           = ch_versions
 
 }

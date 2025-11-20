@@ -14,7 +14,7 @@ workflow GET_KMERS_PROFILE {
     autoencoder_epochs_count            // Channel [ val(integer) ]
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // LOGIC: REFACTORING REFERENCE TUPLE
@@ -49,10 +49,10 @@ workflow GET_KMERS_PROFILE {
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
     //
-    Channel.fromList(params.dimensionality_reduction_methods)
+    channel.fromList(params.dimensionality_reduction_methods)
         .set{dim_methods}
 
-    Channel.from(params.n_neighbours)
+    channel.from(params.n_neighbours)
         .set{hey_neighbour}
 
     dim_methods
