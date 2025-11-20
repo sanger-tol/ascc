@@ -39,10 +39,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
     barcode_results
         .mix(
-            trim_ns_results
-            autofilter_results
-            merged_table
-            phylum_counts
+            trim_ns_results,
+            autofilter_results,
+            merged_table,
+            phylum_counts,
             fcs_adaptor_split.euk,
             fcs_adaptor_split.prok,
             vecscreen_results,

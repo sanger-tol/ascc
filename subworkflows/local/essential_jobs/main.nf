@@ -28,6 +28,7 @@ workflow ESSENTIAL_JOBS {
         }
         .set { new_input_fasta }
 
+    new_input_fasta.view{"REF 0: $it"}
 
     //
     // MODULE: FILTER/BREAK THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A 1.9Gb THRESHOLD, MORE THAN THIS WILL BREAK SOME TOOLS
