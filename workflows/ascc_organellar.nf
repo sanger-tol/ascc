@@ -131,7 +131,7 @@ workflow ASCC_ORGANELLAR {
                             .map { meta, file ->
                                 [[id: meta.id, process: "TIARA"], file]
                             }
-                            .ifEmpty { [[process: "TIARA"],[]] }
+                            .ifEmpty( [[process: "TIARA"],[]] )
 
 
     // ----------------------------------------------
@@ -269,13 +269,13 @@ workflow ASCC_ORGANELLAR {
                             .map { meta, file ->
                                 [[id: meta.id, process: "Coverage"], file]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_bam              = RUN_READ_COVERAGE.out.bam_ch
                             .map { meta, file ->
                                 tuple([id: meta.id, process: "Mapped Bam"], file)
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -296,7 +296,7 @@ workflow ASCC_ORGANELLAR {
                             .map { it ->
                                 [[id: it[0].id, process: "VECSCREEN"], it[1]]
                             }
-                            .ifEmpty { [[process: "VECSCREEN"],[]] }
+                            .ifEmpty( [[process: "VECSCREEN"],[]] )
 
 
     // ----------------------------------------------
@@ -318,19 +318,19 @@ workflow ASCC_ORGANELLAR {
                     .map { it ->
                         [[id: it[0].id, process: "Kraken 1"], it[1]]
                     }
-                .ifEmpty { [[:],[]] }
+                    .ifEmpty( [[:],[]] )
 
     ch_kraken2 = RUN_NT_KRAKEN.out.report
                     .map { it ->
                         [[id: it[0].id, process: "Kraken 2"], it[1]]
                     }
-                .ifEmpty { [[:],[]] }
+                    .ifEmpty( [[:],[]] )
 
     ch_kraken3 = RUN_NT_KRAKEN.out.lineage
                     .map { it ->
                         [[id: it[0].id, process: "Kraken 3"], it[1]]
                     }
-                .ifEmpty { [[:],[]] }
+                    .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -389,19 +389,19 @@ workflow ASCC_ORGANELLAR {
                             .map { it ->
                                 [[id: it[0].id, process: "NT-BLAST"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
                             .map { it ->
                                 [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
                             .map { it ->
                                 [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -422,13 +422,13 @@ workflow ASCC_ORGANELLAR {
                             .map { it ->
                                 [[id: it[0].id, process: "NR-FULL"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     nr_hits             = NR_DIAMOND.out.hits_file
                             .map { it ->
                                 [[id: it[0].id, process: "NR-HITS"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -445,13 +445,13 @@ workflow ASCC_ORGANELLAR {
                             .map { it ->
                                 [[id: it[0].id, process: "UN-FULL"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     un_hits             = UP_DIAMOND.out.hits_file
                             .map { it ->
                                 [[id: it[0].id, process: "UN-HITS"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------

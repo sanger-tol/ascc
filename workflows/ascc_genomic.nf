@@ -109,7 +109,7 @@ workflow ASCC_GENOMIC {
     ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
                                 .ifEmpty( ch_samplesheet )
 
-    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ meta, file ->
+    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
                                 .map{ meta, _file ->
                                     [[id: meta.id, process: "GENOME"], _file]
                                 }
@@ -161,13 +161,13 @@ workflow ASCC_GENOMIC {
                             .map { it ->
                                 [[id: it[0].id, process: "KMERS"], it[1]]
                             }
-                            .ifEmpty { [[process: "KMERS"],[]] }
+                            .ifEmpty( [[process: "KMERS"],[]] )
     // Provide kmers results directories for HTML report
     ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
                             .map { it ->
                                 [[id: it[0].id, process: "KMER_RESULTS"], it[1]]
                             }
-                            .ifEmpty { [[process: "KMER_RESULTS"],[]] }
+                            .ifEmpty( [[process: "KMER_RESULTS"],[]] )
 
 
     // ----------------------------------------------
@@ -183,7 +183,7 @@ workflow ASCC_GENOMIC {
                             .map { meta, file ->
                                 [[id: meta.id, process: "TIARA"], file]
                             }
-                            .ifEmpty { [[process: "TIARA"],[]] }
+                            .ifEmpty( [[process: "TIARA"],[]] )
 
 
     // ----------------------------------------------
@@ -205,19 +205,19 @@ workflow ASCC_GENOMIC {
                             .map { it ->
                                 [[id: it[0].id, process: "NT-BLAST"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
                             .map { it ->
                                 [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
                             .map { it ->
                                 [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -238,13 +238,13 @@ workflow ASCC_GENOMIC {
                             .map { it ->
                                 [[id: it[0].id, process: "NR-FULL"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     nr_hits             = NR_DIAMOND.out.hits_file
                             .map { it ->
                                 [[id: it[0].id, process: "NR-HITS"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -266,13 +266,13 @@ workflow ASCC_GENOMIC {
                             .map { it ->
                                 [[id: it[0].id, process: "UN-FULL"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     un_hits             = UP_DIAMOND.out.hits_file
                             .map { it ->
                                 [[id: it[0].id, process: "UN-HITS"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -315,13 +315,13 @@ workflow ASCC_GENOMIC {
                             .map { it ->
                                 [[id: it[0].id, process: "MITO"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_chloro           = PLASTID_ORGANELLAR_BLAST.out.organelle_report
                             .map { it ->
                                 [[id: it[0].id, process: "CHLORO"], it[1]]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -353,7 +353,7 @@ workflow ASCC_GENOMIC {
                                 def new_meta = meta + [process: "BARCODES"]
                                 [new_meta, _file]
                             }
-                            .ifEmpty([[process: "BARCODES"],[]])
+                            .ifEmpty( [[process: "BARCODES"],[]] )
 
 
     // ----------------------------------------------
@@ -380,7 +380,7 @@ workflow ASCC_GENOMIC {
                 file2
             )
         }
-        .ifEmpty([[process: "FCS-Adaptor"],[], []])
+        .ifEmpty( [[process: "FCS-Adaptor"],[], []] )
         .set { ch_fcsadapt }
 
 
@@ -412,13 +412,13 @@ workflow ASCC_GENOMIC {
         ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
 
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
-                                .ifEmpty([[process: "FCSGX_RESULT"],[]])
+                                .ifEmpty( [[process: "FCSGX_RESULT"],[]] )
 
         ch_fcsgx_report     = RUN_FCSGX.out.fcsgx_report_txt
-                                .ifEmpty([[process: "FCSGX_REPORT"],[]])
+                                .ifEmpty( [[process: "FCSGX_REPORT"],[]] )
 
         ch_fcsgx_taxonomy   = RUN_FCSGX.out.fcsgx_taxonomy_rpt
-                                .ifEmpty([[process: "FCSGX_TAX_REPORT"],[]])
+                                .ifEmpty( [[process: "FCSGX_TAX_REPORT"],[]] )
 
     } else if ( params.fcs_override && params.run_fcsgx in run_conditional) {
 
@@ -459,13 +459,13 @@ workflow ASCC_GENOMIC {
                             .map { meta, file ->
                                 [[id: meta.id, process: "Coverage"], file]
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
     ch_bam              = RUN_READ_COVERAGE.out.bam_ch
                             .map { meta, file ->
                                 tuple([id: meta.id, process: "Mapped Bam"], file)
                             }
-                            .ifEmpty { [[:],[]] }
+                            .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -486,7 +486,7 @@ workflow ASCC_GENOMIC {
                             .map { it ->
                                 [[id: it[0].id, process: "VECSCREEN"], it[1]]
                             }
-                            .ifEmpty { [[process: "VECSCREEN"],[]] }
+                            .ifEmpty( [[process: "VECSCREEN"],[]] )
 
 
     // ----------------------------------------------
@@ -508,19 +508,19 @@ workflow ASCC_GENOMIC {
                     .map { it ->
                         [[id: it[0].id, process: "Kraken 1"], it[1]]
                     }
-                .ifEmpty { [[:],[]] }
+                .ifEmpty( [[:],[]] )
 
     ch_kraken2 = RUN_NT_KRAKEN.out.report
                     .map { it ->
                         [[id: it[0].id, process: "Kraken 2"], it[1]]
                     }
-                .ifEmpty { [[:],[]] }
+                .ifEmpty( [[:],[]] )
 
     ch_kraken3 = RUN_NT_KRAKEN.out.lineage
                     .map { it ->
                         [[id: it[0].id, process: "Kraken 3"], it[1]]
                     }
-                .ifEmpty { [[:],[]] }
+                .ifEmpty( [[:],[]] )
 
 
     // ----------------------------------------------
@@ -608,14 +608,14 @@ workflow ASCC_GENOMIC {
                                 .map{ meta, file ->
                                     tuple([id: meta.id, process: "C_BTK_SUM"], file)
                                 }
-                                .ifEmpty { [[process: "C_BTK_SUM"],[]] }
+                                .ifEmpty( [[process: "C_BTK_SUM"],[]] )
 
     ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
                                 .map{ meta, _file ->
                                     def new_meta = meta + [process: "BTK_DATASET"]
                                     [new_meta, _file]
                                 }
-                                .ifEmpty { [[process: "BTK_DATASET"],[]] }
+                                .ifEmpty( [[process: "BTK_DATASET"],[]] )
 
 
     //
