@@ -51,7 +51,7 @@ workflow ASCC_ORGANELLAR {
     ch_barcodes
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // LOGIC: SET run_conditional AS THE TYPICAL REQUIREMENTS TO RUN PROCESS
@@ -82,32 +82,34 @@ workflow ASCC_ORGANELLAR {
 
     ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
                                 .ifEmpty( ch_samplesheet )
-                                .map { meta, ref ->
+                                .map { meta, _ref ->
                                     tuple([ id      : meta.id,
                                             process : "REFERENCE",
                                             sliding : params.seqkit_sliding,
                                             window  : params.seqkit_window,
                                             taxid   : params.taxid
                                         ],
-                                        ref
+                                        _ref
                                     )
                                 }
 
     ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
                                 .ifEmpty( ch_samplesheet )
 
-    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ meta, file ->
-                                tuple(
-                                    [id: meta.id, process: "GENOME"],
-                                    file
-                                )
-                            }
+    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
+                                .map{ meta, _file ->
+                                    [[id: meta.id, process: "GENOME"], _file]
+                                }
 
     ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
                                 .ifEmpty( [[:],[]] )
 
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-                                .ifEmpty( [[:],[]] )
+                                .map { meta, _file ->
+                                    def new_meta = meta + [process: "TRAILING_NS"]
+                                    [new_meta, _file]
+                                }
+                                .ifEmpty( [[process: "TRAILING_NS"],[]] )
 
     ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
                                 .ifEmpty( [[process: "REFERENCE_SANI_LOG"],[]] )
@@ -126,8 +128,8 @@ workflow ASCC_ORGANELLAR {
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
 
     ch_tiara            = TIARA_TIARA.out.classifications
-                            .map { it ->
-                                [[id: it[0].id, process: "TIARA"], it[1]]
+                            .map { meta, file ->
+                                [[id: meta.id, process: "TIARA"], file]
                             }
                             .ifEmpty { [[process: "TIARA"],[]] }
 
@@ -241,8 +243,8 @@ workflow ASCC_ORGANELLAR {
         }
         .set { ch_fcsgx }
 
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
     }
 
@@ -613,17 +615,21 @@ workflow ASCC_ORGANELLAR {
             }
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+                                    .map {meta, _file ->
+                                        def new_meta = meta + [process: "AUTOFILTER"]
+                                        [new_meta, _file]
+                                    }
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
         ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_alarm_file  = Channel.of( [[:],[]] )
-        ch_autofilt_removed_seqs= Channel.of( [[:],[]] )
-        ch_autofilt_assem       = Channel.of( [[:],[]] )
-        ch_autofilt_indicator   = Channel.of( [[:],[]] )
-        ch_autofilt_fcs_tiara   = Channel.of( [[:],[]] )
-        ch_autofilt_raw_report  = Channel.of( [[:],[]] )
+        ch_autofilt_alarm_file  = channel.of( [[:],[]] )
+        ch_autofilt_removed_seqs= channel.of( [[:],[]] )
+        ch_autofilt_assem       = channel.of( [[:],[]] )
+        ch_autofilt_indicator   = channel.of( [[:],[]] )
+        ch_autofilt_fcs_tiara   = channel.of( [[process: "AUTOFILTER"],[]] )
+        ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 
     //
@@ -640,8 +646,8 @@ workflow ASCC_ORGANELLAR {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        busco_merge_btk = Channel.of( [[],[]] )
-        ch_kmers = Channel.of( [[],[]] )
+        busco_merge_btk = channel.of( [[],[]] )
+        ch_kmers = channel.of( [[],[]] )
 
         ascc_merged_data = ej_gc_coverage
             .map{ meta, file -> tuple([
@@ -697,12 +703,21 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions               = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
         org_merged_table          = ASCC_MERGE_TABLES.out.merged_table
+                                        .map { meta, _file ->
+                                            def new_meta = meta + [process: "MERGED_TABLE"]
+                                            [new_meta, _file]
+                                        }
+
         org_merged_phylum_count   = ASCC_MERGE_TABLES.out.phylum_counts
+                                        .map { meta, _file ->
+                                            def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
+                                            [new_meta, _file]
+                                        }
 
     } else {
-        org_merged_table          = Channel.of( [[:],[]] )
-        merged_extended_table     = Channel.empty()
-        org_merged_phylum_count   = Channel.of( [[:],[]] )
+        org_merged_table          = channel.of( [[process: "MERGED_TABLE"],[]] )
+        merged_extended_table     = channel.empty()
+        org_merged_phylum_count   = channel.of( [[process: "MERGED_PHYLUM_COUNTS"],[]] )
     }
 
     // ----------------------------------------------
@@ -713,15 +728,15 @@ workflow ASCC_ORGANELLAR {
     //
 
     // Placeholders for channels not generated in organellar subworkflow
-    ch_kmers_results = Channel.of( [[],[]] )
+    ch_kmers_results = channel.of( [[],[]] )
 
     // Samplesheet/params file
-    ch_samplesheet_path = Channel.fromPath(params.input)
-    ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
+    ch_samplesheet_path = channel.fromPath(params.input)
+    ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
     // Templates and CSS
-    ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-    ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+    ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+    ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,

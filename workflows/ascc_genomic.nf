@@ -62,7 +62,7 @@ workflow ASCC_GENOMIC {
     ch_barcodes
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     //
     // LOGIC: CREATE btk_busco_run_mode VALUE
@@ -110,17 +110,19 @@ workflow ASCC_GENOMIC {
                                 .ifEmpty( ch_samplesheet )
 
     ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ meta, file ->
-                                tuple(
-                                    [id: meta.id, process: "GENOME"],
-                                    file
-                                )
-                            }
+                                .map{ meta, _file ->
+                                    [[id: meta.id, process: "GENOME"], _file]
+                                }
 
     ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
                                 .ifEmpty( [[:],[]] )
 
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-                                .ifEmpty( [[:],[]] )
+                                .map { meta, _file ->
+                                    def new_meta = meta + [process: "TRAILING_NS"]
+                                    [new_meta, _file]
+                                }
+                                .ifEmpty( [[process: "TRAILING_NS"],[]] )
 
     ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
                                 .ifEmpty( [[process: "REFERENCE_SANI_LOG"],[]] )
@@ -178,8 +180,8 @@ workflow ASCC_GENOMIC {
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
 
     ch_tiara            = TIARA_TIARA.out.classifications
-                            .map { it ->
-                                [[id: it[0].id, process: "TIARA"], it[1]]
+                            .map { meta, file ->
+                                [[id: meta.id, process: "TIARA"], file]
                             }
                             .ifEmpty { [[process: "TIARA"],[]] }
 
@@ -431,8 +433,8 @@ workflow ASCC_GENOMIC {
         }
         .set { ch_fcsgx }
 
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
     }
 
@@ -682,7 +684,7 @@ workflow ASCC_GENOMIC {
             .branch { meta, data ->
                 log.info("[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
 
-                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : Channel.empty()
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : channel.empty()
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
 
@@ -701,13 +703,13 @@ workflow ASCC_GENOMIC {
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        btk_bool_run_btk        = Channel.of([[id: "NA"], "false"])
-        ch_autofilt_alarm_file  = Channel.of( [[:],[]] )
-        ch_autofilt_removed_seqs= Channel.of( [[:],[]] )
-        ch_autofilt_assem       = Channel.of( [[:],[]] )
-        ch_autofilt_indicator   = Channel.of( [[:],[]] )
-        ch_autofilt_fcs_tiara   = Channel.of( [[:],[]] )
-        ch_autofilt_raw_report  = Channel.of( [[:],[]] )
+        btk_bool_run_btk        = channel.of([[id: "NA"], "false"])
+        ch_autofilt_alarm_file  = channel.of( [[:],[]] )
+        ch_autofilt_removed_seqs= channel.of( [[:],[]] )
+        ch_autofilt_assem       = channel.of( [[:],[]] )
+        ch_autofilt_indicator   = channel.of( [[:],[]] )
+        ch_autofilt_fcs_tiara   = channel.of( [[:],[]] )
+        ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 
 
@@ -882,8 +884,8 @@ if (
                                     }
         merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {
-        busco_merge_btk         = Channel.of( [[:],[]] )
-        merged_ds               = Channel.of( [[:],[]] )
+        busco_merge_btk         = channel.of( [[:],[]] )
+        merged_ds               = channel.of( [[:],[]] )
 
     }
 
@@ -960,13 +962,22 @@ if (
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
         merged_table            = ASCC_MERGE_TABLES.out.merged_table
+                                    .map { meta, _file ->
+                                        def new_meta = meta + [process: "MERGED_TABLE"]
+                                        [new_meta, _file]
+                                    }
+
         merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
         merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
+                                    .map { meta, _file ->
+                                        def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
+                                        [new_meta, _file]
+                                    }
 
     } else {
-        merged_table            = Channel.of( [[:],[]] )
-        merged_extended_table   = Channel.empty()
-        merged_phylum_count     = Channel.of( [[:],[]] )
+        merged_table            = channel.of( [[process: "MERGED_TABLE"],[]] )
+        merged_extended_table   = channel.empty()
+        merged_phylum_count     = channel.of( [[process: "MERGED_PHYLUM_COUNTS"],[]] )
     }
 
 
@@ -977,12 +988,12 @@ if (
     //
 
     // Samplesheet/params file
-    ch_samplesheet_path = Channel.fromPath(params.input)
-    ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
+    ch_samplesheet_path = channel.fromPath(params.input)
+    ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
     // Templates and CSS
-    ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-    ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+    ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+    ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
