@@ -82,8 +82,15 @@ workflow ASCC_ORGANELLAR {
 
     ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
                                 .ifEmpty( ch_samplesheet )
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "REFERENCE"], file]
+                                .map { meta, ref ->
+                                    tuple([ id      : meta.id,
+                                            process : "REFERENCE",
+                                            sliding : params.seqkit_sliding,
+                                            window  : params.seqkit_window,
+                                            taxid   : params.taxid
+                                        ],
+                                        ref
+                                    )
                                 }
 
     ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
