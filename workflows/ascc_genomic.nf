@@ -65,9 +65,9 @@ workflow ASCC_GENOMIC {
     ch_versions = Channel.empty()
 
     //
-    // LOGIC: CREATE btk_busco_run_mode VALUE
+    // LOGIC: CREATE run_conditional LIST
     //
-    btk_busco_run_mode = params.btk_busco_run_mode ?: "conditional"
+    run_conditionals = ["all", "genomic"]
 
 
     //
@@ -101,14 +101,12 @@ workflow ASCC_GENOMIC {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
 
         ej_reference_tuple      = ch_samplesheet
-                                    .map{ it ->
-                                        tuple( meta, _file
-                                            [[id: meta.id, process: "REFERENCE"], _file]
-                                        )
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
                                     }
-        ej_dot_genome           = Channel.of( [[:],[]] )
+        ej_dot_genome           = Channel.of( [[process: "GENOME"],[]] )
         ej_gc_coverage          = Channel.of( [[:],[]] )
-        ej_trailing_ns          = Channel.of( [[:],[]] )
+        ej_trailing_ns          = Channel.of( [[process: "TRAILING_NS"],[]] )
         ej_fasta_sanitation_log = Channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
         ej_fasta_filter_log     = Channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
@@ -140,15 +138,9 @@ workflow ASCC_GENOMIC {
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
         ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
-                                .map { it ->
-                                    [[id: it[0].id, process: "KMERS"], it[1]]
-                                }
                                 .ifEmpty { [[process: "KMERS"],[]] }
-        // Provide kmers results directories for HTML report
+
         ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
-                                .map { it ->
-                                    [[id: it[0].id, process: "KMER_RESULTS"], it[1]]
-                                }
                                 .ifEmpty { [[process: "KMER_RESULTS"],[]] }
     } else {
         ch_kmers            = Channel.of( [[process: "KMERS"],[]] )
@@ -168,7 +160,7 @@ workflow ASCC_GENOMIC {
                                 .map { it ->
                                     [[id: it[0].id, process: "TIARA"], it[1]]
                                 }
-                                .ifEmpty { [[:],[]] }
+                                .ifEmpty { [[process: "TIARA"],[]] }
     } else {
         ch_tiara            = Channel.of( [[:],[]] )
     }
@@ -193,23 +185,9 @@ workflow ASCC_GENOMIC {
         // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
+        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
 
     } else {
         ch_nt_blast         = Channel.of( [[:],[]] )

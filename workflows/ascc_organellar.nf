@@ -74,12 +74,7 @@ workflow ASCC_ORGANELLAR {
 
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ it ->
-                                    tuple(
-                                        [id: it[0].id, process: "GENOME"],
-                                        it[1]
-                                    )
-                                }
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
         ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
         ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
@@ -89,16 +84,12 @@ workflow ASCC_ORGANELLAR {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
 
         ej_reference_tuple      = ch_samplesheet
-                                    .map{ it ->
-                                        tuple( meta, _file
-                                            [[id: meta.id, process: "REFERENCE"], _file]
-                                        )
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
                                     }
-
-        ej_seqkit_reference     = ch_samplesheet
-        ej_dot_genome           = Channel.of( [[:],[]] )
+        ej_dot_genome           = Channel.of( [[process: "GENOME"],[]] )
         ej_gc_coverage          = Channel.of( [[:],[]] )
-        ej_trailing_ns          = Channel.of( [[:],[]] )
+        ej_trailing_ns          = Channel.of( [[process: "TRAILING_NS"],[]] )
         ej_fasta_sanitation_log = Channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
         ej_fasta_filter_log     = Channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
