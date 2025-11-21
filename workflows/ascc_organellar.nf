@@ -458,7 +458,7 @@ workflow ASCC_ORGANELLAR {
         //
         def processes = [
             'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
-            'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
+            'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'MAPPED_BAM', 'COVERAGE',
             'Kraken 1', 'Kraken 3'
         ]
 
