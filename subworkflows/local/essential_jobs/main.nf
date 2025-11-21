@@ -7,10 +7,10 @@ include { TRAILINGNS_CHECK                              } from '../../../subwork
 workflow ESSENTIAL_JOBS {
 
     take:
-    input_ref   // Channel [ val(meta), path(file) ]
+    input_ref   // channel.[ val(meta), path(file) ]
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
 
     //

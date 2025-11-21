@@ -11,7 +11,7 @@ workflow RUN_NT_KRAKEN {
     ncbi_rankedlineage_path
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
 
     //

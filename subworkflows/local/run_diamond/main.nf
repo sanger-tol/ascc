@@ -17,9 +17,9 @@ workflow RUN_DIAMOND {
     diamond_db          // val (path)
 
     main:
-    ch_versions     = Channel.empty()
-    ch_ext          = Channel.of("txt")
-    ch_columns      = Channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
+    ch_versions     = channel.empty()
+    ch_ext          = channel.of("txt")
+    ch_columns      = channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
 
 
     //

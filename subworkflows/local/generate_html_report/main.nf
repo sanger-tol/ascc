@@ -22,7 +22,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     css_files_list             // channel: [ css_files_list ] // CSS files to include in the report
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     // Convert params to JSON for passing to the HTML report
     def paramsJson = groovy.json.JsonOutput.toJson(params)
@@ -189,10 +189,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     GENERATE_HTML_REPORT (
         sorted_data.data,
         channel.fromPath("${projectDir}/assets/templates/*.jinja").collect(),   // Pass the list of Jinja templates
-        sorted_data.samplesheet,                                                // Channel of one
-        sorted_data.params,                                                     // Channel of one
+        sorted_data.samplesheet,                                                // channel.of one
+        sorted_data.params,                                                     // channel.of one
         sorted_data.json,                                                       // JSON string can be used multiple times
-        channel.fromPath("${projectDir}/assets/css/*.css").collect()            // Channel of one (CSS files)
+        channel.fromPath("${projectDir}/assets/css/*.css").collect()            // channel.of one (CSS files)
     )
     ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 

@@ -18,14 +18,14 @@ include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE               } from '../../../modules
 workflow RUN_READ_COVERAGE {
 
     take:
-    reference_tuple          // Channel [ val(meta), path(file) ]
+    reference_tuple          // channel.[ val(meta), path(file) ]
     reads
-    platform                 // Channel val( str )
+    platform                 // channel.val( str )
 
     main:
-    ch_versions     = Channel.empty()
-    ch_align_bam    = Channel.empty()
-    ch_refer_bam    = Channel.empty()
+    ch_versions     = channel.empty()
+    ch_align_bam    = channel.empty()
+    ch_refer_bam    = channel.empty()
 
 
     //

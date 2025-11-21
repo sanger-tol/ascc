@@ -9,7 +9,7 @@ workflow RUN_FCSADAPTOR {
     reference_tuple
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
 
     //

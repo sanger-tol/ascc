@@ -11,7 +11,7 @@ workflow PACBIO_BARCODE_CHECK {
     barcode_database        // tupe     [[meta.id], barcode_database]
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB

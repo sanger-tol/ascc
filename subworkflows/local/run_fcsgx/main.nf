@@ -8,12 +8,12 @@ include { PARSE_FCSGX_RESULT    } from '../../../modules/local/fcsgx/parse_resul
 workflow RUN_FCSGX {
 
     take:
-    reference               // Channel [ val(meta), path(file) ]
-    fcsgxpath               // Channel path(file)
-    ncbi_rankedlineage_path // Channel path(file)
+    reference               // channel.[ val(meta), path(file) ]
+    fcsgxpath               // channel.path(file)
+    ncbi_rankedlineage_path // channel.path(file)
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // MODULE: Use SAMTOOLS_DICT to get origin file and md5sum of each sequence

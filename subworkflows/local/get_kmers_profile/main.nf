@@ -8,13 +8,13 @@ include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../../modules/local/k
 
 workflow GET_KMERS_PROFILE {
     take:
-    assembly_fasta                      // Channel [ val(meta), path(file) ]
-    kmer_size                           // Channel [ val(integer) ]
-    dimensionality_reduction_methods    // Channel [ val(string) ]
-    autoencoder_epochs_count            // Channel [ val(integer) ]
+    assembly_fasta                      // channel.[ val(meta), path(file) ]
+    kmer_size                           // channel.[ val(integer) ]
+    dimensionality_reduction_methods    // channel.[ val(string) ]
+    autoencoder_epochs_count            // channel.[ val(integer) ]
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // LOGIC: REFACTORING REFERENCE TUPLE
@@ -49,10 +49,10 @@ workflow GET_KMERS_PROFILE {
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
     //
-    Channel.fromList(params.dimensionality_reduction_methods)
+    channel.fromList(params.dimensionality_reduction_methods)
         .set{dim_methods}
 
-    Channel.from(params.n_neighbours)
+    channel.from(params.n_neighbours)
         .set{hey_neighbour}
 
     dim_methods

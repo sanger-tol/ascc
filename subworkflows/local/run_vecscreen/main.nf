@@ -13,7 +13,7 @@ workflow RUN_VECSCREEN {
     vecscreen_database    // val(db_path)
 
     main:
-    ch_versions                 = Channel.empty()
+    ch_versions                 = channel.empty()
 
 
     //

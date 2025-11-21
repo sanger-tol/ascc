@@ -7,10 +7,10 @@ include { SAMTOOLS_MERGE                            } from '../../../modules/nf-
 workflow PE_MAPPING {
 
     take:
-    reference_data_tuple     // Channel [ val(meta), path(file), path(file) ]
+    reference_data_tuple     // channel.[ val(meta), path(file), path(file) ]
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // LOGIC: MAKE MINIMAP INPUT CHANNEL

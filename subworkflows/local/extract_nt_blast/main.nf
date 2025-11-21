@@ -14,12 +14,12 @@ include { GET_LINEAGE_FOR_TOP   } from '../../../modules/local/get/lineage_for_t
 
 workflow EXTRACT_NT_BLAST {
     take:
-    input_genome            // Channel.of([ [ id: sample_id ], fasta ])
-    blastn_db_path          // Channel.fromPath( db )
-    ncbi_lineage_path       // Channel.fromPath( lineage_path )
+    input_genome            // channel.of([ [ id: sample_id ], fasta ])
+    blastn_db_path          // channel.fromPath( db )
+    ncbi_lineage_path       // channel.fromPath( lineage_path )
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
     blastn_db_path
         .map { it ->
