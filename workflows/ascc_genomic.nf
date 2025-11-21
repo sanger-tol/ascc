@@ -93,10 +93,17 @@ workflow ASCC_GENOMIC {
     )
     ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
+    ch_samplesheet.view{"this: $it"}
+
     ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
                                 .ifEmpty( ch_samplesheet )
                                 .map { meta, file ->
-                                    [[id: meta.id, process: "REFERENCE"], file]
+                                    [[  id      : meta.id,
+                                        process : "REFERENCE",
+                                        sliding : params.seqkit_sliding,
+                                        window  : params.seqkit_window,
+                                        taxid   : params.taxid
+                                    ], file]
                                 }
 
     ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
@@ -988,27 +995,34 @@ if (
     ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
     ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
-    // GENERATE_HTML_REPORT_WORKFLOW (
-    //     ch_barcode_check,
-    //     ch_fcsadapt,
-    //     ej_trailing_ns,
-    //     ch_vecscreen,
-    //     ch_autofilt_fcs_tiara,
-    //     merged_table,
-    //     merged_phylum_count,
-    //     ch_kmers_results,
-    //     ej_reference_tuple.filter {meta, file -> params.run_html_report in run_conditional},
-    //     ej_fasta_sanitation_log,
-    //     ej_fasta_filter_log,
-    //     ch_jinja_templates,
-    //     ch_samplesheet_path,
-    //     ch_params_file,
-    //     ch_fcsgx_report,
-    //     ch_fcsgx_taxonomy,
-    //     ch_create_btk_dataset,
-    //     ch_css_files
-    // )
-    // ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+    ej_reference_tuple
+        .filter { meta, file ->
+            params.run_html_report in ["both", "organellar"]
+            return [[id: meta.id], file]
+        }
+        .set { reference_fasta_tuple }
+
+    GENERATE_HTML_REPORT_WORKFLOW (
+        ch_barcode_check,
+        ch_fcsadapt,
+        ej_trailing_ns,
+        ch_vecscreen,
+        ch_autofilt_fcs_tiara,
+        merged_table,
+        merged_phylum_count,
+        ch_kmers_results,
+        reference_fasta_tuple,
+        ej_fasta_sanitation_log,
+        ej_fasta_filter_log,
+        ch_jinja_templates,
+        ch_samplesheet_path,
+        ch_params_file,
+        ch_fcsgx_report,
+        ch_fcsgx_taxonomy,
+        ch_create_btk_dataset,
+        ch_css_files
+    )
+    ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
 
 
     emit:

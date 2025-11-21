@@ -83,25 +83,24 @@ workflow ASCC_ORGANELLAR {
     ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
                                 .ifEmpty( ch_samplesheet )
                                 .map { meta, file ->
-                                    [[id: meta.id, process: "REFERENCE"], file]
+                                    [[  id      : meta.id,
+                                        process : "REFERENCE",
+                                        sliding : params.seqkit_sliding,
+                                        window  : params.seqkit_window,
+                                        taxid   : params.taxid
+                                    ], file]
                                 }
 
     ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
                                 .ifEmpty{ ch_samplesheet }
 
     ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
-                                .map{ meta, _file ->
-                                    [[id: meta.id, process: "GENOME"], _file]
-                                }
+                                .ifEmpty{ [[process: "GENOME"],[]] }
 
     ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
                                 .ifEmpty{ [[:],[]] }
 
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-                                .map { meta, _file ->
-                                    def new_meta = meta + [process: "TRAILING_NS"]
-                                    [new_meta, _file]
-                                }
                                 .ifEmpty{ [[process: "TRAILING_NS"],[]] }
 
     ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
@@ -118,13 +117,13 @@ workflow ASCC_ORGANELLAR {
     TIARA_TIARA (
         ej_reference_tuple.filter { meta, file -> params.run_tiara in run_conditional }
     )
-    ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+    ch_versions = ch_versions.mix( TIARA_TIARA.out.versions )
 
-    ch_tiara            = TIARA_TIARA.out.classifications
-                            .map { meta, file ->
-                                [[id: meta.id, process: "TIARA"], file]
-                            }
-                            .ifEmpty{ [[process: "TIARA"],[]] }
+    ch_tiara    = TIARA_TIARA.out.classifications
+                    .map { meta, file ->
+                        [[id: meta.id, process: "TIARA"], file]
+                    }
+                    .ifEmpty{ [[process: "TIARA"],[]] }
 
 
     // ----------------------------------------------
@@ -725,27 +724,34 @@ workflow ASCC_ORGANELLAR {
     ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
     ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
-    // GENERATE_HTML_REPORT_WORKFLOW (
-    //     ch_barcode_check,
-    //     ch_fcsadapt,
-    //     ej_trailing_ns,
-    //     ch_vecscreen,
-    //     ch_autofilt_fcs_tiara,
-    //     org_merged_table,
-    //     org_merged_phylum_count,
-    //     ch_kmers_results,
-    //     ej_reference_tuple.filter {meta, file -> params.run_html_report in ["both", "organellar"]},
-    //     ej_fasta_sanitation_log,
-    //     ej_fasta_filter_log,
-    //     ch_jinja_templates,
-    //     ch_samplesheet_path,
-    //     ch_params_file,
-    //     ch_fcsgx_report,
-    //     ch_fcsgx_taxonomy,
-    //     ch_create_btk_dataset,
-    //     ch_css_files
-    // )
-    // ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+    ej_reference_tuple
+        .filter { meta, file ->
+            params.run_html_report in ["both", "organellar"]
+            return [[id: meta.id], file]
+        }
+        .set { reference_fasta_tuple }
+
+    GENERATE_HTML_REPORT_WORKFLOW (
+        ch_barcode_check,
+        ch_fcsadapt,
+        ej_trailing_ns,
+        ch_vecscreen,
+        ch_autofilt_fcs_tiara,
+        org_merged_table,
+        org_merged_phylum_count,
+        ch_kmers_results,
+        reference_fasta_tuple,
+        ej_fasta_sanitation_log,
+        ej_fasta_filter_log,
+        ch_jinja_templates,
+        ch_samplesheet_path,
+        ch_params_file,
+        ch_fcsgx_report,
+        ch_fcsgx_taxonomy,
+        ch_create_btk_dataset,
+        ch_css_files
+    )
+    ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
 
 
     emit:

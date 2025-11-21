@@ -28,8 +28,6 @@ workflow ESSENTIAL_JOBS {
         }
         .set { new_input_fasta }
 
-    new_input_fasta.view{"REF 0: $it"}
-
     //
     // MODULE: FILTER/BREAK THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A 1.9Gb THRESHOLD, MORE THAN THIS WILL BREAK SOME TOOLS
     //
@@ -76,7 +74,7 @@ workflow ESSENTIAL_JOBS {
 
     reference_tuple_from_GG = GENERATE_GENOME.out.reference_tuple
                                 .map{ meta, _file ->
-                                    def new_meta = meta + [process: "REFERENCE"]
+                                    def new_meta = [id: meta.id, process: "REFERENCE"]
                                     [new_meta, _file]
                                 }
 
@@ -94,13 +92,19 @@ workflow ESSENTIAL_JOBS {
     )
     ch_versions             = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
 
+    trailing_ns_report      = TRAILINGNS_CHECK.out.trailing_ns_report
+                                .map { meta, _file ->
+                                    def new_meta = meta + [process: "TRAILING_NS"]
+                                    [new_meta, _file]
+                                }
+
 
     emit:
     reference_tuple_from_GG
     reference_with_seqkit               = new_input_fasta
     dot_genome
     gc_content_txt                      = GC_CONTENT.out.txt
-    trailing_ns_report                  = TRAILINGNS_CHECK.out.trailing_ns_report
+    trailing_ns_report
     filter_fasta_sanitation_log
     filter_fasta_length_filtering_log   = filter_length_filtering_log
     versions                            = ch_versions
