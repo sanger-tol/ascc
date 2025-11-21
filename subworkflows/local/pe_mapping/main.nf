@@ -38,7 +38,7 @@ workflow PE_MAPPING {
     //
     pe_input
         .multiMap { meta, reads_path, ref, bam_output, cigar_paf, cigar_bam, reads_type ->
-            read_tuple          : tuple( meta, read_path)
+            read_tuple          : tuple( meta, reads_path)
             ref                 : tuple( meta, ref)
             bam_index_extension : "csi"
             bool_bam_ouput      : bam_output
