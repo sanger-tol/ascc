@@ -334,14 +334,9 @@ workflow ASCC_GENOMIC {
             ch_barcodes,
             duplicated_db.pacbio_db
         )
-        PACBIO_BARCODE_CHECK.out.filtered.
-            map{ meta, _file ->
-                def new_meta = meta + [process: "BARCODES"]
-                [new_meta, _file]
-            }
-            .set { ch_barcode_check}
-
         ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+
+        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
 
     } else {
         ch_barcode_check    = channel.of( [[process: "BARCODES"],[]] )
@@ -357,25 +352,10 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
-        //
-        RUN_FCSADAPTOR.out.ch_euk
-            .combine(
-                RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
-            )
-            .map { meta, file1, file2 ->
-                tuple(
-                    [id: meta.id, process: "FCS-Adaptor"],
-                    file1,
-                    file2
-                )
-            }
-            .set { ch_fcsadapt }
+        ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
 
     } else {
-        ch_fcsadapt         = Channel.of( [[process: "FCS-Adaptor"],[]] )
+        ch_fcsadapt         = Channel.of( [[:],[]] )
     }
 
 

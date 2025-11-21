@@ -49,8 +49,13 @@ workflow PACBIO_BARCODE_CHECK {
     )
     ch_versions     = ch_versions.mix(FILTER_BARCODE.out.versions)
 
+    filtered        = FILTER_BARCODE.out.debarcoded
+                        .map{ meta, _file ->
+                            def new_meta = meta + [process: "BARCODES"]
+                            [new_meta, _file]
+                        }
 
     emit:
-    filtered        = FILTER_BARCODE.out.debarcoded
+    filtered
     versions        = ch_versions
 }
