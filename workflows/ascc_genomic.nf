@@ -157,13 +157,13 @@ workflow ASCC_GENOMIC {
             ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
         } else {
             log.warn "[ASCC Sourmash] Skipping Sourmash: no valid databases configured"
-            ch_sourmash_summary     = Channel.of( [[],[]] )
-            ch_sourmash_non_target  = Channel.of( [[],[]] )
+            ch_sourmash_summary     = reference_tuple_from_GG.map { meta, ref -> [meta, []] }
+            ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
         }
 
     } else {
-        ch_sourmash_summary     = Channel.of( [[],[]] )
-        ch_sourmash_non_target  = Channel.of( [[],[]] )
+        ch_sourmash_summary     = reference_tuple_from_GG.map { meta, ref -> [meta, []] }
+        ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
     }
 
 
@@ -704,18 +704,24 @@ workflow ASCC_GENOMIC {
                 by: 0
             )
             .combine(
+                ch_sourmash_non_target
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
                 ncbi_ranked_lineage_path
             )
             .combine(
                 taxid
             )
             .multiMap{
-                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  tuple(new_meta, ref)
-                    tiara_file: tuple(new_meta, tiara)
-                    fcs_file:   tuple(new_meta, fcs)
-                    ncbi_rank:  ncbi
+                    reference:      tuple(new_meta, ref)
+                    tiara_file:     tuple(new_meta, tiara)
+                    fcs_file:       tuple(new_meta, fcs)
+                    sourmash_file:  tuple(new_meta, sourmash)
+                    ncbi_rank:      ncbi
             }
 
         //
@@ -725,6 +731,7 @@ workflow ASCC_GENOMIC {
             autofilter_input_formatted.reference,
             autofilter_input_formatted.tiara_file,
             autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.sourmash_file,
             autofilter_input_formatted.ncbi_rank
         )
         ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
