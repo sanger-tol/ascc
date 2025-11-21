@@ -94,14 +94,9 @@ workflow ASCC_GENOMIC {
     ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
     ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-                                .ifEmpty{ ch_samplesheet }
-                                .map { meta, _fasta ->
-                                    [[  id      : meta.id,
-                                        process : "REFERENCE",
-                                        sliding : params.seqkit_sliding,
-                                        window  : params.seqkit_window,
-                                        taxid   : params.taxid
-                                    ], _fasta ]
+                                .ifEmpty( ch_samplesheet )
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "REFERENCE"], file]
                                 }
 
     ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
