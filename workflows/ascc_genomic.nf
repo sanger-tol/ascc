@@ -890,7 +890,7 @@ if (
             }
 
         def processes = [
-            'GC_COV', 'Coverage', 'TIARA',
+            'GC_COV', 'COVERAGE', 'TIARA',
             'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
             'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
         ]
