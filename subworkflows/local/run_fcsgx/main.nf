@@ -29,8 +29,8 @@ workflow RUN_FCSGX {
     //         PRODUCTION_MODE WILL CHANGE HOW THE FCSGX MODULE IS RUN E.G IT IS SPECIFIC FOR `module`
     //
     SAMTOOLS_DICT.out.dict
-        .map { meta, ref, dict ->
-            tuple(meta, ref)
+        .map { meta, ref, _dict ->
+            [meta, ref]
         }
         .set { samtools_reference }
 
@@ -47,10 +47,8 @@ workflow RUN_FCSGX {
     // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
     FCSGX_RUNGX.out.fcsgx_report
-        .map{ it ->
-                tuple(  it[0],
-                        it[1].getParent()
-                )
+        .map{ meta, file ->
+            [meta, file.getParent()]
         }
         .set { report_path }
 

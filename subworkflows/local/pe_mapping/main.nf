@@ -17,18 +17,17 @@ workflow PE_MAPPING {
     //
     reference_data_tuple
         .map { meta, ref, reads_path, reads_type ->
-            tuple(
-                [   id          : meta.id,
-                    single_end  : false,
-                    readtype: reads_type.toString()
-                ],
+            [[  id          : meta.id,
+                single_end  : false,
+                readtype: reads_type.toString()
+            ],
                 reads_path,
                 ref,
                 true,
                 false,
                 false,
                 reads_type
-            )
+            ]
         }
         .set { pe_input }
 
@@ -38,8 +37,8 @@ workflow PE_MAPPING {
     //
     pe_input
         .multiMap { meta, reads_path, ref, bam_output, cigar_paf, cigar_bam, reads_type ->
-            read_tuple          : tuple( meta, reads_path)
-            ref                 : tuple( meta, ref)
+            read_tuple          : [meta, reads_path]
+            ref                 : [meta, ref]
             bam_index_extension : "csi"
             bool_bam_ouput      : bam_output
             bool_cigar_paf      : cigar_paf
@@ -65,7 +64,7 @@ workflow PE_MAPPING {
     MINIMAP2_ALIGN_ILLUMINA.out.bam
         .groupTuple(by: 0)
         .map{ meta, files ->
-            tuple( meta, files.flatten())
+            [meta, files.flatten()]
         }
         .set { collected_files_for_merge }
 

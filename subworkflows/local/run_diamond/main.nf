@@ -36,10 +36,7 @@ workflow RUN_DIAMOND {
     //
     diamond_db
         .map{ it ->
-            tuple(
-                [id: "db"],
-                it
-            )
+            [[id: "db"], it]
         }
         .set{diamond_db_path}
 
@@ -48,8 +45,8 @@ workflow RUN_DIAMOND {
         .combine(ch_columns)
         .combine(diamond_db_path)
         .multiMap{ meta, reference, extensions, columns, meta2, db_path ->
-            reference: tuple(meta, reference)
-            db_path: tuple(meta2, db_path)
+            reference: [meta, reference]
+            db_path: [meta2, db_path]
             ext_ch: extensions
             col_ch: columns
         }

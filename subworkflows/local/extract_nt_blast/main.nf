@@ -69,9 +69,7 @@ workflow EXTRACT_NT_BLAST {
         )
         .combine( id )
         .map { file, identity ->
-            tuple(  [   id: identity    ],
-                    file
-                )
+            [[ id: identity ], file ]
             }
         .set { blast_results }
 

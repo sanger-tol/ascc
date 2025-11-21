@@ -112,7 +112,7 @@ workflow RUN_READ_COVERAGE {
 
     bam_ch              = SAMTOOLS_SORT.out.bam
                             .map { meta, file ->
-                                tuple([id: meta.id, process: "MAPPED_BAM"], file)
+                                [[id: meta.id, process: "MAPPED_BAM"], file]
                             }
                             .ifEmpty { [[:],[]] }
 

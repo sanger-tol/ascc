@@ -22,10 +22,7 @@ workflow GET_KMERS_PROFILE {
     //
     assembly_fasta
         .map{ meta, file ->
-            tuple([id: meta.id,
-                    single_end: true],
-                file
-            )
+            [[id: meta.id, single_end: true], file]
         }
         .set { modified_input }
 

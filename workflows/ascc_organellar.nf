@@ -395,14 +395,16 @@ workflow ASCC_ORGANELLAR {
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
         ch_organellar_cbtk_input = ej_reference_tuple
-            .map{ it -> tuple([
-                id: it[0].id,
-                taxid: it[0].taxid,
-                sci_name: it[0].sci_name,
-                process: "REFERENCE"], it[1])
+            .map{ meta, file ->
+                [[
+                    id: meta.id,
+                    taxid: meta.taxid,
+                    sci_name: meta.sci_name,
+                    process: "REFERENCE"
+                ], file]
             }
             .mix(
-                ej_reference_tuple.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
+                ej_reference_tuple.map{ it -> [[id: it[0].id, process: "GENOME"], it[1] },
                 ch_tiara,
                 ch_nt_blast,
                 ch_btk_format,
@@ -469,7 +471,7 @@ workflow ASCC_ORGANELLAR {
 
         ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
                                     .map{ meta, file ->
-                                        tuple([id: meta.id, process: "C_BTK_SUM"], file)
+                                        [[id: meta.id, process: "C_BTK_SUM"], file]
                                     }
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
                                     .map{ meta, _file ->
@@ -501,15 +503,15 @@ workflow ASCC_ORGANELLAR {
         //
 
         autofilter_input_formatted = ej_reference_tuple
-            .map{ it -> tuple([id: it[0].id], it[1])}
+            .map{ it -> [[id: it[0].id], it[1]] }
             .combine(
                 ch_tiara
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ it -> [[id: it[0].id], it[1]] },
                 by: 0
             )
             .combine(
                 ch_fcsgx
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ it -> [[id: it[0].id], it[1]] },
                 by: 0
             )
             .combine(
@@ -521,9 +523,9 @@ workflow ASCC_ORGANELLAR {
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  tuple(new_meta, ref)
-                    tiara_file: tuple(new_meta, tiara)
-                    fcs_file:   tuple(new_meta, fcs)
+                    reference:  [new_meta, ref]
+                    tiara_file: [new_meta, tiara]
+                    fcs_file:   [new_meta, fcs]
                     ncbi_rank:  ncbi
             }
 
@@ -542,9 +544,7 @@ workflow ASCC_ORGANELLAR {
 
         ch_autofilt_alarm_file  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map{ meta, file ->
-                tuple(
-                    [id: meta.id], file
-                )
+                [[id: meta.id], file]
             }
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
@@ -579,9 +579,8 @@ workflow ASCC_ORGANELLAR {
         ch_kmers = channel.of( [[],[]] )
 
         ascc_merged_data = ej_gc_coverage
-            .map{ meta, file -> tuple([
-                id: meta.id,
-                process: "GC_COV"], file)
+            .map{ meta, file ->
+                [[ id: meta.id, process: "GC_COV"], file]
             }
             .mix(
                 ej_dot_genome,

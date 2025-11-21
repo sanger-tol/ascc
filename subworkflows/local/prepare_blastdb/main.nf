@@ -36,10 +36,7 @@ workflow PREPARE_BLASTDB {
         .filter{it.contains("barcodes")} // Indicates it is a valid barcode
         .combine( barcodes_file )
         .map {str_info, file ->
-            tuple(
-                [id: "BARCODE_TO_MAKEDB", info: str_info],
-                file
-            )
+            [[id: "BARCODE_TO_MAKEDB", info: str_info], file]
         }
         .set {ch_new_barcodes}
 

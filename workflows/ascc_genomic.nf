@@ -552,7 +552,7 @@ workflow ASCC_GENOMIC {
 
         ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
                                     .map{ meta, file ->
-                                        tuple([id: meta.id, process: "C_BTK_SUM"], file)
+                                        [[id: meta.id, process: "C_BTK_SUM"], file]
                                     }
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
                                     .map{ meta, _file ->
@@ -584,15 +584,15 @@ workflow ASCC_GENOMIC {
         //
 
         autofilter_input_formatted = ej_reference_tuple
-            .map{ it -> tuple([id: it[0].id], it[1])}
+            .map{ it -> [[id: it[0].id], it[1]] }
             .combine(
                 ch_tiara
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ it -> [[id: it[0].id], it[1]] },
                 by: 0
             )
             .combine(
                 ch_fcsgx
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ it -> [[id: it[0].id], it[1]] },
                 by: 0
             )
             .combine(
@@ -604,9 +604,9 @@ workflow ASCC_GENOMIC {
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  tuple(new_meta, ref)
-                    tiara_file: tuple(new_meta, tiara)
-                    fcs_file:   tuple(new_meta, fcs)
+                    reference:  [new_meta, ref]
+                    tiara_file: [new_meta, tiara]
+                    fcs_file:   [new_meta, fcs]
                     ncbi_rank:  ncbi
             }
 
@@ -631,7 +631,7 @@ workflow ASCC_GENOMIC {
             .branch { meta, data ->
                 log.info("[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
 
-                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? tuple(meta, "YES") : channel.empty()
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? [meta, "YES"] : channel.empty()
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
 
@@ -639,9 +639,7 @@ workflow ASCC_GENOMIC {
 
         ch_autofilt_alarm_file   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map{ meta, file ->
-                tuple(
-                    [id: meta.id], file
-                )
+                [[id: meta.id], file ]
             }
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
@@ -666,7 +664,7 @@ workflow ASCC_GENOMIC {
 
     run_btk_conditional = ej_reference_tuple
         | map { meta, file ->
-                tuple([id: meta.id, taxid: meta.taxid] , file)
+                [[id: meta.id, taxid: meta.taxid], file]
             }
         // below is combined into the tuple to enforce the block to only run when channel is present.
         | combine ( btk_bool_run_btk
@@ -676,10 +674,7 @@ workflow ASCC_GENOMIC {
                                     .replaceAll(/\s+/, "-")          // Replace remaining spaces with "-"
                                     .replaceAll(/_+/, "_")           // Keep underscores as they are
                                     .replaceAll(/-+/, "-")           // Clean up multiple dashes
-                            tuple(
-                                [id: meta.id, taxid: meta.taxid],
-                                joined_content
-                            )
+                            [[id: meta.id, taxid: meta.taxid], joined_content]
                         },
                 by: [0]
             )
@@ -749,10 +744,7 @@ workflow ASCC_GENOMIC {
     //
     btk_samplesheet = BLOBTOOLKIT_GENERATECSV.out.csv
         .map{ meta, csv ->
-            tuple(
-                [ id: meta.id ],
-                csv
-            )
+            [[id: meta.id], csv]
         }
 
 
@@ -769,10 +761,7 @@ workflow ASCC_GENOMIC {
     // an empty tuple [[id: "NA"], file]
     combined_input = run_btk_conditional.run_btk
         .map{ meta, file, data ->
-            tuple(
-                [id: meta.id], // TODO: a bug?
-                file
-            )
+            [[id: meta.id], file]
         }
         .combine(btk_samplesheet, by: 0)
 
@@ -823,10 +812,8 @@ if (
         )
         ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
-                                    .map{ it ->
-                                        tuple(
-                                            [id: it[0].id, process: "BUSCO_MERGE"], it[1]
-                                        )
+                                    .map{ meta, tsv ->
+                                        [[id: meta.id, process: "BUSCO_MERGE"], tsv]
                                     }
         merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {

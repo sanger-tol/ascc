@@ -18,13 +18,12 @@ workflow ESSENTIAL_JOBS {
     //
     input_ref
         .map { meta, ref ->
-            tuple([ id      : meta.id,
-                    sliding : params.seqkit_sliding,
-                    window  : params.seqkit_window,
-                    taxid   : params.taxid
-                ],
-                ref
-            )
+            [[  id      : meta.id,
+                sliding : params.seqkit_sliding,
+                window  : params.seqkit_window,
+                taxid   : params.taxid
+            ], ref
+            ]
         }
         .set { new_input_fasta }
 
