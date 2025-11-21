@@ -19,11 +19,7 @@ workflow RUN_NT_KRAKEN {
     //
     assembly_fasta
         .map{ meta, file ->
-            tuple([id: meta.id,
-                    single_end: true
-                ],
-                file
-            )
+            [[ id: meta.id, single_end: true ], file ]
         }
         .set { modified_input }
 
@@ -39,6 +35,18 @@ workflow RUN_NT_KRAKEN {
     )
     ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions)
 
+    classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
+                        .map { it ->
+                            [[id: it[0].id, process: "KRAKEN_1"], it[1]]
+                        }
+                        .ifEmpty { [[:],[]] }
+
+    report          = KRAKEN2_KRAKEN2.out.report
+                        .map { it ->
+                            [[id: it[0].id, process: "KRAKEN_2"], it[1]]
+                        }
+                        .ifEmpty { [[:],[]] }
+
 
     //
     // MODULE: GET LINEAGE FOR THE KRAKEN OUTPUT.
@@ -47,12 +55,18 @@ workflow RUN_NT_KRAKEN {
         KRAKEN2_KRAKEN2.out.classified_reads_assignment,
         ncbi_rankedlineage_path
     )
-    ch_versions = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
+    ch_versions     = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
+
+    lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
+                        .map { it ->
+                            [[id: it[0].id, process: "KRAKEN_3"], it[1]]
+                        }
+                        .ifEmpty { [[:],[]] }
 
 
     emit:
-    classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
-    report          = KRAKEN2_KRAKEN2.out.report
-    lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
+    classified
+    report
+    lineage
     versions        = ch_versions
 }

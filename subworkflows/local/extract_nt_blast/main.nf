@@ -84,12 +84,12 @@ workflow EXTRACT_NT_BLAST {
 
     ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full
                                 .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                                    [[id: it[0].id, process: "NT_BLAST_BTK"], it[1]]
                                 }
 
     ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
                                 .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
+                                    [[id: it[0].id, process: "NT_BLAST"], it[1]]
                                 }
 
 
@@ -131,7 +131,7 @@ workflow EXTRACT_NT_BLAST {
 
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
                                 .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
+                                    [[id: it[0].id, process: "NT_BLAST_LINEAGE"], it[1]]
                                 }
 
     // No conversion needed - BLAST results are already in the format expected by BlobToolKit

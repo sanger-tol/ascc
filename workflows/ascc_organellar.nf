@@ -259,22 +259,9 @@ workflow ASCC_ORGANELLAR {
         //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
         //
         ch_kraken1 = RUN_NT_KRAKEN.out.classified
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 1"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-
         ch_kraken2 = RUN_NT_KRAKEN.out.report
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 2"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-
         ch_kraken3 = RUN_NT_KRAKEN.out.lineage
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 3"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
+
     } else {
         ch_kraken1 = channel.of( [[:],[]] )
         ch_kraken2 = channel.of( [[:],[]] )
@@ -333,23 +320,9 @@ workflow ASCC_ORGANELLAR {
             ncbi_ranked_lineage_path.first()
         )
         ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
+        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
+        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
+        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
 
     } else {
         ch_nt_blast         = channel.of( [[:],[]] )
@@ -457,9 +430,9 @@ workflow ASCC_ORGANELLAR {
         // LOGIC: LIST OF PROCESSES TO CHECK FOR
         //
         def processes = [
-            'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
+            'REFERENCE', 'NT_BLAST', 'TIARA', 'KRAKEN_2', 'GENOME', 'KMERS',
             'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'MAPPED_BAM', 'COVERAGE',
-            'Kraken 1', 'Kraken 3'
+            'KRAKEN_1', 'KRAKEN_3'
         ]
 
         //
@@ -634,7 +607,7 @@ workflow ASCC_ORGANELLAR {
 
             def processes = [
                 'GC_COV', 'COVERAGE', 'TIARA',
-                'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
+                'KRAKEN_3', 'NT_BLAST_LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
                 'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
             ]
 
