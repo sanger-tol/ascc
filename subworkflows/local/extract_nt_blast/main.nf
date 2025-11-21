@@ -82,6 +82,16 @@ workflow EXTRACT_NT_BLAST {
     BLAST_CHUNK_TO_FULL ( blast_results )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
+    ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
+                                }
+
+    ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
+                                }
+
 
     //
     // MODULE: RE_ORDER THE DATA IN THE FULL_COORDINATE FILE
@@ -119,14 +129,18 @@ workflow EXTRACT_NT_BLAST {
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
 
+    ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
+                                .map { it ->
+                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
+                                }
+
     // No conversion needed - BLAST results are already in the format expected by BlobToolKit
 
     emit:
     ch_blast_results        = BLAST_BLASTN.out.txt
     ch_formatted_results    = REFORMAT_FULL_OUTFMT6.out.full
-    ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
-    ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
-    ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full  // Format for BTK - full coordinates file
+    ch_top_lineages
+    ch_blast_hits
+    ch_btk_format           // Format for BTK - full coordinates file
     versions                = ch_versions
-
 }

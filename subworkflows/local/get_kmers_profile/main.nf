@@ -16,6 +16,7 @@ workflow GET_KMERS_PROFILE {
     main:
     ch_versions     = channel.empty()
 
+
     //
     // LOGIC: REFACTORING REFERENCE TUPLE
     //
@@ -28,6 +29,7 @@ workflow GET_KMERS_PROFILE {
         }
         .set { modified_input }
 
+
     //
     // MODULE: PRODUCE KMER COUNTS (USING KMER-COUNTER)
     //
@@ -36,6 +38,7 @@ workflow GET_KMERS_PROFILE {
         kmer_size            // val kmer_size
     )
     ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
+
 
     //
     // MODULE: CONVERT NPY TO CSV FORMAT
@@ -68,6 +71,7 @@ workflow GET_KMERS_PROFILE {
         }
         .set{ dim_reduction }
 
+
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS
     //
@@ -79,6 +83,7 @@ workflow GET_KMERS_PROFILE {
     )
     ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION.out.versions)
 
+
     //
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
     //
@@ -87,11 +92,20 @@ workflow GET_KMERS_PROFILE {
         .groupTuple(by: [0])
         .set { collected_files_for_combine }
 
-    // Collect the results directories from KMER_COUNT_DIM_REDUCTION
+    kmers_results = collected_files_for_combine
+        .map { it ->
+            [[id: it[0].id, process: "KMER_RESULTS"], it[1]]
+        }
+        .ifEmpty { [[process: "KMER_RESULTS"],[]] }
+
+    //
+    // LOGIC: Collect the results directories from KMER_COUNT_DIM_REDUCTION
+    //
     KMER_COUNT_DIM_REDUCTION.out.results_dir
         .filter{meta, dir -> !dir.toString().contains("EMPTY")}
         .groupTuple(by: [0])
         .set { collected_results_dirs }
+
 
     //
     // MODULE: COMBINE OUTPUTS OF MULTIPLE METHODS
@@ -99,10 +113,16 @@ workflow GET_KMERS_PROFILE {
     KMER_COUNT_DIM_REDUCTION_COMBINE_CSV (
         collected_files_for_combine
     )
-    ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
+    ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
+
+    combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
+                        .map { it ->
+                            [[id: it[0].id, process: "KMERS"], it[1]]
+                        }
+                        .ifEmpty { [[process: "KMERS"],[]] }
 
     emit:
-    combined_csv  = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-    kmers_results = collected_files_for_combine
+    combined_csv
+    kmers_results
     versions      = ch_versions
 }
