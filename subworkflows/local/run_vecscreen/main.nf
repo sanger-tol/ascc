@@ -62,6 +62,11 @@ workflow RUN_VECSCREEN {
     )
     ch_versions                 = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
 
+    vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
+                                    .map { it ->
+                                        [[id: it[0].id, process: "VECSCREEN"], it[1]]
+                                    }
+                                    .ifEmpty { [[process: "VECSCREEN"],[]] }
 
     emit:
     vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination

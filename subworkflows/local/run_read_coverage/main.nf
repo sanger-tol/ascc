@@ -100,8 +100,24 @@ workflow RUN_READ_COVERAGE {
     ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
 
 
-    emit:
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
     tsv_ch              = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
+                            .map { meta, file ->
+                                [[id: meta.id, process: "COVERAGE"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
+
     bam_ch              = SAMTOOLS_SORT.out.bam
+                            .map { meta, file ->
+                                tuple([id: meta.id, process: "MAPPED_BAM"], file)
+                            }
+                            .ifEmpty { [[:],[]] }
+
+    emit:
+    tsv_ch
+    bam_ch
     versions            = ch_versions
 }

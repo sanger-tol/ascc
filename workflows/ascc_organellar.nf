@@ -51,7 +51,7 @@ workflow ASCC_ORGANELLAR {
     ch_barcodes
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
 
     //
@@ -87,11 +87,11 @@ workflow ASCC_ORGANELLAR {
                                     .map{ meta, _file ->
                                         [[id: meta.id, process: "REFERENCE"], _file]
                                     }
-        ej_dot_genome           = Channel.of( [[process: "GENOME"],[]] )
-        ej_gc_coverage          = Channel.of( [[:],[]] )
-        ej_trailing_ns          = Channel.of( [[process: "TRAILING_NS"],[]] )
-        ej_fasta_sanitation_log = Channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
-        ej_fasta_filter_log     = Channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
+        ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
+        ej_gc_coverage          = channel.of( [[:],[]] )
+        ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
+        ej_fasta_sanitation_log = channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
+        ej_fasta_filter_log     = channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
 
 
@@ -109,7 +109,7 @@ workflow ASCC_ORGANELLAR {
                                 }
                                 .ifEmpty { [[:],[]] }
     } else {
-        ch_tiara            = Channel.of( [[:],[]] )
+        ch_tiara            = channel.of( [[:],[]] )
     }
 
 
@@ -153,7 +153,7 @@ workflow ASCC_ORGANELLAR {
         ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
 
     } else {
-        ch_fcsadapt         = Channel.of( [[process: "FCS-Adaptor"],[]] )
+        ch_fcsadapt         = channel.of( [[process: "FCS-Adaptor"],[]] )
     }
 
 
@@ -195,13 +195,13 @@ workflow ASCC_ORGANELLAR {
         }
         .set { ch_fcsgx }
 
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
     } else {
-        ch_fcsgx            = Channel.of( [[process: "FCSGX_RESULT"],[]] )
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx            = channel.of( [[process: "FCSGX_RESULT"],[]] )
+        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
     }
 
 
@@ -217,25 +217,12 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
         ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "Coverage"], file]
-                                }
-                                .ifEmpty { [[:],[]] }
-
         ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-                                .map { meta, file ->
-                                    tuple([id: meta.id, process: "Mapped Bam"], file)
-                                }
-                                .ifEmpty { [[:],[]] }
 
     } else {
-        ch_coverage         = Channel.of( [[:],[]] )
-        ch_bam              = Channel.of( [[:],[]] )
+        ch_coverage         = channel.of( [[:],[]] )
+        ch_bam              = channel.of( [[:],[]] )
     }
 
 
@@ -249,17 +236,10 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
         ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
-                                .map { it ->
-                                    [[id: it[0].id, process: "VECSCREEN"], it[1]]
-                                }
-                                .ifEmpty { [[process: "VECSCREEN"],[]] }
+
     } else {
-        ch_vecscreen        = Channel.of( [[process: "VECSCREEN"],[]] )
+        ch_vecscreen        = channel.of( [[process: "VECSCREEN"],[]] )
     }
 
     //
@@ -296,9 +276,9 @@ workflow ASCC_ORGANELLAR {
                         }
                     .ifEmpty { [[:],[]] }
     } else {
-        ch_kraken1 = Channel.of( [[:],[]] )
-        ch_kraken2 = Channel.of( [[:],[]] )
-        ch_kraken3 = Channel.of( [[:],[]] )
+        ch_kraken1 = channel.of( [[:],[]] )
+        ch_kraken2 = channel.of( [[:],[]] )
+        ch_kraken3 = channel.of( [[:],[]] )
     }
 
 
@@ -372,9 +352,9 @@ workflow ASCC_ORGANELLAR {
                                 .ifEmpty { [[:],[]] }
 
     } else {
-        ch_nt_blast         = Channel.of( [[:],[]] )
-        ch_blast_lineage    = Channel.of( [[:],[]] )
-        ch_btk_format       = Channel.of( [[:],[]] )
+        ch_nt_blast         = channel.of( [[:],[]] )
+        ch_blast_lineage    = channel.of( [[:],[]] )
+        ch_btk_format       = channel.of( [[:],[]] )
     }
 
 
@@ -401,8 +381,8 @@ workflow ASCC_ORGANELLAR {
                                 .ifEmpty { [[:],[]] }
 
     } else {
-        nr_full             = Channel.of( [[:],[]] )
-        nr_hits             = Channel.of( [[:],[]] )
+        nr_full             = channel.of( [[:],[]] )
+        nr_hits             = channel.of( [[:],[]] )
     }
 
 
@@ -429,8 +409,8 @@ workflow ASCC_ORGANELLAR {
                                 }
                                 .ifEmpty { [[:],[]] }
     } else {
-        un_full             = Channel.of( [[:],[]] )
-        un_hits             = Channel.of( [[:],[]] )
+        un_full             = channel.of( [[:],[]] )
+        un_hits             = channel.of( [[:],[]] )
     }
 
 
@@ -524,8 +504,8 @@ workflow ASCC_ORGANELLAR {
                                         [new_meta, _file]
                                     }
     } else {
-    ch_create_summary       = Channel.of( [[process: "C_BTK_SUM"],[]] )
-    ch_create_btk_dataset   = Channel.of( [[process: "BTK_DATASET"],[]] )
+    ch_create_summary       = channel.of( [[process: "C_BTK_SUM"],[]] )
+    ch_create_btk_dataset   = channel.of( [[process: "BTK_DATASET"],[]] )
     }
 
 
@@ -600,12 +580,12 @@ workflow ASCC_ORGANELLAR {
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_alarm_file  = Channel.of( [[:],[]] )
-        ch_autofilt_removed_seqs= Channel.of( [[:],[]] )
-        ch_autofilt_assem       = Channel.of( [[:],[]] )
-        ch_autofilt_indicator   = Channel.of( [[:],[]] )
-        ch_autofilt_fcs_tiara   = Channel.of( [[:],[]] )
-        ch_autofilt_raw_report  = Channel.of( [[:],[]] )
+        ch_autofilt_alarm_file  = channel.of( [[:],[]] )
+        ch_autofilt_removed_seqs= channel.of( [[:],[]] )
+        ch_autofilt_assem       = channel.of( [[:],[]] )
+        ch_autofilt_indicator   = channel.of( [[:],[]] )
+        ch_autofilt_fcs_tiara   = channel.of( [[:],[]] )
+        ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 
     //
@@ -622,8 +602,8 @@ workflow ASCC_ORGANELLAR {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        busco_merge_btk = Channel.of( [[],[]] )
-        ch_kmers = Channel.of( [[],[]] )
+        busco_merge_btk = channel.of( [[],[]] )
+        ch_kmers = channel.of( [[],[]] )
 
         ascc_merged_data = ej_gc_coverage
             .map{ meta, file -> tuple([
@@ -682,9 +662,9 @@ workflow ASCC_ORGANELLAR {
         org_merged_phylum_count   = ASCC_MERGE_TABLES.out.phylum_counts
 
     } else {
-        org_merged_table          = Channel.of( [[:],[]] )
-        merged_extended_table     = Channel.empty()
-        org_merged_phylum_count   = Channel.of( [[:],[]] )
+        org_merged_table          = channel.of( [[:],[]] )
+        merged_extended_table     = channel.empty()
+        org_merged_phylum_count   = channel.of( [[:],[]] )
     }
 
     //
@@ -696,15 +676,15 @@ workflow ASCC_ORGANELLAR {
     if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
 
         // Placeholders for channels not generated in organellar subworkflow
-        ch_kmers_results = Channel.of( [[],[]] )
+        ch_kmers_results = channel.of( [[],[]] )
 
         // Samplesheet/params file
-        ch_samplesheet_path = Channel.fromPath(params.input)
-        ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
+        ch_samplesheet_path = channel.fromPath(params.input)
+        ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
         // Templates and CSS
-        ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-        ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
+        ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+        ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
         GENERATE_HTML_REPORT_WORKFLOW (
             ch_barcode_check,
