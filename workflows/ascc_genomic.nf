@@ -10,7 +10,6 @@ include { ASCC_MERGE_TABLES                             } from '../modules/local
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
 include { BLOBTOOLKIT_GENERATECSV                       } from '../modules/sanger-tol/blobtoolkit/generatecsv/main'
-include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
 
@@ -157,8 +156,8 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
         ch_tiara            = TIARA_TIARA.out.classifications
-                                .map { it ->
-                                    [[id: it[0].id, process: "TIARA"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "TIARA"], file]
                                 }
                                 .ifEmpty { [[process: "TIARA"],[]] }
     } else {
@@ -240,19 +239,15 @@ workflow ASCC_GENOMIC {
         )
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
         un_full             = UP_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-FULL"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "UN-FULL"], file ]
                                 }
                                 .ifEmpty { [[:],[]] }
 
         un_hits             = UP_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-HITS"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "UN-HITS"], file ]
                                 }
                                 .ifEmpty { [[:],[]] }
     } else {

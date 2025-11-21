@@ -70,7 +70,7 @@ workflow ASCC_ORGANELLAR {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
-        ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+        ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
@@ -104,8 +104,8 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
         ch_tiara            = TIARA_TIARA.out.classifications
-                                .map { it ->
-                                    [[id: it[0].id, process: "TIARA"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "TIARA"], file]
                                 }
                                 .ifEmpty { [[:],[]] }
     } else {
@@ -153,7 +153,7 @@ workflow ASCC_ORGANELLAR {
         ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
 
     } else {
-        ch_fcsadapt         = channel.of( [[process: "FCS-Adaptor"],[]] )
+        ch_fcsadapt         = channel.of( [[:],[]] )
     }
 
 
@@ -167,11 +167,11 @@ workflow ASCC_ORGANELLAR {
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
-            .multiMap { meta, ref, db, tax_id, tax_path ->
-                meta = [id: meta.id, taxid: meta.taxid]
-                reference: [meta, ref]
-                fcs_db_path: db
-                ncbi_tax_path: tax_path
+            .multiMap { meta, ref, db, _tax_id, tax_path ->
+                def new_meta =  [id: meta.id, taxid: meta.taxid]
+                reference:      [new_meta, ref]
+                fcs_db_path:    db
+                ncbi_tax_path:  tax_path
             }
 
         RUN_FCSGX (
@@ -313,7 +313,6 @@ workflow ASCC_ORGANELLAR {
         //
         //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
         //
-
         EXTRACT_NT_BLAST (
             valid_length_fasta,
             nt_database_path.first(),
@@ -342,14 +341,14 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
         nr_full             = NR_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "NR-FULL"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "NR-FULL"], file]
                                 }
                                 .ifEmpty { [[:],[]] }
 
         nr_hits             = NR_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "NR-HITS"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "NR-HITS"], file]
                                 }
                                 .ifEmpty { [[:],[]] }
 
@@ -371,14 +370,14 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
         un_full             = UP_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-FULL"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "UN-FULL"], file ]
                                 }
                                 .ifEmpty { [[:],[]] }
 
         un_hits             = UP_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-HITS"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "UN-HITS"], file ]
                                 }
                                 .ifEmpty { [[:],[]] }
     } else {
@@ -401,10 +400,10 @@ workflow ASCC_ORGANELLAR {
                     taxid: meta.taxid,
                     sci_name: meta.sci_name,
                     process: "REFERENCE"
-                ], file]
+                ], file ]
             }
             .mix(
-                ej_reference_tuple.map{ it -> [[id: it[0].id, process: "GENOME"], it[1] },
+                ej_reference_tuple.map{ meta, file -> [[id: meta.id, process: "GENOME"], file ]},
                 ch_tiara,
                 ch_nt_blast,
                 ch_btk_format,
@@ -421,7 +420,7 @@ workflow ASCC_ORGANELLAR {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] && id != null }
+            .filter { id, data -> id } // THIS SHOULD FILTER OUT THE null AND []
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]
@@ -474,9 +473,9 @@ workflow ASCC_ORGANELLAR {
                                         [[id: meta.id, process: "C_BTK_SUM"], file]
                                     }
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
-                                    .map{ meta, _file ->
+                                    .map{ meta, file ->
                                         def new_meta = meta + [process: "BTK_DATASET"]
-                                        [new_meta, _file]
+                                        [new_meta, file]
                                     }
     } else {
     ch_create_summary       = channel.of( [[process: "C_BTK_SUM"],[]] )
@@ -502,16 +501,16 @@ workflow ASCC_ORGANELLAR {
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
 
-        autofilter_input_formatted = ej_reference_tuple
-            .map{ it -> [[id: it[0].id], it[1]] }
+        ej_reference_tuple
+            .map{ meta, file -> [[id: meta.id], file] }
             .combine(
                 ch_tiara
-                    .map{ it -> [[id: it[0].id], it[1]] },
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
                 ch_fcsgx
-                    .map{ it -> [[id: it[0].id], it[1]] },
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
@@ -528,6 +527,7 @@ workflow ASCC_ORGANELLAR {
                     fcs_file:   [new_meta, fcs]
                     ncbi_rank:  ncbi
             }
+            .set { autofilter_input_formatted }
 
 
         //
@@ -539,7 +539,9 @@ workflow ASCC_ORGANELLAR {
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
-        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly
+                                    .map{ meta, file -> file}
+
         ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
         ch_autofilt_alarm_file  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
@@ -598,7 +600,7 @@ workflow ASCC_ORGANELLAR {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] }
+            .filter { id, data -> id } // THIS SHOULD FILTER AWAY [] and null
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]

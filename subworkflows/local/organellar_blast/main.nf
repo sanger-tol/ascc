@@ -77,11 +77,10 @@ workflow ORGANELLAR_BLAST {
     BLAST_BLASTN.out.txt
         .combine ( organellar_tuple )
         .map { meta, file, org_meta, org_file ->
-            tuple ( [   id: meta.id,                // Assembly Name
-                        og: org_meta.id,            // Organellar Name
-                        sz: file.size() ],          // Size of assembly
-                    file
-            )
+            [[  id: meta.id,                // Assembly Name
+                og: org_meta.id,            // Organellar Name
+                sz: file.size()             // Size of assembly
+            ], file ]
         }
         .set { blast_check }
 
@@ -149,10 +148,9 @@ workflow ORGANELLAR_BLAST {
     EXTRACT_CONTAMINANTS.out.contamination_bed
         .combine ( organellar_tuple)
         .map { blast_meta, blast_txt, organelle_meta, organelle_fasta ->
-            [   id          :   blast_meta.id,
-                organelle   :   organelle_meta.id   ],
-            file(blast_txt)
-            ]
+            [[  id:         blast_meta.id,
+                organelle:  organelle_meta.id
+            ], blast_txt ]
         }
         .set { reformatted_recommendations }
 
