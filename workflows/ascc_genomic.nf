@@ -82,33 +82,26 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-
-    if ( params.run_essentials == "both" || params.run_essentials == "genomic" ) {
-        ESSENTIAL_JOBS(
-            ch_samplesheet
-        )
-        ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
-
-        ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
-        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
-        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
-
-    } else {
+    if ( !params.run_essentials in run_conditionals ) {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
-
-        ej_reference_tuple      = ch_samplesheet
-                                    .map{ meta, _file ->
-                                        [[id: meta.id, process: "REFERENCE"], _file]
-                                    }
-        ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
-        ej_gc_coverage          = channel.of( [[:],[]] )
-        ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
-        ej_fasta_sanitation_log = channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
-        ej_fasta_filter_log     = channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
+
+    ESSENTIAL_JOBS(
+        ch_samplesheet.filter { meta, file -> params.run_essentials in run_conditionals }
+    )
+    ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+
+    ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+                                .ifEmpty{ ch_samplesheet
+                                            .map{ meta, _file ->
+                                                [[id: meta.id, process: "REFERENCE"], _file]
+                                            }
+                                        }
+    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.ifEmpty{ [[process: "GENOME"],[]] }
+    ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt.ifEmpty{ [[:],[]] }
+    ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report.ifEmpty{ [[process: "TRAILING_NS"],[]] }
+    ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log.ifEmpty{ [[process: "REFERENCE_SANI_LOG"],[]] }
+    ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log.ifEmpty{ [[process: "REFERENCE_FILT_LOG"],[]] }
 
 
     if ( params.run_kmers == "both" || params.run_kmers == "genomic" ) {
