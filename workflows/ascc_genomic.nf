@@ -167,31 +167,23 @@ workflow ASCC_GENOMIC {
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( params.run_nt_blast == "both" || params.run_nt_blast == "genomic" ) {
-        //
-        // NOTE: ch_nt_blast needs to be set in two places incase it
-        //          fails during the run
-        //
-        EXTRACT_NT_BLAST (
-            ej_reference_tuple,
-            nt_database_path.first(),
-            ncbi_ranked_lineage_path.first()
-        )
-        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
-        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
+    EXTRACT_NT_BLAST (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_nt_blast in run_conditionals
+        },
+        nt_database_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
 
-    } else {
-        ch_nt_blast         = channel.of( [[:],[]] )
-        ch_blast_lineage    = channel.of( [[:],[]] )
-        ch_btk_format       = channel.of( [[:],[]] )
-    }
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
+    ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
+    ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
+    ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -592,12 +584,12 @@ workflow ASCC_GENOMIC {
             .map{ meta, file -> [[id: meta.id], file] }
             .combine(
                 ch_tiara
-                    .map{ it -> [[id: it[0].id], file] },
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
                 ch_fcsgx
-                    .map{ it -> [[id: it[0].id], file] },
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
