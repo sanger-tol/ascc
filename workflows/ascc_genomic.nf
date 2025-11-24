@@ -78,6 +78,7 @@ workflow ASCC_GENOMIC {
         }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
@@ -111,6 +112,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     if ( params.run_kmers == "both" || params.run_kmers == "genomic" ) {
         //
         // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
@@ -146,25 +148,22 @@ workflow ASCC_GENOMIC {
         ch_kmers_results    = channel.of( [[process: "KMER_RESULTS"],[]] )
     }
 
-
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( params.run_tiara == "both" || params.run_tiara == "genomic" ) {
-        TIARA_TIARA (
-            ej_reference_tuple
-        )
-        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
-        ch_tiara            = TIARA_TIARA.out.classifications
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "TIARA"], file]
-                                }
-                                .ifEmpty { [[process: "TIARA"],[]] }
-    } else {
-        ch_tiara            = channel.of( [[:],[]] )
-    }
+    TIARA_TIARA (
+        ej_reference_tuple.filter{ meta, file -> params.run_tiara in run_conditionals }
+    )
+    ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+    ch_tiara            = TIARA_TIARA.out.classifications
+                            .map { meta, file ->
+                                [[id: meta.id, process: "TIARA"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
@@ -195,6 +194,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
@@ -228,6 +228,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles
@@ -256,6 +257,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     if ( params.run_organellar_blast == "both" || params.run_organellar_blast == "genomic" ) {
         //
         // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
@@ -310,6 +312,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
@@ -338,6 +341,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
@@ -354,6 +358,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
@@ -401,6 +406,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
@@ -422,6 +428,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
@@ -439,6 +446,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
@@ -466,6 +474,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "genomic" ) {
 
         //
@@ -560,6 +569,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
@@ -653,6 +663,7 @@ workflow ASCC_GENOMIC {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // LOGIC: DETERMINE WHETHER BLOBTOOLKIT SHOULD RUN BASED ON CONDITIONALS
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
@@ -786,6 +797,7 @@ workflow ASCC_GENOMIC {
     )
     ch_versions             = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
+    //-------------------------------------------------------------------------
 if (
         ( params.run_merge_datasets == "both" || params.run_merge_datasets == "genomic" ) &&
         ( params.run_btk_busco == "both" || params.run_btk_busco == "genomic" )
@@ -818,6 +830,7 @@ if (
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
@@ -897,6 +910,7 @@ if (
         merged_phylum_count     = channel.of( [[:],[]] )
     }
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
     //              Gate with params.run_html_report to avoid altering default behavior.
