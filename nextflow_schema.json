@@ -202,6 +202,14 @@
                     "enum": ["class", "family", "order", "genus", "phylum"],
                     "help_text": "The taxonomic rank to extract from NCBI taxonomy database using the sample's taxid. This determines the level at which target taxa will be identified for Sourmash filtering. Common values are 'order' (default) for broad taxonomic groups, or 'family'/'genus' for more specific classification."
                 },
+                "sourmash_action_mode": {
+                    "type": "string",
+                    "description": "Action mode for Sourmash contamination filtering in AUTOFILTER",
+                    "fa_icon": "fas fa-filter",
+                    "default": "warn",
+                    "enum": ["warn", "remove"],
+                    "help_text": "Determines how AUTOFILTER handles contigs identified as non-target by Sourmash. 'warn' (default, conservative): flags contigs but does not remove them - to test in production before switching to 'remove'. 'remove' (aggressive): excludes non-target contigs from the filtered assembly - useful for testing or when high confidence in contamination detection is required. Works in parallel with FCS-GX filtering."
+                },
                 "seqkit_sliding": {
                     "type": "integer",
                     "description": "Length of slide for Seqkit",
