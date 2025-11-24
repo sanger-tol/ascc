@@ -7,7 +7,7 @@ import os
 import sys
 import general_purpose_functions as gpf
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 DESCRIPTION = """
 Script for merging contaminant check results into one table
 Version: {VERSION}
@@ -15,6 +15,7 @@ Version: {VERSION}
 Written by Eerik Anuin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
+Updated by Danil Zilov (dz11/zilov) - sourmash integration
 """
 
 
@@ -45,6 +46,7 @@ def parse_args():
     parser.add_argument("-btk", "--blobtoolkit", type=str, help="Blobtoolkit file")
     parser.add_argument("-bb", "--btk_busco", type=str, help="Busco Blobtoolkit file")
     parser.add_argument("-fg", "--fcs_gx", type=str, help="FCS_GX file")
+    parser.add_argument("-sm", "--sourmash", type=str, help="Sourmash summary file")
     parser.add_argument("-n", "--sample_name", type=str, help="Name for the sample")
     parser.add_argument("-m", "--markerscan", type=str, help="MarkerScan file")
     parser.add_argument("-v", "--version", action="version", version=VERSION)
@@ -230,6 +232,13 @@ def load_and_merge_dataframes(paths_dict):
     if paths_dict["fcs_gx"] is not None:
         fcs_gx_df = parse_or_pass(paths_dict["fcs_gx"], "FCSGX")
 
+    sourmash_df = None
+    if paths_dict["sourmash"] is not None:
+        sourmash_df = parse_or_pass(paths_dict["sourmash"], "SOURMASH")
+        if sourmash_df is not None and 'header' in sourmash_df.columns:
+            # Rename 'header' column to 'scaff' for merging
+            sourmash_df = sourmash_df.rename(columns={'header': 'scaff'})
+
     nt_blast_df = None
     if paths_dict["nt_blast"] is not None:
         nt_blast_df = parse_or_pass(paths_dict["nt_blast"], "NT_BLAST")
@@ -272,6 +281,8 @@ def load_and_merge_dataframes(paths_dict):
         df = pd.merge(df, uniprot_diamond_df, on="scaff", how="outer")
     if fcs_gx_df is not None:
         df = pd.merge(df, fcs_gx_df, on="scaff", how="outer")
+    if sourmash_df is not None:
+        df = pd.merge(df, sourmash_df, on="scaff", how="outer")
     if cobiontid_markerscan_df is not None:
         df = pd.merge(df, cobiontid_markerscan_df, on="scaff", how="outer")
     if contigviz_df is not None:
@@ -308,6 +319,7 @@ def main(args):
     paths_dict["blobtoolkit"] = args.blobtoolkit
     paths_dict["btk_busco"] = args.btk_busco
     paths_dict["fcs_gx"] = args.fcs_gx
+    paths_dict["sourmash"] = args.sourmash
 
     required_files = ["gc_content"]
 

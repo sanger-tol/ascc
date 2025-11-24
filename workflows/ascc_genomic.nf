@@ -153,16 +153,20 @@ workflow ASCC_GENOMIC {
 
             // Output channels for downstream use
             ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                        .map { meta, file ->
+                                            [[id: meta.id, process: "SOURMASH"], file]
+                                        }
+                                        .ifEmpty { [[],[]] }
             ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
             ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
         } else {
             log.warn "[ASCC Sourmash] Skipping Sourmash: no valid databases configured"
-            ch_sourmash_summary     = reference_tuple_from_GG.map { meta, ref -> [meta, []] }
+            ch_sourmash_summary     = Channel.of( [[],[]] )
             ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
         }
 
     } else {
-        ch_sourmash_summary     = reference_tuple_from_GG.map { meta, ref -> [meta, []] }
+        ch_sourmash_summary     = Channel.of( [[],[]] )
         ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
     }
 
@@ -965,6 +969,7 @@ if (
                 ch_kmers,
                 ch_tiara,
                 ch_fcsgx,
+                ch_sourmash_summary,
                 ch_coverage,
                 ch_kraken3,
                 ch_blast_lineage,
@@ -983,7 +988,7 @@ if (
         def processes = [
             'GC_COV', 'Coverage', 'TIARA',
             'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
-            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result', 'SOURMASH'
         ]
 
         def processChannels = processes.collectEntries { process ->
