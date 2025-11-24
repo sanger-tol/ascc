@@ -24,8 +24,8 @@ workflow RUN_VECSCREEN {
     )
     ch_versions                 = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
 
-    vecscreen_database.map{ it ->
-        [[id: "db"], it]
+    vecscreen_database.map{ file ->
+        [[id: "db"], file]
     }
     .set { vecscreen_database_tuple }
 

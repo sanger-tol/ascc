@@ -579,15 +579,15 @@ workflow ASCC_GENOMIC {
         //
 
         autofilter_input_formatted = ej_reference_tuple
-            .map{ it -> [[id: it[0].id], it[1]] }
+            .map{ meta, file -> [[id: meta.id], file] }
             .combine(
                 ch_tiara
-                    .map{ it -> [[id: it[0].id], it[1]] },
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
                 ch_fcsgx
-                    .map{ it -> [[id: it[0].id], it[1]] },
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
@@ -614,7 +614,7 @@ workflow ASCC_GENOMIC {
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
-        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{_meta, file -> file}
         ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
         //

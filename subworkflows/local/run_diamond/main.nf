@@ -35,8 +35,8 @@ workflow RUN_DIAMOND {
     // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
     //
     diamond_db
-        .map{ it ->
-            [[id: "db"], it]
+        .map{ file ->
+            [[id: "db"], file]
         }
         .set{diamond_db_path}
 
