@@ -53,6 +53,11 @@ workflow ASCC_ORGANELLAR {
     main:
     ch_versions = channel.empty()
 
+    //
+    // LOGIC: CREATE run_conditional LIST
+    //
+    run_conditionals = ["both", "organellar"]
+
 
     //
     // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
@@ -80,12 +85,7 @@ workflow ASCC_ORGANELLAR {
 
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ it ->
-                                    tuple(
-                                        [id: it[0].id, process: "GENOME"],
-                                        it[1]
-                                    )
-                                }
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
         ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
         ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
@@ -93,88 +93,78 @@ workflow ASCC_ORGANELLAR {
 
     } else {
         ej_reference_tuple      = ch_samplesheet
-                                    .map{ it ->
-                                        tuple( meta, _file
-                                            [[id: meta.id, process: "REFERENCE"], _file]
-                                        )
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
                                     }
-
         ej_seqkit_reference     = ch_samplesheet
-        ej_dot_genome           = Channel.of( [[:],[]] )
-        ej_gc_coverage          = Channel.of( [[:],[]] )
-        ej_trailing_ns          = Channel.of( [[:],[]] )
-        ej_fasta_sanitation_log = Channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
-        ej_fasta_filter_log     = Channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
+        ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
+        ej_gc_coverage          = channel.of( [[:],[]] )
+        ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
+        ej_fasta_sanitation_log = channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
+        ej_fasta_filter_log     = channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( params.run_tiara == "both" || params.run_tiara == "organellar" ) {
-        TIARA_TIARA (
-            ej_reference_tuple
-        )
-        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
-        ch_tiara            = TIARA_TIARA.out.classifications
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "TIARA"], file]
-                                }
-                                .ifEmpty { [[:],[]] }
-    } else {
-        ch_tiara            = channel.of( [[:],[]] )
-    }
+    TIARA_TIARA (
+        ej_reference_tuple.filter{ meta, file -> params.run_tiara in run_conditionals }
+    )
+    ch_versions = ch_versions.mix( TIARA_TIARA.out.versions )
+    ch_tiara    = TIARA_TIARA.out.classifications
+                    .map { meta, file ->
+                        [[id: meta.id, process: "TIARA"], file]
+                    }
+                    .ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar" ) {
+    ej_reference_tuple
+        .combine(pacbio_database)
+        .multiMap{
+            ref_meta, ref_data, pdb_meta, pdb_data ->
+                reference: [ref_meta, ref_data]
+                pacbio_db: [pdb_meta, pdb_data]
+        }
+        .set { duplicated_db }
 
-        ej_reference_tuple
-            .combine(pacbio_database)
-            .multiMap{
-                ref_meta, ref_data, pdb_meta, pdb_data ->
-                    reference: [ref_meta, ref_data]
-                    pacbio_db: [pdb_meta, pdb_data]
-            }
-            .set { duplicated_db }
-
-        PACBIO_BARCODE_CHECK (
-            duplicated_db.reference,
-            ch_barcodes,
-            duplicated_db.pacbio_db
-        )
-        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-
-        ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
-
-    } else {
-        ch_barcode_check    = channel.of( [[process: "BARCODES"],[]] )
-    }
+    PACBIO_BARCODE_CHECK (
+        duplicated_db.reference.filter{ meta, file ->
+            params.run_pacbio_barcodes in run_conditionals
+        },
+        ch_barcodes,
+        duplicated_db.pacbio_db
+    )
+    ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
+                            .ifEmpty{ [[process: "BARCODES"],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar" ) {
-        RUN_FCSADAPTOR (
-            ej_reference_tuple
-        )
-        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    RUN_FCSADAPTOR (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_fcs_adaptor in run_conditionals
+        }
+    )
+    ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
 
-        ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
-
-    } else {
-        ch_fcsadapt         = channel.of( [[:],[]] )
-    }
+    ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
+                            .ifEmpty{ [[:], []] }
 
 
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
 
-    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") & !params.fcs_override) {
+    if ( params.run_fcsgx in run_conditionals && !params.fcs_override) {
 
         joint_channel = ej_reference_tuple
             .combine(fcs_db)
@@ -218,68 +208,51 @@ workflow ASCC_ORGANELLAR {
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.run_coverage == "both" || params.run_coverage == "organellar" ) {
-
-        RUN_READ_COVERAGE (
-            ej_reference_tuple,
-            reads,
-            reads_type,
-        )
-        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-
-        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-        ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-
-    } else {
-        ch_coverage         = channel.of( [[:],[]] )
-        ch_bam              = channel.of( [[:],[]] )
-    }
+    RUN_READ_COVERAGE (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_coverage in run_conditionals
+        },
+        reads_path,
+        reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
+    )
+    ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[:], []] }
+    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[:], []] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( params.run_vecscreen == "both" || params.run_vecscreen == "organellar" ) {
-        RUN_VECSCREEN (
-            ej_reference_tuple,
-            vecscreen_database_path.first()
-        )
-        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    RUN_VECSCREEN (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_vecscreen in run_conditionals
+        },
+        vecscreen_database_path.first()
+    )
+    ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.ifEmpty{ [[process: "VECSCREEN"],[]] }
 
-        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
 
-    } else {
-        ch_vecscreen        = channel.of( [[process: "VECSCREEN"],[]] )
-    }
-
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( params.run_kraken == "both" || params.run_kraken == "organellar" ) {
-
-        RUN_NT_KRAKEN(
-            ej_reference_tuple,
-            nt_kraken_db_path.first(),
-            ncbi_ranked_lineage_path.first()
-        )
-        ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_kraken1 = RUN_NT_KRAKEN.out.classified
-        ch_kraken2 = RUN_NT_KRAKEN.out.report
-        ch_kraken3 = RUN_NT_KRAKEN.out.lineage
-
-    } else {
-        ch_kraken1 = channel.of( [[:],[]] )
-        ch_kraken2 = channel.of( [[:],[]] )
-        ch_kraken3 = channel.of( [[:],[]] )
-    }
+    RUN_NT_KRAKEN(
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_kraken in run_conditionals
+        },
+        nt_kraken_db_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[:], []] }
+    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[:], []] }
+    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[:], []] }
 
 
     //
@@ -315,91 +288,77 @@ workflow ASCC_ORGANELLAR {
             log.info "[ASCC INFO]: Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
 
+
+    //-------------------------------------------------------------------------
     //
-    // LOGIC: THIS CONDITIONAL SHOULD EXECUTE THE PROCESS WHEN:
-    //          INCLUDE STEPS ARE EITHER nt_blast AND all
-    //              _AS WELL AS_
-    //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( params.run_nt_blast == "both" || params.run_nt_blast == "organellar" ) {
-
-        //
-        //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-        //
-        EXTRACT_NT_BLAST (
-            valid_length_fasta,
-            nt_database_path.first(),
-            ncbi_ranked_lineage_path.first()
-        )
-        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
-        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
-
-    } else {
-        ch_nt_blast         = channel.of( [[:],[]] )
-        ch_blast_lineage    = channel.of( [[:],[]] )
-        ch_btk_format       = channel.of( [[:],[]] )
-    }
+    EXTRACT_NT_BLAST (
+        valid_length_fasta.filter{ meta, file ->
+            params.run_nt_blast in run_conditionals
+        },
+        nt_database_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
+    ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
+    ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "organellar" ) {
+    NR_DIAMOND (
+        valid_length_fasta.filter{ meta, file ->
+            params.run_nr_diamond in run_conditionals
+        },
+        diamond_nr_db_path.first()
+    )
+    ch_versions = ch_versions.mix(NR_DIAMOND.out.versions)
+    nr_full     = NR_DIAMOND.out.reformed
+                    .map { meta, file ->
+                        [[id: meta.id, process: "NR-FULL"], file]
+                    }
+                    .ifEmpty { [[:],[]] }
 
-        NR_DIAMOND (
-            valid_length_fasta,
-            diamond_nr_db_path.first()
-        )
-        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-        nr_full             = NR_DIAMOND.out.reformed
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "NR-FULL"], file]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        nr_hits             = NR_DIAMOND.out.hits_file
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "NR-HITS"], file]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        nr_full             = channel.of( [[:],[]] )
-        nr_hits             = channel.of( [[:],[]] )
-    }
+    nr_hits     = NR_DIAMOND.out.hits_file
+                    .map { meta, file ->
+                        [[id: meta.id, process: "NR-HITS"], file]
+                    }
+                    .ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    // NOTE: Format is "qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles"
-    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "organellar" ) {
+    // NOTE: HEADER FORMAT WILL BE -
+    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send
+    //  evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    UP_DIAMOND (
+        valid_length_fasta.filter{ meta, file ->
+            params.run_uniprot_diamond in run_conditionals
+        },
+        diamond_uniprot_db_path.first()
+    )
+    ch_versions = ch_versions.mix(UP_DIAMOND.out.versions)
+    un_full     = UP_DIAMOND.out.reformed
+                    .map { meta, file ->
+                        [[id: meta.id, process: "UN-FULL"], file ]
+                    }
+                    .ifEmpty { [[:],[]] }
 
-        UP_DIAMOND (
-            valid_length_fasta,
-            diamond_uniprot_db_path.first()
-        )
-        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-        un_full             = UP_DIAMOND.out.reformed
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "UN-FULL"], file ]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        un_hits             = UP_DIAMOND.out.hits_file
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "UN-HITS"], file ]
-                                }
-                                .ifEmpty { [[:],[]] }
-    } else {
-        un_full             = channel.of( [[:],[]] )
-        un_hits             = channel.of( [[:],[]] )
-    }
+    un_hits     = UP_DIAMOND.out.hits_file
+                    .map { meta, file ->
+                        [[id: meta.id, process: "UN-HITS"], file ]
+                    }
+                    .ifEmpty { [[:],[]] }
 
 
-    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "organellar" ) {
+
+    if ( params.run_create_btk_dataset in run_conditionaals ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
