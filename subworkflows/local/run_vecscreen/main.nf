@@ -66,6 +66,6 @@ workflow RUN_VECSCREEN {
                                     .ifEmpty { [[process: "VECSCREEN"],[]] }
 
     emit:
-    vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
+    vecscreen_contam
     versions                    = ch_versions
 }
