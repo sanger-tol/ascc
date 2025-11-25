@@ -84,23 +84,29 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
+    if ( !params.run_essentials in run_conditionals ) {
+        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
+    }
 
-    if ( params.run_essentials == "both" || params.run_essentials == "genomic" ) {
+    if ( params.run_essentials in run_conditionals ) {
         ESSENTIAL_JOBS(
-            ch_samplesheet
+            ch_samplesheet.filter{ meta, file -> params.run_essentials in run_conditionals }
         )
-        ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+        ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
+        // Doing this ifEmpty causes a Wrapped Dataflow error later on
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
-        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
-        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
+                                    .ifEmpty{ ch_samplesheet }
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
+                                    }
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.ifEmpty{ [[process: "GENOME"],[]] }
+        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt.ifEmpty{ [[:],[]] }
+        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report.ifEmpty{ [[process: "TRAILING_NS"],[]] }
+        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log.ifEmpty{ [[process: "REFERENCE_SANI_LOG"],[]] }
+        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log.ifEmpty{ [[process: "REFERENCE_FILT_LOG"],[]] }
 
     } else {
-        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
-
         ej_reference_tuple      = ch_samplesheet
                                     .map{ meta, _file ->
                                         [[id: meta.id, process: "REFERENCE"], _file]
@@ -338,8 +344,8 @@ workflow ASCC_GENOMIC {
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
             .multiMap { meta, ref, db, tax_id, tax_path ->
-                meta = [id: meta.id, taxid: meta.taxid]
-                reference: [meta, ref]
+                new_meta = [id: meta.id, taxid: meta.taxid]
+                reference: [new_meta, ref]
                 fcs_db_path: db
                 ncbi_tax_path: tax_path
             }
@@ -536,7 +542,7 @@ workflow ASCC_GENOMIC {
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
 
-        autofilter_input_formatted = ej_reference_tuple
+        ej_reference_tuple
             .map{ meta, file -> [[id: meta.id], file] }
             .combine(
                 ch_tiara
@@ -562,6 +568,7 @@ workflow ASCC_GENOMIC {
                     fcs_file:   [new_meta, fcs]
                     ncbi_rank:  ncbi
             }
+            .set { autofilter_input_formatted }
 
         //
         // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
@@ -859,6 +866,7 @@ if (
         merged_extended_table   = channel.empty()
         merged_phylum_count     = channel.of( [[:],[]] )
     }
+
 
     //-------------------------------------------------------------------------
     //

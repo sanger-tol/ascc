@@ -69,26 +69,35 @@ workflow ASCC_ORGANELLAR {
         }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
+    //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( params.run_essentials == "both" || params.run_essentials == "organellar" ) {
+    if ( !params.run_essentials in run_conditionals ) {
+        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
+    }
+
+    if ( params.run_essentials in run_conditionals ) {
         ESSENTIAL_JOBS(
-            ch_samplesheet
+            ch_samplesheet.filter{ meta, file -> params.run_essentials in run_conditionals }
         )
         ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
+        // Doing this ifEmpty causes a Wrapped Dataflow error later on
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-        ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
-        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
-        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
+                                    .ifEmpty{ ch_samplesheet }
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
+                                    }
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.ifEmpty{ [[process: "GENOME"],[]] }
+        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt.ifEmpty{ [[:],[]] }
+        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report.ifEmpty{ [[process: "TRAILING_NS"],[]] }
+        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log.ifEmpty{ [[process: "REFERENCE_SANI_LOG"],[]] }
+        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log.ifEmpty{ [[process: "REFERENCE_FILT_LOG"],[]] }
+
 
     } else {
-        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
-
         ej_reference_tuple      = ch_samplesheet
                                     .map{ meta, _file ->
                                         [[id: meta.id, process: "REFERENCE"], _file]
@@ -444,19 +453,20 @@ workflow ASCC_ORGANELLAR {
                                         [new_meta, file]
                                     }
     } else {
-    ch_create_summary       = channel.of( [[process: "C_BTK_SUM"],[]] )
-    ch_create_btk_dataset   = channel.of( [[process: "BTK_DATASET"],[]] )
+        ch_create_summary       = channel.of( [[process: "C_BTK_SUM"],[]] )
+        ch_create_btk_dataset   = channel.of( [[process: "BTK_DATASET"],[]] )
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
     if (
-        ( params.run_tiara == "both" || params.run_tiara == "organellar" ) &&
-        ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) &&
-        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "organellar" )
+        ( params.run_tiara in run_conditionals ) &&
+        ( params.run_fcsgx in run_conditionals ) &&
+        ( params.run_autofilter_assembly in run_conditionals )
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
@@ -534,8 +544,8 @@ workflow ASCC_ORGANELLAR {
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
     if (
-        ( params.run_essentials == "both" || params.run_essentials == "organellar" ) &&
-        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "organellar" )
+        ( params.run_essentials in run_conditionals ) &&
+        ( params.run_merge_datasets in run_conditionals )
     ) {
 
         //
@@ -607,47 +617,44 @@ workflow ASCC_ORGANELLAR {
         org_merged_phylum_count   = channel.of( [[:],[]] )
     }
 
+
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
-    //  Gate with params.run_html_report to avoid altering default behavior.
-    //  Use existing channels; substitute placeholders where features are disabled or not wired.
+    //              Gate with params.run_html_report to avoid altering default behavior.
     //
 
-    if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
+    // Params file
+    ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
-        // Placeholders for channels not generated in organellar subworkflow
-        ch_kmers_results = channel.of( [[],[]] )
+    // Templates and CSS
+    ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+    ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
-        // Samplesheet/params file
-        ch_samplesheet_path = channel.fromPath(params.input)
-        ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
+    GENERATE_HTML_REPORT_WORKFLOW (
+        ch_barcode_check,
+        ch_fcsadapt,
+        ej_trailing_ns,
+        ch_vecscreen,
+        ch_autofilt_fcs_tiara,
+        org_merged_table,
+        org_merged_phylum_count,
+        channel.of( [[],[]] ),
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_html_report in run_conditionals
+        },
+        ej_fasta_sanitation_log,
+        ej_fasta_filter_log,
+        ch_jinja_templates,
+        channel.fromPath(params.input), // Samplesheet input for pipeline
+        ch_params_file,
+        ch_fcsgx_report,
+        ch_fcsgx_taxonomy,
+        ch_create_btk_dataset,
+        ch_css_files
+    )
+    ch_versions        = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
 
-        // Templates and CSS
-        ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-        ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
-
-        GENERATE_HTML_REPORT_WORKFLOW (
-            ch_barcode_check,
-            ch_fcsadapt,
-            ej_trailing_ns,
-            ch_vecscreen,
-            ch_autofilt_fcs_tiara,
-            org_merged_table,
-            org_merged_phylum_count,
-            ch_kmers_results,
-            ej_reference_tuple,
-            ej_fasta_sanitation_log,
-            ej_fasta_filter_log,
-            ch_jinja_templates,
-            ch_samplesheet_path,
-            ch_params_file,
-            ch_fcsgx_report,
-            ch_fcsgx_taxonomy,
-            ch_create_btk_dataset,
-            ch_css_files
-        )
-        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
-    }
 
     emit:
 
