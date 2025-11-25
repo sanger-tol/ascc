@@ -88,7 +88,13 @@ workflow ASCC_ORGANELLAR {
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
                                     .ifEmpty{ ch_samplesheet }
                                     .map{ meta, _file ->
-                                        [[id: meta.id, process: "REFERENCE"], _file]
+                                        [[
+                                            id: meta.id,
+                                            process: "REFERENCE",
+                                            sliding : params.seqkit_sliding,
+                                            window  : params.seqkit_window,
+                                            taxid   : params.taxid
+                                        ], _file]
                                     }
 
         // Can cause Channel(Channel(ch_samplesheet)) error
@@ -103,7 +109,13 @@ workflow ASCC_ORGANELLAR {
     } else {
         ej_reference_tuple      = ch_samplesheet
                                     .map{ meta, _file ->
-                                        [[id: meta.id, process: "REFERENCE"], _file]
+                                        [[
+                                            id: meta.id,
+                                            process: "REFERENCE",
+                                            sliding : params.seqkit_sliding,
+                                            window  : params.seqkit_window,
+                                            taxid   : params.taxid
+                                        ], _file]
                                     }
         ej_seqkit_reference     = ch_samplesheet
         ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
