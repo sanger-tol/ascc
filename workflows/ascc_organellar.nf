@@ -90,6 +90,9 @@ workflow ASCC_ORGANELLAR {
                                     .map{ meta, _file ->
                                         [[id: meta.id, process: "REFERENCE"], _file]
                                     }
+
+        // Can cause Channel(Channel(ch_samplesheet)) error
+        ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit.ifEmpty{ ch_samplesheet }
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.ifEmpty{ [[process: "GENOME"],[]] }
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt.ifEmpty{ [[:],[]] }
         ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report.ifEmpty{ [[process: "TRAILING_NS"],[]] }
@@ -102,6 +105,7 @@ workflow ASCC_ORGANELLAR {
                                     .map{ meta, _file ->
                                         [[id: meta.id, process: "REFERENCE"], _file]
                                     }
+        ej_seqkit_reference     = ch_samplesheet
         ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
         ej_gc_coverage          = channel.of( [[:],[]] )
         ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
