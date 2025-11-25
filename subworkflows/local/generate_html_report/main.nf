@@ -37,6 +37,13 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         }
         .set { fcs_adaptor_split }
 
+    ch_fcs_euk  = fcs_adaptor_split.euk
+                    .ifEmpty{ [[process: "FCS_ADAPTOR_EUK"], []] }
+
+    ch_fcs_prok = fcs_adaptor_split.prok
+                    .ifEmpty{ [[process: "FCS_ADAPTOR_PROK"], []] }
+
+
     barcode_results
         .mix(
             trim_ns_results

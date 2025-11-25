@@ -77,7 +77,7 @@ workflow ASCC_ORGANELLAR {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
     }
 
-    if ( params.run_essentials == "both" || params.run_essentials == "organellar" ) {
+    if ( params.run_essentials in run_conditionals ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
@@ -112,12 +112,12 @@ workflow ASCC_ORGANELLAR {
     TIARA_TIARA (
         ej_reference_tuple.filter{ meta, file -> params.run_tiara in run_conditionals }
     )
-    ch_versions = ch_versions.mix( TIARA_TIARA.out.versions )
-    ch_tiara    = TIARA_TIARA.out.classifications
-                    .map { meta, file ->
-                        [[id: meta.id, process: "TIARA"], file]
-                    }
-                    .ifEmpty { [[:],[]] }
+    ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+    ch_tiara            = TIARA_TIARA.out.classifications
+                            .map { meta, file ->
+                                [[id: meta.id, process: "TIARA"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -155,11 +155,10 @@ workflow ASCC_ORGANELLAR {
         }
     )
     ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
     ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
-                            .ifEmpty{ [[:], []] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
@@ -220,8 +219,8 @@ workflow ASCC_ORGANELLAR {
         reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
     )
     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[:], []] }
-    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[:], []] }
+    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[process: "COVERAGE"], []] }
+    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[process: "COVERAGE_BAM"], []] }
 
 
     //-------------------------------------------------------------------------
@@ -250,9 +249,9 @@ workflow ASCC_ORGANELLAR {
         ncbi_ranked_lineage_path.first()
     )
     ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
-    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[:], []] }
-    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[:], []] }
-    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[:], []] }
+    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[process: "KRAKEN_1"], []] }
+    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[process: "KRAKEN_2"], []] }
+    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[process: "KRAKEN_3"], []] }
 
 
     //
@@ -358,7 +357,7 @@ workflow ASCC_ORGANELLAR {
 
 
 
-    if ( params.run_create_btk_dataset in run_conditionaals ) {
+    if ( params.run_create_btk_dataset in run_conditionals ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS

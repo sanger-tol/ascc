@@ -87,11 +87,11 @@ workflow ASCC_GENOMIC {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
     }
 
-    if ( params.run_essentials == "both" || params.run_essentials == "genomic" ) {
+    if ( params.run_essentials in run_conditionals ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
-        ch_versions = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+        ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
 
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
@@ -101,19 +101,15 @@ workflow ASCC_GENOMIC {
         ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
     } else {
-        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
-
         ej_reference_tuple      = ch_samplesheet
-                                    .map{ it ->
-                                        tuple( meta, _file
-                                            [[id: meta.id, process: "REFERENCE"], _file]
-                                        )
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
                                     }
-        ej_dot_genome           = Channel.of( [[:],[]] )
-        ej_gc_coverage          = Channel.of( [[:],[]] )
-        ej_trailing_ns          = Channel.of( [[:],[]] )
-        ej_fasta_sanitation_log = Channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
-        ej_fasta_filter_log     = Channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
+        ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
+        ej_gc_coverage          = channel.of( [[:],[]] )
+        ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
+        ej_fasta_sanitation_log = channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
+        ej_fasta_filter_log     = channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
 
 
@@ -333,16 +329,14 @@ workflow ASCC_GENOMIC {
         }
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
     ch_fcsadapt = RUN_FCSADAPTOR.out.ch_joint_report
-                    .ifEmpty{ [[:], []] }
 
 
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
-    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "genomic") && !params.fcs_override ) {
+    if ( params.run_fcsgx in run_conditionals && !params.fcs_override ) {
 
         joint_channel = ej_reference_tuple
             .combine(fcs_db)
@@ -398,8 +392,8 @@ workflow ASCC_GENOMIC {
         reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
     )
     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[:], []] }
-    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[:], []] }
+    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[process: "COVERAGE"], []] }
+    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[process: "COVERAGE_BAM"], []] }
 
 
     //-------------------------------------------------------------------------
@@ -428,9 +422,9 @@ workflow ASCC_GENOMIC {
         ncbi_ranked_lineage_path.first()
     )
     ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
-    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[:], []] }
-    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[:], []] }
-    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[:], []] }
+    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[process: "KRAKEN_1"], []] }
+    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[process: "KRAKEN_2"], []] }
+    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[process: "KRAKEN_3"], []] }
 
 
     //-------------------------------------------------------------------------
@@ -534,9 +528,9 @@ workflow ASCC_GENOMIC {
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
     if (
-        ( params.run_tiara == "both" || params.run_tiara == "genomic" ) &&
-        ( params.run_fcsgx == "both" || params.run_fcsgx == "genomic" ) &&
-        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic" )
+        ( params.run_tiara in run_conditionals ) &&
+        ( params.run_fcsgx in run_conditionals ) &&
+        ( params.run_autofilter_assembly in run_conditionals )
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP

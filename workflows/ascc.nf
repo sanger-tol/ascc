@@ -102,7 +102,7 @@ workflow ASCC {
             reads_type,
             barcodes
         )
-        ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
+        //ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
     }
 
     //
