@@ -13,7 +13,7 @@ workflow RUN_VECSCREEN {
     vecscreen_database    // val(db_path)
 
     main:
-    ch_versions                 = channel.empty()
+    ch_versions         = channel.empty()
 
 
     //
@@ -22,7 +22,7 @@ workflow RUN_VECSCREEN {
     CHUNK_ASSEMBLY_FOR_VECSCREEN(
         reference_tuple
     )
-    ch_versions                 = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
+    ch_versions         = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
 
     vecscreen_database.map{ file ->
         [[id: "db"], file]
@@ -37,7 +37,7 @@ workflow RUN_VECSCREEN {
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
         vecscreen_database_tuple
     )
-    ch_versions                 = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
+    ch_versions         = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
 
 
     //
@@ -47,7 +47,7 @@ workflow RUN_VECSCREEN {
     FILTER_VECSCREEN_RESULTS(
         NCBITOOLS_VECSCREEN.out.vecscreen_output
     )
-    ch_versions                 = ch_versions.mix( FILTER_VECSCREEN_RESULTS.out.versions )
+    ch_versions         = ch_versions.mix( FILTER_VECSCREEN_RESULTS.out.versions )
 
 
     //
@@ -57,15 +57,15 @@ workflow RUN_VECSCREEN {
     SUMMARISE_VECSCREEN_OUTPUT(
         FILTER_VECSCREEN_RESULTS.out.filtered_vecscreen_outfile
     )
-    ch_versions                 = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
+    ch_versions         = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
 
-    vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
-                                    .map { it ->
-                                        [[id: it[0].id, process: "VECSCREEN"], it[1]]
-                                    }
-                                    .ifEmpty { [[process: "VECSCREEN"],[]] }
+    vecscreen_contam    = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
+                            .map { it ->
+                                [[id: it[0].id, process: "VECSCREEN"], it[1]]
+                            }
+                            .ifEmpty { [[process: "VECSCREEN"],[]] }
 
     emit:
     vecscreen_contam
-    versions                    = ch_versions
+    versions            = ch_versions
 }
