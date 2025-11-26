@@ -8,10 +8,10 @@ include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../../modules/local/k
 
 workflow GET_KMERS_PROFILE {
     take:
-    assembly_fasta                      // channel.[ val(meta), path(file) ]
-    kmer_size                           // channel.[ val(integer) ]
-    dimensionality_reduction_methods    // channel.[ val(string) ]
-    autoencoder_epochs_count            // channel.[ val(integer) ]
+    assembly_fasta                      // channel [ val(meta), path(file) ]
+    kmer_size                           // channel [ val(integer) ]
+    dimensionality_reduction_methods    // channel [ val(string) ]
+    autoencoder_epochs_count            // channel [ val(integer) ]
 
     main:
     ch_versions     = channel.empty()
@@ -45,6 +45,7 @@ workflow GET_KMERS_PROFILE {
         kmer_size                  // val kmer_size
     )
     ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)
+
 
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
@@ -90,8 +91,8 @@ workflow GET_KMERS_PROFILE {
         .set { collected_files_for_combine }
 
     kmers_results = collected_files_for_combine
-        .map { it ->
-            [[id: it[0].id, process: "KMER_RESULTS"], it[1]]
+        .map { meta, file ->
+            [[id: meta.id, process: "KMER_RESULTS"], file]
         }
         .ifEmpty { [[process: "KMER_RESULTS"],[]] }
 
@@ -113,8 +114,8 @@ workflow GET_KMERS_PROFILE {
     ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
 
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-                        .map { it ->
-                            [[id: it[0].id, process: "KMERS"], it[1]]
+                        .map { meta, file ->
+                            [[id: meta.id, process: "KMERS"], file]
                         }
                         .ifEmpty { [[process: "KMERS"],[]] }
 
