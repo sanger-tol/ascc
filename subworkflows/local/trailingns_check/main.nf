@@ -3,7 +3,7 @@ include { TRAILINGNS      } from '../../../modules/local/trailingns/trailingns/m
 workflow TRAILINGNS_CHECK {
 
     take:
-    reference_tuple             // tuple [ val(meta), path(fasta) ]
+    reference_tuple     // tuple [ val(meta), path(fasta) ]
 
     main:
     ch_versions         = channel.empty()
