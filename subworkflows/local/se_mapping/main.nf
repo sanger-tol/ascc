@@ -7,7 +7,7 @@ include { SAMTOOLS_MERGE                             } from '../../../modules/nf
 workflow SE_MAPPING {
 
     take:
-    reference_data_tuple     // channel.[ val(meta), path(file), path(file) ]
+    reference_data_tuple     // channel [ val(meta), path(file), path(file) ]
 
     main:
     ch_versions     = channel.empty()
