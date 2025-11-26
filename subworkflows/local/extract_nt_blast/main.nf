@@ -22,11 +22,8 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = channel.empty()
 
     blastn_db_path
-        .map { it ->
-            [
-                [id: "db"],
-                it
-            ]
+        .map { db ->
+            [ [id: "db"], db ]
         }
         .set { ch_blast }
 
@@ -81,13 +78,13 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
 
     ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT_BLAST_BTK"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "NT_BLAST_BTK"], file]
                                 }
 
     ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT_BLAST"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "NT_BLAST"], file]
                                 }
 
 
@@ -102,8 +99,8 @@ workflow EXTRACT_NT_BLAST {
     // LOGIC: BRANCH DEPENDING ON WHETHER FILE HAS CONTENTS
     //
     REFORMAT_FULL_OUTFMT6.out.full
-        .branch {
-            valid:      it[1].readLines().size() >= 1
+        .branch { _meta, file ->
+            valid:      file.readLines().size() >= 1
             invalid:    true
         }
         .set { gatekeeper }
@@ -128,8 +125,8 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
 
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT_BLAST_LINEAGE"], it[1]]
+                                .map { meta, file ->
+                                    [[id: meta.id, process: "NT_BLAST_LINEAGE"], file]
                                 }
 
     // No conversion needed - BLAST results are already in the format expected by BlobToolKit
