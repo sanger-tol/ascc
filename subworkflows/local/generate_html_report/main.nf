@@ -67,8 +67,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
                     [new_meta, _file]
                 },
             // BELOW ALREADY HAVE PROCESS IN THEIR META
-            fcs_adaptor_split.euk,
-            fcs_adaptor_split.prok,
+            ch_fcs_euk,
+            ch_fcs_prok,
             vecscreen_results,
             kmers_results,
             reference_fasta,
