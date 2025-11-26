@@ -36,14 +36,14 @@ workflow RUN_NT_KRAKEN {
     ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions)
 
     classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
-                        .map { it ->
-                            [[id: it[0].id, process: "KRAKEN_1"], it[1]]
+                        .map { meta, file ->
+                            [[id: meta.id, process: "KRAKEN_1"], file]
                         }
                         .ifEmpty { [[:],[]] }
 
     report          = KRAKEN2_KRAKEN2.out.report
-                        .map { it ->
-                            [[id: it[0].id, process: "KRAKEN_2"], it[1]]
+                        .map { meta, file ->
+                            [[id: meta.id, process: "KRAKEN_2"], file]
                         }
                         .ifEmpty { [[:],[]] }
 
@@ -58,8 +58,8 @@ workflow RUN_NT_KRAKEN {
     ch_versions     = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
 
     lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
-                        .map { it ->
-                            [[id: it[0].id, process: "KRAKEN_3"], it[1]]
+                        .map { meta, file ->
+                            [[id: meta.id, process: "KRAKEN_3"], file]
                         }
                         .ifEmpty { [[:],[]] }
 
