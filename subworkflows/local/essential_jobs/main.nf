@@ -17,13 +17,12 @@ workflow ESSENTIAL_JOBS {
     // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
     //
     input_ref
-        .map { meta, ref ->
+        .map { meta, _ref ->
             [[  id      : meta.id,
                 sliding : params.seqkit_sliding,
                 window  : params.seqkit_window,
                 taxid   : params.taxid
-            ], ref
-            ]
+            ], _ref ]
         }
         .set { new_input_fasta }
 
@@ -95,9 +94,9 @@ workflow ESSENTIAL_JOBS {
     ch_versions             = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
 
     trailing_ns_report      = TRAILINGNS_CHECK.out.trailing_ns_report
-                                .map { meta, file ->
+                                .map { meta, _file ->
                                     def new_meta = meta + [process: "TRAILING_NS"]
-                                    [new_meta, file]
+                                    [new_meta, _file]
                                 }
 
 
