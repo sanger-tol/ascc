@@ -18,9 +18,9 @@ include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE               } from '../../../modules
 workflow RUN_READ_COVERAGE {
 
     take:
-    reference_tuple          // channel.[ val(meta), path(file) ]
-    reads
-    platform                 // channel.val( str )
+    reference_tuple          // channel [ val(meta), path(file) ]
+    reads                    // channel path(files)
+    platform                 // channel val( str )
 
     main:
     ch_versions     = channel.empty()
@@ -55,8 +55,7 @@ workflow RUN_READ_COVERAGE {
         ch_versions     = ch_versions.mix(SE_MAPPING.out.versions)
         ch_align_bam    = SE_MAPPING.out.mapped_bam
 
-    }
-    else if ( params.reads_type in ["illumina"] ) {
+    } else if ( params.reads_type in ["illumina"] ) {
 
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND LONGREAD DATA
@@ -66,7 +65,6 @@ workflow RUN_READ_COVERAGE {
         )
         ch_versions     = ch_versions.mix(PE_MAPPING.out.versions)
         ch_align_bam    = PE_MAPPING.out.mapped_bam
-
     }
 
 
