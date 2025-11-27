@@ -52,7 +52,12 @@ workflow ASCC_ORGANELLAR {
     val_reads_per_chunk
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
+
+    //
+    // LOGIC: CREATE run_conditional LIST
+    //
+    run_conditionals = ["both", "organellar"]
 
 
     //
@@ -64,10 +69,16 @@ workflow ASCC_ORGANELLAR {
         }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
+    //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( params.run_essentials == "both" || params.run_essentials == "organellar" ) {
+    if ( !(params.run_essentials in run_conditionals) ) {
+        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
+    }
+
+    if ( params.run_essentials in run_conditionals ) {
         ESSENTIAL_JOBS(
             ch_samplesheet
         )
@@ -75,134 +86,95 @@ workflow ASCC_ORGANELLAR {
 
         ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
         ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome.map{ it ->
-                                    tuple(
-                                        [id: it[0].id, process: "GENOME"],
-                                        it[1]
-                                    )
-                                }
+        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
         ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
         ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
         ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
         ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
     } else {
-        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
-
         ej_reference_tuple      = ch_samplesheet
-                                    .map{ it ->
-                                        tuple( meta, _file
-                                            [[id: meta.id, process: "REFERENCE"], _file]
-                                        )
+                                    .map{ meta, _file ->
+                                        [[id: meta.id, process: "REFERENCE"], _file]
                                     }
-
         ej_seqkit_reference     = ch_samplesheet
-        ej_dot_genome           = Channel.of( [[:],[]] )
-        ej_gc_coverage          = Channel.of( [[:],[]] )
-        ej_trailing_ns          = Channel.of( [[:],[]] )
-        ej_fasta_sanitation_log = Channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
-        ej_fasta_filter_log     = Channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
+        ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
+        ej_gc_coverage          = channel.of( [[:],[]] )
+        ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
+        ej_fasta_sanitation_log = channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
+        ej_fasta_filter_log     = channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
-    if ( params.run_tiara == "both" || params.run_tiara == "organellar" ) {
-        TIARA_TIARA (
-            ej_reference_tuple
-        )
-        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
-        ch_tiara            = TIARA_TIARA.out.classifications
-                                .map { it ->
-                                    [[id: it[0].id, process: "TIARA"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-    } else {
-        ch_tiara            = Channel.of( [[:],[]] )
-    }
+    TIARA_TIARA (
+        ej_reference_tuple.filter{ meta, file -> params.run_tiara in run_conditionals }
+    )
+    ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+    ch_tiara            = TIARA_TIARA.out.classifications
+                            .map { meta, file ->
+                                [[id: meta.id, process: "TIARA"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    if ( params.run_pacbio_barcodes == "both" || params.run_pacbio_barcodes == "organellar" ) {
+    ej_reference_tuple
+        .combine(pacbio_database)
+        .multiMap{
+            ref_meta, ref_data, pdb_meta, pdb_data ->
+                reference: [ref_meta, ref_data]
+                pacbio_db: [pdb_meta, pdb_data]
+        }
+        .set { duplicated_db }
 
-        ej_reference_tuple
-            .combine(pacbio_database)
-            .multiMap{
-                ref_meta, ref_data, pdb_meta, pdb_data ->
-                    reference: [ref_meta, ref_data]
-                    pacbio_db: [pdb_meta, pdb_data]
-            }
-            .set { duplicated_db }
-
-        PACBIO_BARCODE_CHECK (
-            duplicated_db.reference,
-            ch_barcodes,
-            duplicated_db.pacbio_db
-        )
-
-        PACBIO_BARCODE_CHECK.out.filtered.
-            map{ meta, _file ->
-                def new_meta = meta + [process: "BARCODES"]
-                [new_meta, _file]
-            }
-            .set { ch_barcode_check}
-
-        ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-
-    } else {
-        ch_barcode_check    = channel.of( [[process: "BARCODES"],[]] )
-    }
+    PACBIO_BARCODE_CHECK (
+        duplicated_db.reference.filter{ meta, file ->
+            params.run_pacbio_barcodes in run_conditionals
+        },
+        ch_barcodes,
+        duplicated_db.pacbio_db
+    )
+    ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
+    ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
+                            .ifEmpty{ [[process: "BARCODES"],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
-    if ( params.run_fcs_adaptor == "both" || params.run_fcs_adaptor == "organellar" ) {
-        RUN_FCSADAPTOR (
-            ej_reference_tuple
-        )
-        ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
-        //
-        RUN_FCSADAPTOR.out.ch_euk
-            .combine(
-                RUN_FCSADAPTOR.out.ch_prok.map{it[1]}
-            )
-            .map { meta, file1, file2 ->
-                tuple(
-                    [id: meta.id, process: "FCS-Adaptor"],
-                    file1,
-                    file2
-                )
-            }
-            .set { ch_fcsadapt }
-
-    } else {
-        ch_fcsadapt         = Channel.of( [[process: "FCS-Adaptor"],[]] )
-    }
+    RUN_FCSADAPTOR (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_fcs_adaptor in run_conditionals
+        }
+    )
+    ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
+    ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
 
-    if ( (params.run_fcsgx == "both" || params.run_fcsgx == "organellar") & !params.fcs_override) {
+    if ( params.run_fcsgx in run_conditionals && !params.fcs_override) {
 
         joint_channel = ej_reference_tuple
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
-            .multiMap { meta, ref, db, tax_id, tax_path ->
-                meta = [id: meta.id, taxid: meta.taxid]
-                reference: [meta, ref]
-                fcs_db_path: db
-                ncbi_tax_path: tax_path
+            .multiMap { meta, ref, db, _tax_id, tax_path ->
+                def new_meta =  [id: meta.id, taxid: meta.taxid]
+                reference:      [new_meta, ref]
+                fcs_db_path:    db
+                ncbi_tax_path:  tax_path
             }
 
         RUN_FCSGX (
@@ -226,112 +198,62 @@ workflow ASCC_ORGANELLAR {
         }
         .set { ch_fcsgx }
 
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
 
     } else {
-        ch_fcsgx            = Channel.of( [[process: "FCSGX_RESULT"],[]] )
-        ch_fcsgx_report     = Channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = Channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx            = channel.of( [[process: "FCSGX_RESULT"],[]] )
+        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
-    if ( params.run_coverage == "both" || params.run_coverage == "organellar" ) {
-
-        RUN_READ_COVERAGE (
-            ej_reference_tuple,
-            reads,
-            reads_type,
-            val_reads_per_chunk
-        )
-        ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch
-                                .map { meta, file ->
-                                    [[id: meta.id, process: "Coverage"], file]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_bam              = RUN_READ_COVERAGE.out.bam_ch
-                                .map { meta, file ->
-                                    tuple([id: meta.id, process: "Mapped Bam"], file)
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        ch_coverage         = Channel.of( [[:],[]] )
-        ch_bam              = Channel.of( [[:],[]] )
-    }
+    RUN_READ_COVERAGE (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_coverage in run_conditionals
+        },
+        reads_path,
+        reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
+        val_reads_per_chunk
+    )
+    ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
+    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[process: "COVERAGE"], []] }
+    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[process: "COVERAGE_BAM"], []] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
-    if ( params.run_vecscreen == "both" || params.run_vecscreen == "organellar" ) {
-        RUN_VECSCREEN (
-            ej_reference_tuple,
-            vecscreen_database_path.first()
-        )
-        ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    RUN_VECSCREEN (
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_vecscreen in run_conditionals
+        },
+        vecscreen_database_path.first()
+    )
+    ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
+    ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.ifEmpty{ [[process: "VECSCREEN"],[]] }
 
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam
-                                .map { it ->
-                                    [[id: it[0].id, process: "VECSCREEN"], it[1]]
-                                }
-                                .ifEmpty { [[process: "VECSCREEN"],[]] }
-    } else {
-        ch_vecscreen        = Channel.of( [[process: "VECSCREEN"],[]] )
-    }
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
-    if ( params.run_kraken == "both" || params.run_kraken == "organellar" ) {
-
-        RUN_NT_KRAKEN(
-            ej_reference_tuple,
-            nt_kraken_db_path.first(),
-            ncbi_ranked_lineage_path.first()
-        )
-        ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
-
-        //
-        // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-        //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-        //
-        ch_kraken1 = RUN_NT_KRAKEN.out.classified
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 1"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-
-        ch_kraken2 = RUN_NT_KRAKEN.out.report
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 2"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-
-        ch_kraken3 = RUN_NT_KRAKEN.out.lineage
-                        .map { it ->
-                            [[id: it[0].id, process: "Kraken 3"], it[1]]
-                        }
-                    .ifEmpty { [[:],[]] }
-    } else {
-        ch_kraken1 = Channel.of( [[:],[]] )
-        ch_kraken2 = Channel.of( [[:],[]] )
-        ch_kraken3 = Channel.of( [[:],[]] )
-    }
+    RUN_NT_KRAKEN(
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_kraken in run_conditionals
+        },
+        nt_kraken_db_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
+    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[process: "KRAKEN_1"], []] }
+    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[process: "KRAKEN_2"], []] }
+    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[process: "KRAKEN_3"], []] }
 
 
     //
@@ -367,106 +289,77 @@ workflow ASCC_ORGANELLAR {
             log.info "[ASCC INFO]: Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
 
+
+    //-------------------------------------------------------------------------
     //
-    // LOGIC: THIS CONDITIONAL SHOULD EXECUTE THE PROCESS WHEN:
-    //          INCLUDE STEPS ARE EITHER nt_blast AND all
-    //              _AS WELL AS_
-    //          EXCLUDE _NOT_ CONTAINING nt_blast AND THE valid_length_fasta IS NOT EMPTY
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
-    if ( params.run_nt_blast == "both" || params.run_nt_blast == "organellar" ) {
-
-        //
-        //SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-        //
-
-        EXTRACT_NT_BLAST (
-            valid_length_fasta,
-            nt_database_path.first(),
-            ncbi_ranked_lineage_path.first()
-        )
-        ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-        ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-LINEAGE"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
-                                .map { it ->
-                                    [[id: it[0].id, process: "NT-BLAST-BTK"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        ch_nt_blast         = Channel.of( [[:],[]] )
-        ch_blast_lineage    = Channel.of( [[:],[]] )
-        ch_btk_format       = Channel.of( [[:],[]] )
-    }
+    EXTRACT_NT_BLAST (
+        valid_length_fasta.filter{ meta, file ->
+            params.run_nt_blast in run_conditionals
+        },
+        nt_database_path.first(),
+        ncbi_ranked_lineage_path.first()
+    )
+    ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
+    ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
+    ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
+    ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    if ( params.run_nr_diamond == "both" || params.run_nr_diamond == "organellar" ) {
+    NR_DIAMOND (
+        valid_length_fasta.filter{ meta, file ->
+            params.run_nr_diamond in run_conditionals
+        },
+        diamond_nr_db_path.first()
+    )
+    ch_versions = ch_versions.mix(NR_DIAMOND.out.versions)
+    nr_full     = NR_DIAMOND.out.reformed
+                    .map { meta, file ->
+                        [[id: meta.id, process: "NR_FULL"], file]
+                    }
+                    .ifEmpty { [[:],[]] }
 
-        NR_DIAMOND (
-            valid_length_fasta,
-            diamond_nr_db_path.first()
-        )
-        ch_versions         = ch_versions.mix(NR_DIAMOND.out.versions)
-        nr_full             = NR_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "NR-FULL"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        nr_hits             = NR_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "NR-HITS"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-    } else {
-        nr_full             = Channel.of( [[:],[]] )
-        nr_hits             = Channel.of( [[:],[]] )
-    }
+    nr_hits     = NR_DIAMOND.out.hits_file
+                    .map { meta, file ->
+                        [[id: meta.id, process: "NR_HITS"], file]
+                    }
+                    .ifEmpty { [[:],[]] }
 
 
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    // NOTE: Format is "qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles"
-    if ( params.run_uniprot_diamond == "both" || params.run_uniprot_diamond == "organellar" ) {
+    // NOTE: HEADER FORMAT WILL BE -
+    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send
+    //  evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    UP_DIAMOND (
+        valid_length_fasta.filter{ meta, file ->
+            params.run_uniprot_diamond in run_conditionals
+        },
+        diamond_uniprot_db_path.first()
+    )
+    ch_versions = ch_versions.mix(UP_DIAMOND.out.versions)
+    un_full     = UP_DIAMOND.out.reformed
+                    .map { meta, file ->
+                        [[id: meta.id, process: "UN_FULL"], file ]
+                    }
+                    .ifEmpty { [[:],[]] }
 
-        UP_DIAMOND (
-            valid_length_fasta,
-            diamond_uniprot_db_path.first()
-        )
-        ch_versions         = ch_versions.mix(UP_DIAMOND.out.versions)
-        un_full             = UP_DIAMOND.out.reformed
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-FULL"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-
-        un_hits             = UP_DIAMOND.out.hits_file
-                                .map { it ->
-                                    [[id: it[0].id, process: "UN-HITS"], it[1]]
-                                }
-                                .ifEmpty { [[:],[]] }
-    } else {
-        un_full             = Channel.of( [[:],[]] )
-        un_hits             = Channel.of( [[:],[]] )
-    }
+    un_hits     = UP_DIAMOND.out.hits_file
+                    .map { meta, file ->
+                        [[id: meta.id, process: "UN_HITS"], file ]
+                    }
+                    .ifEmpty { [[:],[]] }
 
 
-    if ( params.run_create_btk_dataset == "both" || params.run_create_btk_dataset == "organellar" ) {
+
+    if ( params.run_create_btk_dataset in run_conditionals ) {
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
@@ -474,14 +367,16 @@ workflow ASCC_ORGANELLAR {
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
         ch_organellar_cbtk_input = ej_reference_tuple
-            .map{ it -> tuple([
-                id: it[0].id,
-                taxid: it[0].taxid,
-                sci_name: it[0].sci_name,
-                process: "REFERENCE"], it[1])
+            .map{ meta, file ->
+                [[
+                    id: meta.id,
+                    taxid: meta.taxid,
+                    sci_name: meta.sci_name,
+                    process: "REFERENCE"
+                ], file ]
             }
             .mix(
-                ej_reference_tuple.map{ it -> tuple([id: it[0].id, process: "GENOME"], it[1])},
+                ej_reference_tuple.map{ meta, file -> [[id: meta.id, process: "GENOME"], file ]},
                 ch_tiara,
                 ch_nt_blast,
                 ch_btk_format,
@@ -498,7 +393,7 @@ workflow ASCC_ORGANELLAR {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] && id != null }
+            .filter { id, data -> id } // THIS SHOULD FILTER OUT THE null AND []
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]
@@ -509,9 +404,9 @@ workflow ASCC_ORGANELLAR {
         // LOGIC: LIST OF PROCESSES TO CHECK FOR
         //
         def processes = [
-            'REFERENCE', 'NT-BLAST', 'TIARA', 'Kraken 2', 'GENOME', 'KMERS',
-            'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'Mapped Bam', 'Coverage',
-            'Kraken 1', 'Kraken 3'
+            'REFERENCE', 'NT_BLAST', 'TIARA', 'KRAKEN_2', 'GENOME', 'KMERS',
+            'FCSGX_RESULT', 'NR_FULL', 'UN_FULL', 'MAPPED_BAM', 'COVERAGE',
+            'KRAKEN_1', 'KRAKEN_3'
         ]
 
         //
@@ -548,27 +443,28 @@ workflow ASCC_ORGANELLAR {
 
         ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
                                     .map{ meta, file ->
-                                        tuple([id: meta.id, process: "C_BTK_SUM"], file)
+                                        [[id: meta.id, process: "C_BTK_SUM"], file]
                                     }
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
-                                    .map{ meta, _file ->
+                                    .map{ meta, file ->
                                         def new_meta = meta + [process: "BTK_DATASET"]
-                                        [new_meta, _file]
+                                        [new_meta, file]
                                     }
     } else {
-    ch_create_summary       = Channel.of( [[process: "C_BTK_SUM"],[]] )
-    ch_create_btk_dataset   = Channel.of( [[process: "BTK_DATASET"],[]] )
+        ch_create_summary       = channel.of( [[process: "C_BTK_SUM"],[]] )
+        ch_create_btk_dataset   = channel.of( [[process: "BTK_DATASET"],[]] )
     }
 
 
+    //-------------------------------------------------------------------------
     //
     // LOGIC: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS SO THE SUBWORKLOW CAN EITHER BE TRIGGERED BY THE VALUES tiara, fcs-gx, autofilter_assemlby AND EXCLUDE STEPS NOT CONTAINING autofilter_assembly
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
     if (
-        ( params.run_tiara == "both" || params.run_tiara == "organellar" ) &&
-        ( params.run_fcsgx == "both" || params.run_fcsgx == "organellar" ) &&
-        ( params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "organellar" )
+        ( params.run_tiara in run_conditionals ) &&
+        ( params.run_fcsgx in run_conditionals ) &&
+        ( params.run_autofilter_assembly in run_conditionals )
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP
@@ -579,16 +475,16 @@ workflow ASCC_ORGANELLAR {
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
 
-        autofilter_input_formatted = ej_reference_tuple
-            .map{ it -> tuple([id: it[0].id], it[1])}
+        ej_reference_tuple
+            .map{ meta, file -> [[id: meta.id], file] }
             .combine(
                 ch_tiara
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
                 ch_fcsgx
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
@@ -600,11 +496,12 @@ workflow ASCC_ORGANELLAR {
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  tuple(new_meta, ref)
-                    tiara_file: tuple(new_meta, tiara)
-                    fcs_file:   tuple(new_meta, fcs)
+                    reference:  [new_meta, ref]
+                    tiara_file: [new_meta, tiara]
+                    fcs_file:   [new_meta, fcs]
                     ncbi_rank:  ncbi
             }
+            .set { autofilter_input_formatted }
 
 
         //
@@ -616,14 +513,14 @@ workflow ASCC_ORGANELLAR {
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
-        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly
+                                    .map{ meta, file -> file}
+
         ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
         ch_autofilt_alarm_file  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
             .map{ meta, file ->
-                tuple(
-                    [id: meta.id], file
-                )
+                [[id: meta.id], file]
             }
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
@@ -632,12 +529,12 @@ workflow ASCC_ORGANELLAR {
 
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
     } else {
-        ch_autofilt_alarm_file  = Channel.of( [[:],[]] )
-        ch_autofilt_removed_seqs= Channel.of( [[:],[]] )
-        ch_autofilt_assem       = Channel.of( [[:],[]] )
-        ch_autofilt_indicator   = Channel.of( [[:],[]] )
-        ch_autofilt_fcs_tiara   = Channel.of( [[:],[]] )
-        ch_autofilt_raw_report  = Channel.of( [[:],[]] )
+        ch_autofilt_alarm_file  = channel.of( [[:],[]] )
+        ch_autofilt_removed_seqs= channel.of( [[:],[]] )
+        ch_autofilt_assem       = channel.of( [[:],[]] )
+        ch_autofilt_indicator   = channel.of( [[:],[]] )
+        ch_autofilt_fcs_tiara   = channel.of( [[:],[]] )
+        ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 
     //
@@ -645,8 +542,8 @@ workflow ASCC_ORGANELLAR {
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
     //
     if (
-        ( params.run_essentials == "both" || params.run_essentials == "organellar" ) &&
-        ( params.run_merge_datasets == "both" || params.run_merge_datasets == "organellar" )
+        ( params.run_essentials in run_conditionals ) &&
+        ( params.run_merge_datasets in run_conditionals )
     ) {
 
         //
@@ -654,13 +551,12 @@ workflow ASCC_ORGANELLAR {
         //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[],[]]
         //
-        busco_merge_btk = Channel.of( [[],[]] )
-        ch_kmers = Channel.of( [[],[]] )
+        busco_merge_btk = channel.of( [[],[]] )
+        ch_kmers = channel.of( [[],[]] )
 
         ascc_merged_data = ej_gc_coverage
-            .map{ meta, file -> tuple([
-                id: meta.id,
-                process: "GC_COV"], file)
+            .map{ meta, file ->
+                [[ id: meta.id, process: "GC_COV"], file]
             }
             .mix(
                 ej_dot_genome,
@@ -678,15 +574,15 @@ workflow ASCC_ORGANELLAR {
             .map { meta, file ->
                 [meta.id, [meta: meta, file: file]]
             }
-            .filter { id, data -> id != [] }
+            .filter { id, data -> id } // THIS SHOULD FILTER AWAY [] and null
             .groupTuple()
             .map { id, data ->
                 [id: id, data: data]
             }
 
             def processes = [
-                'GC_COV', 'Coverage', 'TIARA',
-                'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
+                'GC_COV', 'COVERAGE', 'TIARA',
+                'KRAKEN_3', 'NT_BLAST_LINEAGE', 'KMERS', 'NR_HITS', 'UN_HITS',
                 'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
             ]
 
@@ -714,52 +610,49 @@ workflow ASCC_ORGANELLAR {
         org_merged_phylum_count   = ASCC_MERGE_TABLES.out.phylum_counts
 
     } else {
-        org_merged_table          = Channel.of( [[:],[]] )
-        merged_extended_table     = Channel.empty()
-        org_merged_phylum_count   = Channel.of( [[:],[]] )
+        org_merged_table          = channel.of( [[:],[]] )
+        merged_extended_table     = channel.empty()
+        org_merged_phylum_count   = channel.of( [[:],[]] )
     }
 
+
+    //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
-    //  Gate with params.run_html_report to avoid altering default behavior.
-    //  Use existing channels; substitute placeholders where features are disabled or not wired.
+    //              Gate with params.run_html_report to avoid altering default behavior.
     //
 
-    if ( params.run_html_report == "both" || params.run_html_report == "organellar" ) {
+    // Params file
+    ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
-        // Placeholders for channels not generated in organellar subworkflow
-        ch_kmers_results = Channel.of( [[],[]] )
+    // Templates and CSS
+    ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
+    ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
 
-        // Samplesheet/params file
-        ch_samplesheet_path = Channel.fromPath(params.input)
-        ch_params_file      = params.params_file ? Channel.fromPath(params.params_file) : Channel.value([])
+    GENERATE_HTML_REPORT_WORKFLOW (
+        ch_barcode_check,
+        ch_fcsadapt,
+        ej_trailing_ns,
+        ch_vecscreen,
+        ch_autofilt_fcs_tiara,
+        org_merged_table,
+        org_merged_phylum_count,
+        channel.of( [[],[]] ),
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_html_report in run_conditionals
+        },
+        ej_fasta_sanitation_log,
+        ej_fasta_filter_log,
+        ch_jinja_templates,
+        channel.fromPath(params.input), // Samplesheet input for pipeline
+        ch_params_file,
+        ch_fcsgx_report,
+        ch_fcsgx_taxonomy,
+        ch_create_btk_dataset,
+        ch_css_files
+    )
+    ch_versions        = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
 
-        // Templates and CSS
-        ch_jinja_templates = Channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-        ch_css_files       = Channel.fromPath("${baseDir}/assets/css/*.css").collect()
-
-        GENERATE_HTML_REPORT_WORKFLOW (
-            ch_barcode_check,
-            ch_fcsadapt,
-            ej_trailing_ns,
-            ch_vecscreen,
-            ch_autofilt_fcs_tiara,
-            org_merged_table,
-            org_merged_phylum_count,
-            ch_kmers_results,
-            ej_reference_tuple,
-            ej_fasta_sanitation_log,
-            ej_fasta_filter_log,
-            ch_jinja_templates,
-            ch_samplesheet_path,
-            ch_params_file,
-            ch_fcsgx_report,
-            ch_fcsgx_taxonomy,
-            ch_create_btk_dataset,
-            ch_css_files
-        )
-        ch_versions = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
-    }
 
     emit:
 

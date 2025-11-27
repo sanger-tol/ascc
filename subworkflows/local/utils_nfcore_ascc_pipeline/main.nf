@@ -42,7 +42,7 @@ workflow PIPELINE_INITIALISATION {
 
     main:
 
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -100,8 +100,8 @@ workflow PIPELINE_INITIALISATION {
     //         MODULE DOES NOT OUTPUT ANYTHING BUT SHOULD KILL PIPELINE ON FAIL
     //
     VALIDATE_TAXID(
-        Channel.of(params.taxid),
-        Channel.of(params.ncbi_taxonomy_path)
+        channel.of(params.taxid),
+        channel.of(params.ncbi_taxonomy_path)
     )
     ch_versions = ch_versions.mix(VALIDATE_TAXID.out.versions)
 
@@ -129,7 +129,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // LOGIC: MIX CHANELS WHICH MAY OR MAY NOT BE EMPTY INTO A SINGLE QUEUE CHANNEL
     //
-    unzipped_input = Channel.empty()
+    unzipped_input = channel.empty()
 
     unzipped_input
         .mix(ch_input.unzipped, GUNZIP.out.gunzip)
@@ -152,10 +152,10 @@ workflow PIPELINE_INITIALISATION {
     //
     // NOTE: Setting the basic channels form the input
     //
-    Channel.fromPath(params.pacbio_barcode_file)
+    channel.fromPath(params.pacbio_barcode_file)
         .set {barcode_data_file}
 
-    Channel.of(params.fcs_gx_database_path)
+    channel.of(params.fcs_gx_database_path)
         .set { fcs_gx_database_path}
 
 
@@ -163,8 +163,8 @@ workflow PIPELINE_INITIALISATION {
     // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
     //
     ch_barcodes = params.pacbio_barcode_names ?
-        Channel.of(params.pacbio_barcode_names) :
-        Channel.empty()
+        channel.of(params.pacbio_barcode_names) :
+        channel.empty()
 
     PREPARE_BLASTDB (
         params.sample_id,
@@ -180,7 +180,7 @@ workflow PIPELINE_INITIALISATION {
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
     //
     if ( params.run_coverage != "off" || params.run_btk != "off" ) {
-        ch_grabbed_reads_path       = Channel.of(params.reads_path).collect()
+        ch_grabbed_reads_path       = channel.of(params.reads_path).collect()
     } else {
         ch_grabbed_reads_path       = []
     }
@@ -199,7 +199,7 @@ workflow PIPELINE_INITIALISATION {
 
         // Check the result and fail if needed
         CHECK_NT_BLAST_TAXONOMY.out.status
-            .map { it.trim() }  // Trim any whitespace
+            .map { blast_status_string -> blast_status_string.trim() }  // Trim any whitespace
             .subscribe { status ->
                 if (status == "nt_database_taxonomy_files_not_found") {
                     log.error "NT BLAST database taxonomy check failed"
@@ -244,8 +244,8 @@ workflow PIPELINE_INITIALISATION {
         orga_fcs_samplesheet    = ch_fcs_final_samplesheet.organellar_fcs
 
     } else {
-        geno_fcs_samplesheet    = Channel.empty()
-        orga_fcs_samplesheet    = Channel.empty()
+        geno_fcs_samplesheet    = channel.empty()
+        orga_fcs_samplesheet    = channel.empty()
     }
 
 

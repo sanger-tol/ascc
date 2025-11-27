@@ -47,7 +47,7 @@ workflow ASCC {
     val_reads_per_chunk
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // WORKFLOW: Run main workflow for GENOMIC samples

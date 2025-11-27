@@ -3,10 +3,10 @@ include { TRAILINGNS      } from '../../../modules/local/trailingns/trailingns/m
 workflow TRAILINGNS_CHECK {
 
     take:
-    reference_tuple             // tuple [ val(meta), path(fasta) ]
+    reference_tuple     // tuple [ val(meta), path(fasta) ]
 
     main:
-    ch_versions         = Channel.empty()
+    ch_versions         = channel.empty()
 
     //
     // MODULE: TRIM LENGTHS OF N'S FROM THE INPUT GENOME AND GENERATE A REPORT ON LENGTH

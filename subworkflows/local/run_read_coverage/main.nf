@@ -19,9 +19,9 @@ workflow RUN_READ_COVERAGE {
     val_reads_per_chunk
 
     main:
-    ch_versions     = Channel.empty()
-    ch_align_bam    = Channel.empty()
-    ch_refer_bam    = Channel.empty()
+    ch_versions     = channel.empty()
+    ch_align_bam    = channel.empty()
+    ch_refer_bam    = channel.empty()
 
 
     //
@@ -62,8 +62,7 @@ workflow RUN_READ_COVERAGE {
         ch_out_bam  = SE_MAPPING.out.bam
             | map { meta, bam -> [ meta - meta.subMap("reference_size"), bam ] }
 
-    }
-    else if ( params.reads_type in ["illumina"] ) {
+    } else if ( params.reads_type in ["illumina"] ) {
 
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND SHORTREAD DATA
@@ -97,8 +96,24 @@ workflow RUN_READ_COVERAGE {
     )
     ch_versions         = ch_versions.mix(COVERM_CONTIG.out.versions)
 
-    emit:
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
     tsv_ch              = COVERM_CONTIG.out.coverage
+                            .map { meta, file ->
+                                [[id: meta.id, process: "COVERAGE"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
+
     bam_ch              = ch_out_bam
+                            .map { meta, file ->
+                                [[id: meta.id, process: "MAPPED_BAM"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
+
+    emit:
+    tsv_ch
+    bam_ch
     versions            = ch_versions
 }
