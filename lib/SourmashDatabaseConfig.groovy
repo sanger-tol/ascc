@@ -47,7 +47,7 @@ class SourmashDatabaseConfig {
         def csvFile = new File(csvPath)
 
         if (!csvFile.exists()) {
-            log.error "[ASCC Sourmash] CSV configuration file not found: ${csvPath}"
+            System.err.println "[ASCC Sourmash] CSV configuration file not found: ${csvPath}"
             return []
         }
 
@@ -57,7 +57,7 @@ class SourmashDatabaseConfig {
 
             def fields = line.split(',')
             if (fields.size() != 6) {
-                log.warn "[ASCC Sourmash] Skipping malformed line ${lineNum + 1} in CSV: ${line}"
+                System.err.println "[ASCC Sourmash] Skipping malformed line ${lineNum + 1} in CSV: ${line}"
                 return
             }
 
@@ -149,17 +149,19 @@ class SourmashDatabaseConfig {
     }
 
     /**
-     * Log database configuration summary
-     * Prints formatted information about loaded databases
+     * Get database configuration summary as formatted string
+     * Returns formatted information about loaded databases
      *
      * @param databases List of database configurations
+     * @return Formatted string with database information
      */
-    static void logDatabaseSummary(List<Map> databases) {
-        log.info "[ASCC Sourmash] Loaded ${databases.size()} database configuration(s):"
+    static String getDatabaseSummary(List<Map> databases) {
+        def summary = "[ASCC Sourmash] Loaded ${databases.size()} database configuration(s):\n"
         databases.each { db ->
-            log.info "  - ${db.name}: k=${db.k_for_search}, s=${db.s}"
-            log.info "    DB: ${db.path}"
-            log.info "    Taxa: ${db.assembly_taxa_db}"
+            summary += "  - ${db.name}: k=${db.k_for_search}, s=${db.s}\n"
+            summary += "    DB: ${db.path}\n"
+            summary += "    Taxa: ${db.assembly_taxa_db}\n"
         }
+        return summary
     }
 }

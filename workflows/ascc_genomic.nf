@@ -125,7 +125,7 @@ workflow ASCC_GENOMIC {
 
             // Log summary if valid
             if (validation.valid) {
-                sourmashConfig.logDatabaseSummary(sourmash_databases)
+                log.info sourmashConfig.getDatabaseSummary(sourmash_databases)
             } else {
                 log.error "[ASCC Sourmash] Database validation failed. Sourmash will be skipped."
                 sourmash_databases = []
