@@ -3,10 +3,11 @@ process SOURMASH_MULTISEARCH {
 
     conda "${moduleDir}/environment.yml"
 
-    // current container does not include sourmash_plugin_branchwater https://github.com/sourmash-bio/sourmash_plugin_branchwater
-    // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-    //    'https://depot.galaxyproject.org/singularity/sourmash:4.9.4--hdfd78af_0':
-    //    'biocontainers/sourmash:4.9.4--hdfd78af_0' }"
+    // Custom container with sourmash_plugin_branchwater v0.9.14
+    // See: https://hub.docker.com/r/zilov/sourmash_plugin_branchwater
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'docker://docker.io/zilov/sourmash_plugin_branchwater:0.9.14':
+        'docker.io/zilov/sourmash_plugin_branchwater:0.9.14' }"
 
     input:
     tuple val(meta), path(signature), path(db), val(k), val(s)
