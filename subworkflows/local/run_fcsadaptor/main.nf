@@ -9,7 +9,7 @@ workflow RUN_FCSADAPTOR {
     reference_tuple
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
 
     //
@@ -29,7 +29,22 @@ workflow RUN_FCSADAPTOR {
     )
     ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_EUK.out.versions)
 
+
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
+    //
+    FCS_FCSADAPTOR_EUK.out.adaptor_report
+        .combine(
+            FCS_FCSADAPTOR_PROK.out.adaptor_report.map{meta, file -> file}
+        )
+        .map { meta, file1, file2 ->
+            [[id: meta.id], file1, file2 ]
+        }
+        .set { ch_fcsadapt }
+
     emit:
+    ch_joint_report = ch_fcsadapt
     ch_euk          = FCS_FCSADAPTOR_EUK.out.adaptor_report
     ch_prok         = FCS_FCSADAPTOR_PROK.out.adaptor_report
 

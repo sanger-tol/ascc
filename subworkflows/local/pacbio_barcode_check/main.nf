@@ -11,7 +11,7 @@ workflow PACBIO_BARCODE_CHECK {
     barcode_database        // tupe     [[meta.id], barcode_database]
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
@@ -49,8 +49,13 @@ workflow PACBIO_BARCODE_CHECK {
     )
     ch_versions     = ch_versions.mix(FILTER_BARCODE.out.versions)
 
+    filtered        = FILTER_BARCODE.out.debarcoded
+                        .map{ meta, _file ->
+                            def new_meta = meta + [process: "BARCODES"]
+                            [new_meta, _file]
+                        }
 
     emit:
-    filtered        = FILTER_BARCODE.out.debarcoded
+    filtered
     versions        = ch_versions
 }

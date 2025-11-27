@@ -7,11 +7,11 @@ include { SAMTOOLS_MERGE                             } from '../../../modules/nf
 workflow SE_MAPPING {
 
     take:
-    reference_data_tuple     // Channel [ val(meta), path(file), path(file) ]
+    reference_data_tuple     // channel [ val(meta), path(file), path(file) ]
 
     main:
-    ch_versions     = Channel.empty()
-    ch_align_bams   = Channel.empty()
+    ch_versions     = channel.empty()
+    ch_align_bams   = channel.empty()
 
 
     //
@@ -19,24 +19,23 @@ workflow SE_MAPPING {
     //
     reference_data_tuple
         .map { meta, ref, reads_path ->
-            tuple(
-                [   id          : meta.id,
+                [[  id          : meta.id,
                     single_end  : true,
                     readtype    : params.reads_type
                 ],
-                ref,
-                reads_path,
-                "csi",
-                true,
-                false,
-                false,
-                params.reads_type
-            )
+                    ref,
+                    reads_path,
+                    "csi",
+                    true,
+                    false,
+                    false,
+                    params.reads_type
+                ]
         }
         .multiMap{
             meta, reference, reads, index_format, bam_output, cigar_paf, cigar_bam, read_type ->
-            reads_ch: tuple(meta, reads)
-            refer_ch: tuple(meta, reference)
+            reads_ch: [meta, reads]
+            refer_ch: [meta, reference]
             inx_frmt: index_format
             bam_outp: bam_output
             cigar_pf: cigar_paf
@@ -65,7 +64,7 @@ workflow SE_MAPPING {
     MINIMAP2_ALIGN_SE.out.bam
         .groupTuple(by: 0)
         .map{ meta, files ->
-            tuple( meta, files.flatten())
+            [meta, files.flatten()]
         }
         .set { collected_files_for_merge }
 
