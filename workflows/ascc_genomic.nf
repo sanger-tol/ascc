@@ -83,7 +83,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( !params.run_essentials in run_conditionals ) {
+    if ( !(params.run_essentials in run_conditionals) ) {
         log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
     }
 
@@ -202,13 +202,13 @@ workflow ASCC_GENOMIC {
     //
     nr_full     = NR_DIAMOND.out.reformed
                     .map { it ->
-                        [[id: it[0].id, process: "NR-FULL"], it[1]]
+                        [[id: it[0].id, process: "NR_FULL"], it[1]]
                     }
                     .ifEmpty { [[:],[]] }
 
     nr_hits     = NR_DIAMOND.out.hits_file
                     .map { it ->
-                        [[id: it[0].id, process: "NR-HITS"], it[1]]
+                        [[id: it[0].id, process: "NR_HITS"], it[1]]
                     }
                     .ifEmpty { [[:],[]] }
 
@@ -230,13 +230,13 @@ workflow ASCC_GENOMIC {
 
     un_full     = UP_DIAMOND.out.reformed
                     .map { meta, file ->
-                        [[id: meta.id, process: "UN-FULL"], file ]
+                        [[id: meta.id, process: "UN_FULL"], file ]
                     }
                     .ifEmpty { [[:],[]] }
 
     un_hits     = UP_DIAMOND.out.hits_file
                     .map { meta, file ->
-                        [[id: meta.id, process: "UN-HITS"], file ]
+                        [[id: meta.id, process: "UN_HITS"], file ]
                     }
                     .ifEmpty { [[:],[]] }
 
@@ -468,7 +468,7 @@ workflow ASCC_GENOMIC {
         //
         def processes = [
             'REFERENCE', 'NT_BLAST', 'TIARA', 'KRAKEN_2', 'GENOME', 'KMERS',
-            'FCSGX_RESULT', 'NR-FULL', 'UN-FULL', 'MAPPED_BAM', 'COVERAGE',
+            'FCSGX_RESULT', 'NR_FULL', 'UN_FULL', 'MAPPED_BAM', 'COVERAGE',
             'KRAKEN_1', 'KRAKEN_3'
         ]
 
@@ -590,7 +590,7 @@ workflow ASCC_GENOMIC {
             .branch { meta, data ->
                 log.info("[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
 
-                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") ? [meta, "YES"] : channel.empty()
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION")
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
 
@@ -643,7 +643,7 @@ workflow ASCC_GENOMIC {
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
             def ignore_autofilter       = params.btk_busco_run_mode == "mandatory" && btk_requested
-            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && data.contains("YES")
+            def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && data.contains("YES_ABNORMAL_CONTAMINATION")
 
             run_btk: (ignore_autofilter || not_mandatory_btk)
             skip_btk: true
@@ -767,7 +767,7 @@ workflow ASCC_GENOMIC {
                         .map { meta, file ->
                             [meta.id, [meta, file]]
                     })
-                .map { id, ref_meta, ref_file, btk_meta, btk_file ->
+                .map { _id, ref_meta, ref_file, _btk_meta, btk_file ->
                     [ref_meta, ref_file, btk_file]
                 }
 
@@ -830,7 +830,7 @@ workflow ASCC_GENOMIC {
 
         def processes = [
             'GC_COV', 'COVERAGE', 'TIARA',
-            'KRAKEN_3', 'NT_BLAST_LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
+            'KRAKEN_3', 'NT_BLAST_LINEAGE', 'KMERS', 'NR_HITS', 'UN_HITS',
             'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
         ]
 

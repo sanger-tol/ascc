@@ -199,7 +199,7 @@ workflow PIPELINE_INITIALISATION {
 
         // Check the result and fail if needed
         CHECK_NT_BLAST_TAXONOMY.out.status
-            .map { file -> file.trim() }  // Trim any whitespace
+            .map { blast_status_string -> blast_status_string.trim() }  // Trim any whitespace
             .subscribe { status ->
                 if (status == "nt_database_taxonomy_files_not_found") {
                     log.error "NT BLAST database taxonomy check failed"
