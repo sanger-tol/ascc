@@ -522,6 +522,11 @@ workflow ASCC_ORGANELLAR {
             }
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+                                    .map{ meta, _file ->
+                                        def new_meta = meta + [process: "AUTOFILTER"]
+                                        [new_meta, _file]
+                                    }
+
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
         ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
 
@@ -531,7 +536,7 @@ workflow ASCC_ORGANELLAR {
         ch_autofilt_removed_seqs= channel.of( [[:],[]] )
         ch_autofilt_assem       = channel.of( [[:],[]] )
         ch_autofilt_indicator   = channel.of( [[:],[]] )
-        ch_autofilt_fcs_tiara   = channel.of( [[:],[]] )
+        ch_autofilt_fcs_tiara   = channel.of( [[process: "AUTOFILTER"],[]] )
         ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 

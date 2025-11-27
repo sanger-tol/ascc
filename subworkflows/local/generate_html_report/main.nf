@@ -46,16 +46,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
     barcode_results
         .mix(
-            trim_ns_results
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "TRAILING_NS"]
-                    [new_meta, _file]
-                },
-            autofilter_results
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "AUTOFILTER"]
-                    [new_meta, _file]
-                },
+            trim_ns_results,
+            autofilter_results,
             merged_table
                 .map{ meta, _file ->
                     def new_meta = meta + [process: "MERGED_TABLE"]
