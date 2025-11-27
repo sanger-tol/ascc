@@ -610,12 +610,21 @@ workflow ASCC_ORGANELLAR {
         )
         ch_versions               = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
         org_merged_table          = ASCC_MERGE_TABLES.out.merged_table
+                                        .map{ meta, _file ->
+                                            def new_meta = meta + [process: "MERGED_TABLE"]
+                                            [new_meta, _file]
+                                        }
+
         org_merged_phylum_count   = ASCC_MERGE_TABLES.out.phylum_counts
+                                        .map{ meta, _file ->
+                                            def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
+                                            [new_meta, _file]
+                                        }
 
     } else {
-        org_merged_table          = channel.of( [[:],[]] )
+        org_merged_table          = channel.of( [[process: "MERGED_TABLE"],[]] )
         merged_extended_table     = channel.empty()
-        org_merged_phylum_count   = channel.of( [[:],[]] )
+        org_merged_phylum_count   = channel.of( [[process: "MERGED_PHYLUM_COUNTS"],[]] )
     }
 
 
