@@ -95,7 +95,7 @@ workflow ESSENTIAL_JOBS {
 
     trailing_ns_report      = TRAILINGNS_CHECK.out.trailing_ns_report
                                 .map { meta, _file ->
-                                    def new_meta = meta + [process: "TRAILING_NS"]
+                                    def new_meta = [id: meta.id, process: "TRAILING_NS"]
                                     [new_meta, _file]
                                 }
 

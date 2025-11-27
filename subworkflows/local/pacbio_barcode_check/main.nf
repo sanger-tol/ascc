@@ -51,8 +51,7 @@ workflow PACBIO_BARCODE_CHECK {
 
     filtered        = FILTER_BARCODE.out.debarcoded
                         .map{ meta, _file ->
-                            def new_meta = meta + [process: "BARCODES"]
-                            [new_meta, _file]
+                            [[id: meta.id, process: "BARCODES"], _file]
                         }
 
     emit:

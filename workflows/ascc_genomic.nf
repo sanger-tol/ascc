@@ -603,8 +603,7 @@ workflow ASCC_GENOMIC {
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
                                     .map{ meta, _file ->
-                                        def new_meta = meta + [process: "AUTOFILTER"]
-                                        [new_meta, _file]
+                                        [[id: meta.id, process: "AUTOFILTER"], _file]
                                     }
 
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
@@ -725,7 +724,7 @@ workflow ASCC_GENOMIC {
     // WITHOUT AUTOFILTER
     // an empty tuple [[id: "NA"], file]
     combined_input = run_btk_conditional.run_btk
-        .map{ meta, file, data ->
+        .map{ meta, file, _data ->
             [[id: meta.id], file]
         }
         .combine(btk_samplesheet, by: 0)
@@ -864,15 +863,13 @@ workflow ASCC_GENOMIC {
 
         merged_table            = ASCC_MERGE_TABLES.out.merged_table
                                     .map{ meta, _file ->
-                                        def new_meta = meta + [process: "MERGED_TABLE"]
-                                        [new_meta, _file]
+                                        [[id: meta.id, process: "MERGED_TABLE"], _file]
                                     }
 
         merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
         merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
                                     .map{ meta, _file ->
-                                        def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
-                                        [new_meta, _file]
+                                        [[id: meta.id, process: MERGED_PHYLUM_COUNTS"], _file]
                                     }
 
     } else {

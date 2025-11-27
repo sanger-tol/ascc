@@ -44,18 +44,24 @@ workflow RUN_FCSGX {
 
     fcsgx_report_txt    = FCSGX_RUNGX.out.fcsgx_report
                             .map { meta, file ->
-                                file ? [meta + [process: "FCSGX_REPORT"], file] : [[process: "FCSGX_REPORT"], []]
+                                file ? [[
+                                    id: meta.id,
+                                    process: "FCSGX_REPORT"
+                                ], file] : [[process: "FCSGX_REPORT"], []]
                             }
 
     fcsgx_taxonomy_rpt  = FCSGX_RUNGX.out.taxonomy_report
                             .map { meta, file ->
-                                file ? [meta + [process: "FCSGX_TAX_REPORT"], file] : [[process: "FCSGX_TAX_REPORT"], []]
+                                file ? [[
+                                    id: meta.id,
+                                    process: "FCSGX_TAX_REPORT"
+                                ], file] : [[process: "FCSGX_TAX_REPORT"], []]
                             }
 
     //
     // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
-    FCSGX_RUNGX.out.fcsgx_report
+    fcsgx_report_txt
         .map{ meta, file ->
             [meta, file.getParent()]
         }
@@ -73,7 +79,10 @@ workflow RUN_FCSGX {
 
     fcsgxresult     = PARSE_FCSGX_RESULT.out.fcsgxresult
                         .map { meta, file ->
-                            file ? [meta + [process: "FCSGX_RESULT"], file] : [[process: "FCSGX_RESULT"], []]
+                            file ? [[
+                                id: meta.id,
+                                process: "FCSGX_RESULT"
+                            ], file] : [[process: "FCSGX_RESULT"], []]
                         }
 
     emit:

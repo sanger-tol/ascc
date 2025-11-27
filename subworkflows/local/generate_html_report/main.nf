@@ -48,17 +48,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .mix(
             trim_ns_results,
             autofilter_results,
-            merged_table
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "MERGED_TABLE"]
-                    [new_meta, _file]
-                },
-            phylum_counts
-                .map{ meta, _file ->
-                    def new_meta = meta + [process: "MERGED_PHYLUM_COUNTS"]
-                    [new_meta, _file]
-                },
-            // BELOW ALREADY HAVE PROCESS IN THEIR META
+            merged_table,
+            phylum_counts,
             ch_fcs_euk,
             ch_fcs_prok,
             vecscreen_results,
