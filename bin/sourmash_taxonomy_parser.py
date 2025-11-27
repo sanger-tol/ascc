@@ -25,6 +25,29 @@ def setup_logger():
     logger.addHandler(ch)
     return logger
 
+def extract_contig_number(query_name):
+    """
+    Extract numeric contig number from query_name.
+
+    Examples:
+        'contig_1' -> 1
+        'scaffold_42' -> 42
+        'chr1' -> 1
+        'some_name_123' -> 123
+        'no_number' -> float('inf')  # sort to end if no number found
+
+    Returns:
+        int: The extracted contig number, or infinity if not found
+    """
+    import re
+    # Look for one or more digits at the end of the string, possibly preceded by underscore or other separator
+    match = re.search(r'(\d+)$', query_name)
+    if match:
+        return int(match.group(1))
+    else:
+        # No number found - sort these to the end
+        return float('inf')
+
 # Initialize logger
 logger = setup_logger()
 
@@ -41,7 +64,8 @@ def parse_sourmash_results(file_path):
             match_name = row['match_name']
             containment = row['containment']
             jaccard = row['jaccard']
-            intersect_hashes = row.get('intersect_hashes', 0)  # Default to 0 if column doesn't exist
+            # Ensure intersect_hashes is numeric (float or int)
+            intersect_hashes = float(row.get('intersect_hashes', 0)) if pd.notna(row.get('intersect_hashes', 0)) else 0.0
 
             if " " in match_name:
                 # Handle cases where match_name contains spaces
@@ -131,8 +155,13 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
     if assembly_df is not None and 'taxid' in assembly_df.columns:
         taxid_dict = assembly_df['taxid'].dropna().astype(str).str.strip().to_dict()
 
-    # Sort summary to ensure proper ordering
-    sorted_summary = sorted(summary, key=lambda x: (x[0], -x[5]))
+    # Sort summary with priority:
+    # 1. By contig number in query_name (ascending: contig_1, contig_2, ...)
+    # 2. By intersect_hashes (descending: more hashes first)
+    sorted_summary = sorted(
+        summary,
+        key=lambda x: (extract_contig_number(x[0]), -float(x[5]))
+    )
 
     # Log run parameters to stdout/stderr instead of file
     logger.info("=" * 60)
