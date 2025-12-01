@@ -22,7 +22,9 @@ include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
-include { getEmptyPlaceholder } from "${projectDir}/lib/ascc_utils.groovy"
+// FUNCTION IMPORTS
+// NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
+include { getEmptyPlaceholder                           } from "${projectDir}/lib/ascc_utils.groovy"
 
 
 
@@ -493,7 +495,7 @@ workflow ASCC_ORGANELLAR {
             .join(ch_blast_lineage, remainder: true)
             .join(channel.of([[:],[]]), remainder: true) //ch_kmers - not in organellar
             .join(nr_hits,          remainder: true)
-            .join(nr_hits,          remainder: true)
+            .join(un_hits,          remainder: true)
             .join(ch_create_summary,remainder: true)
             .join(channel.of([[:],[]]), remainder: true) //busco_merge_btk - not in organellar
             .join(ch_fcsgx,         remainder: true)

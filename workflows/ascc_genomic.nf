@@ -28,7 +28,9 @@ include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
-include { getEmptyPlaceholder } from "${projectDir}/lib/ascc_utils.groovy"
+// FUNCTION IMPORTS
+// NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
+include { getEmptyPlaceholder                           } from "${projectDir}/lib/ascc_utils.groovy"
 
 
 
@@ -733,7 +735,7 @@ workflow ASCC_GENOMIC {
             .join(ch_blast_lineage, remainder: true)
             .join(ch_kmers,         remainder: true)
             .join(nr_hits,          remainder: true)
-            .join(nr_hits,          remainder: true)
+            .join(un_hits,          remainder: true)
             .join(ch_create_summary,remainder: true)
             .join(busco_merge_btk,  remainder: true)
             .join(ch_fcsgx,         remainder: true)
