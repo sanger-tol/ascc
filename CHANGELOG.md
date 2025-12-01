@@ -7,31 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
-Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to compliment FCSGX and Tiara.
+Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to complement FCS-GX and Tiara for k-mer based contamination detection.
 
 ### `Added`
 
-- `RUN_SOURMASH` subworkflow
-- Addition of `run_sourmash` config option
+- `RUN_SOURMASH` subworkflow for k-mer based taxonomic classification
+  - `SOURMASH_SKETCH`: Create MinHash sketches from assembly sequences
+  - `SOURMASH_MULTISEARCH`: Search sketches against multiple databases
+  - `PARSE_SOURMASH`: Parse results and identify non-target taxa contigs
+  - `GET_TARGET_TAXA`: Extract target taxonomic level from NCBI taxonomy
+- Integration with `AUTOFILTER_AND_CHECK_ASSEMBLY` module
+  - Sourmash results combined with FCS-GX and Tiara for contamination filtering
+  - Configurable action mode (`warn` or `remove`) for sourmash detections
+- Integration with `ASCC_MERGE_TABLES` to include sourmash results in final CSV output
+- New Python scripts:
+  - `bin/sourmash_taxonomy_parser.py`: Parse sourmash multisearch results and taxonomy
+  - `bin/get_target_taxa_from_taxid.py`: Extract target taxonomic level from taxid
+- Support for multiple sourmash databases with flexible configuration
+  - Direct parameter configuration via `--sourmash_databases`
+  - CSV-based configuration via `--sourmash_db_config`
+- Comprehensive nf-test suite for all sourmash modules and subworkflows
+- Integration tests with Plasmodium and E.coli test databases
 - Addition of @zilov as contributor
+
+### `Fixed`
+
+- `bin/autofilter.py`: Updated to handle sourmash_action column in CSV format (6 columns instead of 5)
+- `bin/abnormal_contamination_check.py`: Updated CSV format validation for new sourmash_action column
+- `modules/local/parse/sourmash/main.nf`: Fixed YAML versions block to handle stderr correctly
+- `modules/local/ascc/merge_tables/main.nf`: Fixed optional sourmash parameter handling
 
 ### Dependencies
 
-| Module               | Old Version | New Versions |
-| -------------------- | ----------- | ------------ |
-| CAT_CAT              |             |              |
-| SOURMASH_SKETCH      |             |              |
-| SOURMASH_MULTISEARCH |             |              |
-| PARSE_SOURMASH       |             |              |
+| Module               | Old Version | New Version |
+| -------------------- | ----------- | ----------- |
+| CAT_CAT              | NA          | nf-core     |
+| SOURMASH_SKETCH      | NA          | 4.8.11      |
+| SOURMASH_MULTISEARCH | NA          | 4.8.11      |
+| PARSE_SOURMASH       | NA          | custom      |
+| GET_TARGET_TAXA      | NA          | custom      |
 
 ### Parameters
 
-// NOT YET ADDED sourmash_dblist IN CONFIGS
+| Old Parameter | New Parameter              | Description                                            |
+| ------------- | -------------------------- | ------------------------------------------------------ |
+| NA            | --run_sourmash             | Control sourmash execution ('off', 'genomic', 'both')  |
+| NA            | --sourmash_databases       | List of sourmash databases (direct configuration)      |
+| NA            | --sourmash_db_config       | Path to CSV file with database configuration           |
+| NA            | --sourmash_taxonomy_level  | Taxonomic level for target taxa ('order' by default)   |
+| NA            | --sourmash_action_mode     | Action mode for autofilter ('warn' or 'remove')        |
 
-| Old Parameter | New Parameter     |
-| ------------- | ----------------- |
-| NA            | --run_sourmash    |
-| NA            | --sourmash_dblist |
+### `Notes`
+
+- Sourmash databases require MinHash sketches with k-mer sizes and scaled values
+- Target taxa is automatically extracted from NCBI taxonomy based on input taxid
+- Integration tests successfully validated with 121 processes (26 minutes runtime)
+- Four critical bugs were identified and fixed during integration testing
 
 ## [0.5.0] - Red Spider-Boat [ ##/08/2025 ]
 
