@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - Red Watch [ ##/##/2025 ]
+## [0.6.0] - Red Watch [ 01/12/2025 ]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -64,11 +64,75 @@ Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to complement
 - Integration tests successfully validated with 121 processes (26 minutes runtime)
 - Four critical bugs were identified and fixed during integration testing
 
-## [0.5.0] - Red Spider-Boat [ ##/08/2025 ]
+## [0.5.2] - Red Spider-Boat (H2) [06/10/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
-Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stability for sanger production.
+Release 9 of sanger-tol/ascc, a modification to FCS_ADAPTOR and configs.
+
+### `Added`
+
+- Patch to `FCS_ADAPTOR` to avoid the use of `/tmp`
+- Update `SANGER_TOL_BLOBTOOLKIT` in `base.config` to use 1200.MB rather than `process_low`'s 12.GB
+- Updated the script `abnormal_contamination_check.py` in the module `AUTOFILTER_AND_CHECK_ASSEMBLY`
+  - This adds reporting for the number of `REVIEW/INFO` tags output by FCS as an alarm paramter to trigger SANGER_TOL_BLOBTOOLKIT
+- Updated ro-crate, tests, and CHANGELOG.
+- Now the pipeline is quite stable in production, there is the aim to once again start collecting resource statistics.
+  - Updated `trace` scope output for ASCC and BLOBTOOLKIT (via `assets/btk_config_files/btk_trace.config`)
+- Updating `SANGER_TOL_BTK` to 0.9.0 (Scyther)
+
+### `Dependencies`
+
+| Module                        | Old Version                           | New Versions                          |
+| ----------------------------- | ------------------------------------- | ------------------------------------- |
+| AUTOFILTER_AND_CHECK_ASSEMBLY | abnormal_contamination_check.py:1.1.0 | abnormal_contamination_check.py:1.2.0 |
+| SANGER_TOL_BTK                | 0.8.0                                 | 0.9.0                                 |
+
+## [0.5.1] - Red Spider-Boat (H1) [29/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 8 of sanger-tol/ascc, focusing on a module update and some minor structural updates.
+
+### `Added`
+
+- `SAMTOOLS_FAIDX` now outputs a `.sizes` file so `CUSTOM_CHROMSIZES` has been removed.
+- Remove Legacy `GrabFiles` function (#163).
+- Updating modules to most recent version available on nf-core (#163, #162).
+- Updated Snapshots to reflect version changes (#163)
+
+### `Fixed`
+
+- Removed nf-core modules which arn't actually in use (#164)
+- Updated version outputs from modules previously reporting `null` (#164)
+
+### `Bugs`
+
+- Currently, Blobtoolkit will _not_ run if there is no autofilter output channel.
+- tiara, fcsgx, autofilter must always be activated.
+
+### `Dependencies`
+
+| Module               | Old Version               | New Versions |
+| -------------------- | ------------------------- | ------------ |
+| SAMTOOLS_FAIDX       | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_SORT        | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_MERGE       | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_DICT        | 1.21.1                    | 1.22.1       |
+| SAMTOOLS_DEPTH       | 1.21.1                    | 1.22.1       |
+| KRAKEN2_KRAKEN2      | 2.1.4                     | 2.1.6        |
+| BLASTN               | 2.15.0                    | 2.16.0       |
+| BLAST_MAKEBLASTDB    | 2.15.0                    | 2.16.9       |
+| DIAMOND_BLASTX       | 2.1.8                     | 2.1.12       |
+| GNU_SORT             | 9.3                       | 9.5          |
+| SEQKIT_SLIDER        | 2.8.1                     | 2.8.0        |
+| CUSTOM_GETCHROMSIZES | samtools:1.21--h50ea8bc_0 | REMOVED      |
+
+## [0.5.0] - Red Spider-Boat [05/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 7 of sanger-tol/ascc, focusing on the 3.3.2 template upgrade and stability for sanger production.
 
 ### `Notes`
 
@@ -76,16 +140,16 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 
 ### `Added`
 
-- Template update to 3.3.2.
+- Template update to 3.3.2 (#155)
 - Added pipeline-level nf-test testing which is now running as standard CI.
 - Corrected versioning in the .nextflow.log.
-- Minor updates to the base.config.
+- Minor updates to the base.config (#158)
 - singularity pid setting is now false.
 - Param to expose FILTER_FASTA ext.cutoff and enforce min/max values.
 - The FCSGX module has been heavily patched when using `--profile production`, this is to support `module` and `modulecmd`.
 - The `--production` profile now contains a FCSGX module override linked to the above.
   - Resources have been included otherwise FCSGX will use the nextflow defaults.
-  - Queue for FCSGX has been changed to `oversubscribed` in the `production.config`.
+  - Queue for FCSGX has been changed to `oversubscribed` in the `production.config` (#162)
 - Changes to the resource allocation to improve support for large genomes. Changes are for the modules:
   - BLAST_BLASTN
   - BLAST_BLASTN_MOD
@@ -106,7 +170,7 @@ Release 7 of sanger-tol/ascc, focusing on the 3.3.3 template upgrade and stabili
 - Changed instances of `projectDir` to `launchDir` for safety (In tests).
 - Map pattern in ESSENTIAL_JOBS has been updated to reduce re-writing all values.
 - Corrected references to `withName: '*:PACBIO_BARCODE_CHECK:BLAST_BLASTN'`.
-- Updated resource notation to use e notation #134
+- Updated resource notation to use e notation (#134)
 
 ### `Bugs`
 

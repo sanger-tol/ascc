@@ -1,5 +1,3 @@
-#!/usr/bin/env nextflow
-
 //
 // MODULE IMPORT BLOCK
 //
@@ -50,6 +48,7 @@ workflow RUN_NT_KRAKEN {
         ncbi_rankedlineage_path
     )
     ch_versions = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
+
 
     emit:
     classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment

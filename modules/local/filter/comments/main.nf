@@ -25,7 +25,6 @@ process FILTER_COMMENTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ubuntu: \$(ubuntu --version | sed 's/Ubuntu //g')
         coreutils: $VERSION
     END_VERSIONS
     """
@@ -38,7 +37,6 @@ process FILTER_COMMENTS {
 
     cat <<-END_VERSIONS > ${prefix}_filtered_blast_result.txt
     "${task.process}":
-        ubuntu: \$(ubuntu --version | sed 's/Ubuntu //g')
         coreutils: $VERSION
     END_VERSIONS
     """
