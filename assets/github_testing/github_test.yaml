@@ -1,7 +1,7 @@
 reads_path:
-  - /lustre/scratch124/tol/teams/tola/users/dp24/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz
+  - /home/runner/work/ascc/ascc/asccTinyTest_V2/pacbio/Pyoeliiyoelii17XNL_pbtools_simulated_pacbio_reads.fa.gz
 reads_type: "hifi"
-pacbio_barcode_file: /lustre/scratch124/tol/teams/tola/users/dp24/ascc/assets/pacbio_adaptors.fa
+pacbio_barcode_file: /home/runner/work/ascc/ascc/assets/pacbio_adaptors.fa
 pacbio_barcode_names: "bc2001,bc2009"
 sample_id: "Pyoeliiyoelii17XNL"
 scientific_name: "Plasmodium yoelii yoelii 17XNL"

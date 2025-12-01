@@ -16,8 +16,8 @@ process ASCC_MERGE_TABLES {
         path (nt_kraken),
         path (nt_blast),
         path (dim_reduction_embeddings),
-        path (nr_diamond),
-        path (uniprot_diamond),
+        path (nr_diamond,               stageAs: "diamond.csv"),
+        path (uniprot_diamond,          stageAs: "uniprot.csv"),
         path (btk),
         path (btk_busco),
         path (fcs_gx)
