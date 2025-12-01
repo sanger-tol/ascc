@@ -29,7 +29,7 @@ process PARSE_SOURMASH {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sourmash: \$(echo \$(sourmash --version 2>&1) | sed 's/^sourmash //' )
+        sourmash_taxonomy_parser: \$(sourmash_taxonomy_parser.py --version 2>/dev/null | cut -d' ' -f2 || echo "unknown")
     END_VERSIONS
     """
 
@@ -41,7 +41,7 @@ process PARSE_SOURMASH {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sourmash: \$(echo \$(sourmash --version 2>&1) | sed 's/^sourmash //' )
+        sourmash_taxonomy_parser: \$(sourmash_taxonomy_parser.py --version 2>/dev/null | cut -d' ' -f2 || echo "unknown")
     END_VERSIONS
     """
 }

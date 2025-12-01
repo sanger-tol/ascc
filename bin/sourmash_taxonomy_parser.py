@@ -8,6 +8,9 @@ from typing import Dict
 import pandas as pd
 import os
 
+# Version of sourmash_taxonomy_parser
+__version__ = "1.0.0"
+
 def setup_logger():
     """Configure and return a logger for the application."""
     logger = logging.getLogger('sourmash_taxonomy_parser')
@@ -62,10 +65,17 @@ def parse_sourmash_results(file_path):
         for _, row in df.iterrows():
             query_name = row['query_name']
             match_name = row['match_name']
-            containment = row['containment']
-            jaccard = row['jaccard']
-            # Ensure intersect_hashes is numeric (float or int)
-            intersect_hashes = float(row.get('intersect_hashes', 0)) if pd.notna(row.get('intersect_hashes', 0)) else 0.0
+
+            # Skip rows where containment or jaccard are not numeric (duplicate headers)
+            try:
+                containment = float(row['containment'])
+                jaccard = float(row['jaccard'])
+                # Ensure intersect_hashes is numeric (float or int)
+                intersect_hashes = float(row.get('intersect_hashes', 0)) if pd.notna(row.get('intersect_hashes', 0)) else 0.0
+            except (ValueError, TypeError):
+                # Skip this row - it's likely a duplicate header
+                logger.warning(f"Skipping row with non-numeric values: query_name={query_name}, match_name={match_name}")
+                continue
 
             if " " in match_name:
                 # Handle cases where match_name contains spaces
@@ -310,12 +320,22 @@ def main(sourmash_file=None, assembly_db=None, target_taxa=None, outdir=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse sourmash results and extract query-match relationships with similarity scores.")
-    parser.add_argument('-s', '--sourmash_results', help='Path to the sourmash results file to parse', required=True)
-    parser.add_argument('-a', '--assembly_db', help='Path to assembly database file with taxonomic information', required=True)
+    parser.add_argument('-s', '--sourmash_results', help='Path to the sourmash results file to parse', required=False)
+    parser.add_argument('-a', '--assembly_db', help='Path to assembly database file with taxonomic information', required=False)
     parser.add_argument('--target_taxa', nargs='+', help='Target taxa in format taxon:value (e.g., order:coleoptera family:Carabidae)')
     parser.add_argument('--log', help='Path to log file (if not provided, logs to stderr)', default=None)
-    parser.add_argument('-o', '--outdir', help='Output directory for results (default: current directory)', default=None, required=True)
+    parser.add_argument('-o', '--outdir', help='Output directory for results (default: current directory)', default=None)
+    parser.add_argument('--version', action='version', version=f'sourmash_taxonomy_parser {__version__}')
     args = parser.parse_args()
+
+    # If only version was requested, exit
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+
+    # Validate required arguments (unless --version was used)
+    if not args.sourmash_results or not args.assembly_db or not args.outdir:
+        parser.error("the following arguments are required: -s/--sourmash_results, -a/--assembly_db, -o/--outdir")
 
     # Configure file logging if requested
     if args.log:
