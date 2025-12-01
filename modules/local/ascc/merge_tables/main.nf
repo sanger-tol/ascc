@@ -43,7 +43,7 @@ process ASCC_MERGE_TABLES {
     def btk                         = btk                       ? "-btk ${btk}"                     : ""
     def btk_busco                   = btk_busco                 ? "-bb ${btk_busco}"                : ""
     def fcs_gx                      = fcs_gx                    ? "-fg ${fcs_gx}"                   : ""
-    def sourmash_arg                = sourmash_summary.name != 'SOURMASH_summary.csv' ? "-sm ${sourmash_summary}" : ""
+    def sourmash_arg                = sourmash_summary          ? "-sm ${sourmash_summary}"         : ""
 
     """
     ascc_merge_tables.py \\
