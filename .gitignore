@@ -8,3 +8,4 @@ testing*
 *.pyc
 null/
 .nf-test*
+ascc_tiny_test_databases
