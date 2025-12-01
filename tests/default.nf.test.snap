@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            118,
+            135,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -183,6 +183,12 @@
                 "asccTinyTest_V2_HAPLO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_HAPLO/ascc_main_output",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv",
+                "asccTinyTest_V2_HAPLO/autofilter",
+                "asccTinyTest_V2_HAPLO/autofilter/asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv",
+                "asccTinyTest_V2_HAPLO/autofilter/asccTinyTest_V2_HAPLO_autofiltered.fasta",
+                "asccTinyTest_V2_HAPLO/autofilter/assembly_filtering_removed_sequences.txt",
+                "asccTinyTest_V2_HAPLO/autofilter/fcs-gx_alarm_indicator_file.txt",
+                "asccTinyTest_V2_HAPLO/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_HAPLOBTK_DS.yaml",
@@ -345,12 +351,6 @@
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv",
-                "asccTinyTest_V2_PRIMARY/autofilter",
-                "asccTinyTest_V2_PRIMARY/autofilter/asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv",
-                "asccTinyTest_V2_PRIMARY/autofilter/asccTinyTest_V2_PRIMARY_autofiltered.fasta",
-                "asccTinyTest_V2_PRIMARY/autofilter/assembly_filtering_removed_sequences.txt",
-                "asccTinyTest_V2_PRIMARY/autofilter/fcs-gx_alarm_indicator_file.txt",
-                "asccTinyTest_V2_PRIMARY/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_PRIMARYBTK_DS.yaml",
@@ -460,16 +460,13 @@
             ],
             false,
             [
-                "asccTinyTest_V2_PRIMARY_autofiltered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3"
+                "asccTinyTest_V2_HAPLO_autofiltered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3"
             ],
             false,
             [
-                "asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
+                "asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv:md5,1c757782b1527c33cdf5bccfe523b0b7",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "fcs-gx_alarm_indicator_file.txt:md5,5e2adbeffcb565e1d205959c9f9ab9c0",
-                "asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
-                "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "fcs-gx_alarm_indicator_file.txt:md5,4e51ff92a0dd9a35d81b02e5d2b8b627"
+                "fcs-gx_alarm_indicator_file.txt:md5,912dc11ad86f82d2020f152411fec508"
             ],
             false,
             [
@@ -698,6 +695,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-09-12T11:54:51.307372533"
+        "timestamp": "2025-12-01T14:40:25.174071"
     }
 }
