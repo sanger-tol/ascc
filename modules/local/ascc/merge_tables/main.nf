@@ -48,8 +48,6 @@ process ASCC_MERGE_TABLES {
     def fcs_gx                      = fcs_gx.size() > 80                        ? "-fg ${fcs_gx}"                   : ""
 
     """
-    ls -lh
-
     ascc_merge_tables.py \\
         --gc_cov $gc_content \\
         --sample_name $meta.id \\

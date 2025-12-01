@@ -41,7 +41,7 @@ process GENERATE_HTML_REPORT {
     def reference_file               = reference_fasta              ? "--reference ${reference_fasta}" : ""
     def barcode_arg                  = barcode_results              ? "--barcode_file ./barcode_file.txt" : "" // IS THIS EVALUATING THE FOLDER OF CONTENTS?
     def fcs_euk_arg                  = fcs_adaptor                  ? "--fcs_adaptor_euk_file ./fcs/*_euk*" : ""
-    def fcs_prok_arg                 = fcs_adaptor                  ? "--fcs_adaptor_prok_file ./fcs/*_euk*" : ""
+    def fcs_prok_arg                 = fcs_adaptor                  ? "--fcs_adaptor_prok_file ./fcs/*_prok*" : ""
     def trim_ns_arg                  = trim_ns_results              ? "--trim_ns_file ${trim_ns_results}" : ""
     def vecscreen_arg                = vecscreen_results            ? "--vecscreen_file ${vecscreen_results}" : ""
     def autofilter_arg               = autofilter_results           ? "--autofilter_file ${autofilter_results}" : ""
@@ -63,7 +63,8 @@ process GENERATE_HTML_REPORT {
     # Create kmers directory if it doesn't exist
     mkdir -p kmers
 
-    cat ./barcodes/* > ./barcode_file.txt
+    # Combine barcode results into one file
+    cat ./barcodes/* */ > ./barcode_file.txt
 
     # Run the report generation script
     generate_html_report.py \\
