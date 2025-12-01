@@ -103,7 +103,7 @@ workflow ORGANELLAR_BLAST {
             valid: lines_in_file >= 1
             invalid : lines_in_file < 1
 
-            log.info "[ASCC info] ORGANELLAR_BLAST results contain ${ lines_in_file } lines (> 0 is Valid)\n"
+            log.info "[ASCC INFO] ORGANELLAR_BLAST results contain ${ lines_in_file } lines (> 0 is Valid)"
             log.info "\t--$meta.id & $meta.og "
         }
         .set { no_comments }

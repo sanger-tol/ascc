@@ -83,34 +83,16 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    if ( !(params.run_essentials in run_conditionals) ) {
-        log.warn("[ASCC WARN]: MAKE SURE YOU ARE AWARE YOU ARE SKIPPING ESSENTIAL JOBS, THIS INCLUDES BREAKING SCAFFOLDS OVER 1.9GB, FILTERING N\'s AND GC CONTENT REPORT (THIS WILL BREAK OTHER PROCESSES AND SHOULD ONLY BE RUN WITH `--run_essentials {both,genomic,organellar,off}`)")
-    }
-
-    if ( params.run_essentials in run_conditionals ) {
-        ESSENTIAL_JOBS(
-            ch_samplesheet
-        )
-        ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
-
-        ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-        ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
-        ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-        ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-        ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
-        ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
-
-    } else {
-        ej_reference_tuple      = ch_samplesheet
-                                    .map{ meta, _file ->
-                                        [[id: meta.id, process: "REFERENCE"], _file]
-                                    }
-        ej_dot_genome           = channel.of( [[process: "GENOME"],[]] )
-        ej_gc_coverage          = channel.of( [[:],[]] )
-        ej_trailing_ns          = channel.of( [[process: "TRAILING_NS"],[]] )
-        ej_fasta_sanitation_log = channel.of( [[process: "REFERENCE_SANI_LOG"],[]] )
-        ej_fasta_filter_log     = channel.of( [[process: "REFERENCE_FILT_LOG"],[]] )
-    }
+    ESSENTIAL_JOBS(
+        ch_samplesheet
+    )
+    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+    ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
+    ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
+    ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
+    ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
+    ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
 
     //-------------------------------------------------------------------------
@@ -138,11 +120,8 @@ workflow ASCC_GENOMIC {
     // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
     //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
     //
-    ch_kmers            = GET_KMERS_PROFILE.out.combined_csv
-                            .ifEmpty { [[process: "KMERS"],[]] }
-
-    ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results
-                            .ifEmpty { [[process: "KMER_RESULTS"],[]] }
+    ch_kmers            = GET_KMERS_PROFILE.out.combined_csv.ifEmpty { [[:],[]] }
+    ch_kmers_results    = GET_KMERS_PROFILE.out.kmers_results.ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -154,9 +133,7 @@ workflow ASCC_GENOMIC {
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
     ch_tiara            = TIARA_TIARA.out.classifications
-                            .map { meta, file ->
-                                [[id: meta.id, process: "TIARA"], file]
-                            }
+                            .map { meta, file -> [[id: meta.id ], file] }
                             .ifEmpty { [[:],[]] }
 
 
@@ -173,11 +150,6 @@ workflow ASCC_GENOMIC {
         ncbi_ranked_lineage_path.first()
     )
     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-
-    //
-    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-    //
     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
     ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
     ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
@@ -195,21 +167,12 @@ workflow ASCC_GENOMIC {
         diamond_nr_db_path.first()
     )
     ch_versions = ch_versions.mix(NR_DIAMOND.out.versions)
-
-    //
-    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-    //
     nr_full     = NR_DIAMOND.out.reformed
-                    .map { it ->
-                        [[id: it[0].id, process: "NR_FULL"], it[1]]
-                    }
+                    .map { meta, file -> [[id: meta.id ], file] }
                     .ifEmpty { [[:],[]] }
 
     nr_hits     = NR_DIAMOND.out.hits_file
-                    .map { it ->
-                        [[id: it[0].id, process: "NR_HITS"], it[1]]
-                    }
+                    .map { meta, file -> [[id: meta.id ], file] }
                     .ifEmpty { [[:],[]] }
 
 
@@ -229,15 +192,11 @@ workflow ASCC_GENOMIC {
     ch_versions = ch_versions.mix(UP_DIAMOND.out.versions)
 
     un_full     = UP_DIAMOND.out.reformed
-                    .map { meta, file ->
-                        [[id: meta.id, process: "UN_FULL"], file ]
-                    }
+                    .map { meta, file -> [[id: meta.id], file ] }
                     .ifEmpty { [[:],[]] }
 
     un_hits     = UP_DIAMOND.out.hits_file
-                    .map { meta, file ->
-                        [[id: meta.id, process: "UN_HITS"], file ]
-                    }
+                    .map { meta, file -> [[id: meta.id ], file ] }
                     .ifEmpty { [[:],[]] }
 
 
@@ -281,15 +240,11 @@ workflow ASCC_GENOMIC {
     //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
     //
     ch_mito     = MITO_ORGANELLAR_BLAST.out.organelle_report
-                    .map { meta, file ->
-                        [[id: meta.id, process: "MITO"], file]
-                    }
+                    .map { meta, file -> [[id: meta.id ], file] }
                     .ifEmpty { [[:],[]] }
 
     ch_chloro   = PLASTID_ORGANELLAR_BLAST.out.organelle_report
-                    .map { meta, file ->
-                        [[id: meta.id, process: "CHLORO"], file]
-                    }
+                    .map { meta, file -> [[id: meta.id ], file] }
                     .ifEmpty { [[:],[]] }
 
 
@@ -315,8 +270,7 @@ workflow ASCC_GENOMIC {
         duplicated_db.pacbio_db
     )
     ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
-    ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered
-                            .ifEmpty{ [[process: "BARCODES"],[]] }
+    ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.ifEmpty{ [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -329,7 +283,7 @@ workflow ASCC_GENOMIC {
         }
     )
     ch_versions = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
-    ch_fcsadapt = RUN_FCSADAPTOR.out.ch_joint_report
+    ch_fcsadapt = RUN_FCSADAPTOR.out.ch_joint_report.ifEmpty{ [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -364,19 +318,18 @@ workflow ASCC_GENOMIC {
 
         fcs_samplesheet.map{ meta, file ->
             log.info("[ASCC INFO]: Overriding Internal FCSGX with ${file}")
-            def new_meta = meta + [process: "FCSGX_RESULT"]
-            [new_meta, file]
+            [[id: meta.id], file]
 
         }
         .set { ch_fcsgx }
 
-        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx_report     = channel.of( [[:],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[:],[]] )
 
     } else {
-        ch_fcsgx            = channel.of( [[process: "FCSGX_RESULT"],[]] )
-        ch_fcsgx_report     = channel.of( [[process: "FCSGX_REPORT"],[]] )
-        ch_fcsgx_taxonomy   = channel.of( [[process: "FCSGX_TAX_REPORT"],[]] )
+        ch_fcsgx            = channel.of( [[:],[]] )
+        ch_fcsgx_report     = channel.of( [[:],[]] )
+        ch_fcsgx_taxonomy   = channel.of( [[:],[]] )
     }
 
 
@@ -392,8 +345,8 @@ workflow ASCC_GENOMIC {
         reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
     )
     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)
-    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[process: "COVERAGE"], []] }
-    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[process: "COVERAGE_BAM"], []] }
+    ch_coverage         = RUN_READ_COVERAGE.out.tsv_ch.ifEmpty{ [[:], []] }
+    ch_bam              = RUN_READ_COVERAGE.out.bam_ch.ifEmpty{ [[:], []] }
 
 
     //-------------------------------------------------------------------------
@@ -407,7 +360,7 @@ workflow ASCC_GENOMIC {
         vecscreen_database_path.first()
     )
     ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
-    ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.ifEmpty{ [[process: "VECSCREEN"],[]] }
+    ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.ifEmpty{ [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -422,9 +375,9 @@ workflow ASCC_GENOMIC {
         ncbi_ranked_lineage_path.first()
     )
     ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
-    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[process: "KRAKEN_1"], []] }
-    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[process: "KRAKEN_2"], []] }
-    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[process: "KRAKEN_3"], []] }
+    ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[:], []] }
+    ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[:], []] }
+    ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[:], []] }
 
 
     //-------------------------------------------------------------------------
@@ -436,71 +389,47 @@ workflow ASCC_GENOMIC {
         //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[:],[]]
         //
         //
-        ch_genomic_cbtk_input = ej_reference_tuple
-            .mix(
-                ej_dot_genome,
-                ch_kmers,
-                ch_tiara,
-                ch_nt_blast,
-                // Use the BLAST top hits for BTK
-                ch_btk_format,
-                ch_fcsgx,
-                ch_bam,
-                ch_coverage,
-                ch_kraken1,
-                ch_kraken2,
-                ch_kraken3,
-                nr_full,
-                un_full
-            )
-            .map { meta, file ->
-                [meta.id, [meta: meta, file: file]]
+        ej_reference_tuple
+            .map{meta, file -> [[id: meta.id], file]}
+            .join(ch_nt_blast,  remainder: true)
+            .join(ch_tiara,     remainder: true)
+            .join(ej_dot_genome,remainder: true)
+            .join(ch_fcsgx,     remainder: true)
+            .join(ch_bam,       remainder: true)
+            .join(ch_coverage,  remainder: true)
+            .join(ch_kmers,     remainder: true)
+            .join(ch_kraken1,   remainder: true)
+            .join(ch_kraken2,   remainder: true)
+            .join(ch_kraken3,   remainder: true)
+            .join(nr_full,      remainder: true)
+            .join(un_full,      remainder: true)
+            .filter { items ->
+                def meta = items[0]
+                meta != null &&
+                meta != [] &&
+                !(meta instanceof Map && (meta.id == null || meta.isEmpty()))
             }
-            .filter { id, data -> id != [] && id != null }
-            .groupTuple()
-            .map { id, data ->
-                [id: id, data: data]
-            }
-
-
-        //
-        // LOGIC: LIST OF PROCESSES TO CHECK FOR
-        //
-        def processes = [
-            'REFERENCE', 'NT_BLAST', 'TIARA', 'KRAKEN_2', 'GENOME', 'KMERS',
-            'FCSGX_RESULT', 'NR_FULL', 'UN_FULL', 'MAPPED_BAM', 'COVERAGE',
-            'KRAKEN_1', 'KRAKEN_3'
-        ]
-
-
-        //
-        // LOGIC: Create a channel for each process
-        //
-        def processChannels = processes.collectEntries { process ->
-            [(process): ch_genomic_cbtk_input
-                .map { sample ->
-                    def data = sample.data.find { it.meta.process == process }
-                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+            .map { items ->
+                // Replace null values with placeholder file
+                items.withIndex().collect { item, index ->
+                    if (item == null) {
+                        getEmptyPlaceholder(index)
+                    } else if (item instanceof List && item.isEmpty()) {
+                        getEmptyPlaceholder(index)
+                    } else {
+                        item
+                    }
                 }
-            ]
-        }
-
-
-        //
-        // LOGIC: Combine all channels using a series of combine operations
-        //
-        def combined_channel = processChannels['REFERENCE']
-
-        processes.tail().each { process ->
-            combined_channel = combined_channel.combine(processChannels[process], by: 0)
-        }
+            }
+            .set{ create_input_channel}
 
 
         //
         // MODULE: CREATE A BTK COMPATIBLE DATASET FOR NEW DATA
         //
         CREATE_BTK_DATASET (
-            combined_channel,
+            create_input_channel,
+            params.taxid,
             ncbi_taxonomy_path.first(),
             scientific_name
 
@@ -508,17 +437,13 @@ workflow ASCC_GENOMIC {
         ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
         ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
-                                    .map{ meta, file ->
-                                        [[id: meta.id, process: "C_BTK_SUM"], file]
-                                    }
+                                    .map{ meta, _file -> [[ id: meta.id ], _file] }
+
         ch_create_btk_dataset   = CREATE_BTK_DATASET.out.btk_datasets
-                                    .map{ meta, _file ->
-                                        def new_meta = meta + [process: "BTK_DATASET"]
-                                        [new_meta, _file]
-                                    }
+                                    .map{ meta, _file -> [[ id: meta.id ], _file] }
     } else {
-        ch_create_summary       = channel.of( [[process: "C_BTK_SUM"],[]] )
-        ch_create_btk_dataset   = channel.of( [[process: "BTK_DATASET"],[]] )
+        ch_create_summary       = channel.of( [[:],[]] )
+        ch_create_btk_dataset   = channel.of( [[:],[]] )
     }
 
 
@@ -544,13 +469,11 @@ workflow ASCC_GENOMIC {
         ej_reference_tuple
             .map{ meta, file -> [[id: meta.id], file] }
             .combine(
-                ch_tiara
-                    .map{ meta, file -> [[id: meta.id], file] },
+                ch_tiara.map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
-                ch_fcsgx
-                    .map{ meta, file -> [[id: meta.id], file] },
+                ch_fcsgx.map{ meta, file -> [[id: meta.id], file] },
                 by: 0
             )
             .combine(
@@ -593,30 +516,24 @@ workflow ASCC_GENOMIC {
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION")
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
-
+        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
         btk_bool_run_btk        = btk_bool.run_btk
-
-        ch_autofilt_alarm_file   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-            .map{ meta, file ->
-                [[id: meta.id], file ]
-            }
-
-        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
-                                    .map{ meta, _file ->
-                                        [[id: meta.id, process: "AUTOFILTER"], _file]
-                                    }
-
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
         ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
 
-        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
+        ch_autofilt_alarm_file  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
+                                    .map{ meta, file -> [[id: meta.id], file ] }
+
+        ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
+                                    .map{ meta, _file -> [[id: meta.id], _file] }
+
     } else {
         btk_bool_run_btk        = channel.of([[id: "NA"], "false"])
         ch_autofilt_alarm_file  = channel.of( [[:],[]] )
         ch_autofilt_removed_seqs= channel.of( [[:],[]] )
         ch_autofilt_assem       = channel.of( [[:],[]] )
         ch_autofilt_indicator   = channel.of( [[:],[]] )
-        ch_autofilt_fcs_tiara   = channel.of( [[process: "AUTOFILTER"],[]] )
+        ch_autofilt_fcs_tiara   = channel.of( [[:],[]] )
         ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 
@@ -627,11 +544,11 @@ workflow ASCC_GENOMIC {
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
     run_btk_conditional = ej_reference_tuple
-        | map { meta, file ->
+        .map { meta, file ->
                 [[id: meta.id, taxid: meta.taxid], file]
             }
         // below is combined into the tuple to enforce the block to only run when channel is present.
-        | combine ( btk_bool_run_btk
+        .combine ( btk_bool_run_btk
                         .map{ meta, data ->
                             def joined_content = data
                                     .replaceAll(/\s*\|\s*/, "-")     // Replace " | " with "-"
@@ -642,7 +559,7 @@ workflow ASCC_GENOMIC {
                         },
                 by: [0]
             )
-        | branch { meta, assembly, data ->
+        .branch { meta, assembly, data ->
             def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
@@ -780,9 +697,7 @@ workflow ASCC_GENOMIC {
             )
             ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
             busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
-                                        .map{ meta, tsv ->
-                                            [[id: meta.id, process: "BUSCO_MERGE"], tsv]
-                                        }
+                                        .map{ meta, _tsv -> [[id: meta.id], _tsv] }
             merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
         } else {
             busco_merge_btk         = channel.of( [[:],[]] )
@@ -802,80 +717,57 @@ workflow ASCC_GENOMIC {
     ) {
 
         //
-        // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
-        //          AND INPUT TO HERE ARE NOW MERGED AND MAPPED
-        //          EMPTY CHANNELS ARE CHECKED AND DEFAULTED TO [[process: "PROCESS"],[]]
+        // LOGIC: JOIN CHANNELS INTO ONE BASED ON META.ID WHILST RETAINING EMPTY CHANNELS
         //
-        ascc_merged_data = ej_gc_coverage
-            .map{ meta, file ->
-                [[id: meta.id, process: "GC_COV"], file]
+        ej_reference_tuple
+            .map{meta, file -> [[id: meta.id], file]}
+            .join(ej_gc_coverage
+                .map{meta, file -> [[id: meta.id], file]},   remainder: true)
+            .join(ch_coverage,      remainder: true)
+            .join(ch_tiara,         remainder: true)
+            .join(ch_kraken3,       remainder: true)
+            .join(ch_blast_lineage, remainder: true)
+            .join(ch_kmers,         remainder: true)
+            .join(nr_hits,          remainder: true)
+            .join(nr_hits,          remainder: true)
+            .join(ch_create_summary,remainder: true)
+            .join(busco_merge_btk,  remainder: true)
+            .join(ch_fcsgx,         remainder: true)
+            .filter { items ->
+                def meta = items[0]
+                meta != null &&
+                meta != [] &&
+                !(meta instanceof Map && (meta.id == null || meta.isEmpty()))
             }
-            .mix(
-                ej_dot_genome,
-                ch_create_summary,
-                busco_merge_btk,
-                ch_kmers,
-                ch_tiara,
-                ch_fcsgx,
-                ch_coverage,
-                ch_kraken3,
-                ch_blast_lineage,
-                nr_hits,
-                un_hits
-            )
-            .map { meta, file ->
-                [meta.id, [meta: meta, file: file]]
-            }
-            .filter { id, data -> id != [] && id != null }
-            .groupTuple()
-            .map { id, data ->
-                [id: id, data: data]
-            }
-
-        def processes = [
-            'GC_COV', 'COVERAGE', 'TIARA',
-            'KRAKEN_3', 'NT_BLAST_LINEAGE', 'KMERS', 'NR_HITS', 'UN_HITS',
-            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX_RESULT'
-        ]
-
-        def processChannels = processes.collectEntries { process ->
-            [(process): ascc_merged_data
-                .map { sample ->
-                    def data = sample.data.find { it.meta.process == process }
-                    data ? [sample.id, data.meta, data.file] : [sample.id, [process: process], []]
+            .map { items ->
+                // Replace null values with placeholder file
+                items.withIndex().collect { item, index ->
+                    if (item == null) {
+                        getEmptyPlaceholder(index)
+                    } else if (item instanceof List && item.isEmpty()) {
+                        getEmptyPlaceholder(index)
+                    } else {
+                        item
+                    }
                 }
-            ]
-        }
+            }
+            .set{ merge_input_channel}
 
-        def ascc_combined_channels = processChannels['GC_COV']
-        processes.tail().each { process ->
-            ascc_combined_channels = ascc_combined_channels
-                                    .combine(processChannels[process], by: 0)
-        }
-
-        //
-        // SUBWORKFLOW: MERGES DATA THAT IS NOT USED IN THE CREATION OF THE BTK_DATASETS FOLDER
-        //
         ASCC_MERGE_TABLES (
-            ascc_combined_channels.map { it[1..-1] } // Remove the first item in tuple (mapping key)
+            merge_input_channel
         )
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
         merged_table            = ASCC_MERGE_TABLES.out.merged_table
-                                    .map{ meta, _file ->
-                                        [[id: meta.id, process: "MERGED_TABLE"], _file]
-                                    }
+                                    .map{ meta, _file -> [[id: meta.id ], _file] }
 
         merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
         merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
-                                    .map{ meta, _file ->
-                                        [[id: meta.id, process: MERGED_PHYLUM_COUNTS"], _file]
-                                    }
-
+                                    .map{ meta, _file -> [[id: meta.id], _file] }
     } else {
-        merged_table            = channel.of( [[process: "MERGED_TABLE"],[]] )
+        merged_table            = channel.of( [[:],[]] )
         merged_extended_table   = channel.empty()
-        merged_phylum_count     = channel.of( [[process: "MERGED_PHYLUM_COUNTS"],[]] )
+        merged_phylum_count     = channel.of( [[:],[]] )
     }
 
 
@@ -981,6 +873,14 @@ workflow ASCC_GENOMIC {
     tiara_output                = ch_tiara
 
     versions                    = ch_versions
+}
+
+def getEmptyPlaceholder(idx) {
+    def placeholder = file("${workDir}/EMPTY_PLACEHOLDER_${idx}")
+    if (!placeholder.exists()) {
+        placeholder.text = ''
+    }
+    return placeholder
 }
 
 /*
