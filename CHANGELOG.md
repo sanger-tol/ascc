@@ -49,13 +49,13 @@ Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to complement
 
 ### Parameters
 
-| Old Parameter | New Parameter              | Description                                            |
-| ------------- | -------------------------- | ------------------------------------------------------ |
-| NA            | --run_sourmash             | Control sourmash execution ('off', 'genomic', 'both')  |
-| NA            | --sourmash_databases       | List of sourmash databases (direct configuration)      |
-| NA            | --sourmash_db_config       | Path to CSV file with database configuration           |
-| NA            | --sourmash_taxonomy_level  | Taxonomic level for target taxa ('order' by default)   |
-| NA            | --sourmash_action_mode     | Action mode for autofilter ('warn' or 'remove')        |
+| Old Parameter | New Parameter             | Description                                           |
+| ------------- | ------------------------- | ----------------------------------------------------- |
+| NA            | --run_sourmash            | Control sourmash execution ('off', 'genomic', 'both') |
+| NA            | --sourmash_databases      | List of sourmash databases (direct configuration)     |
+| NA            | --sourmash_db_config      | Path to CSV file with database configuration          |
+| NA            | --sourmash_taxonomy_level | Taxonomic level for target taxa ('order' by default)  |
+| NA            | --sourmash_action_mode    | Action mode for autofilter ('warn' or 'remove')       |
 
 ### `Notes`
 
