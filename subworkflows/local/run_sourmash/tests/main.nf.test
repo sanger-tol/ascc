@@ -12,6 +12,31 @@ nextflow_workflow {
 
     test("E.coli genome with single database (k=21)") {
 
+        setup {
+            // Download NCBI taxonomy database (rankedlineage.dmp)
+            new File("${projectDir}/NCBI_TAXONOMY").mkdirs()
+
+            def rankedlineageFile = new File("${projectDir}/NCBI_TAXONOMY/rankedlineage.dmp")
+            if (!rankedlineageFile.exists()) {
+                println "\nDownloading NCBI taxonomy database..."
+
+                def command = ['bash', '-c',
+                    "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz " +
+                    "--output ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz && " +
+                    "tar -C ${projectDir}/NCBI_TAXONOMY -xzf ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz rankedlineage.dmp"
+                ]
+                def process = command.execute()
+                process.waitFor()
+
+                if (process.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download NCBI taxonomy: ${process.err.text}")
+                }
+                println "Done"
+            } else {
+                println "NCBI taxonomy database already exists, skipping download"
+            }
+        }
+
         when {
             workflow {
                 """
