@@ -1,4 +1,8 @@
-include { GENERATE_HTML_REPORT } from '../../../modules/local/generate_html_report/main'
+include { GENERATE_HTML_REPORT  } from '../../../modules/local/generate_html_report/main'
+
+// FUNCTION IMPORTS
+// NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
+include { getEmptyPlaceholder   } from "${projectDir}/lib/ascc_utils.groovy"
 
 workflow GENERATE_HTML_REPORT_WORKFLOW {
     take:
@@ -67,7 +71,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         // ON THE LEFT OVER CHANNELS, THOSE WITH VALID META OBJECTS
         .map { items ->
             // Replace null values with placeholder file
-            items.collect { item ->
+            items.withIndex().collect { item, index ->
                 if (item == null) {
                     getEmptyPlaceholder()
                 } else if (item instanceof List && item.isEmpty()) {
@@ -96,12 +100,4 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     emit:
     report    = GENERATE_HTML_REPORT.out.report
     versions  = ch_versions
-}
-
-def getEmptyPlaceholder() {
-    def placeholder = file("${workDir}/EMPTY_PLACEHOLDER")
-    if (!placeholder.exists()) {
-        placeholder.text = ''
-    }
-    return placeholder
 }
