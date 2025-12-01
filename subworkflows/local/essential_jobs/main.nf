@@ -41,8 +41,9 @@ workflow ESSENTIAL_JOBS {
     )
     ch_versions                         = ch_versions.mix(FILTER_FASTA.out.versions)
     filter_fasta_sanitation_log         = FILTER_FASTA.out.sanitation_log
+                                             .map{ meta, _file -> [[id: meta.id ], _file] }
     filter_fasta_length_filtering_log   = FILTER_FASTA.out.length_filtering_log
-
+                                             .map{ meta, _file -> [[id: meta.id ], _file] }
 
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA

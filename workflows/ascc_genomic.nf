@@ -28,6 +28,10 @@ include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
+include { getEmptyPlaceholder } from "${projectDir}/lib/ascc_utils.groovy"
+
+
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -798,13 +802,10 @@ workflow ASCC_GENOMIC {
         },
         ej_fasta_sanitation_log,
         ej_fasta_filter_log,
-        ch_jinja_templates,
-        channel.fromPath(params.input), // Samplesheet input for pipeline
         ch_params_file,
         ch_fcsgx_report,
         ch_fcsgx_taxonomy,
-        ch_create_btk_dataset,
-        ch_css_files
+        ch_create_btk_dataset
     )
     ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
 
@@ -873,14 +874,6 @@ workflow ASCC_GENOMIC {
     tiara_output                = ch_tiara
 
     versions                    = ch_versions
-}
-
-def getEmptyPlaceholder(idx) {
-    def placeholder = file("${workDir}/EMPTY_PLACEHOLDER_${idx}")
-    if (!placeholder.exists()) {
-        placeholder.text = ''
-    }
-    return placeholder
 }
 
 /*

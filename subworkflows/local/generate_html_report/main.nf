@@ -13,13 +13,10 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     reference_fasta            // channel: [ val(meta), [ reference_fasta ] ]
     fasta_sanitation_log       // channel: [ val(meta), [ fasta_sanitation_log ] ]
     fasta_length_filtering_log // channel: [ val(meta), [ fasta_length_filtering_log ] ]
-    jinja_templates_list       // channel: [ jinja_templates_list ] // Updated to accept a list
-    samplesheet                // channel: [ samplesheet ]
     params_file                // channel: [ params_file ]
     fcsgx_report_txt           // channel: [ val(meta), [ fcsgx_report_txt ] ]
     fcsgx_taxonomy_rpt         // channel: [ val(meta), [ fcsgx_taxonomy_rpt ] ]
     btk_dataset                // channel: [ val(meta), [ btk_dataset ] ]
-    css_files_list             // channel: [ css_files_list ] // CSS files to include in the report
 
     main:
     ch_versions = channel.empty()
@@ -89,7 +86,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     GENERATE_HTML_REPORT (
         sorted_data,
         channel.fromPath("${projectDir}/assets/templates/*.jinja").collect(),  // Pass the list of Jinja templates
-        samplesheet,
+        channel.fromPath(params.input).collect(),
         [],   // Do we even use a params.params_file?
         channel.value(paramsJson),                                             // JSON string can be used multiple times
         channel.fromPath("${projectDir}/assets/css/*.css").collect()           // channel.of one (CSS files)
