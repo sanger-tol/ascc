@@ -63,7 +63,7 @@ process GENERATE_HTML_REPORT {
     mkdir -p kmers
 
     # If barcodes exists, check for contents and then cat
-    if [ -d ./barcodes/ ] && [ "$(ls -A ./barcodes/)" ]; then
+    if [ -d ./barcodes/ ] && [ "\$(ls -A ./barcodes/)" ]; then
         cat ./barcodes/* > ./barcode_file.txt
     else
         echo "Folder empty, skip barcodes."
