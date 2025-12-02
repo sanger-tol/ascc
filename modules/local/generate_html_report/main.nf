@@ -39,7 +39,7 @@ process GENERATE_HTML_REPORT {
 
     // Build CLI args using staged file paths (readers). Include only if present.
     def reference_file               = reference_fasta              ? "--reference ${reference_fasta}" : ""
-    def barcode_arg                  = barcode_results              ? "--barcode_file ./barcode_file.txt" : "" // IS THIS EVALUATING THE FOLDER OF CONTENTS?
+    def barcode_arg                  = barcode_results              ? "--barcode_file ./barcode_file.txt" : ""
     def fcs_euk_arg                  = fcs_adaptor                  ? "--fcs_adaptor_euk_file ./fcs/*_euk*" : ""
     def fcs_prok_arg                 = fcs_adaptor                  ? "--fcs_adaptor_prok_file ./fcs/*_prok*" : ""
     def trim_ns_arg                  = trim_ns_results              ? "--trim_ns_file ${trim_ns_results}" : ""
@@ -68,9 +68,6 @@ process GENERATE_HTML_REPORT {
     else
         echo "Folder empty, skip barcodes."
     fi
-
-    # Here for debugging at the minute
-    ls -lh
 
     # Run the report generation script
     generate_html_report.py \\
