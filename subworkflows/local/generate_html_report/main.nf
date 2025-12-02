@@ -73,9 +73,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
             // Replace null values with placeholder file
             items.withIndex().collect { item, index ->
                 if (item == null) {
-                    getEmptyPlaceholder()
+                    getEmptyPlaceholder(index)
                 } else if (item instanceof List && item.isEmpty()) {
-                    getEmptyPlaceholder()
+                    getEmptyPlaceholder(index)
                 } else {
                     item
                 }
