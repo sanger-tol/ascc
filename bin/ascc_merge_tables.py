@@ -57,16 +57,11 @@ def check_paths(paths_dict, required_files):
     """
     out_dict = dict()
 
-    print(f"paths_dict: f{paths_dict}")
-
     for data_type, input_file in paths_dict.items():
         if input_file != None and not "EMPTY" in input_file:
-            print(f"Passed Checking: {input_file}")
             out_dict[data_type] = input_file
         else:
             out_dict[data_type] = None
-
-    print(out_dict)
 
     return out_dict
 
@@ -318,7 +313,6 @@ def main(args):
     required_files = ["gc_content"]
 
     paths_dict = check_paths(paths_dict, required_files)
-    print(f"New paths dict: {paths_dict}")
 
     df = load_and_merge_dataframes(paths_dict)
     df.to_csv(f"{args.sample_name}_contamination_check_merged_table.csv", index=False)
