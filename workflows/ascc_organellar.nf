@@ -536,6 +536,18 @@ workflow ASCC_ORGANELLAR {
     }
 
 
+    //
+    // SUBWORKFLOW: DECONTAMINATE FASTA
+    //
+    // RUN_DECONTAMINATION_FASTA(
+    //      if !run_btk and run_decon_fasta = "both" || "genomic/organellar"
+    // )
+    // PLACEHOLDER FOR NEXT CHUNK OF WORK
+    // From bin/generate_contamination_bed.py output 2-3 files
+    //  abnormal_contamination
+    // OUTPUT FASTA HAS .decontaminated appended to file name
+
+
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
