@@ -55,16 +55,22 @@ process GENERATE_HTML_REPORT {
     def fcs_gx_taxonomy_arg          = fcs_gx_taxonomy_rpt          ? "--fcs_gx_taxonomy_rpt ${fcs_gx_taxonomy_rpt}" : ""
 
     // Convert params_json to a properly escaped string for command line
-    def params_json_arg = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
-    // dp24 variables for clarity
-    def btk_included    = "${params.run_create_btk_dataset == 'both' || (params.run_create_btk_dataset == 'genomic' && params.genomic_only) || (params.run_create_btk_dataset == 'organellar' && !params.genomic_only)}"
-    def btk_outdir      = "${params.outdir}/${meta.id}"
+    def params_json_arg             = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
+    def btk_included                = "${params.run_create_btk_dataset == 'both' || (params.run_create_btk_dataset == 'genomic' && params.genomic_only) || (params.run_create_btk_dataset == 'organellar' && !params.genomic_only)}"
+    def btk_outdir                  = "${params.outdir}/${meta.id}"
     """
     # Create kmers directory if it doesn't exist
     mkdir -p kmers
 
-    # Combine barcode results into one file
-    cat ./barcodes/* */ > ./barcode_file.txt
+    # If barcodes exists, check for contents and then cat
+    if [ -d ./barcodes/ ] && [ "$(ls -A ./barcodes/)" ]; then
+        cat ./barcodes/* > ./barcode_file.txt
+    else
+        echo "Folder empty, skip barcodes."
+    fi
+
+    # Here for debugging at the minute
+    ls -lh
 
     # Run the report generation script
     generate_html_report.py \\
