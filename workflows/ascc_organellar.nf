@@ -20,6 +20,7 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
+include { DECONTAMINATE_FASTA                           } from '../subworkflows/local/decontaminate_fasta'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 // FUNCTION IMPORTS
