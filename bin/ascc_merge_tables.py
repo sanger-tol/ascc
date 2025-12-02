@@ -60,7 +60,7 @@ def check_paths(paths_dict, required_files):
     print(f"paths_dict: f{paths_dict}")
 
     for data_type, input_file in paths_dict.items():
-        if input_file != None:
+        if input_file != None and not "EMPTY" in input_file:
             print(f"Passed Checking: {input_file}")
             out_dict[data_type] = input_file
         else:
