@@ -36,7 +36,7 @@ process ASCC_MERGE_TABLES {
     def args                        = task.ext.args                             ?: ""
 
     // COVERAGE IS MANDATORY
-    def coverage                    = coverage                                  ? "-c ${coverage}"                  : ""
+    def coverage                    = coverage.size() > 80                      ? "-c ${coverage}"                  : ""
     def tiara                       = tiara.size() > 80                         ? "-t ${tiara}"                     : ""
     def nt_kraken                   = nt_kraken.size() > 80                     ? "-nk ${nt_kraken}"                : ""
     def nt_blast                    = nt_blast.size() > 80                      ? "-nb ${nt_blast}"                 : ""
