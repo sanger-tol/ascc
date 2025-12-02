@@ -35,17 +35,17 @@ process ASCC_MERGE_TABLES {
     def prefix                      = task.ext.prefix                           ?: "${meta.id}"
     def args                        = task.ext.args                             ?: ""
 
-    // COVERAGE IS MANDATORY
-    def coverage                    = coverage.size() > 80                      ? "-c ${coverage}"                  : ""
-    def tiara                       = tiara.size() > 80                         ? "-t ${tiara}"                     : ""
-    def nt_kraken                   = nt_kraken.size() > 80                     ? "-nk ${nt_kraken}"                : ""
-    def nt_blast                    = nt_blast.size() > 80                      ? "-nb ${nt_blast}"                 : ""
-    def dim_reduction_embeddings    = dim_reduction_embeddings.size() > 80      ? "-dr ${dim_reduction_embeddings}" : ""
-    def nr_diamond                  = nr_diamond.size() > 80                    ? "-nd ${nr_diamond}"               : ""
-    def uniprot_diamond             = uniprot_diamond.size() > 80               ? "-ud ${uniprot_diamond}"          : ""
-    def btk                         = btk.size() > 80                           ? "-btk ${btk}"                     : ""
-    def btk_busco                   = btk_busco.size() > 80                     ? "-bb ${btk_busco}"                : ""
-    def fcs_gx                      = fcs_gx.size() > 80                        ? "-fg ${fcs_gx}"                   : ""
+    def empty_file_size             = 80
+    def coverage                    = coverage.size()                   > empty_file_size   ? "-c ${coverage}"                  : ""
+    def tiara                       = tiara.size()                      > empty_file_size   ? "-t ${tiara}"                     : ""
+    def nt_kraken                   = nt_kraken.size()                  > empty_file_size   ? "-nk ${nt_kraken}"                : ""
+    def nt_blast                    = nt_blast.size()                   > empty_file_size   ? "-nb ${nt_blast}"                 : ""
+    def dim_reduction_embeddings    = dim_reduction_embeddings.size()   > empty_file_size   ? "-dr ${dim_reduction_embeddings}" : ""
+    def nr_diamond                  = nr_diamond.size()                 > empty_file_size   ? "-nd ${nr_diamond}"               : ""
+    def uniprot_diamond             = uniprot_diamond.size()            > empty_file_size   ? "-ud ${uniprot_diamond}"          : ""
+    def btk                         = btk.size()                        > empty_file_size   ? "-btk ${btk}"                     : ""
+    def btk_busco                   = btk_busco.size()                  > empty_file_size   ? "-bb ${btk_busco}"                : ""
+    def fcs_gx                      = fcs_gx.size()                     > empty_file_size   ? "-fg ${fcs_gx}"                   : ""
 
     """
     ascc_merge_tables.py \\
