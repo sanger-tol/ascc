@@ -64,8 +64,8 @@
                 },
                 "FILTER_FASTA": {
                     "python": "3.9.1",
-                    "sanitise_input_fasta_file": "1.2.0",
-                    "filter_fasta_by_length": "1.1.0"
+                    "sanitise_input_fasta_file": "1.3.0",
+                    "filter_fasta_by_length": "1.2.0"
                 },
                 "FILTER_VECSCREEN_RESULTS": {
                     "python": "3.9.1",
@@ -75,11 +75,14 @@
                     "python": "3.9.1",
                     "gc_content": 1.0
                 },
+                "GENERATE_HTML_REPORT": {
+                    "python": "3.8.6",
+                    "jinja2": "2.11.2",
+                    "pandas": "1.0.5",
+                    "generate_html_report": 1.0
+                },
                 "GET_KMER_COUNTS": {
-                    "python": "3.10.12",
-                    "kcounter": "0.1.1",
-                    "general_purpose_functions.py": "1.0.0",
-                    "get_kmers_counts.py": 1.0
+                    "kmer-counter": "0.1.2"
                 },
                 "GET_LARGEST_SCAFFOLD": {
                     "get_largest_scaffold": 2.0,
@@ -114,11 +117,15 @@
                 "KMER_COUNT_DIM_REDUCTION_COMBINE_CSV": {
                     "python": "3.11.0",
                     "pandas": "1.5.2",
-                    "kmer_count_dim_reduction_combine_csv.py": 1.0
+                    "kmer_count_dim_reduction_combine_csv.py": null
                 },
                 "KRAKEN2_KRAKEN2": {
                     "kraken2": "2.1.6",
                     "pigz": 2.8
+                },
+                "MINIMAP2_ALIGN_SE": {
+                    "minimap2": "2.29-r1283",
+                    "samtools": 1.21
                 },
                 "NCBITOOLS_VECSCREEN": {
                     "vecscreen": 1.0
@@ -137,14 +144,31 @@
                     "python": "3.9.1",
                     "reformat_blast_outfmt6": "1.0.0"
                 },
+                "REFORMAT_NPY_2_CSV": {
+                    "python": "3.10.12",
+                    "npy_2_csv.py": "1.0.0"
+                },
                 "REFORMAT_TO_HITS_FILE": {
                     "python": "3.9.1",
                     "convert_to_hits": "2.0.0"
+                },
+                "SAMTOOLS_DEPTH": {
+                    "samtools": "1.22.1"
+                },
+                "SAMTOOLS_DEPTH_AVERAGE_COVERAGE": {
+                    "python": "3.9.1",
+                    "samtools_depth_average_coverage": 1.0
                 },
                 "SAMTOOLS_DICT": {
                     "samtools": "1.22.1"
                 },
                 "SAMTOOLS_FAIDX": {
+                    "samtools": "1.22.1"
+                },
+                "SAMTOOLS_MERGE": {
+                    "samtools": 1.21
+                },
+                "SAMTOOLS_SORT": {
                     "samtools": "1.22.1"
                 },
                 "SED_SED": {
@@ -171,7 +195,7 @@
                     "trim_Ns.py": 1.0
                 },
                 "Workflow": {
-                    "sanger-tol/ascc": "v0.5.2"
+                    "sanger-tol/ascc": "v0.5.3"
                 }
             },
             [
@@ -271,10 +295,33 @@
                 "asccTinyTest_V2_HAPLO/filter_barcode/asccTinyTest_V2_HAPLO_bc2009_filtered.txt",
                 "asccTinyTest_V2_HAPLO/filtered_fasta",
                 "asccTinyTest_V2_HAPLO/filtered_fasta/asccTinyTest_V2_HAPLO_filtered.fasta",
+                "asccTinyTest_V2_HAPLO/filtered_fasta/asccTinyTest_V2_HAPLO_filtering_stderr.txt",
+                "asccTinyTest_V2_HAPLO/filtered_fasta/fasta_length_filtering.json",
+                "asccTinyTest_V2_HAPLO/filtered_fasta/fasta_sanitation.json",
                 "asccTinyTest_V2_HAPLO/gc_content",
                 "asccTinyTest_V2_HAPLO/gc_content/asccTinyTest_V2_HAPLO-GC_CONTENT.txt",
+                "asccTinyTest_V2_HAPLO/html_report",
+                "asccTinyTest_V2_HAPLO/html_report/report",
+                "asccTinyTest_V2_HAPLO/html_report/report/site",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/asccTinyTest_V2_HAPLO.html",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/css",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/css/ascc_report.css",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_base.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_macros.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_autofiltering.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_barcodes.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_cobiont.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_coverage.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_fcs_adaptor.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_fcs_gx.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_input.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_kmers.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_overview.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_trim_ns.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/_tab_vecscreen.html.jinja",
+                "asccTinyTest_V2_HAPLO/html_report/report/site/templates/ascc_report.html.jinja",
                 "asccTinyTest_V2_HAPLO/kmer_data",
-                "asccTinyTest_V2_HAPLO/kmer_data/asccTinyTest_V2_HAPLO_KMER_COUNTS.csv",
                 "asccTinyTest_V2_HAPLO/kmer_data/asccTinyTest_V2_HAPLO_kmers_dim_reduction_embeddings_combined.csv",
                 "asccTinyTest_V2_HAPLO/sourmash",
                 "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO.sig",
@@ -293,8 +340,11 @@
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO.kraken2.report.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/versions.yml",
+                "asccTinyTest_V2_MITO/average_coverage",
+                "asccTinyTest_V2_MITO/average_coverage/asccTinyTest_V2_MITO_average_coverage.txt",
                 "asccTinyTest_V2_MITO/create_btk_dataset",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD",
+                "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD/MAPPED_cov.json",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_MITOBTK_DS.yaml",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD/gc.json",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD/identifiers.json",
@@ -330,12 +380,36 @@
                 "asccTinyTest_V2_MITO/filter_barcode/asccTinyTest_V2_MITO_bc2009_filtered.txt",
                 "asccTinyTest_V2_MITO/filtered_fasta",
                 "asccTinyTest_V2_MITO/filtered_fasta/asccTinyTest_V2_MITO_filtered.fasta",
+                "asccTinyTest_V2_MITO/filtered_fasta/asccTinyTest_V2_MITO_filtering_stderr.txt",
+                "asccTinyTest_V2_MITO/filtered_fasta/fasta_length_filtering.json",
+                "asccTinyTest_V2_MITO/filtered_fasta/fasta_sanitation.json",
                 "asccTinyTest_V2_MITO/gc_content",
                 "asccTinyTest_V2_MITO/gc_content/asccTinyTest_V2_MITO-GC_CONTENT.txt",
                 "asccTinyTest_V2_MITO/sourmash",
                 "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO.sig",
                 "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
                 "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
+                "asccTinyTest_V2_MITO/html_report",
+                "asccTinyTest_V2_MITO/html_report/report",
+                "asccTinyTest_V2_MITO/html_report/report/site",
+                "asccTinyTest_V2_MITO/html_report/report/site/asccTinyTest_V2_MITO.html",
+                "asccTinyTest_V2_MITO/html_report/report/site/css",
+                "asccTinyTest_V2_MITO/html_report/report/site/css/ascc_report.css",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_base.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_macros.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_autofiltering.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_barcodes.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_cobiont.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_coverage.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_fcs_adaptor.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_fcs_gx.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_input.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_kmers.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_overview.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_trim_ns.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_vecscreen.html.jinja",
+                "asccTinyTest_V2_MITO/html_report/report/site/templates/ascc_report.html.jinja",
                 "asccTinyTest_V2_MITO/summarise_vecscreen_output",
                 "asccTinyTest_V2_MITO/summarise_vecscreen_output/asccTinyTest_V2_MITO.vecscreen_contamination",
                 "asccTinyTest_V2_MITO/tiara_raw_output",
@@ -433,10 +507,33 @@
                 "asccTinyTest_V2_PRIMARY/filter_barcode/asccTinyTest_V2_PRIMARY_bc2009_filtered.txt",
                 "asccTinyTest_V2_PRIMARY/filtered_fasta",
                 "asccTinyTest_V2_PRIMARY/filtered_fasta/asccTinyTest_V2_PRIMARY_filtered.fasta",
+                "asccTinyTest_V2_PRIMARY/filtered_fasta/asccTinyTest_V2_PRIMARY_filtering_stderr.txt",
+                "asccTinyTest_V2_PRIMARY/filtered_fasta/fasta_length_filtering.json",
+                "asccTinyTest_V2_PRIMARY/filtered_fasta/fasta_sanitation.json",
                 "asccTinyTest_V2_PRIMARY/gc_content",
                 "asccTinyTest_V2_PRIMARY/gc_content/asccTinyTest_V2_PRIMARY-GC_CONTENT.txt",
+                "asccTinyTest_V2_PRIMARY/html_report",
+                "asccTinyTest_V2_PRIMARY/html_report/report",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/asccTinyTest_V2_PRIMARY.html",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/css",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/css/ascc_report.css",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_base.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_macros.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_autofiltering.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_barcodes.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_cobiont.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_coverage.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_fcs_adaptor.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_fcs_gx.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_input.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_kmers.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_overview.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_trim_ns.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/_tab_vecscreen.html.jinja",
+                "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/ascc_report.html.jinja",
                 "asccTinyTest_V2_PRIMARY/kmer_data",
-                "asccTinyTest_V2_PRIMARY/kmer_data/asccTinyTest_V2_PRIMARY_KMER_COUNTS.csv",
                 "asccTinyTest_V2_PRIMARY/kmer_data/asccTinyTest_V2_PRIMARY_kmers_dim_reduction_embeddings_combined.csv",
                 "asccTinyTest_V2_PRIMARY/sourmash",
                 "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY.sig",
@@ -523,6 +620,7 @@
                 "nt_kraken_phylum.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "nt_kraken_species.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "tiara.json:md5,e886e56e2af86a0f434d92919578a96f",
+                "MAPPED_cov.json:md5,85ea5a95ea028f67b2e2af7950549628",
                 "asccTinyTest_V2_MITOBTK_DS.yaml:md5,c8aed8504706e846843590115b947239",
                 "gc.json:md5,5e9eaa862517a4fafada54e4f8fa109b",
                 "identifiers.json:md5,a8fa6468ed53c0a3fe7ec689f524b8bf",
@@ -591,10 +689,9 @@
                 "nt_kraken_species.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "tiara.json:md5,e886e56e2af86a0f434d92919578a96f"
             ],
-            true,
             [
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479",
-                "btk_summary_table_full.tsv:md5,d6d213438165ad36234a9359e6d72291",
+                "btk_summary_table_full.tsv:md5,07ef0cf1ac6b58218eb163442b0db00c",
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479"
             ],
             true,

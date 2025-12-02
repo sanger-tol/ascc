@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
-"""
+VERSION = "1.0.0"
+DESCRIPTION = f"""
 Script processing the cobiont check result tables to add a combined classification ('merged_classif') column that is based
     on the output of multiple tools. Also generates a table for estimated coverages per 'merged_classif' column
+Version = {VERSION}
+Written by Eerik Aunin (eeaunin)
 """
 
 import pandas as pd
@@ -14,26 +17,43 @@ import os
 
 def generate_counts_df(df, counts_df_output_path):
     """
-    Creates a table that shows the number of sequences, mean coverage and sequence span per phylum
+    Creates a table that shows the number of sequences, mean coverage and sequence span per phylum,
+    including the source of the classification
     """
-    merged_classif_counts = df["merged_classif"].value_counts(dropna=False)
-    cov_list = list()
-    span_list = list()
-    for classif_item, _ in merged_classif_counts.iteritems():
-        ind = list(np.where(df["merged_classif"] == classif_item)[0])
-        cov_values = df.iloc[ind, df.columns.get_loc("coverage")]
-        length_values = df.iloc[ind, df.columns.get_loc("length")]
+    # Group by both merged_classif and merged_classif_source
+    grouped = df.groupby(["merged_classif", "merged_classif_source"])
+
+    # Initialise lists to store results
+    phylum_list = []
+    source_list = []
+    count_list = []
+    cov_list = []
+    span_list = []
+
+    # Calculate statistics for each group
+    for (classif, source), group in grouped:
+        phylum_list.append(classif)
+        source_list.append(source)
+        count_list.append(len(group))
+        cov_values = group["coverage"]
+        length_values = group["length"]
         cov_list.append(round(np.mean(cov_values), 2))
         span_sum = sum(length_values) / 1000000
         span_list.append(round(span_sum, 2))
 
-    counts_df = merged_classif_counts.to_frame()
-    counts_df["mean_coverage"] = cov_list
-    counts_df["span_mb"] = span_list
+    # Create DataFrame with results
+    counts_df = pd.DataFrame(
+        {
+            "phylum": phylum_list,
+            "classification_source": source_list,
+            "number_of_sequences": count_list,
+            "mean_coverage": cov_list,
+            "span_mb": span_list,
+        }
+    )
 
-    counts_df.rename(columns={"merged_classif": "number_of_sequences"}, inplace=True)
-    counts_df.index.name = "phylum"
-    counts_df.to_csv(counts_df_output_path, index=True)
+    # Save to CSV
+    counts_df.to_csv(counts_df_output_path, index=False)
 
 
 def main(output_folder, sample_id):
@@ -41,9 +61,6 @@ def main(output_folder, sample_id):
         output_folder, sample_id
     )
     btk_results_table_path = "{}/btk_summary_table_full.tsv".format(output_folder)
-    output_df_path = "{}/{}_contamination_check_merged_table_extended.csv".format(
-        output_folder, sample_id
-    )
     counts_df_output_path = "{}/{}_phylum_counts_and_coverage.csv".format(
         output_folder, sample_id
     )
@@ -64,13 +81,13 @@ def main(output_folder, sample_id):
         )
         sys.exit(1)
 
+    # Continue even if the BlobToolKit dataset is not found
     if os.path.isfile(btk_results_table_path) == False:
         sys.stderr.write(
-            "Skipping the exporting of extended results table because the BlobToolKit dataset ({}) was not found\n".format(
+            "Warning: BlobToolKit dataset ({}) was not found. Continuing without it.\n".format(
                 btk_results_table_path
             )
         )
-        sys.exit(0)
 
     main_df = None
     main_df = pd.read_csv(main_results_table_path)
@@ -82,17 +99,51 @@ def main(output_folder, sample_id):
         )
         sys.exit(1)
 
-    if "btk_bestsum_phylum" not in main_df.columns:
+    # Check for taxonomy columns in order of preference
+    taxonomy_column = None
+    if "buscoregions_phylum" in main_df.columns:
+        taxonomy_column = "buscoregions_phylum"
+    elif "buscogenes_phylum" in main_df.columns:
+        taxonomy_column = "buscogenes_phylum"
+    elif "btk_bestsum_phylum" in main_df.columns:
+        taxonomy_column = "btk_bestsum_phylum"
+    elif "fcs_gx_phylum" in main_df.columns:
+        taxonomy_column = "fcs_gx_phylum"
+    elif "nt_kraken_phylum" in main_df.columns:
+        taxonomy_column = "nt_kraken_phylum"
+    elif "tiara_classif" in main_df.columns:
+        taxonomy_column = "tiara_classif"
+
+    if taxonomy_column is None:
         sys.stderr.write(
-            "Column 'btk_bestsum_phylum' was not found in results table ({})\n".format(
+            "No taxonomy column (buscoregions_phylum, buscogenes_phylum, btk_bestsum_phylum, fcs_gx_phylum, nt_kraken_phylum, or tiara_classif) was found in results table ({})\n".format(
                 main_results_table_path
             )
         )
         sys.exit(1)
 
+    # Check if coverage column exists
+    if "coverage" not in main_df.columns:
+        sys.stderr.write(
+            "Column 'coverage' was not found in results table ({})\n".format(
+                main_results_table_path
+            )
+        )
+        sys.exit(1)
+
+    # Check if length column exists
+    if "length" not in main_df.columns:
+        # If length column doesn't exist, add NaN values to indicate missing data
+        sys.stderr.write(
+            "Column 'length' was not found in results table ({}). Using NaN to indicate missing values.\n".format(
+                main_results_table_path
+            )
+        )
+        main_df["length"] = np.nan
+
     df = main_df
-    df["merged_classif"] = df["btk_bestsum_phylum"]
-    df["merged_classif_source"] = "btk_bestsum_phylum"
+    df["merged_classif"] = df[taxonomy_column]
+    df["merged_classif_source"] = taxonomy_column
 
     if "nt_kraken_phylum" in df.columns:
         ind = list(np.where(df["merged_classif"] == "no-hit")[0])
@@ -127,19 +178,22 @@ def main(output_folder, sample_id):
         )
         df["merged_classif"] = df["merged_classif"].replace("archaea", "Archaea-undef")
 
-    df.to_csv(output_df_path, index=False)
-    os.remove(main_results_table_path)
-    # os.rename(output_df_path, main_results_table_path) To remove Nextflow confussion
+    # Write the modified DataFrame directly back to the original file
+    # This is simpler and avoids issues with file operations
+    df.to_csv(main_results_table_path, index=False)
+
+    # Generate the counts file separately
     generate_counts_df(df, counts_df_output_path)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument(
         "output_folder",
         type=str,
         help="Path to the directory with the output tables of the pipeline",
     )
-    parser.add_argument("sample_id", type=str, help="ToL ID of the sample")
+    parser.add_argument("sample_id", type=str, help="Sample ID")
+    parser.add_argument("-v", "--version", action="version", version=VERSION)
     args = parser.parse_args()
     main(args.output_folder, args.sample_id)

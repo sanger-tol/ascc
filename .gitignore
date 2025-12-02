@@ -7,5 +7,7 @@ testing/
 testing*
 *.pyc
 null/
-.nf-test*
-ascc_tiny_test_databases
+.nf-test/
+.nf-test.log
+*.tar.gz
+*.dmnd

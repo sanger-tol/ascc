@@ -11,7 +11,7 @@ workflow GENERATE_GENOME {
     barcodes
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // MODULE: GENERATE INDEX OF REFERENCE
@@ -19,7 +19,7 @@ workflow GENERATE_GENOME {
     //
     SAMTOOLS_FAIDX (
         to_chromsize,
-        Channel.of([[],[]]),
+        channel.of([[],[]]),
         true
     )
     ch_versions     = ch_versions.mix(  SAMTOOLS_FAIDX.out.versions )

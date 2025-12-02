@@ -45,7 +45,7 @@ workflow SANGERTOL_ASCC {
     diamond_uniprot_db_path     // UNIPROT database path
     taxid                       // taxid of input assembly
     nt_kraken_db_path           // path to custom kraken database
-    vecscreen_database_path     // Path to custom Vecscreen database
+    vecscreen_database_path     // Path to custom VECSCREEN database
     reads_path                  // tuple of paths to input read files
     reads_layout                // Layout of input reads [SINGLE, PAIRED]
     reads_type                  // Type of input reads [HIFI, CLR, ILLUMINA, etc...]

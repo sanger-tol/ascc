@@ -18,14 +18,14 @@ include { SAMTOOLS_DEPTH_AVERAGE_COVERAGE               } from '../../../modules
 workflow RUN_READ_COVERAGE {
 
     take:
-    reference_tuple          // Channel [ val(meta), path(file) ]
-    reads
-    platform                 // Channel val( str )
+    reference_tuple          // channel [ val(meta), path(file) ]
+    reads                    // channel path(files)
+    platform                 // channel val( str )
 
     main:
-    ch_versions     = Channel.empty()
-    ch_align_bam    = Channel.empty()
-    ch_refer_bam    = Channel.empty()
+    ch_versions     = channel.empty()
+    ch_align_bam    = channel.empty()
+    ch_refer_bam    = channel.empty()
 
 
     //
@@ -55,8 +55,7 @@ workflow RUN_READ_COVERAGE {
         ch_versions     = ch_versions.mix(SE_MAPPING.out.versions)
         ch_align_bam    = SE_MAPPING.out.mapped_bam
 
-    }
-    else if ( params.reads_type in ["illumina"] ) {
+    } else if ( params.reads_type in ["illumina"] ) {
 
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND LONGREAD DATA
@@ -66,7 +65,6 @@ workflow RUN_READ_COVERAGE {
         )
         ch_versions     = ch_versions.mix(PE_MAPPING.out.versions)
         ch_align_bam    = PE_MAPPING.out.mapped_bam
-
     }
 
 
@@ -100,8 +98,24 @@ workflow RUN_READ_COVERAGE {
     ch_versions         = ch_versions.mix( SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.versions )
 
 
-    emit:
+    //
+    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
+    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
+    //
     tsv_ch              = SAMTOOLS_DEPTH_AVERAGE_COVERAGE.out.average_coverage
+                            .map { meta, file ->
+                                [[id: meta.id, process: "COVERAGE"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
+
     bam_ch              = SAMTOOLS_SORT.out.bam
+                            .map { meta, file ->
+                                [[id: meta.id, process: "MAPPED_BAM"], file]
+                            }
+                            .ifEmpty { [[:],[]] }
+
+    emit:
+    tsv_ch
+    bam_ch
     versions            = ch_versions
 }

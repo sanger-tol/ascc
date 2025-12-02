@@ -14,7 +14,7 @@ workflow PREPARE_BLASTDB {
     barcode_names           // val      (csv-list-string)
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
 
     //
@@ -36,10 +36,7 @@ workflow PREPARE_BLASTDB {
         .filter{it.contains("barcodes")} // Indicates it is a valid barcode
         .combine( barcodes_file )
         .map {str_info, file ->
-            tuple(
-                [id: "BARCODE_TO_MAKEDB", info: str_info],
-                file
-            )
+            [[id: "BARCODE_TO_MAKEDB", info: str_info], file]
         }
         .set {ch_new_barcodes}
 

@@ -3,12 +3,12 @@ process SANGER_TOL_BTK {
     label 'process_low'
 
     input:
-    tuple val(meta), path(reference), path(samplesheet_csv), path(autofilter)
-    path blastp,                        stageAs: "blastp.dmnd"
+    tuple val(meta), path(reference), path(samplesheet_csv)
+    path blastp, stageAs: "blastp.dmnd"
     path blastn
     path blastx
     path tax_dump
-    path( "input_pacbio_files/*" )
+    path pacbio_files
     path blobtoolkit_config_file
     path blobtoolkit_trace_config
     val busco_lineages_folder

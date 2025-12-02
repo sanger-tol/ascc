@@ -3,14 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - Red Watch [ 01/12/2025 ]
+## [0.6.0] - Red Notebook [##/##/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
-Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to complement FCS-GX and Tiara for k-mer based contamination detection.
+Release 10 of sanger-tol/ascc, addition of a report generator.
 
 ### `Added`
 
+- Reporting for the pipeline output into a more human readable output (html) @eaunin
+- Standardised some channel names
+- Standardised log info and warning calls
+- Changed the main method of kmer counting for memory efficiency
+  - Also added a module to re-generate the kmer string
+- Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel.
+- Added process tags to all channels
+  - caused an issue where combining channels will produce PRIMARY, HAPLOTYPE and null channels, ending pipeline execution, this requires filtering out null channels in some places.
 - `RUN_SOURMASH` subworkflow for k-mer based taxonomic classification
   - `SOURMASH_SKETCH`: Create MinHash sketches from assembly sequences
   - `SOURMASH_MULTISEARCH`: Search sketches against multiple databases
@@ -29,23 +37,25 @@ Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to complement
 - Comprehensive nf-test suite for all sourmash modules and subworkflows
 - Integration tests with Plasmodium and E.coli test databases
 - Addition of @zilov as contributor
-
-### `Fixed`
-
 - `bin/autofilter.py`: Updated to handle sourmash_action column in CSV format (6 columns instead of 5)
 - `bin/abnormal_contamination_check.py`: Updated CSV format validation for new sourmash_action column
 - `modules/local/parse/sourmash/main.nf`: Fixed YAML versions block to handle stderr correctly
 - `modules/local/ascc/merge_tables/main.nf`: Fixed optional sourmash parameter handling
 
-### Dependencies
+### `Bugs`
 
-| Module               | Old Version | New Version |
-| -------------------- | ----------- | ----------- |
-| CAT_CAT              | NA          | nf-core     |
-| SOURMASH_SKETCH      | NA          | 4.8.11      |
-| SOURMASH_MULTISEARCH | NA          | 4.8.11      |
-| PARSE_SOURMASH       | NA          | custom      |
-| GET_TARGET_TAXA      | NA          | custom      |
+### `Dependencies`
+
+| Module               | Old Version | New Versions |
+| -------------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT | NA          | 1.0          |
+| KMER_COUNTER         |             |              |
+| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
+| CAT_CAT              | NA          | nf-core      |
+| SOURMASH_SKETCH      | NA          | 4.8.11       |
+| SOURMASH_MULTISEARCH | NA          | 4.8.11       |
+| PARSE_SOURMASH       | NA          | custom       |
+| GET_TARGET_TAXA      | NA          | custom       |
 
 ### Parameters
 
@@ -63,6 +73,17 @@ Release 8 of sanger-tol/ascc, focusing on the addition of sourmash to complement
 - Target taxa is automatically extracted from NCBI taxonomy based on input taxid
 - Integration tests successfully validated with 121 processes (26 minutes runtime)
 - Four critical bugs were identified and fixed during integration testing
+
+## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 10 of sanger-tol/ascc, a bug fix for the btk trace.config file.
+
+### `Fixed`
+
+- host_name should have been hostname
+- missing double quotation mark in string
 
 ## [0.5.2] - Red Spider-Boat (H2) [06/10/2025]
 

@@ -46,13 +46,11 @@ workflow ASCC {
     barcodes
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // WORKFLOW: Run main workflow for GENOMIC samples
     //
-    //
-    // TODO: FCS OVERRIDE VALUES NOW AVAILABLE
     GENOMIC (
         genomic_genomes,
         organellar_genomes,

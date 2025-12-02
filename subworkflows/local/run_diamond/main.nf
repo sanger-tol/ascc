@@ -17,9 +17,9 @@ workflow RUN_DIAMOND {
     diamond_db          // val (path)
 
     main:
-    ch_versions     = Channel.empty()
-    ch_ext          = Channel.of("txt")
-    ch_columns      = Channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
+    ch_versions     = channel.empty()
+    ch_ext          = channel.of("txt")
+    ch_columns      = channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
 
 
     //
@@ -35,11 +35,8 @@ workflow RUN_DIAMOND {
     // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
     //
     diamond_db
-        .map{ it ->
-            tuple(
-                [id: "db"],
-                it
-            )
+        .map{ file ->
+            [[id: "db"], file]
         }
         .set{diamond_db_path}
 
@@ -48,8 +45,8 @@ workflow RUN_DIAMOND {
         .combine(ch_columns)
         .combine(diamond_db_path)
         .multiMap{ meta, reference, extensions, columns, meta2, db_path ->
-            reference: tuple(meta, reference)
-            db_path: tuple(meta2, db_path)
+            reference: [meta, reference]
+            db_path: [meta2, db_path]
             ext_ch: extensions
             col_ch: columns
         }
