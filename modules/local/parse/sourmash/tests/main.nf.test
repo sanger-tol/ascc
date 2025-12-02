@@ -1,0 +1,146 @@
+nextflow_process {
+
+    name "Test Process PARSE_SOURMASH"
+    script "../main.nf"
+    process "PARSE_SOURMASH"
+    config "./nextflow.config"
+    tag "modules"
+    tag "modules_local"
+    tag "parse"
+    tag "parse/sourmash"
+
+    test("Parse sourmash results with target_taxa order:enterobacterales") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome' ],
+                    file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
+                ]
+                input[1] = file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
+                input[2] = 'order:enterobacterales'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Check summary file exists and has correct structure
+                { assert path(process.out.multisearch_summary[0][1]).exists() },
+                {
+                    def lines = path(process.out.multisearch_summary[0][1]).readLines()
+
+                    // Check CSV header (first line, no comment lines anymore)
+                    assert lines[0].contains('header,assembly_accession,taxa,top_n,containment,jaccard,intersect_hashes,is_target')
+
+                    // Check data rows exist and have correct columns
+                    assert lines.size() > 1 : "Should have data rows"
+                    def dataRow = lines[1].split(',')
+                    assert dataRow.size() == 8 : "Should have 8 columns"
+                },
+                // Check non_target file exists (but may be empty if all queries have target matches)
+                { assert path(process.out.multisearch_non_target[0][1]).exists() },
+                {
+                    def lines = path(process.out.multisearch_non_target[0][1]).readLines()
+
+                    // Check CSV header exists (first line, no comment lines anymore)
+                    assert lines[0].contains('header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom')
+
+                    // In this test, all queries have target matches, so non_target file should only have header
+                    assert lines.size() == 1 : "Should only have header line (no non-target queries)"
+                },
+                // Check versions - split line to avoid timestamp/path issues
+                {
+                    def versionContent = path(process.out.versions[0]).text
+                    def versionLines = versionContent.readLines()
+                    assert versionLines[0] == '"PARSE_SOURMASH":'
+                    assert versionLines[1].contains('sourmash_taxonomy_parser:')
+                }
+            )
+        }
+    }
+
+    test("Parse sourmash results with non-matching target_taxa") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome_nomatch' ],
+                    file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
+                ]
+                input[1] = file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
+                input[2] = 'phylum:chordata'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Check summary file exists
+                { assert path(process.out.multisearch_summary[0][1]).exists() },
+                {
+                    def lines = path(process.out.multisearch_summary[0][1]).readLines()
+
+                    // Check CSV structure (first line is header, no comment lines anymore)
+                    assert lines.size() > 1 : "Should have header and data rows"
+
+                    // Check that is_target column shows None (no target_taxa matches found in DB)
+                    def dataRow = lines[1].split(',')
+                    assert dataRow[7] == 'None' : "is_target should be None when target_taxa doesn't match any genome in DB"
+                },
+                // Check non_target file - all contigs should be non-target
+                { assert path(process.out.multisearch_non_target[0][1]).exists() },
+                {
+                    def lines = path(process.out.multisearch_non_target[0][1]).readLines()
+                    // Should have header + data rows (all 1 query should be non-target)
+                    assert lines.size() >= 2 : "Should have non-target contigs when target_taxa doesn't match"
+                },
+                // Check versions - split line to avoid timestamp/path issues
+                {
+                    def versionContent = path(process.out.versions[0]).text
+                    def versionLines = versionContent.readLines()
+                    assert versionLines[0] == '"PARSE_SOURMASH":'
+                    assert versionLines[1].contains('sourmash_taxonomy_parser:')
+                }
+            )
+        }
+    }
+
+    test("Parse sourmash results - stub") {
+
+        options '-stub'
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome' ],
+                    file('test_multisearch_results.csv')
+                ]
+                input[1] = file('test_assembly_taxa_db.csv')
+                input[2] = 'order:enterobacterales'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.multisearch_summary[0][1]).exists() },
+                { assert path(process.out.multisearch_non_target[0][1]).exists() },
+                { assert path(process.out.versions[0]).exists() }
+            )
+        }
+    }
+
+}

@@ -22,8 +22,9 @@ process GET_KMER_COUNTS {
     task.ext.when == null || task.ext.when
 
     script:
-    def KCOUNTER_VERSION = "0.1.1"
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def KCOUNTER_VERSION    = "0.1.1"
+    def GENERAL_FUNCTIONS   = "1.0.0"
+    def prefix              = task.ext.prefix ?: "${meta.id}"
     """
     get_kmers_counts.py \\
         $input_fasta \\
@@ -34,14 +35,15 @@ process GET_KMER_COUNTS {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         kcounter: $KCOUNTER_VERSION
-        general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+        general_purpose_functions.py: $GENERAL_FUNCTIONS
         get_kmers_counts.py: \$(get_kmers_counts.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
     stub:
-    def KCOUNTER_VERSION = "0.1.1"
-    def prefix = args.ext.prefix ?: "${meta.id}"
+    def KCOUNTER_VERSION    = "0.1.1"
+    def GENERAL_FUNCTIONS   = "1.0.0"
+    def prefix              = args.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}_KMER_COUNTS.csv
 
@@ -49,7 +51,7 @@ process GET_KMER_COUNTS {
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         kcounter: $KCOUNTER_VERSION
-        general_purpose_functions.py: \$(general_purpose_functions.py --version | cut -d' ' -f2)
+        general_purpose_functions.py: $GENERAL_FUNCTIONS
         get_kmers_counts.py: \$(get_kmers_counts.py --version | cut -d' ' -f2)
     END_VERSIONS
     """

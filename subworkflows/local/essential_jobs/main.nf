@@ -1,9 +1,15 @@
+//
+// LOCAL MODULE IMPORTS
+//
+include { FILTER_FASTA      } from '../../../modules/local/filter/fasta/main'
+include { GC_CONTENT        } from '../../../modules/local/gc/content/main'
+include { TRAILINGNS        } from '../../../modules/local/trailingns/trailingns/main'
 
-include { FILTER_FASTA                                  } from '../../../modules/local/filter/fasta/main'
-include { GC_CONTENT                                    } from '../../../modules/local/gc/content/main'
+//
+// LOCAL SUBWORKFLOW IMPORTS
+//
+include { GENERATE_GENOME   } from '../../../subworkflows/local/generate_genomes/main'
 
-include { GENERATE_GENOME                               } from '../../../subworkflows/local/generate_genomes/main'
-include { TRAILINGNS_CHECK                              } from '../../../subworkflows/local/trailingns_check/main'
 
 workflow ESSENTIAL_JOBS {
 
@@ -61,18 +67,19 @@ workflow ESSENTIAL_JOBS {
 
 
     //
-    // SUBWORKFLOW: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOME
+    // MODULE: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOME
     //
-    TRAILINGNS_CHECK (
+    TRAILINGNS (
         FILTER_FASTA.out.fasta
     )
-    ch_versions             = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
+    ch_versions             = ch_versions.mix(TRAILINGNS.out.versions)
 
 
     emit:
-    reference_tuple_from_GG             = GENERATE_GENOME.out.reference_tuple
-    reference_with_seqkit               = new_input_fasta
-    dot_genome                          = GENERATE_GENOME.out.dot_genome
-    gc_content_txt                      = GC_CONTENT.out.txt
-    versions                            = ch_versions
+    reference_tuple_from_GG = GENERATE_GENOME.out.reference_tuple
+    reference_with_seqkit   = new_input_fasta
+    trailingns_report       = TRAILINGNS.out.trailing_ns_report
+    dot_genome              = GENERATE_GENOME.out.dot_genome
+    gc_content_txt          = GC_CONTENT.out.txt
+    versions                = ch_versions
 }

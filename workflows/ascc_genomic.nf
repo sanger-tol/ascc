@@ -12,19 +12,20 @@ include { SANGER_TOL_BTK                                } from '../modules/local
 include { GENERATE_SAMPLESHEET                          } from '../modules/local/blobtoolkit/generate_samplesheet/main'
 include { NEXTFLOW_RUN as SANGER_TOL_BTK_CASCADE        } from '../modules/local/run/main'
 
+include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
+
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
-include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
+// include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
 include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
 include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_SOURMASH                                  } from "../subworkflows/local/run_sourmash/main"
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
@@ -102,31 +103,72 @@ workflow ASCC_GENOMIC {
         ej_gc_coverage          = Channel.empty()
     }
 
-    //
+
     // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
-    //              SCAFFOLDS IN ASSEMBLY
+    //             SCAFFOLDS IN ASSEMBLY
+
+
     //
+    // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION
+    //
+    def sourmashConfig = new SourmashDatabaseConfig()
+    def sourmash_databases = sourmashConfig.parseDatabaseConfig(params)
+
+    // Validate databases if Sourmash is enabled
+    if (params.run_sourmash == "both" || params.run_sourmash == "genomic") {
+        if (sourmash_databases.size() > 0) {
+            def validation = sourmashConfig.validateDatabases(sourmash_databases)
+
+            // Log warnings
+            validation.warnings.each { warning ->
+                log.warn "[ASCC Sourmash] ${warning}"
+            }
+
+            // Log summary if valid
+            if (validation.valid) {
+                log.info sourmashConfig.getDatabaseSummary(sourmash_databases)
+            } else {
+                log.error "[ASCC Sourmash] Database validation failed. Sourmash will be skipped."
+                sourmash_databases = []
+            }
+        } else {
+            log.warn "[ASCC Sourmash] No Sourmash databases configured. Sourmash will be skipped."
+        }
+    }
+
+    // Create channel for Sourmash databases
+    ch_sourmash_databases = Channel.fromList(sourmash_databases)
+
+
     if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
 
-        reference_tuple_from_GG
-            .map { meta, file ->
-                def meta2 = [] // Inject meta data for sourmash runs
-                [meta2, file]
-            }
-            .set { sourmash_reference }
+        // Only run if databases are configured and validated
+        if (sourmash_databases.size() > 0) {
 
-        ch_dbs = Channel.empty()
-        RUN_SOURMASH (
-            sourmash_reference,
-            ch_dbs
-        )
+            RUN_SOURMASH (
+                reference_tuple_from_GG,
+                ch_sourmash_databases,
+                ncbi_ranked_lineage_path,
+                params.sourmash_taxonomy_level
+            )
 
-        // This will be used for btk input if we decide to go that route
-        ch_sourmash         = Channel.of( [[],[]] )
-        ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+            // Output channels for downstream use
+            ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                        .map { meta, file ->
+                                            [[id: meta.id, process: "SOURMASH"], file]
+                                        }
+                                        .ifEmpty { [[],[]] }
+            ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+            ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
+        } else {
+            log.warn "[ASCC Sourmash] Skipping Sourmash: no valid databases configured"
+            ch_sourmash_summary     = Channel.of( [[],[]] )
+            ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
+        }
 
     } else {
-        ch_sourmash         = Channel.of( [[],[]] )
+        ch_sourmash_summary     = Channel.of( [[],[]] )
+        ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
     }
 
 
@@ -169,11 +211,11 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     if ( params.run_tiara == "both" || params.run_tiara == "genomic" ) {
-        EXTRACT_TIARA_HITS (
+        TIARA_TIARA (
             reference_tuple_from_GG
         )
-        ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara
+        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+        ch_tiara            = TIARA_TIARA.out.classifications
                                 .map { it ->
                                     [[id: it[0].id, process: "TIARA"], it[1]]
                                 }
@@ -667,18 +709,24 @@ workflow ASCC_GENOMIC {
                 by: 0
             )
             .combine(
+                ch_sourmash_non_target
+                    .map{ it -> tuple([id: it[0].id], it[1])},
+                by: 0
+            )
+            .combine(
                 ncbi_ranked_lineage_path
             )
             .combine(
                 taxid
             )
             .multiMap{
-                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  tuple(new_meta, ref)
-                    tiara_file: tuple(new_meta, tiara)
-                    fcs_file:   tuple(new_meta, fcs)
-                    ncbi_rank:  ncbi
+                    reference:      tuple(new_meta, ref)
+                    tiara_file:     tuple(new_meta, tiara)
+                    fcs_file:       tuple(new_meta, fcs)
+                    sourmash_file:  tuple(new_meta, sourmash)
+                    ncbi_rank:      ncbi
             }
 
         //
@@ -688,6 +736,7 @@ workflow ASCC_GENOMIC {
             autofilter_input_formatted.reference,
             autofilter_input_formatted.tiara_file,
             autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.sourmash_file,
             autofilter_input_formatted.ncbi_rank
         )
         ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
@@ -859,6 +908,7 @@ workflow ASCC_GENOMIC {
         ncbi_taxonomy_path.first(),
         reads_path.collect(),
         file("${projectDir}/assets/btk_config_files/btk_pipeline.config"),
+        file("${projectDir}/assets/btk_config_files/btk_trace.config"),
         btk_lineages_path.first(),
         btk_lineages.first(),
         taxid.first(),
@@ -921,6 +971,7 @@ if (
                 ch_kmers,
                 ch_tiara,
                 ch_fcsgx,
+                ch_sourmash_summary,
                 ch_coverage,
                 ch_kraken3,
                 ch_blast_lineage,
@@ -939,7 +990,7 @@ if (
         def processes = [
             'GC_COV', 'Coverage', 'TIARA',
             'Kraken 3', 'NT-BLAST-LINEAGE', 'KMERS', 'NR-HITS', 'UN-HITS',
-            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result'
+            'C_BTK_SUM', 'BUSCO_MERGE','FCSGX result', 'SOURMASH'
         ]
 
         def processChannels = processes.collectEntries { process ->

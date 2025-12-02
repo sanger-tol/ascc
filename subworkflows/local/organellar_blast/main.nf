@@ -1,6 +1,13 @@
-include { SED_SED                                    }   from '../../../modules/local/sed/sed/main'
+//
+// NF-CORE MODULE IMPORT
+//
 include { BLAST_MAKEBLASTDB                          }   from '../../../modules/nf-core/blast/makeblastdb'
 include { BLAST_BLASTN                               }   from '../../../modules/nf-core/blast/blastn'
+
+//
+// LOCAL MODULE IMPORT
+//
+include { SED_SED                                    }   from '../../../modules/local/sed/sed/main'
 include { EXTRACT_CONTAMINANTS                       }   from '../../../modules/local/extract/contaminants/main'
 include { FILTER_COMMENTS                            }   from '../../../modules/local/filter/comments/main'
 include { ORGANELLE_CONTAMINATION_RECOMMENDATIONS    }   from '../../../modules/local/organelle/contamination_recommendations/main'
@@ -56,7 +63,10 @@ workflow ORGANELLAR_BLAST {
 
     BLAST_BLASTN (
         ref_and_db.reference_tuple,
-        ref_and_db.blastdb_tuple
+        ref_and_db.blastdb_tuple,
+        [],
+        [],
+        []
     )
     ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
@@ -98,6 +108,7 @@ workflow ORGANELLAR_BLAST {
             log.info "\t--$meta.id & $meta.og "
         }
         .set { no_comments }
+
 
     //
     // NOTE: Strip out a ton of junk meta so we can join the tuples together

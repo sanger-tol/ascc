@@ -1,0 +1,4 @@
+assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom,superkingdom
+GCF_000005845.2,562,Escherichia coli,Escherichia,Enterobacteriaceae,Enterobacterales,Gammaproteobacteria,Pseudomonadota,Bacteria,Bacteria
+GCA_000755165.2,5679,Leishmania panamensis,Leishmania,Trypanosomatidae,Trypanosomatida,Kinetoplastea,Euglenozoa,Eukaryota,Eukaryota
+GCF_031323975.1,562,Escherichia coli,Escherichia,Enterobacteriaceae,Enterobacterales,Gammaproteobacteria,Pseudomonadota,Bacteria,Bacteria

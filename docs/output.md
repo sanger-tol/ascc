@@ -164,8 +164,8 @@ Creates a BlobToolKit dataset folder compatible with BlobToolKit viewer (https:/
 <summary>Output files</summary>
 
 - `autofilter/`
-  `autofiltered.fasta` - The decontaminated input genome. The decontamination is based on the results of FCS-GX.
-  `ABNORMAL_CHECK.csv` - Combined FCS-GX and Tiara summary of contamination.
+  `autofiltered.fasta` - The decontaminated input genome. The decontamination is based on the results of FCS-GX, Sourmash and Tiara.
+  `ABNORMAL_CHECK.csv` - Combined FCS-GX, Sourmash and Tiara summary of contamination.
   `assembly_filtering_removed_sequences.txt` - Sequences deemed contamination by FCS-GX (labelled with the EXCLUDE tag by FCS-GX) and removed from the above assembly.
   `fcs-gx_alarm_indicator_file.txt` - Contains text to control the running of BlobToolKit pipeline. If enough contamination is found by FCS-GX, an alarm is triggered to switch on the running of BlobToolKit pipeline.
 
@@ -327,6 +327,19 @@ FCS-GX (https://github.com/ncbi/fcs) is NCBI software that detects contaminants 
 </details>
 
 Kraken (https://github.com/DerrickWood/kraken2) assigns taxonomic labels to input DNA sequences based on comparing them to a database of kmers. ASCC uses a Kraken database made from the sequences of the NCBI nt database. The FASTA sequences of NCBI nt database are available at https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/.
+
+### Sourmash
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `sourmash/`
+  `*_sourmash_summary.csv` - A CSV file containing taxonomic classification results from sourmash multisearch. Each row represents a contig with its best match against the sourmash databases, including containment scores, taxonomic assignment, and whether it matches the target taxa.
+  `*_sourmash_non_target.csv` - A CSV file listing contigs that were classified as non-target taxa based on the sourmash results. This file is used by the AUTOFILTER module to identify potential contamination.
+
+</details>
+
+Sourmash (https://github.com/sourmash-bio/sourmash) is a toolkit for k-mer based genomic comparisons using MinHash sketching. ASCC uses sourmash to perform rapid taxonomic classification by comparing assembly sequences against user-provided databases of genome sketches. The tool creates MinHash sketches of the input assembly sequences and searches them against one or more databases to identify the taxonomic origin of each contig. Sourmash complements FCS-GX and Tiara by providing k-mer based evidence for contamination detection. The target taxonomic level (e.g., order, family) is automatically extracted from the NCBI taxonomy based on the input taxid, and contigs that don't match the target taxa are flagged as potential contaminants. This information is integrated into the AUTOFILTER module where it contributes to the final contamination assessment alongside FCS-GX and Tiara results.
 
 ### nr Diamond BLASTX
 

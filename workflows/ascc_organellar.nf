@@ -7,12 +7,12 @@
 include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 
+include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
+
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
-include { EXTRACT_TIARA_HITS                            } from '../subworkflows/local/extract_tiara_hits/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
-include { TRAILINGNS_CHECK                              } from '../subworkflows/local/trailingns_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
@@ -89,26 +89,73 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
     //              SCAFFOLDS IN ASSEMBLY
     //
+
+    //
+    // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION (same as genomic workflow)
+    //
+    def sourmashConfig = new SourmashDatabaseConfig()
+    def sourmash_databases = sourmashConfig.parseDatabaseConfig(params)
+
+    // Validate databases if Sourmash is enabled
+    if (params.run_sourmash == "both" || params.run_sourmash == "organellar") {
+        if (sourmash_databases.size() > 0) {
+            def validation = sourmashConfig.validateDatabases(sourmash_databases)
+
+            // Log warnings
+            validation.warnings.each { warning ->
+                log.warn "[ASCC Sourmash Organellar] ${warning}"
+            }
+
+            // Log summary if valid
+            if (validation.valid) {
+                log.info sourmashConfig.getDatabaseSummary(sourmash_databases)
+            } else {
+                log.error "[ASCC Sourmash Organellar] Database validation failed. Sourmash will be skipped."
+                sourmash_databases = []
+            }
+        } else {
+            log.warn "[ASCC Sourmash Organellar] No Sourmash databases configured. Sourmash will be skipped."
+        }
+    }
+
+    // Create channel for Sourmash databases
+    ch_sourmash_databases = Channel.fromList(sourmash_databases)
+
     if ( params.run_sourmash == "both" || params.run_sourmash == "organellar" ) {
 
-        reference_tuple_from_GG
-            .map { meta, file ->
-                def meta2 = [] // Inject meta data for sourmash runs
-                [meta2, file]
-            }
-            .set { sourmash_reference }
+        // Only run if databases are configured and validated
+        if (sourmash_databases.size() > 0) {
 
-        ch_dbs = Channel.empty()
-        RUN_SOURMASH (
-            sourmash_reference,
-            ch_dbs
-        )
+            RUN_SOURMASH (
+                reference_tuple_from_GG,
+                ch_sourmash_databases,
+                ncbi_ranked_lineage_path,
+                params.sourmash_taxonomy_level
+            )
 
-        // This will be used for btk input if we decide to go that route
-        ch_sourmash         = Channel.of( [[],[]] )
-        ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+            // Output channels for downstream use (analogous to genomic workflow)
+            ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                        .map { meta, file ->
+                                            [[id: meta.id, process: "SOURMASH"], file]
+                                        }
+                                        .ifEmpty { [[],[]] }
+            ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+                                        .map { meta, file -> tuple([id: meta.id], file) }
+                                        .ifEmpty { reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) } }
+
+            // This will be used for btk input if we decide to go that route
+            ch_sourmash         = Channel.of( [[],[]] )
+            ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+
+        } else {
+            // Skip Sourmash if no databases configured
+            ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) }
+            ch_sourmash         = Channel.of( [[],[]] )
+        }
 
     } else {
+        // Skip Sourmash entirely
+        ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) }
         ch_sourmash         = Channel.of( [[],[]] )
     }
 
@@ -117,11 +164,11 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     if ( params.run_tiara == "both" || params.run_tiara == "organellar" ) {
-        EXTRACT_TIARA_HITS (
+        TIARA_TIARA (
             reference_tuple_from_GG
         )
-        ch_versions         = ch_versions.mix(EXTRACT_TIARA_HITS.out.versions)
-        ch_tiara            = EXTRACT_TIARA_HITS.out.ch_tiara
+        ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
+        ch_tiara            = TIARA_TIARA.out.classifications
                                 .map { it ->
                                     [[id: it[0].id, process: "TIARA"], it[1]]
                                 }
@@ -555,18 +602,23 @@ workflow ASCC_ORGANELLAR {
                 by: 0
             )
             .combine(
+                ch_sourmash_non_target,
+                by: 0
+            )
+            .combine(
                 ncbi_ranked_lineage_path
             )
             .combine(
                 taxid
             )
             .multiMap{
-                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  tuple(new_meta, ref)
-                    tiara_file: tuple(new_meta, tiara)
-                    fcs_file:   tuple(new_meta, fcs)
-                    ncbi_rank:  ncbi
+                    reference:      tuple(new_meta, ref)
+                    tiara_file:     tuple(new_meta, tiara)
+                    fcs_file:       tuple(new_meta, fcs)
+                    sourmash_file:  tuple(new_meta, sourmash)
+                    ncbi_rank:      ncbi
             }
 
 
@@ -577,6 +629,7 @@ workflow ASCC_ORGANELLAR {
             autofilter_input_formatted.reference,
             autofilter_input_formatted.tiara_file,
             autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.sourmash_file,
             autofilter_input_formatted.ncbi_rank
         )
         ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
