@@ -18,8 +18,8 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix  = args.ext.prefix   ?: "${meta.id}"
-    def args    = args.ext.args     ?: ""
+    def prefix  = task.ext.prefix   ?: "${meta.id}"
+    def args    = task.ext.args     ?: ""
     """
     clip_regions_bed.py \\
         --sample_id ${prefix} \\
@@ -36,7 +36,7 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
     stub:
     def prefix  = args.ext.prefix   ?: "${meta.id}"
     """
-    touch ${prefix}.fasta.decontaminated
+    touch ${prefix}.decontaminated.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

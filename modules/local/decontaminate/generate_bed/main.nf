@@ -9,13 +9,13 @@ process DECONTAMINATE_GENERATE_BED {
 
     input:
     tuple val(meta),    path(fasta),
-        path(parsed_fcsgx,          stageAs: "./dataset/fcsgx_data/*"),
-        path(abnormal_check_csv,    stageAs: "./dataset/autofilter/*"),
-        path(fcs_adaptor_file,      stageAs: "./dataset/fcs_adaptor/*"),
-        path(trailingns,            stageAs: "./dataset/trailingns/*"),
-        path(barcodes,              stageAs: "./dataset/filter_barcode/**"),
-        path(mito_recomendations,   stageAs: "./dataset/organelle_contamination_recommendations.mito_mito/*"),
-        path(plastid_recomendations,stageAs: "./dataset/organelle_contamination_recommendations.plastid_plastid/*")
+        path(parsed_fcsgx,              stageAs: "./dataset/fcsgx_data/*"),
+        path(abnormal_check_csv,        stageAs: "./dataset/autofilter/*"),
+        path(fcs_adaptor_file,          stageAs: "./dataset/fcs_adaptor/*"),
+        path(trailingns,                stageAs: "./dataset/trailingns/*"),
+        path(barcodes,                  stageAs: "./dataset/filter_barcode/**"),
+        path(mito_recommendations,      stageAs: "./dataset/organelle_contamination_recommendations.mito_mito/*"),
+        path(plastid_recommendations,   stageAs: "./dataset/organelle_contamination_recommendations.plastid_plastid/*")
 
 
     output:
@@ -29,8 +29,8 @@ process DECONTAMINATE_GENERATE_BED {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix      = args.ext.prefix                       ?: "${meta.id}"
-    def args        = args.ext.args                         ?: ""
+    def prefix      = task.ext.prefix                       ?: "${meta.id}"
+    def args        = task.ext.args                         ?: ""
     def organellar  = meta.assembly_type == "organellar"    ? true          : false
     """
     generate_contamination_bed.py \\
@@ -47,11 +47,11 @@ process DECONTAMINATE_GENERATE_BED {
     """
 
     stub:
-    def prefix  = args.ext.prefix   ?: "${meta.id}"
+    def prefix      = args.ext.prefix   ?: "${meta.id}"
     """
     touch ${prefix}.contamination.bed
     touch ${prefix}.tiara.bed
-    touch ${prefic}.report
+    touch ${prefix}.report
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
