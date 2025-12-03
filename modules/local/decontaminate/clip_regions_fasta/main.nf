@@ -8,12 +8,12 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
         'quay.io/biocontainers/biopython:1.81' }"
 
     input:
-    tuple val(meta), path(fasta_input_file)
+    tuple val(meta), path(fasta)
     path(contamination_bed)
 
     output:
-    tuple val(meta), path("*.decontaminated.fasta")  , emit: decontaminated_fasta
-    path "versions.yml"                           , emit: versions
+    tuple val(meta), path("*.decontaminated.fasta") , emit: decontaminated_fasta
+    path "versions.yml"                             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,7 +22,10 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
     def prefix  = args.ext.prefix   ?: "${meta.id}"
     def args    = args.ext.args     ?: ""
     """
-    clip_regions_bed.py $fasta_input_file $contamination_bed ${args}
+    clip_regions_bed.py \\
+        $fasta \\
+        $contamination_bed \\
+        ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -8,11 +8,12 @@ process DECONTAMINATE_GENERATE_BED {
         'quay.io/biocontainers/biopython:1.81' }"
 
     input:
-    tuple val(meta), path(fasta_input_file)
+    tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("*_chunked_assembly.fa")  , emit: chunked_assembly
-    path "versions.yml"                             , emit: versions
+    tuple val(meta), path("*.bed")      , emit: bed
+    tuple val(meta), path("*.report")   , emit: report
+    path "versions.yml"                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,12 +22,12 @@ process DECONTAMINATE_GENERATE_BED {
     def prefix  = args.ext.prefix   ?: "${meta.id}"
     def args    = args.ext.args     ?: ""
     """
-    chunk_assembly_for_vecscreen.py $fasta_input_file ${prefix}_chunked_assembly.fa ${args}
+    generate_contamination_bed.py $fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        chunk_assembly_for_vecscreen.py: \$(chunk_assembly_for_vecscreen.py --version | cut -d' ' -f2)
+        generate_contamination_bed.py: \$(generate_contamination_bed.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 
@@ -38,7 +39,7 @@ process DECONTAMINATE_GENERATE_BED {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        chunk_assembly_for_vecscreen.py: \$(chunk_assembly_for_vecscreen.py --version | cut -d' ' -f2)
+        generate_contamination_bed.py: \$(generate_contamination_bed.py --version | cut -d' ' -f2)
     END_VERSIONS
     """
 }
