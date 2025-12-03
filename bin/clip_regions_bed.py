@@ -11,37 +11,33 @@ import os
 import argparse
 
 class Assembly:
-     
+
     @property
     def original_zipped_fasta_file(self):
         return self._original_zipped_fasta_file
 
     @property
-    def assembly_label(self):
-        return self._assembly_label
-    
-    @property
     def fasta_suffix(self):
         return self._fasta_suffix
-    
+
     @property
     def original_dir(self):
         return self._original_dir
-    
+
     @property
     def zip_suffix(self):
         return self._zip_suffix
-    
-    def __init__(self, original_zipped_fasta_file):
+
+    def __init__(self, assembly_name, original_zipped_fasta_file):
+        self.assembly_label = assembly_name
         self._original_zipped_fasta_file = original_zipped_fasta_file
-        (self._assembly_label, self._fasta_suffix, self._original_dir, self._zip_suffix) = self.get_parameters_from_filename(original_zipped_fasta_file)
+        (self._fasta_suffix, self._original_dir, self._zip_suffix) = self.get_parameters_from_filename(original_zipped_fasta_file)
         self.zipped_fasta_file = self.get_zipped_fasta_file(original_zipped_fasta_file)
-	
+
     @staticmethod
     def get_parameters_from_filename(original_zipped_fasta_file):
-        assembly_label = ''
         fasta_suffix = ''
-        assembly_label_match = re.search('^([^/]+)\.(fa|fasta|fna)(\.gz)?$', os.path.basename(original_zipped_fasta_file))
+        assembly_label_match = re.search(r'^([^/]+)\.(fa|fasta|fna)(\.gz)?$', os.path.basename(original_zipped_fasta_file))
         if assembly_label_match:
             original_dir = os.path.dirname(original_zipped_fasta_file)
             if original_dir != '':
@@ -55,12 +51,12 @@ class Assembly:
             print('Error finding assembly label')
             quit()
 
-        return (assembly_label, fasta_suffix, original_dir, zip_suffix)
+        return (fasta_suffix, original_dir, zip_suffix)
 
     @staticmethod
     def get_zipped_fasta_file(original_zipped_fasta_file):
         zipped_fasta_file = ''
-        fasta_file_match = re.search('^([^/]+)\.(fa|fasta|fna)(.gz)?$', os.path.basename(original_zipped_fasta_file))
+        fasta_file_match = re.search(r'^([^/]+)\.(fa|fasta|fna)(.gz)?$', os.path.basename(original_zipped_fasta_file))
         if fasta_file_match:
             zipped_fasta_file = fasta_file_match.group(1)
         else:
@@ -88,11 +84,7 @@ class Assembly:
             return contamination_file
         else:
             return ''
-        
-    def get_bed_contamination_file(self):
-        bed_contamination_file = os.path.join(self.original_dir, f"{self.assembly_label}.contamination.bed")
-        return bed_contamination_file if os.path.isfile(bed_contamination_file) else ''
-        
+
     def get_mito_fasta_file(self):
         return(self.original_dir + self.assembly_label + '.mito_removed.fa')
 
@@ -102,18 +94,15 @@ class Assembly:
 def main():
 
     parser = argparse.ArgumentParser(description='Remove contamination')
-    parser.add_argument("--fasta", metavar='GRIT-42', type=str, help='FASTA files to clip')
-    parser.add_argument("--bed", action='store_true', help='Use BED file')
+    parser.add_argument("--sample_id", type=str, help='Name for assebmly')
+    parser.add_argument("--fasta", type=str, help='FASTA files to clip')
+    parser.add_argument("--bed", type=str, help='Contamination BED file')
+    parser.add_argument("--version", action="version", version="1.0.0")
 
     args = parser.parse_args()
 
-    subassembly = Assembly(args.fasta)
+    subassembly = Assembly(args.sample_id, args.fasta)
 
-    if args.bed:
-        print(subassembly.get_unzipped_screening_copy(), subassembly.get_bed_contamination_file(), subassembly.get_decontaminated_fasta_file())
-    else:
-        print(subassembly.get_unzipped_screening_copy(), subassembly.get_contamination_file(), subassembly.get_decontaminated_fasta_file())
-    
     verbose = True
 
     # INSTRUCTIONS: python3.4.0 clip_regions_oo.py [SUBASSEMBLY_LABEL]
@@ -134,16 +123,11 @@ def main():
     # Note that a REMOVE in the mitochondrial section results in both a REMOVE and a MITOCHONDRIAL entry
     # MITOCHONDRIAL_REMOVE or PLASTID_REMOVE directly signals the option given above
 
-    contamination_file = subassembly.get_contamination_file()
-    if args.bed:
-        contamination_file = subassembly.get_bed_contamination_file()
-
-    print(contamination_file)
-    with open(contamination_file, 'r') as coord_input_handle:
+    with open(args.bed, 'r') as coord_input_handle:
         for line in coord_input_handle:
-            if not re.match('^#', line):	# Ignore comments
+            if not re.match(r'^#', line):	# Ignore comments
                 if args.bed:
-                    fields = re.split('\s+', line)
+                    fields = re.split(r'\s+', line)
                     id = fields[0]
                     start = int(fields[1])
                     end = int(fields[2])
@@ -154,13 +138,13 @@ def main():
                     if id not in coord_list_for_sequence:
                         coord_list_for_sequence[id] = []
 
-                    coord_list_for_sequence[id].append([start+1,end,treatment])
+                    coord_list_for_sequence[id].append([start+1, end, treatment])
                 else:
-                    if re.search('^\S*(REMOVE|TRIM|MASK|CLIP|CONTAMINANT|VecScreen)', line):
-                        fields = re.split('\s+', line)
+                    if re.search(r'^\S*(REMOVE|TRIM|MASK|CLIP|CONTAMINANT|VecScreen)', line):
+                        fields = re.split(r'\s+', line)
                         id = fields[1]
 
-                        if re.search('^REMOVE', fields[0]):
+                        if re.search(r'^REMOVE', fields[0]):
                             treatment = 'REMOVE'
                             if id not in coord_list_for_sequence:
                                 coord_list_for_sequence[id] = []
@@ -177,21 +161,21 @@ def main():
                             end = fields[3]
 
                             treatment = 'MASK'
-                            if re.search('^(TRIM|REVCLIP|FWDCLIP|CLIP)', fields[0]):
+                            if re.search(r'^(TRIM|REVCLIP|FWDCLIP|CLIP)', fields[0]):
                                 treatment = 'TRIM'
-                            if re.search('^VecScreen', fields[0]):
+                            if re.search(r'^VecScreen', fields[0]):
                                 treatment = 'CONTAMINANT'
-                            if re.search('^CONTAMINANT', fields[0]):
-                                treatment = 'CONTAMINANT'						
+                            if re.search(r'^CONTAMINANT', fields[0]):
+                                treatment = 'CONTAMINANT'
 
                             if id not in coord_list_for_sequence:
                                 coord_list_for_sequence[id] = []
                             coord_list_for_sequence[id].append([int(start), int(end), treatment])
-                    elif (mito_flag or common_euk_flag) and not re.search('^#', line) and not re.search('^\=', line):
-                        fields = re.split('\s+', line)
+                    elif (mito_flag or common_euk_flag) and not re.search(r'^#', line) and not re.search(r'^\=', line):
+                        fields = re.split(r'\s+', line)
 
                         if len(fields) > 6:
-                            
+
                             treatment = 'CONTAMINANT'
                             if mito_flag:
                                 treatment = 'MITOCHONDRIAL' # CAPTURE MITO
@@ -205,15 +189,15 @@ def main():
                             if id not in coord_list_for_sequence:
                                 coord_list_for_sequence[id] = []
                             coord_list_for_sequence[id].append([start, end, treatment])
-                    elif re.search('\=\=\=', line): # If this is a new section, this must be the end of the mito region
+                    elif re.search(r'\=\=\=', line): # If this is a new section, this must be the end of the mito region
                         mito_flag = False
                         plastid_flag = False
                         common_euk_flag = False
-                    if re.search('MITO', line): # If this is the mito region, change behaviour
+                    if re.search(r'MITO', line): # If this is the mito region, change behaviour
                         mito_flag = True
-                    elif re.search('PLASTID', line): # If this is the plastid region, change behaviour
+                    elif re.search(r'PLASTID', line): # If this is the plastid region, change behaviour
                         plastid_flag = True
-                    if re.search('COMMON CONTAMINANTS IN EUKARYOTES', line): # If this is the mito region, change behaviour
+                    if re.search(r'COMMON CONTAMINANTS IN EUKARYOTES', line): # If this is the mito region, change behaviour
                         common_euk_flag = True
 
     # Merge entries
@@ -241,7 +225,7 @@ def main():
         coord_pair_and_treatment_for_label = {}
 
         for coord_pair_and_treatment in sorted(coord_list_for_sequence[id], key = lambda cpt: cpt[0]):
-        
+
             # Reject any malformed features
             if coord_pair_and_treatment[0] > coord_pair_and_treatment[1] or coord_pair_and_treatment[0] < 0 or coord_pair_and_treatment[1] < 0:
                 print('Malformed feature:', str(coord_pair_and_treatment[0]), '-', str(coord_pair_and_treatment[1]))
@@ -260,11 +244,11 @@ def main():
                 'TERMINUS': 'END',
                 'POSITION': coord_pair_and_treatment[1],
                 'LABEL': label,
-            }			
+            }
 
             termini.append(start_position)
             termini.append(end_position)
-            
+
         termini = sorted(termini, key=sort_termini)
 
         depth = 0
@@ -359,7 +343,7 @@ def main():
                 last_end = 0
                 edited_record = SeqRecord(Seq(''), id=record.id, description = record.description, name = record.name)
                 for coord_pair_and_treatment in sorted(coord_list_for_sequence[record.id], key = lambda cpt: cpt[0]):
-    
+
                     if verbose:
                         print('\t', coord_pair_and_treatment)
 
