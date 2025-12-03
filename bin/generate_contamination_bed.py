@@ -19,27 +19,27 @@ def parse_args(args=None):
 
     parser.add_argument(
         "--decon_tolid_type_dir",
-        type=str, 
+        type=str,
         help=".",
     )
     parser.add_argument(
         "--assembly_type",
-        type=str, 
+        type=str,
         help="."
     )
     parser.add_argument(
-		"--assembly_path", 
-		type=str, 
+		"--assembly_path",
+		type=str,
 		help=""
 	)
     parser.add_argument(
-        "--is_organelle", 
-        type=bool, 
-        help="Is an organelle", 
+        "--is_organelle",
+        type=bool,
+        help="Is an organelle",
     )
     parser.add_argument(
-        "--no_fcs_gx", 
-        type=bool, 
+        "--no_fcs_gx",
+        type=bool,
         help="Do not use FCS-GX"
     )
     parser.add_argument(
@@ -47,19 +47,21 @@ def parse_args(args=None):
         help="No multiplexing barcodes expected",
     )
     parser.add_argument(
-        "--longread_paths", 
-        type=str, 
+        "--longread_paths",
+        type=str,
         nargs="?",
-        help="", 
+        help="",
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0")
-    
+    parser.add_argument("--version", action="version", version="1.0.0")
+
     return parser.parse_args(args)
 
 def main():
     args = parse_args()
-    
-    merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files = get_decon_bed_files(decon_tolid_type_dir, is_organelle)
+
+    decon_tolid_type_dir = args.decon_tolid_type_dir
+    is_organelle = args.is_organelle
+    merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files = get_decon_bed_files(decon_tolid_type_dir, is_organelle, args.no_fcs_gx, args.no_barcodes, [])
 
     # BASE BED FILE NAMES OFF ASSEMBLY
     main_bed_output_file = f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.contamination.bed"
@@ -179,6 +181,12 @@ def main():
     tiara_bed_output_handle.close()
 
     contamination_report, is_abnormal, abnormal_details = build_contamination_report(args.assembly_type, length_for_scaffold, lengths_removed, scaffolds_removed, scaffold_count, fcs_gx_taxonomy_removed, sequences_removed_by_reason, fcs_ambiguity_text)
+
+    with open(f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.report.txt", 'w') as report_file:
+        report_file.write(contamination_report)
+
+        with open(f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.abnormal_details.txt", 'w') as report_file:
+            report_file.write(abnormal_details)
 
     return contamination_report, is_abnormal, abnormal_details
 
@@ -337,7 +345,7 @@ def parse_fcs_adapator_file(fcs_adaptor_file: str, length_for_scaffold) -> Dict[
         return sequences_removed
 
 def parse_barcode_files(barcode_files: List[str]) -> Dict[str, int]:
-    sequences_removed = {}        
+    sequences_removed = {}
     for barcode_file in barcode_files:
         with open(barcode_file) as barcode_handle:
             for line in barcode_handle:
@@ -392,7 +400,7 @@ def parse_organelle_csv(organelle_file: str):
                 sequences_removed[main_output] = end
     return sequences_removed, scaffolds_removed
 
-def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx: bool, no_barcodes: bool, longread_paths: List[str]) -> Dict[str, str]: 
+def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx: bool, no_barcodes: bool, longread_paths: List[str]) -> Dict[str, str]:
     if not no_fcs_gx and not is_organelle:
         merged_filter_file = search_directory_for_file_pattern(
             decon_tolid_type_dir + "/autofilter/", "_ABNORMAL_CHECK.csv$"
@@ -403,7 +411,7 @@ def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx
     else:
         merged_filter_file = None
         fcs_gx_file = None
-        
+
     fcs_adaptor_file = search_directory_for_file_pattern(
         decon_tolid_type_dir + "/fcs_adaptor/", "_euk.fcs_adaptor_report.txt$"
     )
@@ -467,7 +475,7 @@ def search_directory_for_file_pattern(directory, pattern, multiple_results=False
 def get_scaffold_for_fasta(assembly_file: str) -> Tuple[Dict[str, int], int]:
     """Get list of scaffolds from fasta file"""
 
-    fasta_input_handle = gzip.open(assembly_file, "rt")
+    fasta_input_handle = open(assembly_file, "rt")
     length_for_scaffold = {}
     scaffold_count = 0
     for record in SeqIO.parse(fasta_input_handle, "fasta"):
