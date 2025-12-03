@@ -16,8 +16,8 @@ workflow RUN_DECONTAMINATE_FASTA {
     fcs_adaptor_file
     trailingns
     barcodes
-    mito_recomendations
-    plastid_recomendations
+    mito_recommendations
+    plastid_recommendations
 
     main:
     ch_versions             = Channel.empty()
@@ -27,13 +27,13 @@ workflow RUN_DECONTAMINATE_FASTA {
     //
     input_genome
         .map{meta, file -> [[id: meta.id], file]}
-        .join(parsed_fcsgx,          remainder: true)
-        .join(fcsgx_tiara_summary,   remainder: true)
-        .join(fcs_adaptor_file,      remainder: true)
-        .join(trailingns,            remainder: true)
-        .join(barcodes,              remainder: true)
-        .join(mito_recomendations,   remainder: true)
-        .join(plastid_recomendations,remainder: true)
+        .join(parsed_fcsgx,             remainder: true)
+        .join(fcsgx_tiara_summary,      remainder: true)
+        .join(fcs_adaptor_file,         remainder: true)
+        .join(trailingns,               remainder: true)
+        .join(barcodes,                 remainder: true)
+        .join(mito_recommendations,     remainder: true)
+        .join(plastid_recommendations,  remainder: true)
         .filter { items ->
             def meta = items[0]
             meta != null &&
