@@ -9,26 +9,25 @@ process GENERATE_HTML_REPORT {
 
     input:
     tuple val(meta),
-        val(assm), path(reference_fasta),
-        val(barc), path(barcode_results,               stageAs: "barcodes/*"),
-        val(sani), path(fasta_sanitation_log,          stageAs: "fasta_sanitation/*"),
-        val(filt), path(fasta_length_filtering_log,    stageAs: "fasta_length_filtering/*"),
-        val(trim), path(trim_ns_results,               stageAs: "trailingns/*"),
-        val(fcsr), path(fcs_gx_report_txt,             stageAs: "fcsgx/*"),
-        val(fcst), path(fcs_gx_taxonomy_rpt,           stageAs: "fcsgx/*"),
-        val(vecs), path(vecscreen_results,             stageAs: "vecscreen/*"),
-        val(kmer), path(kmers_results,                 stageAs: "kmers/**"),
-        val(fcse), path(fcs_adaptor_euk,               stageAs: "fcs/*"),
-        val(fcsp), path(fcs_adaptor_prok,              stageAs: "fcs/*"),
-        val(auto), path(autofilter_results,            stageAs: "autofilter/*"),
-        val(merg), path(merged_table,                  stageAs: "merged/*"),
-        val(phyl), path(phylum_counts,                 stageAs: "coverage/*"),
-        val(btkd), path(btk_output_dir,                stageAs: "btk/*")
-    path(jinja_templates_list,                         stageAs: "templates/*")
+        path(reference_fasta),
+        path(barcode_results,               stageAs: "barcodes/*"),
+        path(trim_ns_results,               stageAs: "trailingns/*"),
+        path(autofilter_results,            stageAs: "autofilter/*"),
+        path(merged_table,                  stageAs: "merged/*"),
+        path(phylum_counts,                 stageAs: "coverage/*"),
+        path(fcs_adaptor,                   stageAs: "fcs/**"),
+        path(vecscreen_results,             stageAs: "vecscreen/*"),
+        path(kmers_results,                 stageAs: "kmers/**"),
+        path(fasta_sanitation_log,          stageAs: "fasta_sanitation/*"),
+        path(fasta_length_filtering_log,    stageAs: "fasta_length_filtering/*"),
+        path(fcs_gx_report_txt,             stageAs: "fcsgx/report/*"),
+        path(fcs_gx_taxonomy_rpt,           stageAs: "fcsgx/taxonomy/*"),
+        path(btk_output_dir,                stageAs: "btk/*")
+    path(jinja_templates_list,              stageAs: "report/site/templates/*")
     path(samplesheet)
     path(params_file)
     val(params_json)
-    path(css_files_list,                                stageAs: "css/*")
+    path(css_files_list,                    stageAs: "report/site/css/*")
 
     output:
     tuple val(meta), path("report/site/*"), emit: report
@@ -42,9 +41,9 @@ process GENERATE_HTML_REPORT {
 
     // Build CLI args using staged file paths (readers). Include only if present.
     def reference_file               = reference_fasta              ? "--reference ${reference_fasta}" : ""
-    def barcode_arg                  = barcode_results              ? "--barcode_file ${barcode_results}" : ""
-    def fcs_euk_arg                  = fcs_adaptor_euk              ? "--fcs_adaptor_euk_file ${fcs_adaptor_euk}" : ""
-    def fcs_prok_arg                 = fcs_adaptor_prok             ? "--fcs_adaptor_prok_file ${fcs_adaptor_prok}" : ""
+    def barcode_arg                  = barcode_results              ? "--barcode_file ./barcode_file.txt" : ""
+    def fcs_euk_arg                  = fcs_adaptor                  ? "--fcs_adaptor_euk_file ./fcs/*_euk*" : ""
+    def fcs_prok_arg                 = fcs_adaptor                  ? "--fcs_adaptor_prok_file ./fcs/*_prok*" : ""
     def trim_ns_arg                  = trim_ns_results              ? "--trim_ns_file ${trim_ns_results}" : ""
     def vecscreen_arg                = vecscreen_results            ? "--vecscreen_file ${vecscreen_results}" : ""
     def autofilter_arg               = autofilter_results           ? "--autofilter_file ${autofilter_results}" : ""
@@ -58,18 +57,19 @@ process GENERATE_HTML_REPORT {
     def fcs_gx_taxonomy_arg          = fcs_gx_taxonomy_rpt          ? "--fcs_gx_taxonomy_rpt ${fcs_gx_taxonomy_rpt}" : ""
 
     // Convert params_json to a properly escaped string for command line
-    def params_json_arg = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
-    // dp24 variables for clarity
-    def btk_included    = "${params.run_create_btk_dataset == 'both' || (params.run_create_btk_dataset == 'genomic' && params.genomic_only) || (params.run_create_btk_dataset == 'organellar' && !params.genomic_only)}"
-    def btk_outdir      = "${params.outdir}/${meta.id}"
+    def params_json_arg             = params_json ? "--params_json '${params_json.replaceAll("'", "\\'")}'" : ""
+    def btk_included                = "${params.run_create_btk_dataset == 'both' || (params.run_create_btk_dataset == 'genomic' && params.genomic_only) || (params.run_create_btk_dataset == 'organellar' && !params.genomic_only)}"
+    def btk_outdir                  = "${params.outdir}/${meta.id}"
     """
-    mkdir -p report/site/templates
-    mkdir -p report/site/css
-    cp templates/*.jinja report/site/templates/
-    cp css/*.css report/site/css/
-
     # Create kmers directory if it doesn't exist
     mkdir -p kmers
+
+    # If barcodes exists, check for contents and then cat
+    if [ -d ./barcodes/ ] && [ "\$(ls -A ./barcodes/)" ]; then
+        cat ./barcodes/* > ./barcode_file.txt
+    else
+        echo "Folder empty, skip barcodes."
+    fi
 
     # Run the report generation script
     generate_html_report.py \\

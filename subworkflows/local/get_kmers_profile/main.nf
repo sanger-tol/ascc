@@ -91,10 +91,8 @@ workflow GET_KMERS_PROFILE {
         .set { collected_files_for_combine }
 
     kmers_results = collected_files_for_combine
-        .map { meta, file ->
-            [[id: meta.id, process: "KMER_RESULTS"], file]
-        }
-        .ifEmpty { [[process: "KMER_RESULTS"],[]] }
+        .map { meta, file -> [[ id: meta.id ], file]  }
+        .ifEmpty { [[:],[]] }
 
     //
     // LOGIC: Collect the results directories from KMER_COUNT_DIM_REDUCTION
@@ -112,12 +110,9 @@ workflow GET_KMERS_PROFILE {
         collected_files_for_combine
     )
     ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
-
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-                        .map { meta, file ->
-                            [[id: meta.id, process: "KMERS"], file]
-                        }
-                        .ifEmpty { [[process: "KMERS"],[]] }
+                        .map { meta, file -> [[ id: meta.id ], file] }
+                        .ifEmpty { [[:],[]] }
 
     emit:
     combined_csv

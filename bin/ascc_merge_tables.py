@@ -7,7 +7,7 @@ import os
 import sys
 import general_purpose_functions as gpf
 
-VERSION = "2.0.1"
+VERSION = "2.0.2"
 DESCRIPTION = """
 Script for merging contaminant check results into one table
 Version: {VERSION}
@@ -58,10 +58,10 @@ def check_paths(paths_dict, required_files):
     out_dict = dict()
 
     for data_type, input_file in paths_dict.items():
-        if input == None:
-            pass
-        else:
+        if input_file != None and not "EMPTY" in input_file:
             out_dict[data_type] = input_file
+        else:
+            out_dict[data_type] = None
 
     return out_dict
 
@@ -294,6 +294,7 @@ def parse_or_pass(input_file: str, name: str):
 
 def main(args):
     paths_dict = dict()
+
     paths_dict["gc_content"] = args.gc_cov
     paths_dict["coverage"] = args.coverage
     paths_dict["tiara"] = args.tiara
@@ -312,6 +313,7 @@ def main(args):
     required_files = ["gc_content"]
 
     paths_dict = check_paths(paths_dict, required_files)
+
     df = load_and_merge_dataframes(paths_dict)
     df.to_csv(f"{args.sample_name}_contamination_check_merged_table.csv", index=False)
 
