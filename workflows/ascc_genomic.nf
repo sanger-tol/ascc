@@ -26,7 +26,7 @@ include { RUN_FCSGX                                     } from '../subworkflows/
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
-//include { DECONTAMINATE_FASTA                           } from '../subworkflows/local/decontaminate_fasta'
+//include { RUN_DECONTAMINATE_FASTA                           } from '../subworkflows/local/run_decontaminate_fasta'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 // FUNCTION IMPORTS
