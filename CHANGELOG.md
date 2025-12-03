@@ -14,11 +14,16 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Reporting for the pipeline output into a more human readable output (html) @eaunin
 - Standardised some channel names
 - Standardised log info and warning calls
+- Standardise tuples, ifEmpty and other operators
 - Changed the main method of kmer counting for memory efficiency
-  - Also added a module to re-generate the kmer string
-- Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel.
-- Added process tags to all channels
-  - caused an issue where combining channels will produce PRIMARY, HAPLOTYPE and null channels, ending pipeline execution, this requires filtering out null channels in some places.
+  - See https://github.com/CobiontID/kmer-counter
+  - Also added a module to re-generate the kmer strings
+- Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel
+- If/else control for processes has been updated to used filter control
+- Strict Syntax update to remove it[0] and replace with named variables, remove the few `|` operators that existed
+- Simplification of data-mapper channel processing before some processes
+- Production profile, update to give blobtoolkit a cleaner name on Sanger LSF
+- Update `ASCC_MERGE_TABLES` to be aware of empty files
 - Use sanger-tol chunked mapping subworkflow for read mapping (by @prototaxites)
 - Use coverm's contig mode for contig depth estimation (by @prototaxites)
 
@@ -26,14 +31,18 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 
 ### `Dependencies`
 
-| Module                          | Old Version | New Versions |
-| ------------------------------- | ----------- | ------------ |
-| GENERATE_HTML_REPORT            | NA          | 1.0          |
-| KMER_COUNTER                    |             |              |
-| REFORMAT_NPY2CSV                | NA          | 1.0.0        |
-| SAMTOOLS_DEPTH                  | 1.22.1      | NA           |
-| SAMTOOLS_DEPTH_AVERAGE_COVERAGE | 1.0         | NA           |
-| COVERM_CONTIG                   | NA          | 0.70         |
+| Module                          | Tool           | Old Version | New Versions |
+| ------------------------------- | -------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT            |                | NA          | 1.0          |
+| KMER_COUNTER                    |                | 1.0.0       | 0.1.2        |
+| REFORMAT_NPY2CSV                |                | NA          | 1.0.0        |
+| ASCC_MERGE_TABLES               |                | 2.0.1       | 2.0.2        |
+| FASTXALIGN_PYFASTXINDEX         | slice_fasta.py | NA          | 1.0.0        |
+| FASTXALIGN_MINIMAP2ALIGN        | slice_fasta.py | NA          | 1.0.0        |
+| FASTXALIGN_MINIMAP2ALIGN        | minimap2       | NA          | 2.30         |
+| SAMTOOLS_DEPTH                  | samtools       | 1.22.1      | NA           |
+| SAMTOOLS_DEPTH_AVERAGE_COVERAGE | samtools       | 1.0         | NA           |
+| COVERM_CONTIG                   | coverm         | NA          | 0.70         |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 

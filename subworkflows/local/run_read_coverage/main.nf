@@ -96,20 +96,12 @@ workflow RUN_READ_COVERAGE {
     )
     ch_versions         = ch_versions.mix(COVERM_CONTIG.out.versions)
 
-    //
-    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-    //
     tsv_ch              = COVERM_CONTIG.out.coverage
-                            .map { meta, file ->
-                                [[id: meta.id, process: "COVERAGE"], file]
-                            }
+                            .map { meta, file -> [ [id: meta.id] , file ] }
                             .ifEmpty { [[:],[]] }
 
     bam_ch              = ch_out_bam
-                            .map { meta, file ->
-                                [[id: meta.id, process: "MAPPED_BAM"], file]
-                            }
+                            .map { meta, file -> [ [id: meta.id] , file ] }
                             .ifEmpty { [[:],[]] }
 
     emit:
