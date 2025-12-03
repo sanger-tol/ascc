@@ -1,10 +1,4 @@
 //
-// NF-CORE MODULE IMPORT
-//
-include { BLAST_BLASTN          } from '../../../modules/nf-core/blast/blastn/main'
-include { SEQKIT_SLIDING        } from '../../../modules/nf-core/seqkit/sliding/main'
-
-//
 // LOCAL MODULE IMPORT
 //
 include { DECONTAMINATE_CLIP_REGIONS_FASTA  } from '../../../modules/local/decontaminate/clip_regions_fasta/main'
