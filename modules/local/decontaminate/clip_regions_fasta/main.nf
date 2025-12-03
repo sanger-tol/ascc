@@ -11,7 +11,7 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
     tuple val(meta), path(fasta), path(contamination_bed)
 
     output:
-    tuple val(meta), path("*.fasta.decontaminated") , emit: decontaminated_fasta
+    tuple val(meta), path("*.decontaminated.fa") , emit: decontaminated_fasta
     path "versions.yml"                             , emit: versions
 
     when:
@@ -22,6 +22,7 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
     def args    = args.ext.args     ?: ""
     """
     clip_regions_bed.py \\
+        --sample_id ${prefix} \\
         --fasta $fasta \\
         --bed $contamination_bed
 
