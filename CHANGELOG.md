@@ -23,6 +23,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Strict Syntax update to remove it[0] and replace with named variables, remove the few `|` operators that existed
 - Simplification of data-mapper channel processing before some processes
 - Production profile, update to give blobtoolkit a cleaner name on Sanger LSF
+- Update `ASCC_MERGE_TABLES` to be aware of empty files
 
 ### `Bugs`
 
@@ -33,6 +34,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 | GENERATE_HTML_REPORT | NA          | 1.0          |
 | KMER_COUNTER         | 1.0.0       | 0.1.2        |
 | REFORMAT_NPY2CSV     | NA          | 1.0.0        |
+| ASCC_MERGE_TABLES    | 2.0.1       | 2.0.2        |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
