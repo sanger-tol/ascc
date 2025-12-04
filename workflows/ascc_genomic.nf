@@ -685,7 +685,9 @@ workflow ASCC_GENOMIC {
     //          EXEC MODULE PRODUCES NO VERSIONS
     //
     combined_ch
-        .combine( reads_path.collect() )
+        .combine( reads_path.collect()
+            .map { paths -> [paths] }
+        )
         .map { meta, ref, alarm, path_list ->
             [[id:meta.id], path_list]
         }
