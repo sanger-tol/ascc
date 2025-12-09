@@ -10,7 +10,10 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": [
+                "input",
+                "outdir"
+            ],
             "properties": {
                 "input": {
                     "type": "string",
@@ -48,12 +51,20 @@
                     "description": "Type of read (hifi)",
                     "fa_icon": "fas fa-input-text",
                     "default": "hifi",
-                    "enum": ["hifi", "clr", "ont", "illumina"]
+                    "enum": [
+                        "hifi",
+                        "clr",
+                        "ont",
+                        "illumina"
+                    ]
                 },
                 "reads_layout": {
                     "type": "string",
                     "description": "Specify whether all reads are SINGLE or PAIRED end reads",
-                    "enum": ["SINGLE", "PAIRED"],
+                    "enum": [
+                        "SINGLE",
+                        "PAIRED"
+                    ],
                     "fa_icon": "fas fa-input-text",
                     "default": "SINGLE"
                 },
@@ -188,122 +199,214 @@
                 "run_essentials": {
                     "type": "string",
                     "description": "Run essential jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_kmers": {
                     "type": "string",
                     "description": "Run kmer jobs on assemblies",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "both",
+                        "off"
+                    ],
                     "default": "genomic"
                 },
                 "run_tiara": {
                     "type": "string",
                     "description": "Run tiara jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_coverage": {
                     "type": "string",
                     "description": "Run coverage jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_nt_blast": {
                     "type": "string",
                     "description": "Run nt_blast jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_html_report": {
                     "type": "string",
                     "description": "Run HTML report generation on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "off"
                 },
                 "run_nr_diamond": {
                     "type": "string",
                     "description": "Run nr_diamond jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_uniprot_diamond": {
                     "type": "string",
                     "description": "Run uniprot_diamond jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_kraken": {
                     "type": "string",
                     "description": "Run kraken jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_fcsgx": {
                     "type": "string",
                     "description": "Run fcsgx jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_fcs_adaptor": {
                     "type": "string",
                     "description": "Run fcs_adaptor jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_vecscreen": {
                     "type": "string",
                     "description": "Run vecscreen jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_btk_busco": {
                     "type": "string",
                     "description": "Run btk_busco jobs on assemblies",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "both",
+                        "off"
+                    ],
                     "default": "genomic"
                 },
                 "run_pacbio_barcodes": {
                     "type": "string",
                     "description": "Run pacbio_barcodes jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_organellar_blast": {
                     "type": "string",
                     "description": "Run organellar_blast jobs on assemblies",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "both",
+                        "off"
+                    ],
                     "default": "genomic"
                 },
                 "run_autofilter_assembly": {
                     "type": "string",
                     "description": "Run autofilter_assembly jobs on assemblies",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "both",
+                        "off"
+                    ],
                     "default": "genomic"
                 },
                 "run_create_btk_dataset": {
                     "type": "string",
                     "description": "Run create_btk_dataset jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "organellar",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "run_merge_datasets": {
                     "type": "string",
                     "description": "Run merge_datasets jobs on assemblies",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "both",
+                        "off"
+                    ],
                     "default": "genomic"
                 },
                 "run_decontaminate_fasta": {
                     "type": "string",
                     "description": "Run decontaminate fasta, fasta will automatically be decontaminated if btk doesn't run",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": [
+                        "genomic",
+                        "both",
+                        "off"
+                    ],
                     "default": "both"
                 },
                 "btk_busco_run_mode": {
                     "type": "string",
                     "description": "Should btk be run as mandatory or conditional on levels of contamination.",
                     "fa_icon": "fas fa-file-lines",
-                    "enum": ["mandatory", "conditional"],
+                    "enum": [
+                        "mandatory",
+                        "conditional"
+                    ],
                     "default": "conditional"
                 },
                 "genomic_only": {
@@ -326,6 +429,12 @@
                     "mimetype": "text/csv",
                     "description": "Override the internal FCS and provide your own. READ THE DOCS TO MAKE SURE IT IS GENERATED CORRECTLY.",
                     "fa_icon": "fas fa-file-lines"
+                },
+                "deepclean": {
+                    "type": "boolean",
+                    "description": "Delete the entire workDir",
+                    "fa_icon": "fas fa-file-lines",
+                    "default": false
                 }
             }
         },
@@ -396,7 +505,14 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ],
                     "hidden": true
                 },
                 "email_on_fail": {

@@ -144,5 +144,37 @@ workflow.onComplete {
         } catch (Exception e) {
             log.warn "Failed to create completion file: ${e.message}"
         }
+
+        if ( params.deepclean && worflow.success ) {
+
+            try {
+                //simple command to get size of work directory
+                def workDirSizeFunc = "du -sh ${workflow.workDir}".execute()
+                workDirSizeFunc.waitFor()
+
+                //print total size of work directory for end user
+                log.info "[ASCC INFO]: WorkDir Size: ${workDirSizeFunc.in.text.split()[0]}"
+
+
+                //delete workdir
+                log.info "Deleting WorkDir: ${workflow.workDir}"
+                def deleteWorkDirFunc = "rm -rf ${workflow.workDir}".execute()
+                deleteWorkDirFunc.waitFor()
+
+                if (deleteProc.exitValue() == 0) {
+                    log.info "[ASCC INFO]: Work directory cleanup completed!"
+                } else {
+                    log.warn "[ASCC WARN]: Cleanup encountered issues"
+                }
+
+            } catch (Exception e) {
+                log.warn "[ASCC WARN]: Could not clean up work directory: ${e.message}"
+            }
+
+        } else if (!workflow.success) {
+            log.info "[ASCC INFO]: Pipeline failed - work directory preserved for debugging: ${workflow.workDir}"
+        } else {
+            log.info "[ASCC INFO]: No Cleanup needed for: ${workflow.workDir}"
+        }
     }
 }
