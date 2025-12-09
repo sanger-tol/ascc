@@ -161,7 +161,7 @@ workflow.onComplete {
                 def deleteWorkDirFunc = "rm -rf ${workflow.workDir}".execute()
                 deleteWorkDirFunc.waitFor()
 
-                if (deleteProc.exitValue() == 0) {
+                if (deleteWorkDirFunc.exitValue() == 0) {
                     log.info "[ASCC INFO]: Work directory cleanup completed!"
                 } else {
                     log.warn "[ASCC WARN]: Cleanup encountered issues"
