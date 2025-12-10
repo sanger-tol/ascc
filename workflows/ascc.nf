@@ -171,7 +171,7 @@ workflow.onComplete {
                 log.warn "[ASCC WARN]: Could not clean up work directory: ${e.message}"
             }
 
-        } else if (!params.deepclean) {
+        } else {
             log.info "[ASCC INFO]: No Cleanup needed for: ${workflow.workDir}"
         }
     }
