@@ -171,9 +171,7 @@ workflow.onComplete {
                 log.warn "[ASCC WARN]: Could not clean up work directory: ${e.message}"
             }
 
-        } else if (!workflow.success) {
-            log.info "[ASCC INFO]: Pipeline failed - work directory preserved for debugging: ${workflow.workDir}"
-        } else {
+        } else if (!params.deepclean) {
             log.info "[ASCC INFO]: No Cleanup needed for: ${workflow.workDir}"
         }
     }
