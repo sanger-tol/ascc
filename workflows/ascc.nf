@@ -145,7 +145,7 @@ workflow.onComplete {
             log.warn "Failed to create completion file: ${e.message}"
         }
 
-        if ( params.deepclean && worflow.success ) {
+        if ( params.deepclean ) {
 
             try {
                 //simple command to get size of work directory
