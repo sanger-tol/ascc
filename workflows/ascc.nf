@@ -140,9 +140,9 @@ workflow.onComplete {
                 Launch directory: ${workflow.launchDir}
                 Command line: ${workflow.commandLine}
             """.stripIndent()
-            log.info "Completion file created: ${completionFile}"
+            log.info "[ASCC INFO] Completion file created: ${completionFile}"
         } catch (Exception e) {
-            log.warn "Failed to create completion file: ${e.message}"
+            log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
         }
     }
 }

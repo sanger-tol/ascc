@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            128,
+            132,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -31,6 +31,14 @@
                 "CREATE_BTK_DATASET": {
                     "python": "3.9.13",
                     "create_btk_dataset": "3.0.0"
+                },
+                "DECONTAMINATE_CLIP_REGIONS_FASTA": {
+                    "python": "3.12.0",
+                    "clip_regions_bed.py": "1.0.0"
+                },
+                "DECONTAMINATE_GENERATE_BED": {
+                    "python": "3.12.0",
+                    "generate_contamination_bed.py": "1.0.0"
                 },
                 "DIAMOND_BLASTX": {
                     "diamond": "2.1.12"
