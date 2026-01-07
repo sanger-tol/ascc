@@ -44,7 +44,7 @@ workflow GENERATE_GENOME {
     ch_versions     = ch_versions.mix( GET_LARGEST_SCAFFOLD.out.versions )
 
     emit:
-    max_scaff_size  = GET_LARGEST_SCAFFOLD.out.scaff_size.toInteger()
+    max_scaff_size  = GET_LARGEST_SCAFFOLD.out.scaff_size.toLong()
     dot_genome      = GNU_SORT.out.sorted
     ref_index       = SAMTOOLS_FAIDX.out.fai
     reference_tuple = to_chromsize
