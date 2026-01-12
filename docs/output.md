@@ -73,10 +73,13 @@ Depending on the alignment length and percentage identity, the script can recomm
 ### Plastid Organellar Blast
 
 <details markdown="1">
+<summary>Output files</summary>
+
 - `plastid_organellar_blast/`
-  `*-plastid_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected plastid contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
+  `*-plastid_genome.contamination_recommendation` – A file that contains the names of sequences that are suspected plastid contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected plastid contaminants.
 
 </details>
+
 
 This subworkflow uses BLAST against a user-provided plastid sequence to detect leftover organellar sequences in the assembly file that should contain only chromosomal sequences. The method is the same as in the Mito Organellar Blast part.
 
@@ -172,6 +175,34 @@ Creates a BlobToolKit dataset folder compatible with BlobToolKit viewer (https:/
 </details>
 
 Autofilter and check assembly returns a decontaminated genome file as well as summaries of the contamination found.
+
+#### FCS-GX alarm thresholds
+
+The `fcs-gx_alarm_indicator_file.txt` is created when an alarm condition is met,
+based on how much sequence is removed by FCS-GX filtering (and optionally how
+`REVIEW`/`INFO` categories are treated depending on the `--review_info` setting).
+
+The alarm uses the following metrics and compares them to user-defined thresholds:
+
+- **TOTAL_LENGTH_REMOVED (bp)**  
+  Total number of bases removed from the assembly.  
+  Compared against: `--alarm_length_removed`.
+
+- **PERCENTAGE_LENGTH_REMOVED (%)**  
+  Percentage of removed bases relative to the total input assembly length.  
+  Compared against: `--alarm_percentage`.
+
+- **LARGEST_SCAFFOLD_REMOVED (bp)**  
+  Length of the largest single removed sequence.  
+  Compared against: `--alarm_scaff_length`.
+
+- **PERCENTAGE_SCAFFOLDS_REMOVED (%)**  
+  Percentage of scaffolds removed relative to the total scaffold count.  
+  Compared against: `--alarm_scaff_percent_removed`.
+
+If the alarm triggers, the pipeline uses `fcs-gx_alarm_indicator_file.txt` to
+switch on additional inspection steps such as running the BlobToolKit pipeline.
+
 
 ### Sanger-TOL BTK
 
