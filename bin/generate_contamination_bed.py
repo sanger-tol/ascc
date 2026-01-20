@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-# Adapted from ascc_nf_core_to_bed.py by James Torrance (jt8@sanger.ac.uk)
+# Written as ascc_nf_core_to_bed.py by James Torrance (jt8@sanger.ac.uk)
+# Adapted by William Eagles (we3@sanger.ac.uk)
+# Adapted by Damon-Lee Pointon (dp24@sanger.ac.uk)
 
 from typing import Dict, List, Tuple
 import os
@@ -9,8 +11,21 @@ import re
 import collections
 import csv
 import gzip
+import logging
 from Bio import SeqIO
 import argparse
+
+VERSION = "V1.1.0"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),  # logs to terminal
+        logging.FileHandler("GenerateDecontaminationBed.log")  # logs to file
+    ]
+)
+logger = logging.getLogger('gdb_logger')
 
 """Generate BED file from decon results"""
 
@@ -52,20 +67,25 @@ def parse_args(args=None):
         nargs="?",
         help="",
     )
-    parser.add_argument("--version", action="version", version="1.0.0")
+    parser.add_argument("--version", action="version", version=VERSION)
 
-    return parser.parse_args(args)
+    return parser.parse_args()
 
 def main():
     args = parse_args()
+
+    logger.info(f"Running with ARGS: {args}")
 
     decon_tolid_type_dir = args.decon_tolid_type_dir
     is_organelle = args.is_organelle
     merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files = get_decon_bed_files(decon_tolid_type_dir, is_organelle, args.no_fcs_gx, args.no_barcodes, [])
 
     # BASE BED FILE NAMES OFF ASSEMBLY
-    main_bed_output_file = f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.contamination.bed"
-    tiara_bed_output_file = f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.tiara.bed"
+    main_bed_output_file = f"{re.sub('.fa(sta)?.gz$', '', args.assembly_path)}.contamination.bed"
+    tiara_bed_output_file = f"{re.sub('.fa(sta)?.gz$', '', args.assembly_path)}.tiara.bed"
+
+    logger.info(f"Found Main Bed File: {main_bed_output_file}")
+    logger.info(f"Found Tiara: {tiara_bed_output_file}")
 
     main_bed_output_handle = open(main_bed_output_file, "w")
     tiara_bed_output_handle = open(tiara_bed_output_file, "w")
@@ -99,7 +119,7 @@ def main():
         for organelle in ["mito", "plastid"]:
             organelle_recommendation_dir = search_directory_for_file_pattern(
                 args.decon_tolid_type_dir,
-                f"organelle_contamination_recommendations.*_{organelle.upper()}$",
+                f"organelle_contamination_recommendations.{organelle}_{organelle}$",
                 no_files_okay=True,
             )
             if organelle_recommendation_dir is not None and os.path.isdir(
@@ -107,9 +127,10 @@ def main():
             ):
                 organelle_file = search_directory_for_file_pattern(
                     organelle_recommendation_dir,
-                    f"{organelle.upper()}.*.bed$",
+                    f"_{organelle.upper()}.ALL.unfiltered_scaffold_coverage.bed$",
                     no_files_okay=True,
                 )
+                logger.info(f"Found Organelle file: {organelle_file}")
                 if organelle_file is not None:
                     main_bed_output_handle.write(f"# {long_organelle_name[organelle]}\n")
                     organelle_sequences_removed, scaffolds_removed_for_organelle = parse_organelle_csv(organelle_file)
@@ -182,11 +203,11 @@ def main():
 
     contamination_report, is_abnormal, abnormal_details = build_contamination_report(args.assembly_type, length_for_scaffold, lengths_removed, scaffolds_removed, scaffold_count, fcs_gx_taxonomy_removed, sequences_removed_by_reason, fcs_ambiguity_text)
 
-    with open(f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.report.txt", 'w') as report_file:
+    with open(f"{re.sub('.fa(sta)?.gz$', '', args.assembly_path)}.report.txt", 'w') as report_file:
         report_file.write(contamination_report)
 
-        with open(f"{re.sub(".fa(sta)?.gz$", "", args.assembly_path)}.abnormal_details.txt", 'w') as report_file:
-            report_file.write(abnormal_details)
+    with open(f"{re.sub('.fa(sta)?.gz$', '', args.assembly_path)}.abnormal_details.txt", 'w') as report_file:
+        report_file.write(abnormal_details)
 
     return contamination_report, is_abnormal, abnormal_details
 
@@ -261,22 +282,22 @@ def build_contamination_report(assembly_type: str, length_for_scaffold, lengths_
                     >= alarm_threshold_for_parameter_by_reason[reason][parameter]
                 ):
                     alarm_by_reason_description += f" in assembly {assembly_type} {parameter} is {value_for_parameter_by_reason[reason][parameter]} which is above the alarm threshold {alarm_threshold_for_parameter_by_reason[reason][parameter]}."
-                    print("abnormal_contamination_report triggered")
+                    logger.info("abnormal_contamination_report triggered")
                     report_is_abnormal = True
-                    print(alarm_by_reason_description)
+                    logger.info(alarm_by_reason_description)
 
     for parameter in value_for_parameter:
         alarm_description = ""
-        print(f"{parameter}: {value_for_parameter[parameter]}")
+        logger.info(f"{parameter}: {value_for_parameter[parameter]}")
         if (
             parameter in alarm_threshold_for_parameter
             and value_for_parameter[parameter]
             >= alarm_threshold_for_parameter[parameter]
         ):
             alarm_description += f" in assembly {assembly_type} {parameter} is {value_for_parameter[parameter]} which is above the alarm threshold {alarm_threshold_for_parameter[parameter]}."
-            print("abnormal_contamination_report triggered")
+            logger.info("abnormal_contamination_report triggered")
             report_is_abnormal = True
-            print(alarm_description)
+            logger.info(alarm_description)
         if alarm_description != "":
             alarm_description = "Abnormal contamination report:" + alarm_description
             abnormal_details += alarm_description
@@ -296,8 +317,7 @@ def parse_fcs_gx_file(fcs_gx_file: str) -> Dict[str, str]:
         for line in fcs_gx_handle:
             fields = re.split(",", line.rstrip())
             if len(fields) < 4:
-                exit(f"FCS-GX - Not enough fields in line {line}")
-                sys
+                sys.exit(f"FCS-GX - Not enough fields in line {line}")
             scaffold = fields[0]
             taxonomy = fields[1]
             fcs_gx_div = fields[3]
@@ -314,15 +334,15 @@ def parse_fcs_adapator_file(fcs_adaptor_file: str, length_for_scaffold) -> Dict[
         for line in fcs_adaptor_handle:
             fields = re.split(r"\s+", line.rstrip())
             if not re.match("^#", line):
-                accession = fields[0]
+                accession: str = fields[0]
                 length = fields[1]
                 action = fields[2]
-                ranges = fields[3]
-                start = None
-                end = None
-                treatment = None
+                ranges: str = fields[3]
+                start = 0
+                end = 0
+                treatment = "NA"
                 if action == "ACTION_TRIM":
-                    range_list = re.split(",", ranges)
+                    range_list: list[str] = re.split(",", ranges)
                     for range in range_list:
                         (start, end) = re.split(r"\.\.", range)
                         start = int(start)
@@ -340,7 +360,8 @@ def parse_fcs_adapator_file(fcs_adaptor_file: str, length_for_scaffold) -> Dict[
                 else:
                     exit(f"Action not recognised: {action}")
 
-                main_output = "\t".join([accession, str(start), str(end), treatment]) + "\n"
+                list_to_output: list[str] = [accession, str(start), str(end), treatment]
+                main_output = "\t".join(list_to_output) + "\n"
                 sequences_removed[main_output] = end - start
         return sequences_removed
 
@@ -372,7 +393,7 @@ def parse_trim_ns_file(trim_ns_file: str) -> Dict[str, int]:
             ):  # You may just want one
                 scaffold = fields[1]
                 start = int(fields[2]) - 1
-                end = fields[3]
+                end = int(fields[3])
                 treatment = "TRIM"
                 main_output ="\t".join([scaffold, str(start), str(end), treatment]) + "\n"
                 sequences_removed[main_output] = end - start
@@ -400,7 +421,7 @@ def parse_organelle_csv(organelle_file: str):
                 sequences_removed[main_output] = end
     return sequences_removed, scaffolds_removed
 
-def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx: bool, no_barcodes: bool, longread_paths: List[str]) -> Dict[str, str]:
+def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx: bool, no_barcodes: bool, longread_paths: List[str]):
     if not no_fcs_gx and not is_organelle:
         merged_filter_file = search_directory_for_file_pattern(
             decon_tolid_type_dir + "/autofilter/", "_ABNORMAL_CHECK.csv$"
@@ -408,6 +429,8 @@ def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx
         fcs_gx_file = search_directory_for_file_pattern(
             decon_tolid_type_dir + "/fcsgx_data/", "_parsed_fcsgx.csv$"
         )
+        logger.info(f"Found FCS_GX file: {fcs_gx_file}")
+        logger.info(f"Found Autofilter file: {merged_filter_file}")
     else:
         merged_filter_file = None
         fcs_gx_file = None
@@ -415,16 +438,22 @@ def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx
     fcs_adaptor_file = search_directory_for_file_pattern(
         decon_tolid_type_dir + "/fcs_adaptor/", "_euk.fcs_adaptor_report.txt$"
     )
+    logger.info(f"Found FCS_adaptor files: {fcs_adaptor_file}") if len(fcs_adaptor_file) > 0 else "NA"
+
     trim_ns_file = search_directory_for_file_pattern(
         decon_tolid_type_dir + "/trailingns/", "_trim_Ns$"
     )
     if trim_ns_file is None:
-        print("Could not find trim Ns file")
+        logger.info("Could not find trim Ns file")
         sys.exit(1)
+    else:
+        logger.info(f"Found TrimNs: {trim_ns_file}")
 
     barcode_files = search_directory_for_file_pattern(
         decon_tolid_type_dir + "/filter_barcode/", "_filtered.txt$", multiple_results=True
     )
+
+    logger.info(f"Found Barcode Files: {barcode_files}")
 
     if len(barcode_files) == 0 and not no_barcodes:
         # Were there barcodes in the input file?
@@ -437,6 +466,7 @@ def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx
                 )
                 # Quit if there was a barcode in the input filename, but otherwise continue
                 for pacbio_reads_file in pacbio_reads_files:
+                    logger.info(f"Found Pacbio reads file: {pacbio_reads_file}")
                     if re.search(r"bc\d{4}", pacbio_reads_file):
                         barcodes_found = False
             else:
@@ -452,9 +482,11 @@ def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx
     return merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files
 
 def search_directory_for_file_pattern(directory, pattern, multiple_results=False, no_files_okay = False):
+    logger.info(f"Searching {directory} -- for {pattern}")
     if os.path.isdir(directory):
         match_files = []
         for candidate_file in os.scandir(directory):
+            logger.info(f"Candidate file for {pattern} is {candidate_file}")
             if re.search(pattern, candidate_file.name):
                 match_files.append(directory + '/' + candidate_file.name)
         if multiple_results:
@@ -465,10 +497,10 @@ def search_directory_for_file_pattern(directory, pattern, multiple_results=False
             if len(match_files) == 0 and no_files_okay:
                 return None
             else:
-                print(f'Could not find unique file for pattern {pattern}: candidates include {match_files}')
+                logger.info(f'Could not find unique file for pattern {pattern}: candidates include {match_files}')
                 sys.exit(1)
     else:
-        print(f'Not a directory: {directory}')
+        logger.info(f'Not a directory: {directory}')
         sys.exit(1)
 
 

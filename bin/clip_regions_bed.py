@@ -9,6 +9,20 @@ from Bio.Seq import Seq
 import sys
 import os
 import argparse
+from datetime import datetime
+import logging
+
+VERSION = "V1.1.0"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),  # logs to terminal
+        logging.FileHandler("ClipRegions.log")  # logs to file
+    ]
+)
+logger = logging.getLogger('cr_logger')
 
 class Assembly:
 
@@ -48,7 +62,7 @@ class Assembly:
             if zip_suffix is None:
                 zip_suffix = ''
         else:
-            print('Error finding assembly label')
+            logger.warning('Error finding assembly label')
             quit()
 
         return (fasta_suffix, original_dir, zip_suffix)
@@ -60,7 +74,7 @@ class Assembly:
         if fasta_file_match:
             zipped_fasta_file = fasta_file_match.group(1)
         else:
-            print('Error finding fasta file')
+            logger.warning('Error finding fasta file')
             quit()
 
         return zipped_fasta_file
@@ -74,8 +88,12 @@ class Assembly:
 
         return unzipped_assembly_copy
 
+    def get_todays_date(self):
+        current_datetime = datetime.now()
+        return f"{current_datetime.year}{current_datetime.month}{current_datetime.day}"
+
     def get_decontaminated_fasta_file(self):
-        return(self.original_dir + self.assembly_label + '.decontaminated.fa')
+        return(self.original_dir + self.assembly_label + '_' + self.get_todays_date() + '.decontaminated.fa')
 
     def get_contamination_file(self):
         contamination_file = self.original_dir + self.assembly_label + '.contamination'
@@ -91,23 +109,30 @@ class Assembly:
     def get_plastid_fasta_file(self):
         return(self.original_dir + self.assembly_label + '.plastid_removed.fa')
 
-def main():
+
+def sort_termini(terminus):
+	if terminus['TERMINUS'] == 'END':
+		terminus['POSITION'] += 0.5
+	return terminus['POSITION']
+
+
+def parse_args():
 
     parser = argparse.ArgumentParser(description='Remove contamination')
     parser.add_argument("--sample_id", type=str, help='Name for assebmly')
     parser.add_argument("--fasta", type=str, help='FASTA files to clip')
     parser.add_argument("--bed", type=str, help='Contamination BED file')
-    parser.add_argument("--version", action="version", version="1.0.0")
+    parser.add_argument("--verbose", action="store_false", help="Add verbose output")
+    parser.add_argument("--version", action="version", version=VERSION)
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+
+    args = parse_args()
 
     subassembly = Assembly(args.sample_id, args.fasta)
-
-    verbose = True
-
-    # INSTRUCTIONS: python3.4.0 clip_regions_oo.py [SUBASSEMBLY_LABEL]
-
-    # NOTE: CHECK YOUR EXAMPLE DATA!
 
     coord_list_for_sequence = {}
 
@@ -207,6 +232,7 @@ def main():
         max_treatment = None
         for coord_pair_and_treatment in sorted(coord_list_for_sequence[id], key = lambda cpt: cpt[0]):
             if coord_pair_and_treatment[0] <= max_end:
+                logger.info(f"Screening coordinate overlap in {id} - TREATMENT: {coord_pair_and_treatment[2]}, {max_treatment}")
                 print('Screening coordinate overlap in ' + id + ' TREATMENT:' + coord_pair_and_treatment[2] + ' vs ' + max_treatment)
             if coord_pair_and_treatment[1] > max_end:
                 max_end = coord_pair_and_treatment[1]
@@ -337,14 +363,14 @@ def main():
             remove_flag = False
 
             if(record.id in coord_list_for_sequence):
-                if verbose:
+                if args.verbose:
                     print('Extracting from', record.id)
 
                 last_end = 0
                 edited_record = SeqRecord(Seq(''), id=record.id, description = record.description, name = record.name)
                 for coord_pair_and_treatment in sorted(coord_list_for_sequence[record.id], key = lambda cpt: cpt[0]):
 
-                    if verbose:
+                    if args.verbose:
                         print('\t', coord_pair_and_treatment)
 
                     # We handle removal of mito sequence by treating it as a REMOVE entry and a MITOCHONDRIAL entry
@@ -399,10 +425,6 @@ def main():
         SeqIO.write(plastid_records, plastid_output_handle, 'fasta')
         plastid_output_handle.close()
 
-def sort_termini(terminus):
-	if terminus['TERMINUS'] == 'END':
-		terminus['POSITION'] += 0.5
-	return terminus['POSITION']
 
 if __name__ == "__main__":
 	main()
