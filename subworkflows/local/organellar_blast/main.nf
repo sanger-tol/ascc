@@ -165,7 +165,8 @@ workflow ORGANELLAR_BLAST {
 
 
     emit:
-    organelle_report= ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations
-    versions        = ch_versions
+    organelle_report        = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations
+    full_organelle_report   = reformatted_recommendations
+    versions                = ch_versions
 
 }

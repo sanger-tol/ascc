@@ -3,10 +3,11 @@
 //
 include { DECONTAMINATE_GENERATE_BED        } from '../../../modules/local/decontaminate/generate_bed/main'
 include { DECONTAMINATE_CLIP_REGIONS_FASTA  } from '../../../modules/local/decontaminate/clip_regions_fasta/main'
+include { GZIP                              } from '../../../modules/local/gzip/main'
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder                           } from "${projectDir}/lib/ascc_utils.groovy"
+include { getEmptyPlaceholder               } from "${projectDir}/lib/ascc_utils.groovy"
 
 workflow RUN_DECONTAMINATE_FASTA {
     take:
@@ -20,7 +21,7 @@ workflow RUN_DECONTAMINATE_FASTA {
     plastid_recommendations
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions     = Channel.empty()
 
     //
     // LOGIC: DATAMAPPER FOR DECONTAMINATE_GENERATE_BED
@@ -54,29 +55,41 @@ workflow RUN_DECONTAMINATE_FASTA {
         }
         .set{ merge_input_channel}
 
+    merge_input_channel.view{"Merged Channel for Decon Bed: $it"}
 
     //
     // MODULE: GENERATES CONTAMINATION .BED
     //
     DECONTAMINATE_GENERATE_BED (
-        merge_input_channel
+        merge_input_channel,
+        [[:],[]]
     )
-    ch_versions             = ch_versions.mix(DECONTAMINATE_GENERATE_BED.out.versions)
+    ch_versions     = ch_versions.mix(DECONTAMINATE_GENERATE_BED.out.versions)
 
 
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
     //
     DECONTAMINATE_CLIP_REGIONS_FASTA (
-        DECONTAMINATE_GENERATE_BED.out.main_contamination_data
+        DECONTAMINATE_GENERATE_BED.out.contamination_bed
     )
-    ch_versions             = ch_versions.mix(DECONTAMINATE_CLIP_REGIONS_FASTA.out.versions)
+    ch_versions     = ch_versions.mix(DECONTAMINATE_CLIP_REGIONS_FASTA.out.versions)
 
+
+    //
+    // MODULE: ZIP THE DECONTAMINATED FASTA
+    //
+    GZIP (
+        DECONTAMINATE_CLIP_REGIONS_FASTA.out.decontaminated_fasta
+    )
+    ch_versions     = ch_versions.mix(GZIP.out.versions)
 
     emit:
-    // contamination_report_txt    = DECONTAMINATE_CLIP_REGIONS_FASTA.out.contamination_report_txt
-    // contamination_bed           = DECONTAMINATE_CLIP_REGIONS_FASTA.out.contamination_bed
-    // decontaminated_fasta        = DECONTAMINATE_CLIP_REGIONS_FASTA.out.decontaminated_fasta
-    versions                    = ch_versions
+    jira_contamination_report       = DECONTAMINATE_GENERATE_BED.out.jira_report
+    tiara_contamination_report      = DECONTAMINATE_GENERATE_BED.out.tiara_bed
+    abnormal_contamination_report   = DECONTAMINATE_GENERATE_BED.out.abnormal_report
+    contamination_bed               = DECONTAMINATE_GENERATE_BED.out.contamination_bed
+    decontaminated_fasta            = GZIP.out.gzipped
+    versions                        = ch_versions
 
 }
