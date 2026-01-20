@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - Red Notebook [##/##/2025]
+## [0.6.0] - Red Notebook [##/01/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -24,17 +24,25 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Simplification of data-mapper channel processing before some processes
 - Production profile, update to give blobtoolkit a cleaner name on Sanger LSF
 - Update `ASCC_MERGE_TABLES` to be aware of empty files
+- Adding the RUN_DECONTAMINATION subworkflow which will produce a decontamination fasta.
+- Added a `du -sh` command to the completion file so we can easily see how much storage the run eats up.
+- More outputs from the `ORGANELLAT_BLAST` processes.
 
 ### `Bugs`
 
+- Currently, `DECONTAMINATE_CLIP_REGIONS_FASTA` should only run if `BLOBTOOLKIT` is not run. This is because, `BTK` would indicate there is enough contamination in the assembly to make a "decontaminated.fa" useless.
+
 ### `Dependencies`
 
-| Module               | Old Version | New Versions |
-| -------------------- | ----------- | ------------ |
-| GENERATE_HTML_REPORT | NA          | 1.0          |
-| KMER_COUNTER         | 1.0.0       | 0.1.2        |
-| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
-| ASCC_MERGE_TABLES    | 2.0.1       | 2.0.2        |
+| Module                           | Old Version | New Versions |
+| -------------------------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT             | NA          | 1.0          |
+| KMER_COUNTER                     | 1.0.0       | 0.1.2        |
+| REFORMAT_NPY2CSV                 | NA          | 1.0.0        |
+| ASCC_MERGE_TABLES                | 2.0.1       | 2.0.2        |
+| DECONTAMINATE_CLIP_REGIONS_FASTA | NA          | 1.1.0        |
+| DECONTAMINATE_GENERATE_BED       | NA          | 1.1.0        |
+| GZIP                             | NA          | 1.13         |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
