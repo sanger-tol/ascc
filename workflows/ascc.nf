@@ -127,12 +127,17 @@ workflow.onComplete {
     if (workflow.success) {
         try {
             def completionFile = file("${params.outdir}/workflow_completed.txt")
+
+            def du = ["du", "-sh", workflow.workDir.toString()].execute()
+            du.waitFor()
+
             completionFile.text = """
                 Workflow completed successfully!
                 Completed at: ${workflow.complete}
                 Duration: ${workflow.duration}
                 Success: ${workflow.success}
                 Work directory: ${workflow.workDir}
+                Work directory size: ${du.text.trim()}
                 Exit status: ${workflow.exitStatus}
                 Run name: ${workflow.runName}
                 Session ID: ${workflow.sessionId}

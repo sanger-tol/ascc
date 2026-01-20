@@ -229,7 +229,7 @@ workflow ASCC_GENOMIC {
         ej_reference_tuple,
         organellar_check.mito
     )
-    ch_versions = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+    ch_versions     = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
 
 
     //
@@ -239,21 +239,28 @@ workflow ASCC_GENOMIC {
         ej_reference_tuple,
         organellar_check.plastid
     )
-    ch_versions = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
 
     //
     // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
     //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
     //
-    ch_mito     = MITO_ORGANELLAR_BLAST.out.organelle_report
-                    .map { meta, file -> [[id: meta.id ], file] }
-                    .ifEmpty { [[:],[]] }
+    ch_mito         = MITO_ORGANELLAR_BLAST.out.organelle_report
+                        .map { meta, file -> [[id: meta.id ], file] }
+                        .ifEmpty { [[:],[]] }
 
-    ch_chloro   = PLASTID_ORGANELLAR_BLAST.out.organelle_report
-                    .map { meta, file -> [[id: meta.id ], file] }
-                    .ifEmpty { [[:],[]] }
+    ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report
+                        .map { meta, file -> [[id: meta.id ], file] }
+                        .ifEmpty { [[:],[]] }
 
+    ch_mito_full    = MITO_ORGANELLAR_BLAST.out.full_organelle_report
+                        .map { meta, file -> [[id: meta.id ], file] }
+                        .ifEmpty { [[:],[]] }
+
+    ch_chloro_full  = MITO_ORGANELLAR_BLAST.out.full_organelle_report
+                        .map { meta, file -> [[id: meta.id ], file] }
+                        .ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -582,7 +589,9 @@ workflow ASCC_GENOMIC {
             log.info "[ASCC INFO]: CONTAMINATION THRESHOLD NOT MET"
             log.info "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
             log.info "\t- You can verify here: $file"
+            return [meta, file]
         }
+        .set { skipped_btk_ch }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
         log.warn "[ASCC WARN]: run_autofilter_assembly is off, but run_btk_busco != off"
@@ -796,8 +805,8 @@ workflow ASCC_GENOMIC {
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,
-        ch_mito,
-        ch_chloro
+        ch_mito_full,
+        ch_chloro_full
     )
     ch_versions = ch_versions.mix(RUN_DECONTAMINATE_FASTA.out.versions)
 
