@@ -11,7 +11,7 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
     tuple val(meta), path(fasta), path(contamination_bed)
 
     output:
-    tuple val(meta), path("*.decontaminated.fa") , emit: decontaminated_fasta
+    tuple val(meta), path("*.decontaminated.fa")    , emit: decontaminated_fasta
     path "versions.yml"                             , emit: versions
 
     when:
