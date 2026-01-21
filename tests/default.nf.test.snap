@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            132,
+            134,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -34,11 +34,11 @@
                 },
                 "DECONTAMINATE_CLIP_REGIONS_FASTA": {
                     "python": "3.12.0",
-                    "clip_regions_bed.py": "1.0.0"
+                    "clip_regions_bed.py": "1.1.0"
                 },
                 "DECONTAMINATE_GENERATE_BED": {
                     "python": "3.12.0",
-                    "generate_contamination_bed.py": "1.0.0"
+                    "generate_contamination_bed.py": "1.1.0"
                 },
                 "DIAMOND_BLASTX": {
                     "diamond": "2.1.12"
@@ -102,6 +102,9 @@
                 },
                 "GNU_SORT": {
                     "coreutils": 9.5
+                },
+                "GZIP": {
+                    "gunzip": 1.13
                 },
                 "KMER_COUNT_DIM_REDUCTION": {
                     "python": "3.11.8",
@@ -195,6 +198,7 @@
                 "asccTinyTest_V2_HAPLO/KRAKEN2/asccTinyTest_V2_HAPLO_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_HAPLO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_HAPLO/ascc_main_output",
+                "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_2026120.decontaminated.fa.gz",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_filtered.fasta",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_filtered.fasta.abnormal_details.txt",
@@ -410,6 +414,7 @@
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/asccTinyTest_V2_PRIMARY_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output",
+                "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_2026120.decontaminated.fa.gz",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_filtered.fasta",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_filtered.fasta.abnormal_details.txt",
