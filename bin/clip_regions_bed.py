@@ -12,7 +12,7 @@ import argparse
 from datetime import datetime
 import logging
 
-VERSION = "V1.1.0"
+VERSION = "1.1.0"
 
 logging.basicConfig(
     level=logging.INFO,

@@ -15,7 +15,7 @@ import logging
 from Bio import SeqIO
 import argparse
 
-VERSION = "V1.1.0"
+VERSION = "1.1.0"
 
 logging.basicConfig(
     level=logging.INFO,
