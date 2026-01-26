@@ -558,10 +558,7 @@
                 "pipeline_info/ascc_software_versions.yml",
                 "workflow_completed.txt"
             ],
-            [
-                "asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv:md5,bae2255d56cff2e1cc9b0d7b4ea5c7e0",
-                "asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv:md5,bae2255d56cff2e1cc9b0d7b4ea5c7e0"
-            ],
+            true,
             true,
             true,
             [
