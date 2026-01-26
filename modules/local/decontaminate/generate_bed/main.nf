@@ -31,14 +31,12 @@ process DECONTAMINATE_GENERATE_BED {
     script:
     def prefix      = task.ext.prefix                       ?: "${meta.id}"
     def args        = task.ext.args                         ?: ""
-    def organellar  = meta.assembly_type == "organellar"    ? "--is_organelle True" : ""
-
     """
     generate_contamination_bed.py \\
         --assembly_path $fasta \\
         --decon_tolid_type_dir "./dataset" \\
         --assembly_type ${meta.id} \\
-        $organellar
+        $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

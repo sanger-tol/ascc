@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            134,
+            138,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -187,7 +187,7 @@
                     "trim_Ns.py": 1.0
                 },
                 "Workflow": {
-                    "sanger-tol/ascc": "v0.5.3"
+                    "sanger-tol/ascc": "v0.6.0"
                 }
             },
             [
@@ -198,7 +198,6 @@
                 "asccTinyTest_V2_HAPLO/KRAKEN2/asccTinyTest_V2_HAPLO_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_HAPLO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_HAPLO/ascc_main_output",
-                "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_2026120.decontaminated.fa.gz",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_filtered.fasta",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_filtered.fasta.abnormal_details.txt",
@@ -334,6 +333,18 @@
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO.kraken2.report.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/versions.yml",
+                "asccTinyTest_V2_MITO/ascc_main_output",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.abnormal_details.txt",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.contamination.bed",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.report.txt",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.tiara.bed",
+                "asccTinyTest_V2_MITO/autofilter",
+                "asccTinyTest_V2_MITO/autofilter/asccTinyTest_V2_MITO_ABNORMAL_CHECK.csv",
+                "asccTinyTest_V2_MITO/autofilter/asccTinyTest_V2_MITO_autofiltered.fasta",
+                "asccTinyTest_V2_MITO/autofilter/assembly_filtering_removed_sequences.txt",
+                "asccTinyTest_V2_MITO/autofilter/fcs-gx_alarm_indicator_file.txt",
+                "asccTinyTest_V2_MITO/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_MITO/average_coverage",
                 "asccTinyTest_V2_MITO/average_coverage/asccTinyTest_V2_MITO_average_coverage.txt",
                 "asccTinyTest_V2_MITO/create_btk_dataset",
@@ -414,7 +425,6 @@
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/asccTinyTest_V2_PRIMARY_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output",
-                "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_2026120.decontaminated.fa.gz",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_filtered.fasta",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_filtered.fasta.abnormal_details.txt",
@@ -547,6 +557,10 @@
                 "pipeline_info",
                 "pipeline_info/ascc_software_versions.yml",
                 "workflow_completed.txt"
+            ],
+            [
+                "asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv:md5,b676f46f486ed68298230ec61c236994",
+                "asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv:md5,b676f46f486ed68298230ec61c236994"
             ],
             true,
             true,
@@ -792,9 +806,9 @@
             true
         ],
         "meta": {
-            "nf-test": "0.9.2",
+            "nf-test": "0.9.3",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-10-30T10:48:10.274023943"
+        "timestamp": "2026-01-26T16:42:39.577116035"
     }
 }

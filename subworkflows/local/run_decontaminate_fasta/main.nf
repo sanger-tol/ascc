@@ -27,7 +27,9 @@ workflow RUN_DECONTAMINATE_FASTA {
     // LOGIC: DATAMAPPER FOR DECONTAMINATE_GENERATE_BED
     //
     input_genome
-        .map{meta, file -> [[id: meta.id], file]}
+        .map{
+            meta, file -> [[id: meta.id], file]
+        }
         .join(parsed_fcsgx,             remainder: true)
         .join(fcsgx_tiara_summary,      remainder: true)
         .join(fcs_adaptor_file,         remainder: true)
@@ -55,7 +57,6 @@ workflow RUN_DECONTAMINATE_FASTA {
         }
         .set{ merge_input_channel}
 
-    merge_input_channel.view{"Merged Channel for Decon Bed: $it"}
 
     //
     // MODULE: GENERATES CONTAMINATION .BED

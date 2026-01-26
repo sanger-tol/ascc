@@ -161,12 +161,33 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            def stable_name = getAllFilesFromDir(
+                params.outdir,
+                relative: true,
+                includeDir: true,
+                ignore: [
+                    'pipeline_info/*.{html,json,txt}',
+                    'asccTinyTest_V2_{HAPLO,PRIMARY,MITO}/ascc_main_output/*.decontaminated.*'
+                ]
+            )
 
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
 
-            def ascc_main_output    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/ascc_main_output/*contamination_check_merged_table.csv"])
+            def ascc_main_output = getAllFilesFromDir(
+                    params.outdir,
+                    include: [
+                        "asccTinyTest_V2_{HAPLO,PRIMARY,MITO}/ascc_main_output/*contamination_check_merged_table.csv"
+                    ]
+                )
+
+            def ascc_decontaminated_fa = getAllFilesFromDir(
+                    params.outdir,
+                    include: [
+                        "asccTinyTest_V2_{HAPLO,PRIMARY,MITO}/ascc_main_output/*.decontaminated.*"
+                    ]
+                )
+
             def kmer_data_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/kmer_data/*combined.csv"])
 
             def autofilter_warn_txt = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofiltering_done_indicator_file.txt"])
@@ -222,7 +243,9 @@ nextflow_pipeline {
 
                     // sizes have been written to show that there are X numbers across the Y relevant input assemblies
                     // ascc_main_output                         // file output has minute changes per run
-                    ascc_main_output.size() == 2,
+                    ascc_main_output,
+                    ascc_decontaminated_fa.size() == 3,
+
                     // kmer_data_files,                         // ML method outputs, changes per run, included in stable name
                     kmer_data_files.size() == 2,
                     autofilter_warn_txt,                        // Autofilter warn file - Warns of completion

@@ -795,7 +795,7 @@ workflow ASCC_GENOMIC {
     //              AND ABNORMAL CONTAMINATION IS FOUND
     RUN_DECONTAMINATE_FASTA(
         ej_reference_tuple.filter{ meta, file ->
-            params.run_decontaminate_fasta in run_conditionals
+            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly == "both"
             return [[id: meta.id], file]
         },
         ch_fcsgx,
