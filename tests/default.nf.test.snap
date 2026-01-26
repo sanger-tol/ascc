@@ -559,8 +559,8 @@
                 "workflow_completed.txt"
             ],
             [
-                "asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv:md5,b676f46f486ed68298230ec61c236994",
-                "asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv:md5,b676f46f486ed68298230ec61c236994"
+                "asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv:md5,bae2255d56cff2e1cc9b0d7b4ea5c7e0",
+                "asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv:md5,bae2255d56cff2e1cc9b0d7b4ea5c7e0"
             ],
             true,
             true,
@@ -809,6 +809,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2026-01-26T16:42:39.577116035"
+        "timestamp": "2026-01-26T17:16:23.777281863"
     }
 }

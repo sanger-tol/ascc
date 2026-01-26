@@ -46,7 +46,7 @@ process DECONTAMINATE_GENERATE_BED {
     """
 
     stub:
-    def prefix      = args.ext.prefix   ?: "${meta.id}"
+    def prefix      = task.ext.prefix   ?: "${meta.id}"
     """
     touch ${prefix}.contamination.bed
     touch ${prefix}.tiara.bed
