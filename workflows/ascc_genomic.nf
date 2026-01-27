@@ -258,7 +258,7 @@ workflow ASCC_GENOMIC {
                         .map { meta, file -> [[id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
-    ch_chloro_full  = MITO_ORGANELLAR_BLAST.out.full_organelle_report
+    ch_chloro_full  = PLASTID_ORGANELLAR_BLAST.out.full_organelle_report
                         .map { meta, file -> [[id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
