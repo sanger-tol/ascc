@@ -1,7 +1,6 @@
-include { SAMTOOLS_FAIDX   } from '../../../modules/nf-core/samtools/faidx/main'
-include { SAMTOOLS_INDEX   } from '../../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_MERGE   } from '../../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_MARKDUP } from '../../../modules/nf-core/samtools/markdup/main'
+include { SAMTOOLS_FAIDX    } from '../../../modules/nf-core/samtools/faidx/main'
+include { SAMTOOLS_MERGE    } from '../../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_MERGEDUP } from '../../../modules/sanger-tol/samtools/mergedup/main'
 
 workflow BAM_SAMTOOLS_MERGE_MARKDUP {
 
@@ -21,7 +20,6 @@ workflow BAM_SAMTOOLS_MERGE_MARKDUP {
         [ [:],[] ],    // fai
         false          // get sizes
     )
-    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
 
     //
     // Logic: create a channel with both fai and gzi for each assembly
@@ -29,8 +27,8 @@ workflow BAM_SAMTOOLS_MERGE_MARKDUP {
     //        remainder join
     //
     ch_fai_gzi = SAMTOOLS_FAIDX.out.fai
-        | join(SAMTOOLS_FAIDX.out.gzi, by: 0, remainder: true)
-        | map { meta, fai, gzi -> [ meta, fai, gzi ?: [] ] }
+        .join(SAMTOOLS_FAIDX.out.gzi, by: 0, remainder: true)
+        .map { meta, fai, gzi -> [ meta, fai, gzi ?: [] ] }
 
     //
     // Logic: Prepare input for merging bams.
@@ -38,9 +36,9 @@ workflow BAM_SAMTOOLS_MERGE_MARKDUP {
     //        we emit groups downstream ASAP once all bams have been made
     //
     ch_samtools_merge_input = ch_bam
-        | combine(ch_assemblies, by: 0)
-        | combine(ch_fai_gzi, by: 0)
-        | multiMap { meta, bams, assembly, fai, gzi ->
+        .combine(ch_assemblies, by: 0)
+        .combine(ch_fai_gzi, by: 0)
+        .multiMap { meta, bams, assembly, fai, gzi ->
             bam:   [ meta, bams ]
             fasta: [ meta, assembly ]
             fai:   [ meta, fai ]
@@ -48,53 +46,44 @@ workflow BAM_SAMTOOLS_MERGE_MARKDUP {
         }
 
     //
-    // Module: Merge position-sorted bam files
+    // Module: Either merge position-sorted bam files, or merge and mark duplicates
     //
-    SAMTOOLS_MERGE(
-        ch_samtools_merge_input.bam,
-        ch_samtools_merge_input.fasta,
-        ch_samtools_merge_input.fai,
-        ch_samtools_merge_input.gzi,
-    )
-    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
+    if(val_mark_duplicates) {
+        SAMTOOLS_MERGEDUP(
+            ch_samtools_merge_input.bam,
+            ch_samtools_merge_input.fasta,
+            ch_samtools_merge_input.fai,
+            ch_samtools_merge_input.gzi,
+        )
+        ch_versions    = ch_versions.mix(SAMTOOLS_MERGEDUP.out.versions)
 
-    //
-    // Module: Mark duplicates on the merged bam
-    //
-    ch_samtools_markdup_input = SAMTOOLS_MERGE.out.bam
-        | combine(ch_assemblies, by: 0)
-        | filter { val_mark_duplicates }
-        | multiMap { meta, bam, assembly ->
-            bam:      [ meta, bam ]
-            assembly: [ meta, assembly ]
-        }
+        ch_output_bam  = SAMTOOLS_MERGEDUP.out.bam
+            .mix(SAMTOOLS_MERGEDUP.out.cram)
 
-    SAMTOOLS_MARKDUP(
-        ch_samtools_markdup_input.bam,
-        ch_samtools_markdup_input.assembly
-    )
-    ch_versions = ch_versions.mix(SAMTOOLS_MARKDUP.out.versions)
+        ch_output_index = SAMTOOLS_MERGEDUP.out.csi
+            .mix(SAMTOOLS_MERGEDUP.out.crai)
 
-    //
-    // Logic: Choose output bam file depending on options
-    //
-    ch_output_bam = val_mark_duplicates ? SAMTOOLS_MARKDUP.out.bam : SAMTOOLS_MERGE.out.bam
-
-    //
-    // Module: Index output bam
-    //
-    SAMTOOLS_INDEX(ch_output_bam)
-    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-
-    ch_bam_index = channel.empty()
-        | mix(
-            SAMTOOLS_INDEX.out.bai,
-            SAMTOOLS_INDEX.out.csi,
-            SAMTOOLS_INDEX.out.crai
+        ch_output_metrics = SAMTOOLS_MERGEDUP.out.metrics
+    } else {
+        SAMTOOLS_MERGE(
+            ch_samtools_merge_input.bam,
+            ch_samtools_merge_input.fasta,
+            ch_samtools_merge_input.fai,
+            ch_samtools_merge_input.gzi,
         )
 
+        ch_output_bam  = SAMTOOLS_MERGE.out.bam
+            .mix(SAMTOOLS_MERGE.out.cram)
+
+        ch_output_index = SAMTOOLS_MERGE.out.csi
+            .mix(SAMTOOLS_MERGE.out.crai)
+
+        ch_output_metrics = channel.empty()
+    }
+
     emit:
-    bam       = ch_output_bam // channel: [ val(meta), path(bam) ]
-    bam_index = ch_bam_index  // channel: [ val(meta), path(index) ]
-    versions  = ch_versions   // channel: [ versions.yml ]
+    bam       = ch_output_bam     // channel: [ val(meta), path(bam) ]
+    bam_index = ch_output_index   // channel: [ val(meta), path(index) ]
+    metrics   = ch_output_metrics // channel [ val(meta), path(stats) ]
+    versions  = ch_versions       // channel: [ versions.yml ]
 }
