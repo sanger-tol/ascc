@@ -73,7 +73,7 @@ def main(barcodes_fasta_path, pacbio_read_files, pacbio_multiplexing_barcode_nam
 
     if os.path.isfile(barcodes_fasta_path) is False:
         sys.stderr.write(
-            "FASTA file with PacBio multiplexing barcode sequences ({barcodes_fasta_path}) was not found\n"
+            f"FASTA file with PacBio multiplexing barcode sequences ({barcodes_fasta_path}) was not found\n"
         )
         sys.exit(1)
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         "-m", "--multiplex_name", type=str, help="Pacbio Multiplex Barcode Name"
     )
 
-    parser.add_argument("-v", action="version", version="1.0")
+    parser.add_argument("-v", action="version", version="1.0.1")
     args = parser.parse_args()
     main(args.barcode_fasta, args.pacbio_reads, args.multiplex_name)
 

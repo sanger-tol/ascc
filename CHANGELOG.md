@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - Red Notebook [##/##/2025]
+## [0.6.0] - Red Notebook [28/01/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -11,6 +11,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 
 ### `Added`
 
+- Version bump to 0.6.0, this is RC1 for a version 1.0.0 release.
 - Reporting for the pipeline output into a more human readable output (html) @eaunin
 - Standardised some channel names
 - Standardised log info and warning calls
@@ -24,17 +25,30 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Simplification of data-mapper channel processing before some processes
 - Production profile, update to give blobtoolkit a cleaner name on Sanger LSF
 - Update `ASCC_MERGE_TABLES` to be aware of empty files
+- Adding the `RUN_DECONTAMINATION` subworkflow which will produce a decontamination fasta in gz format.
+  - Added extra conditionals to subworkflow, run_autofilter_assembly must also be active. The ABNORMAL.csv is currently vital to the use of the decontamination scripts.
+- Added a `du -sh` command to the completion file so we can easily see how much storage the run eats up.
+- More outputs from the `ORGANELLAT_BLAST` processes.
+- Fixed small bug in `PACBIO_BARCODE_CHECK` which stopped proper reporting, no impact on output.
+- NF-test has been updated to latest outputs.
 
 ### `Bugs`
 
+- Fixed a bug that has stopped barcodes being reported correctly, `BLAST_BLASTN` was not configured correctly and so real hits were much sparcer than expected.
+- Currently, `DECONTAMINATE_CLIP_REGIONS_FASTA` should only run if `BLOBTOOLKIT` is not run. This is because, `BTK` would indicate there is enough contamination in the assembly to make a "decontaminated.fa" useless.
+
 ### `Dependencies`
 
-| Module               | Old Version | New Versions |
-| -------------------- | ----------- | ------------ |
-| GENERATE_HTML_REPORT | NA          | 1.0          |
-| KMER_COUNTER         | 1.0.0       | 0.1.2        |
-| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
-| ASCC_MERGE_TABLES    | 2.0.1       | 2.0.2        |
+| Module                           | Old Version | New Versions |
+| -------------------------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT             | NA          | 1.0          |
+| KMER_COUNTER                     | 1.0.0       | 0.1.2        |
+| REFORMAT_NPY2CSV                 | NA          | 1.0.0        |
+| ASCC_MERGE_TABLES                | 2.0.1       | 2.0.2        |
+| DECONTAMINATE_CLIP_REGIONS_FASTA | NA          | 1.1.0        |
+| DECONTAMINATE_GENERATE_BED       | NA          | 1.1.0        |
+| GZIP                             | NA          | 1.13         |
+| PACBIO_BARCODE_CHECK             | 1.0.0       | 1.0.1        |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
