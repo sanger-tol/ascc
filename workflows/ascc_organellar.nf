@@ -20,7 +20,7 @@ include { RUN_FCSADAPTOR                                } from '../subworkflows/
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
-//include { RUN_DECONTAMINATE_FASTA                           } from '../subworkflows/local/run_decontaminate_fasta'
+include { RUN_DECONTAMINATE_FASTA                       } from '../subworkflows/local/run_decontaminate_fasta'
 include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
 
 // FUNCTION IMPORTS
@@ -474,6 +474,7 @@ workflow ASCC_ORGANELLAR {
         ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
 
+
     //
     // LOGIC: EACH SUBWORKFLOW OUTPUTS EITHER AN EMPTY CHANNEL OR A FILE CHANNEL DEPENDING ON THE RUN RULES
     //          SO THE RULES FOR THIS ONLY NEED TO BE A SIMPLE "DO YOU WANT IT OR NOT"
@@ -539,18 +540,6 @@ workflow ASCC_ORGANELLAR {
     }
 
 
-    //
-    // SUBWORKFLOW: DECONTAMINATE FASTA
-    //
-    // RUN_DECONTAMINATION_FASTA(
-    //      if !run_btk and run_decon_fasta = "both" || "genomic/organellar"
-    // )
-    // PLACEHOLDER FOR NEXT CHUNK OF WORK
-    // From bin/generate_contamination_bed.py output 2-3 files
-    //  abnormal_contamination
-    // OUTPUT FASTA HAS .decontaminated appended to file name
-
-
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: GENERATE HTML REPORT (minimal wiring, opt-in)
@@ -584,6 +573,29 @@ workflow ASCC_ORGANELLAR {
         ch_create_btk_dataset
     )
     ch_versions        = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+
+
+    //
+    // SUBWORKFLOW: GENERATE DECONTAMINATION FILES AND POTENTIALLY A DECONTAMINATED FASTA
+    //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
+    //              AND ABNORMAL CONTAMINATION IS FOUND
+    //              AUTOFILTERING THE ASSEMBLY IS ESSENTIAL FOR DECON TO RUN
+    RUN_DECONTAMINATE_FASTA(
+        ej_reference_tuple.filter{ meta, file ->
+            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly == "both"
+            return [[id: meta.id], file]
+        },
+        ch_fcsgx,
+        ch_autofilt_fcs_tiara,
+        ch_fcsadapt.map{ meta, files ->
+            [meta, files.find{ it.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+        }, // We only want the EUKARYOTIC report
+        ej_trailing_ns,
+        ch_barcode_check,
+        channel.of( [[:],[]] ),
+        channel.of( [[:],[]] )
+    )
+    ch_versions = ch_versions.mix(RUN_DECONTAMINATE_FASTA.out.versions)
 
 
     emit:
