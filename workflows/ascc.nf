@@ -134,8 +134,8 @@ workflow ASCC {
         ).set { ch_collated_versions }
 
 
-     emit:
-     versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    emit:
+    versions       = ch_collated_versions                 // channel: [ path(versions.yml) ]
 
 }
 
