@@ -11,11 +11,20 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "meta": ["id"]
+                "meta": [
+                    "id"
+                ]
             },
             "assembly_type": {
                 "type": "string",
-                "enum": ["PRIMARY", "HAPLO", "HAP1", "HAP2", "MITO", "PLASTID"]
+                "enum": [
+                    "PRIMARY",
+                    "HAPLO",
+                    "HAP1",
+                    "HAP2",
+                    "MITO",
+                    "PLASTID"
+                ]
             },
             "assembly_file": {
                 "type": "string",
@@ -25,6 +34,10 @@
                 "errorMessage": "Fasta file representing the genome assembly to be cleaned."
             }
         },
-        "required": ["sample", "assembly_type", "assembly_file"]
+        "required": [
+            "sample",
+            "assembly_type",
+            "assembly_file"
+        ]
     }
 }
