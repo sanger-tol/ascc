@@ -297,7 +297,6 @@ nextflow_pipeline {
             new File("${projectDir}/KRAKEN2").deleteDir()
             new File("${projectDir}/VECSCREEN").deleteDir()
             new File("${projectDir}/DIAMOND").deleteDir()
-            new File("${workDir}").deleteDir()
         }
     }
 }

@@ -21,6 +21,7 @@ workflow RUN_READ_COVERAGE {
     main:
     ch_versions     = channel.empty()
     ch_align_bam    = channel.empty()
+    ch_out_bam      = channel.empty()
     ch_refer_bam    = channel.empty()
 
 
@@ -38,15 +39,17 @@ workflow RUN_READ_COVERAGE {
     // - Removed the mix function from this as it is not needed, there shouldn't be multiple read
     // types
     //
+    //
 
-    if ( params.reads_type in ["hifi", "clr", "ont"] ) {
+    if ( platform in ["hifi", "clr", "ont"] ) {
 
         //
         // MODULE: RUN SINGLE END MAPPING ON THE REFERENCE AND LONGREAD DATA
         //
         ch_map_long_reads_input = ref_and_data
-            | groupTuple(by: [0, 1]) // the reads are not a list so we get multiple input channels otherwise
-            | multiMap { meta, reference, reads ->
+            .groupTuple(by: [0, 1]) // the reads are not a list so we get multiple input channels otherwise
+            .multiMap { meta, reference, reads ->
+                def meta_new = meta + [readtype: platform]
                 reference: [ meta_new, reference ]
                 reads: [ meta_new, reads ]
             }
@@ -58,9 +61,9 @@ workflow RUN_READ_COVERAGE {
             true
         )
         ch_versions = ch_versions.mix(SE_MAPPING.out.versions)
-        ch_out_bam  = SE_MAPPING.out.bam
+        ch_out_bam  = ch_out_bam.mix(SE_MAPPING.out.bam)
 
-    } else if ( params.reads_type in ["illumina"] ) {
+    } else if ( platform in ["illumina"] ) {
 
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND SHORTREAD DATA
@@ -80,7 +83,7 @@ workflow RUN_READ_COVERAGE {
             "csi"
         )
         ch_versions = ch_versions.mix( SAMTOOLS_SORT.out.versions )
-        ch_out_bam  = SAMTOOLS_SORT.out.bam
+        ch_out_bam  = ch_out_bam.mix(SAMTOOLS_SORT.out.bam)
     }
 
     //
@@ -92,7 +95,7 @@ workflow RUN_READ_COVERAGE {
         true,
         false
     )
-    ch_versions         = ch_versions.mix(COVERM_CONTIG.out.versions)
+    ch_versions = ch_versions.mix(COVERM_CONTIG.out.versions)
 
     tsv_ch              = COVERM_CONTIG.out.coverage
                             .map { meta, file -> [ [id: meta.id] , file ] }

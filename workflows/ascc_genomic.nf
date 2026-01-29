@@ -357,7 +357,7 @@ workflow ASCC_GENOMIC {
             params.run_coverage in run_conditionals
         },
         reads_path,
-        reads_type.first(), //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
+        reads_type, //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
         val_reads_per_chunk
     )
     ch_versions         = ch_versions.mix(RUN_READ_COVERAGE.out.versions)

@@ -135,7 +135,7 @@ workflow {
         Channel.fromPath(params.vecscreen_database_path),
         Channel.from(params.reads_path),
         Channel.of(params.reads_layout),
-        Channel.of(params.reads_type),
+        params.reads_type,
         Channel.of(params.busco_lineages),
         Channel.fromPath(params.busco_lineages_folder),
         PIPELINE_INITIALISATION.out.barcodes,

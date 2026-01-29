@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            138,
+            139,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -164,9 +164,6 @@
                     "samtools": "1.22.1"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.22.1"
-                },
-                "SAMTOOLS_INDEX": {
                     "samtools": "1.22.1"
                 },
                 "SAMTOOLS_MERGE": {
@@ -637,7 +634,7 @@
                 "nt_kraken_phylum.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "nt_kraken_species.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "tiara.json:md5,e886e56e2af86a0f434d92919578a96f",
-                "MAPPED_cov.json:md5,bd2ae113ff1bb87df60e8327f6983800",
+                "MAPPED_cov.json:md5,07b13dcd4378693c807183ab3216b68b",
                 "asccTinyTest_V2_MITOBTK_DS.yaml:md5,c8aed8504706e846843590115b947239",
                 "gc.json:md5,5e9eaa862517a4fafada54e4f8fa109b",
                 "identifiers.json:md5,a8fa6468ed53c0a3fe7ec689f524b8bf",
@@ -708,7 +705,7 @@
             ],
             [
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479",
-                "btk_summary_table_full.tsv:md5,0643f6900ce89068663ebdd75bb2d1bd",
+                "btk_summary_table_full.tsv:md5,26af5cb898cb7b21776239394d1564fc",
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479"
             ],
             true,
@@ -807,8 +804,8 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.6"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2026-01-26T17:16:23.777281863"
+        "timestamp": "2026-01-29T15:05:55.139592"
     }
 }
