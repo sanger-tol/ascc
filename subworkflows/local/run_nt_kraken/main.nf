@@ -33,7 +33,6 @@ workflow RUN_NT_KRAKEN {
         false,               // val save_output_fastqs
         true                 // val save_reads_assignment
     )
-    ch_versions     = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions)
     classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
                         .map { meta, file -> [[ id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }

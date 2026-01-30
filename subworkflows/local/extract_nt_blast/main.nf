@@ -47,7 +47,7 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     input_genome
-        .map{ meta, file ->
+        .map{ meta, _file ->
             meta.id
         }
         .set { id }
@@ -57,7 +57,7 @@ workflow EXTRACT_NT_BLAST {
     // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
     //
     BLAST_BLASTN.out.txt
-        .map { meta, files ->
+        .map { _meta, files ->
             files
         }
         .collectFile(

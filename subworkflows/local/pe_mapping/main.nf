@@ -36,7 +36,7 @@ workflow PE_MAPPING {
     // LOGIC: MULTIMAP TO MAKE BOOLEAN ARGUMENTS
     //
     pe_input
-        .multiMap { meta, reads_path, ref, bam_output, cigar_paf, cigar_bam, reads_type ->
+        .multiMap { meta, reads_path, ref, bam_output, cigar_paf, cigar_bam, _reads_type ->
             read_tuple          : [meta, reads_path]
             ref                 : [meta, ref]
             bam_index_extension : "csi"
@@ -58,8 +58,6 @@ workflow PE_MAPPING {
         illumina_input.bool_cigar_paf,
         illumina_input.bool_cigar_bam
     )
-    ch_versions     = ch_versions.mix(MINIMAP2_ALIGN_ILLUMINA.out.versions)
-
 
     MINIMAP2_ALIGN_ILLUMINA.out.bam
         .groupTuple(by: 0)
@@ -74,6 +72,7 @@ workflow PE_MAPPING {
     //
     SAMTOOLS_MERGE(
         collected_files_for_merge,
+        [[],[]],
         [[],[]],
         [[],[]]
     )

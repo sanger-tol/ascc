@@ -108,8 +108,8 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    Channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    channel
+        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
             sample, type_of_assembly, assembly_file ->
                 return [
@@ -144,7 +144,7 @@ workflow PIPELINE_INITIALISATION {
     // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
     ch_samplesheet
-        .branch { meta, file ->
+        .branch { _meta, file ->
             zipped: file.name.endsWith('.gz')
             unzipped: !file.name.endsWith('.gz')
         }
@@ -157,7 +157,6 @@ workflow PIPELINE_INITIALISATION {
     GUNZIP (
         ch_input.zipped
     )
-    ch_versions = ch_versions.mix(GUNZIP.out.versions)
 
 
     //
@@ -175,7 +174,7 @@ workflow PIPELINE_INITIALISATION {
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
     //
     standardised_unzipped_input
-        .branch{ meta, fasta ->
+        .branch{ meta, _fasta ->
             organellar_genome: (meta.assembly_type in ["MITO", "PLASTID"])
             genomic_genome: !(meta.assembly_type in ["MITO", "PLASTID"])
             error: true
@@ -251,7 +250,7 @@ workflow PIPELINE_INITIALISATION {
     //
 
     if (params.fcs_override) {
-        Channel
+        channel
             .fromList(
                 samplesheetToList(params.fcs_override_samplesheet, "${projectDir}/assets/fcs_schema_input.json"))
             .map {
@@ -267,7 +266,7 @@ workflow PIPELINE_INITIALISATION {
             .set { ch_fcs_samplesheet }
 
         ch_fcs_samplesheet
-            .branch{ meta, file ->
+            .branch{ meta, _file ->
                 organellar_fcs: (meta.assembly_type in ["MITO", "PLASTID"])
                 genomic_fcs: !(meta.assembly_type in ["MITO", "PLASTID"])
                 error: true

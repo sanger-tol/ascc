@@ -22,8 +22,6 @@ workflow RUN_READ_COVERAGE {
     ch_versions     = channel.empty()
     ch_align_bam    = channel.empty()
     ch_out_bam      = channel.empty()
-    ch_refer_bam    = channel.empty()
-
 
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
@@ -48,15 +46,15 @@ workflow RUN_READ_COVERAGE {
         //
         ch_map_long_reads_input = ref_and_data
             .groupTuple(by: [0, 1]) // the reads are not a list so we get multiple input channels otherwise
-            .multiMap { meta, reference, reads ->
+            .multiMap { meta, reference, read_files ->
                 def meta_new = meta + [readtype: platform]
                 reference: [ meta_new, reference ]
-                reads: [ meta_new, reads ]
+                read_ch: [ meta_new, read_files ]
             }
 
         SE_MAPPING(
             ch_map_long_reads_input.reference,
-            ch_map_long_reads_input.reads,
+            ch_map_long_reads_input.read_ch,
             val_reads_per_chunk,
             true
         )
