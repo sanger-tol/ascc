@@ -171,6 +171,19 @@ Creates a BlobToolKit dataset folder compatible with BlobToolKit viewer (https:/
 
 </details>
 
+The `fcs-gx_alarm_indicator_file.txt` file contains a series of alarm thresholds which are metrics of contamination in the genome and how much they effect it. If alarms are triggered then `SANGER_TOL_BTK` is triggered (in conditional mode, which is default).
+
+An example is:
+```
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: TOTAL_LENGTH_REMOVED == 155375 : Alarm threshold == 10000000.0
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: PERCENTAGE_LENGTH_REMOVED == 0.017758325257176553 : Alarm threshold == 3
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: LARGEST_SCAFFOLD_REMOVED == 53073 : Alarm threshold == 1800000.0
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: PERCENTAGE_SCAFFOLDS_REMOVED == 6.557377049180328 : Alarm threshold == 10.0
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: REVIEW_OR_INFO == 0 : Alarm threshold == 0
+```
+
+`NO_ABNORMAL_CONTAMINATION` or `YES_ABNORMAL_CONTAMINATION` based on whether the threshold has been met. Followed by `Stage 1` (BTK is considered Stage 2) for {ASSEMBLY OF INTEREST} and then the threshold name and observed value, along with the threshold trigger value. In total there are 5 metrics, however, more can be added by modifying the `bin/autofilter_contamination_check.py` script.
+
 Autofilter and check assembly returns a decontaminated genome file as well as summaries of the contamination found.
 
 ### Sanger-TOL BTK
