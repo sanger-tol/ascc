@@ -25,8 +25,7 @@ include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder                           } from "${projectDir}/lib/ascc_utils.groovy"
-
+include { getEmptyPlaceholder                           } from '../functions/local/ascc_utils'
 
 
 /*
@@ -39,10 +38,10 @@ workflow ASCC_ORGANELLAR {
 
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
-    fcs_ov                  // params.fcs_override
+    _fcs_ov                  // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet for override
     fcs_db                  // [path(path)]
-    reads
+    _reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
     ncbi_taxonomy_path
@@ -99,7 +98,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     TIARA_TIARA (
-        ej_reference_tuple.filter{ meta, file -> params.run_tiara in run_conditionals }
+        ej_reference_tuple.filter{ _meta, _file -> params.run_tiara in run_conditionals }
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
     ch_tiara            = TIARA_TIARA.out.classifications
@@ -121,7 +120,7 @@ workflow ASCC_ORGANELLAR {
         .set { duplicated_db }
 
     PACBIO_BARCODE_CHECK (
-        duplicated_db.reference.filter{ meta, file ->
+        duplicated_db.reference.filter{ _meta, _file ->
             params.run_pacbio_barcodes in run_conditionals
         },
         ch_barcodes,
@@ -136,7 +135,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
     RUN_FCSADAPTOR (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_fcs_adaptor in run_conditionals
         }
     )
@@ -197,7 +196,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
     RUN_READ_COVERAGE (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_coverage in run_conditionals
         },
         reads_path,
@@ -214,7 +213,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
     RUN_VECSCREEN (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_vecscreen in run_conditionals
         },
         vecscreen_database_path.first()
@@ -228,7 +227,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
     RUN_NT_KRAKEN(
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_kraken in run_conditionals
         },
         nt_kraken_db_path.first(),
@@ -264,12 +263,12 @@ workflow ASCC_ORGANELLAR {
 
             [meta2, file]
         }
-        .filter { meta, file ->
+        .filter { meta, _file ->
                     meta.seq_count >= params.seqkit_window
         }
 
     valid_length_fasta
-        .map{ meta, file ->
+        .map{ meta, _file ->
             log.info "[ASCC INFO]: Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
 
@@ -279,7 +278,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
     //
     EXTRACT_NT_BLAST (
-        valid_length_fasta.filter{ meta, file ->
+        valid_length_fasta.filter{ _meta, _file ->
             params.run_nt_blast in run_conditionals
         },
         nt_database_path.first(),
@@ -296,7 +295,7 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     NR_DIAMOND (
-        valid_length_fasta.filter{ meta, file ->
+        valid_length_fasta.filter{ _meta, _file ->
             params.run_nr_diamond in run_conditionals
         },
         diamond_nr_db_path.first()
@@ -319,7 +318,7 @@ workflow ASCC_ORGANELLAR {
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send
     //  evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     UP_DIAMOND (
-        valid_length_fasta.filter{ meta, file ->
+        valid_length_fasta.filter{ _meta, _file ->
             params.run_uniprot_diamond in run_conditionals
         },
         diamond_uniprot_db_path.first()
@@ -535,7 +534,7 @@ workflow ASCC_ORGANELLAR {
 
     } else {
         org_merged_table          = channel.of( [[:],[]] )
-        merged_extended_table     = channel.empty()
+        //merged_extended_table     = channel.empty()
         org_merged_phylum_count   = channel.of( [[:],[]] )
     }
 
@@ -549,10 +548,6 @@ workflow ASCC_ORGANELLAR {
     // Params file
     ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
-    // Templates and CSS
-    ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-    ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
-
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
         ch_fcsadapt,
@@ -562,7 +557,7 @@ workflow ASCC_ORGANELLAR {
         org_merged_table,
         org_merged_phylum_count,
         channel.of( [[:],[]] ),
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_html_report in run_conditionals
         },
         ej_fasta_sanitation_log,
@@ -588,7 +583,7 @@ workflow ASCC_ORGANELLAR {
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
         ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ it.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,
