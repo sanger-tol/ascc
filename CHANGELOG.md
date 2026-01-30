@@ -25,6 +25,8 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Simplification of data-mapper channel processing before some processes
 - Production profile, update to give blobtoolkit a cleaner name on Sanger LSF
 - Update `ASCC_MERGE_TABLES` to be aware of empty files
+- Use sanger-tol chunked mapping subworkflow for read mapping (by @prototaxites)
+- Use coverm's contig mode for contig depth estimation (by @prototaxites)
 - Adding the `RUN_DECONTAMINATION` subworkflow which will produce a decontamination fasta in gz format.
   - Added extra conditionals to subworkflow, run_autofilter_assembly must also be active. The ABNORMAL.csv is currently vital to the use of the decontamination scripts.
 - Added a `du -sh` command to the completion file so we can easily see how much storage the run eats up.
@@ -39,16 +41,22 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 
 ### `Dependencies`
 
-| Module                           | Old Version | New Versions |
-| -------------------------------- | ----------- | ------------ |
-| GENERATE_HTML_REPORT             | NA          | 1.0          |
-| KMER_COUNTER                     | 1.0.0       | 0.1.2        |
-| REFORMAT_NPY2CSV                 | NA          | 1.0.0        |
-| ASCC_MERGE_TABLES                | 2.0.1       | 2.0.2        |
-| DECONTAMINATE_CLIP_REGIONS_FASTA | NA          | 1.1.0        |
-| DECONTAMINATE_GENERATE_BED       | NA          | 1.1.0        |
-| GZIP                             | NA          | 1.13         |
-| PACBIO_BARCODE_CHECK             | 1.0.0       | 1.0.1        |
+| Module                           | Tool                          | Old Version | New Versions |
+| -------------------------------- | ----------------------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT             | generate_html_report.py       | NA          | 1.0          |
+| KMER_COUNTER                     | kmer-counter                  | 1.0.0       | 0.1.2        |
+| REFORMAT_NPY2CSV                 | npy_2_csv.py                  | NA          | 1.0.0        |
+| ASCC_MERGE_TABLES                | merge_btk_datasets.p          | 2.0.1       | 2.0.2        |
+| FASTXALIGN_PYFASTXINDEX          | slice_fasta.py                | NA          | 1.0.0        |
+| FASTXALIGN_MINIMAP2ALIGN         | slice_fasta.py                | NA          | 1.0.0        |
+| FASTXALIGN_MINIMAP2ALIGN         | minimap2                      | NA          | 2.30         |
+| SAMTOOLS_DEPTH                   | samtools                      | 1.22.1      | NA           |
+| SAMTOOLS_DEPTH_AVERAGE_COVERAGE  | samtools                      | 1.0         | NA           |
+| COVERM_CONTIG                    | coverm                        | NA          | 0.70         |
+| DECONTAMINATE_CLIP_REGIONS_FASTA | clip_regions.py               | NA          | 1.1.0        |
+| DECONTAMINATE_GENERATE_BED       | generate_contamination_bed.py | NA          | 1.1.0        |
+| GZIP                             | gzip                          | 1.13        |              |
+| PACBIO_BARCODE_CHECK             | pacbio_barcode_check.py       | 1.0.0       | 1.0.1        |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 

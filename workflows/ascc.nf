@@ -42,6 +42,7 @@ workflow ASCC {
     btk_lineages
     btk_lineages_path
     barcodes
+    val_reads_per_chunk
 
     main:
     ch_versions     = channel.empty()
@@ -71,7 +72,8 @@ workflow ASCC {
         reads_type,
         btk_lineages,
         btk_lineages_path,
-        barcodes
+        barcodes,
+        val_reads_per_chunk
     )
     ch_versions         = ch_versions.mix(GENOMIC.out.versions)
 
@@ -98,7 +100,8 @@ workflow ASCC {
             vecscreen_database_path,
             reads_path,
             reads_type,
-            barcodes
+            barcodes,
+            val_reads_per_chunk
         )
         ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
     }

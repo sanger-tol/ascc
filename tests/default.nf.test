@@ -111,7 +111,7 @@ nextflow_pipeline {
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
-                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${launchDir}/NCBI_TAXONOMY -xzf new_taxdump.tar.gz"
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output ${launchDir}/new_taxdump.tar.gz && tar -C ${launchDir}/NCBI_TAXONOMY -xzf ${launchDir}/new_taxdump.tar.gz"
                 ],
                 "ASCC_DIAMOND_DB": [
                     "COMMAND":
@@ -297,7 +297,6 @@ nextflow_pipeline {
             new File("${projectDir}/KRAKEN2").deleteDir()
             new File("${projectDir}/VECSCREEN").deleteDir()
             new File("${projectDir}/DIAMOND").deleteDir()
-            new File("${workDir}").deleteDir()
         }
     }
 }

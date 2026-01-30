@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            138,
+            139,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -28,6 +28,9 @@
                     "python": "3.12.0",
                     "chunk_assembly_for_vecscreen.py": 1.0
                 },
+                "COVERM_CONTIG": {
+                    "coverm": "0.7.0"
+                },
                 "CREATE_BTK_DATASET": {
                     "python": "3.9.13",
                     "create_btk_dataset": "3.0.0"
@@ -46,6 +49,14 @@
                 "DIAMOND_BLAST_CHUNK_TO_FULL": {
                     "python": "3.9.1",
                     "blast_hit_chunk_coords_to_full_coords": 1.0
+                },
+                "FASTXALIGN_MINIMAP2ALIGN": {
+                    "slice_fasta.py": "1.0.0",
+                    "samtools": "1.22.1",
+                    "minimap2": "2.30-r1287"
+                },
+                "FASTXALIGN_PYFASTXINDEX": {
+                    "slice_fasta.py": "1.0.0"
                 },
                 "FCSGX_RUNGX": {
                     "fcsgx": "0.5.5-9-gfc836c1"
@@ -124,9 +135,8 @@
                     "kraken2": "2.1.6",
                     "pigz": 2.8
                 },
-                "MINIMAP2_ALIGN_SE": {
-                    "minimap2": "2.29-r1283",
-                    "samtools": 1.21
+                "MINIMAP2_INDEX": {
+                    "minimap2": "2.29-r1283"
                 },
                 "NCBITOOLS_VECSCREEN": {
                     "vecscreen": 1.0
@@ -150,13 +160,6 @@
                     "python": "3.9.1",
                     "convert_to_hits": "2.0.0"
                 },
-                "SAMTOOLS_DEPTH": {
-                    "samtools": "1.22.1"
-                },
-                "SAMTOOLS_DEPTH_AVERAGE_COVERAGE": {
-                    "python": "3.9.1",
-                    "samtools_depth_average_coverage": 1.0
-                },
                 "SAMTOOLS_DICT": {
                     "samtools": "1.22.1"
                 },
@@ -164,9 +167,6 @@
                     "samtools": "1.22.1"
                 },
                 "SAMTOOLS_MERGE": {
-                    "samtools": 1.21
-                },
-                "SAMTOOLS_SORT": {
                     "samtools": "1.22.1"
                 },
                 "SED_SED": {
@@ -346,7 +346,7 @@
                 "asccTinyTest_V2_MITO/autofilter/fcs-gx_alarm_indicator_file.txt",
                 "asccTinyTest_V2_MITO/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_MITO/average_coverage",
-                "asccTinyTest_V2_MITO/average_coverage/asccTinyTest_V2_MITO_average_coverage.txt",
+                "asccTinyTest_V2_MITO/average_coverage/asccTinyTest_V2_MITO.depth.txt",
                 "asccTinyTest_V2_MITO/create_btk_dataset",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD/MAPPED_cov.json",
@@ -634,7 +634,7 @@
                 "nt_kraken_phylum.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "nt_kraken_species.json:md5,5d4cfc05f7f814841c229184b114fe54",
                 "tiara.json:md5,e886e56e2af86a0f434d92919578a96f",
-                "MAPPED_cov.json:md5,85ea5a95ea028f67b2e2af7950549628",
+                "MAPPED_cov.json:md5,07b13dcd4378693c807183ab3216b68b",
                 "asccTinyTest_V2_MITOBTK_DS.yaml:md5,c8aed8504706e846843590115b947239",
                 "gc.json:md5,5e9eaa862517a4fafada54e4f8fa109b",
                 "identifiers.json:md5,a8fa6468ed53c0a3fe7ec689f524b8bf",
@@ -705,7 +705,7 @@
             ],
             [
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479",
-                "btk_summary_table_full.tsv:md5,07ef0cf1ac6b58218eb163442b0db00c",
+                "btk_summary_table_full.tsv:md5,26af5cb898cb7b21776239394d1564fc",
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479"
             ],
             true,
@@ -804,8 +804,8 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.6"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2026-01-26T17:16:23.777281863"
+        "timestamp": "2026-01-29T15:05:55.139592"
     }
 }
