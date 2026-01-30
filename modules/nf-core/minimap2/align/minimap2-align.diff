@@ -4,7 +4,7 @@ Changes in component 'nf-core/minimap2/align'
 Changes in 'minimap2/align/main.nf':
 --- modules/nf-core/minimap2/align/main.nf
 +++ modules/nf-core/minimap2/align/main.nf
-@@ -50,8 +50,6 @@
+@@ -50,20 +50,14 @@
          $cigar_paf \\
          $set_cigar_bam \\
          $bam_output
@@ -13,10 +13,10 @@ Changes in 'minimap2/align/main.nf':
      """
  
      stub:
-@@ -59,11 +57,8 @@
+     def prefix = task.ext.prefix ?: "${meta.id}"
      def output_file = bam_format ? "${prefix}.bam" : "${prefix}.paf"
      def bam_index = bam_index_extension ? "touch ${prefix}.bam.${bam_index_extension}" : ""
-     def bam_input = "${reads.extension}".matches('sam|bam|cram')
+-    def bam_input = "${reads.extension}".matches('sam|bam|cram')
 -    def target = reference ?: (bam_input ? error("BAM input requires reference") : reads)
 -
      """
