@@ -143,9 +143,8 @@
                 "sanger-tol": {
                     "blobtoolkit/generatecsv": {
                         "branch": "main",
-                        "git_sha": "ac5ce1a5a808dd78a115a1a88719c1ea31554667",
-                        "installed_by": ["modules"],
-                        "patch": "modules/sanger-tol/blobtoolkit/generatecsv/blobtoolkit-generatecsv.diff"
+                        "git_sha": "23e5b60803e95c1a4db81228142ae2a767b81f50",
+                        "installed_by": ["modules"]
                     },
                     "fastxalign/minimap2align": {
                         "branch": "main",
