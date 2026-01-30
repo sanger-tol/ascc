@@ -156,14 +156,14 @@ workflow {
     )
 
 
-    onComplete:
+}
+
+workflow.onComplete {
     if (workflow.success) {
         try {
             def completionFile = file("${params.outdir}/workflow_completed.txt")
-
             def du = ["du", "-sh", workflow.workDir.toString()].execute()
             du.waitFor()
-
             completionFile.text = """
                 Workflow completed successfully!
                 Completed at: ${workflow.complete}
@@ -184,7 +184,6 @@ workflow {
         }
     }
 }
-
 
 
 /*

@@ -9,7 +9,7 @@ include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local
 
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
 
-include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { ESSENTIAL_JOBS as ESSENTIAL_JOBS_ORGANELLAR   } from '../subworkflows/local/essential_jobs/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
@@ -80,17 +80,17 @@ workflow ASCC_ORGANELLAR {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    ESSENTIAL_JOBS(
+    ESSENTIAL_JOBS_ORGANELLAR(
         ch_samplesheet
     )
-    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
-    ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
-    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
-    ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
-    ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
-    ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
-    ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
+    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS_ORGANELLAR.out.versions)
+    ej_reference_tuple      = ESSENTIAL_JOBS_ORGANELLAR.out.reference_tuple_from_GG
+    ej_seqkit_reference     = ESSENTIAL_JOBS_ORGANELLAR.out.reference_with_seqkit
+    ej_dot_genome           = ESSENTIAL_JOBS_ORGANELLAR.out.dot_genome
+    ej_gc_coverage          = ESSENTIAL_JOBS_ORGANELLAR.out.gc_content_txt
+    ej_trailing_ns          = ESSENTIAL_JOBS_ORGANELLAR.out.trailing_ns_report
+    ej_fasta_sanitation_log = ESSENTIAL_JOBS_ORGANELLAR.out.filter_fasta_sanitation_log
+    ej_fasta_filter_log     = ESSENTIAL_JOBS_ORGANELLAR.out.filter_fasta_length_filtering_log
 
 
     //-------------------------------------------------------------------------
