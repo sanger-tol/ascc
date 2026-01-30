@@ -102,9 +102,9 @@ process GENERATE_HTML_REPORT {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        jinja2: \$(python -c 'import jinja2; print(jinja2.__version__)')
-        pandas: \$(python -c 'import pandas; print(pandas.__version__)')
-        generate_html_report: \$(python generate_html_report.py --version 2>&1 | sed 's/.*version //g')
+        jinja2: \$(python3 -c 'import jinja2; print(jinja2.__version__)')
+        pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
+        generate_html_report: \$(python3 generate_html_report.py --version 2>&1 | sed 's/.*version //g')
     END_VERSIONS
     """
 
@@ -120,9 +120,9 @@ process GENERATE_HTML_REPORT {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-        jinja2: \$(python -c 'import jinja2; print(jinja2.__version__)')
-        pandas: \$(python -c 'import pandas; print(pandas.__version__)')
-        generate_html_report: \$(python generate_html_report.py --version 2>&1 | sed 's/.*version //g')
+        jinja2: \$(python3 -c 'import jinja2; print(jinja2.__version__)')
+        pandas: \$(python3 -c 'import pandas; print(pandas.__version__)')
+        generate_html_report: \$(python3 generate_html_report.py --version 2>&1 | sed 's/.*version //g')
     END_VERSIONS
     """
 }
