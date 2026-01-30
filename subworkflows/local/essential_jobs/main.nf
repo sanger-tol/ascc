@@ -1,4 +1,4 @@
-include { FILTER_FASTA as FF1                           } from '../../../modules/local/filter/fasta/main'
+include { FILTER_FASTA                                  } from '../../../modules/local/filter/fasta/main'
 include { GC_CONTENT                                    } from '../../../modules/local/gc/content/main'
 
 include { GENERATE_GENOME                               } from '../../../subworkflows/local/generate_genomes/main'
@@ -35,21 +35,21 @@ workflow ESSENTIAL_JOBS {
                         (params.run_fcs_adaptor == "genomic" && params.genomic_only) ||
                         (params.run_fcs_adaptor == "organellar" && !params.genomic_only))
 
-    FF1(
+    FILTER_FASTA(
         new_input_fasta,
         run_fcs_adaptor
     )
-    ch_versions                         = ch_versions.mix(FF1.out.versions)
-    filter_fasta_sanitation_log         = FF1.out.sanitation_log
+    ch_versions                         = ch_versions.mix(FILTER_FASTA.out.versions)
+    filter_fasta_sanitation_log         = FILTER_FASTA.out.sanitation_log
                                              .map{ meta, _file -> [[id: meta.id ], _file] }
-    filter_fasta_length_filtering_log   = FF1.out.length_filtering_log
+    filter_fasta_length_filtering_log   = FILTER_FASTA.out.length_filtering_log
                                              .map{ meta, _file -> [[id: meta.id ], _file] }
 
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
     //
     GC_CONTENT (
-        FF1.out.fasta
+        FILTER_FASTA.out.fasta
     )
     ch_versions             = ch_versions.mix(GC_CONTENT.out.versions)
 
@@ -58,7 +58,7 @@ workflow ESSENTIAL_JOBS {
     // SUBWORKFLOW: GENERATE GENOME FILE - NA
     //
     GENERATE_GENOME (
-        FF1.out.fasta,
+        FILTER_FASTA.out.fasta,
         params.pacbio_barcode_names
     )
     ch_versions             = ch_versions.mix(GENERATE_GENOME.out.versions)
@@ -71,7 +71,7 @@ workflow ESSENTIAL_JOBS {
     // SUBWORKFLOW: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOME
     //
     TRAILINGNS_CHECK (
-        FF1.out.fasta
+        FILTER_FASTA.out.fasta
     )
     ch_versions             = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
     trailing_ns_report      = TRAILINGNS_CHECK.out.trailing_ns_report

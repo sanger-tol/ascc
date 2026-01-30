@@ -13,7 +13,7 @@ include { BLOBTOOLKIT_GENERATECSV                       } from '../modules/sange
 
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
 
-include { ESSENTIAL_JOBS as ESSENTIAL_JOBS_GENOMIC      } from '../subworkflows/local/essential_jobs/main'
+include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
@@ -91,16 +91,16 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
     //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
-    ESSENTIAL_JOBS_GENOMIC(
+    ESSENTIAL_JOBS(
         ch_samplesheet
     )
-    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS_GENOMIC.out.versions)
-    ej_reference_tuple      = ESSENTIAL_JOBS_GENOMIC.out.reference_tuple_from_GG
-    ej_dot_genome           = ESSENTIAL_JOBS_GENOMIC.out.dot_genome
-    ej_gc_coverage          = ESSENTIAL_JOBS_GENOMIC.out.gc_content_txt
-    ej_trailing_ns          = ESSENTIAL_JOBS_GENOMIC.out.trailing_ns_report
-    ej_fasta_sanitation_log = ESSENTIAL_JOBS_GENOMIC.out.filter_fasta_sanitation_log
-    ej_fasta_filter_log     = ESSENTIAL_JOBS_GENOMIC.out.filter_fasta_length_filtering_log
+    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
+    ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+    ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
+    ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
+    ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
+    ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
+    ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
 
     //-------------------------------------------------------------------------
