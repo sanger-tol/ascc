@@ -13,18 +13,15 @@ process CHECK_BARCODE {
     val multiplex_csv
 
     output:
-    env OUTPUT          , emit: result
-    path "versions.yml" , emit: versions
+    path "barcode_results.txt"  , emit: result
+    path "versions.yml"         , emit: versions
 
     script:
-    def prefix      = task.ext.prefix   ?: "${meta.id}"
-    def args        = task.ext.args     ?: ''
     """
-    OUTPUT=\$(\\
-        pacbio_barcode_check.py \\
-            -b ${barcodes} \\
-            -p in/ \\
-            -m ${multiplex_csv})
+    pacbio_barcode_check.py \\
+        -b ${barcodes} \\
+        -p in/ \\
+        -m ${multiplex_csv} > barcode_results.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -104,7 +104,7 @@ process GENERATE_HTML_REPORT {
         python: \$(python --version | sed 's/Python //g')
         jinja2: \$(python -c 'import jinja2; print(jinja2.__version__)')
         pandas: \$(python -c 'import pandas; print(pandas.__version__)')
-        generate_html_report: \$(python $baseDir/bin/generate_html_report.py --version 2>&1 | sed 's/.*version //g')
+        generate_html_report: \$(python generate_html_report.py --version 2>&1 | sed 's/.*version //g')
     END_VERSIONS
     """
 
@@ -117,15 +117,12 @@ process GENERATE_HTML_REPORT {
     cp css/*.css report/site/css/
     touch report/site/${prefix}.html
 
-    # Run the report generation script (stub mode)
-    echo "Would run python $baseDir/bin/generate_html_report.py --pipeline_version ${workflow.manifest.version} --fcs_gx_report_txt fcsgx/*.fcs_gx_report.txt --fcs_gx_taxonomy_rpt fcsgx/*.taxonomy.rpt with samplesheet $samplesheet ${params_file ? 'and params file ' + params_file : ''} and FASTA sanitation logs"
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
         jinja2: \$(python -c 'import jinja2; print(jinja2.__version__)')
         pandas: \$(python -c 'import pandas; print(pandas.__version__)')
-        generate_html_report: \$(python $baseDir/bin/generate_html_report.py --version 2>&1 | sed 's/.*version //g')
+        generate_html_report: \$(python generate_html_report.py --version 2>&1 | sed 's/.*version //g')
     END_VERSIONS
     """
 }

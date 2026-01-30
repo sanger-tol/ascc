@@ -1,5 +1,5 @@
 process AUTOFILTER_AND_CHECK_ASSEMBLY {
-    tag "$meta.id"
+    tag "${meta.id}"
     label "process_medium"
 
     conda "${moduleDir}/environment.yml"
@@ -52,7 +52,6 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     """
 
     stub:
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
     touch autofiltered.fasta
     touch ABNORMAL_CHECK.csv

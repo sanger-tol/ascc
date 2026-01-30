@@ -19,7 +19,6 @@ process GZIP {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     gzip \\
         --force \\
@@ -33,8 +32,7 @@ process GZIP {
     """
 
     stub:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: name
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.gz
     cat <<-END_VERSIONS > versions.yml

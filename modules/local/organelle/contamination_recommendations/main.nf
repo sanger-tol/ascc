@@ -20,6 +20,7 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
     """
     organelle_contamination_recommendation.py \\
         --input "${files}" \\
+        ${args} \\
         --output ${prefix}.contamination_recommendation
 
     cat <<-END_VERSIONS > versions.yml
@@ -30,7 +31,6 @@ process ORGANELLE_CONTAMINATION_RECOMMENDATIONS {
     """
 
     stub:
-    def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}-${meta.organelle}"
     """
     touch ${prefix}.bed

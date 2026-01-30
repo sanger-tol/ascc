@@ -8,15 +8,14 @@ process EXTRACT_CONTAMINANTS {
         'biocontainers/mulled-v2-7fa7184beddbf01b0b0ae64ed643f6c05f12cbcc:337918d8410b938b17fd4beb45024a78ffa6b0d3-0' }"
 
     input:
-    tuple val(meta), path(blast_data)
-    tuple val(meta), path(fasta)
+    tuple val(meta),    path(fasta)
+    tuple val(meta2),   path(blast_data)
 
     output:
     tuple val(meta), path( "*.ALL*unfiltered_scaffold_coverage.bed" ),  emit: contamination_bed
     path "versions.yml",                                                emit: versions
 
     script:
-    def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
     extract_contaminants_by_type.py \\
@@ -32,7 +31,6 @@ process EXTRACT_CONTAMINANTS {
     """
 
     stub:
-    def args    = task.ext.args     ?: ''
     """
     touch test.bed
 
