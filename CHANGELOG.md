@@ -11,6 +11,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 
 ### `Added`
 
+- Minimum Nextflow version is 25.10.0!
 - Version bump to 0.6.0, this is RC1 for a version 1.0.0 release.
 - Reporting for the pipeline output into a more human readable output (html) @eaunin
 - Standardised some channel names
@@ -33,6 +34,15 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - More outputs from the `ORGANELLAT_BLAST` processes.
 - Fixed small bug in `PACBIO_BARCODE_CHECK` which stopped proper reporting, no impact on output.
 - NF-test has been updated to latest outputs.
+- Updated to better follow strict syntax changes. Includes:
+  - prepending of `_` to unused vars
+  - C to c for channels
+  - No ENV outputs, instead output to file and read file.
+- Removed `lib/ascc_utils.groovy` in favour of `functions/local/ascc_utils.nf`
+- Updated NF-core modules that now support version topics, some of these do include tool version updates.
+- Removed modules as no longe needed
+  - `CAT_CAT`
+  - `GET_LARGEST_SCAFFOLD` as we now nolonger need a comparator to use TBI or CSI indexes.
 
 ### `Bugs`
 
@@ -57,6 +67,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 | DECONTAMINATE_GENERATE_BED       | generate_contamination_bed.py | NA          | 1.1.0        |
 | GZIP                             | gzip                          | 1.13        |              |
 | PACBIO_BARCODE_CHECK             | pacbio_barcode_check.py       | 1.0.0       | 1.0.1        |
+| CAT_CAT                          | pigz                          | 2.3.8       | NA           |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 
