@@ -51,9 +51,6 @@ def extract_contig_number(query_name):
         # No number found - sort these to the end
         return float('inf')
 
-# Initialize logger
-logger = setup_logger()
-
 def parse_sourmash_results(file_path):
     """Parse the sourmash results file and extract query-match relationships."""
     query_matches = defaultdict(list)
@@ -336,6 +333,9 @@ if __name__ == "__main__":
     # Validate required arguments (unless --version was used)
     if not args.sourmash_results or not args.assembly_db or not args.outdir:
         parser.error("the following arguments are required: -s/--sourmash_results, -a/--assembly_db, -o/--outdir")
+
+    # Initialize logger
+    logger = setup_logger()
 
     # Configure file logging if requested
     if args.log:
