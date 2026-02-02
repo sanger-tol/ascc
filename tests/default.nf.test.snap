@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            139,
+            137,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -96,10 +96,6 @@
                 },
                 "GET_KMER_COUNTS": {
                     "kmer-counter": "0.1.2"
-                },
-                "GET_LARGEST_SCAFFOLD": {
-                    "get_largest_scaffold": 2.0,
-                    "coreutils": 9.1
                 },
                 "GET_LINEAGE_FOR_KRAKEN": {
                     "python": "3.11.0",
