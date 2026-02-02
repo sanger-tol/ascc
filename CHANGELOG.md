@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - Red Notebook [##/##/2025]
+## [v1.1.0] - Purple Frame [##/##/2026]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
 
@@ -48,21 +48,17 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 
 | Module               | Old Version | New Versions |
 | -------------------- | ----------- | ------------ |
-| GENERATE_HTML_REPORT | NA          | 1.0          |
-| KMER_COUNTER         |             |              |
-| REFORMAT_NPY2CSV     | NA          | 1.0.0        |
-| CAT_CAT              | NA          | nf-core      |
+| CAT_CAT              | NA          | 2.3.4        |
 | SOURMASH_SKETCH      | NA          | 4.8.11       |
 | SOURMASH_MULTISEARCH | NA          | 4.8.11       |
-| PARSE_SOURMASH       | NA          | custom       |
-| GET_TARGET_TAXA      | NA          | custom       |
+| PARSE_SOURMASH       | NA          | 1.0.0        |
+| GET_TARGET_TAXA      | NA          | 1.0.0        |
 
 ### Parameters
 
 | Old Parameter | New Parameter             | Description                                           |
 | ------------- | ------------------------- | ----------------------------------------------------- |
 | NA            | --run_sourmash            | Control sourmash execution ('off', 'genomic', 'both') |
-| NA            | --sourmash_databases      | List of sourmash databases (direct configuration)     |
 | NA            | --sourmash_db_config      | Path to CSV file with database configuration          |
 | NA            | --sourmash_taxonomy_level | Taxonomic level for target taxa ('order' by default)  |
 | NA            | --sourmash_action_mode    | Action mode for autofilter ('warn' or 'remove')       |
