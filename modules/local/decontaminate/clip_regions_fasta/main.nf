@@ -19,7 +19,6 @@ process DECONTAMINATE_CLIP_REGIONS_FASTA {
 
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
-    def args    = task.ext.args     ?: ""
     """
     clip_regions_bed.py \\
         --sample_id ${prefix} \\

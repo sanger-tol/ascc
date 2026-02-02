@@ -48,11 +48,7 @@ process FILTER_FASTA {
 
     stub:
     def prefix      = task.ext.prefix   ?: "${meta.id}"
-    // Conditionally add the max header length argument for stub
-    def max_header_arg = check_fcs_header_len ? "--max_header_len 50" : ""
     """
-    echo "Would run: sanitise_input_fasta_file.py ${input_fasta} ${max_header_arg} --log_file fasta_sanitation.json --max_detailed_changes 0 > ${prefix}_shortened.fasta"
-    echo "Would run: filter_fasta_by_length.py ${args} ${prefix}_shortened.fasta ${max_length} --log_file fasta_length_filtering.json > ${prefix}_filtered.fasta 2> ${prefix}_filtering_stderr.txt"
     touch ${prefix}_filtered.fasta
     touch ${prefix}_filtering_stderr.txt
     echo '{"input_file":"${input_fasta}","total_sequences":0,"has_issues":false}' > fasta_sanitation.json

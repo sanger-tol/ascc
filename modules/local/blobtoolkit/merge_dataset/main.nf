@@ -1,11 +1,6 @@
 process MERGE_BTK_DATASETS {
     tag "$meta.id"
     label 'process_low'
-
-
-    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        exit 1, "MERGE_BTK_DATASETS module does not support Conda. Please use Docker / Singularity / Podman instead."
-    }
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
@@ -20,9 +15,11 @@ process MERGE_BTK_DATASETS {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix              = task.ext.prefix       ?: "${meta.id}"
-    def args                = task.ext.args         ?: ""
+    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
+        exit 1, "MERGE_BTK_DATASETS module does not support Conda. Please use Docker / Singularity / Podman instead."
+    }
 
+    def args                = task.ext.args         ?: ""
     """
     mkdir -p merged_datasets/
 
@@ -40,8 +37,6 @@ process MERGE_BTK_DATASETS {
     """
 
     stub:
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
-
     """
     mkdir -p merged_datasets/
 

@@ -16,7 +16,6 @@ process PARSE_FCSGX_RESULT {
     path "versions.yml",                emit: versions
 
     script:
-    def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     parse_fcsgx_result.py ${fcs_gx_reports_folder} ${ncbi_rankedlineage_path} > ${prefix}_parsed_fcsgx.csv

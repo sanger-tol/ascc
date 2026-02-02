@@ -1,11 +1,6 @@
 process CREATE_BTK_DATASET {
     tag "$meta.id"
     label 'process_medium'
-
-
-    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        exit 1, "CREATE_BTK_DATASET module does not support Conda. Please use Docker / Singularity / Podman instead."
-    }
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
@@ -37,6 +32,10 @@ process CREATE_BTK_DATASET {
     task.ext.when == null || task.ext.when
 
     script:
+    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
+        exit 1, "CREATE_BTK_DATASET module does not support Conda. Please use Docker / Singularity / Podman instead."
+    }
+
     def prefix          = task.ext.prefix   ?: "${meta.id}"
     def args            = task.ext.args     ?: ""
     def blastn_arg      = nt_blast_file     ? "-bh ${nt_blast_file}"     : ""

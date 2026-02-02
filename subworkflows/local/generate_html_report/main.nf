@@ -2,7 +2,7 @@ include { GENERATE_HTML_REPORT  } from '../../../modules/local/generate_html_rep
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder   } from "${projectDir}/lib/ascc_utils.groovy"
+include { getEmptyPlaceholder   } from '../../../functions/local/ascc_utils'
 
 workflow GENERATE_HTML_REPORT_WORKFLOW {
     take:
@@ -45,9 +45,9 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .join(fcs_adaptor
             .map { meta, files ->
                         // LOGIC: SORT INTO PREDICTABLE ORDER
-                        def sorted_files = files.sort {
-                            it.toString().contains('_euk') ? 0 :
-                            it.toString().contains('_prok') ? 1 : 2
+                        def sorted_files = files.sort { file ->
+                            file.toString().contains('_euk') ? 0 :
+                            file.toString().contains('_prok') ? 1 : 2
                         }
                         [[id: meta.id], sorted_files]
                     },              remainder: true)

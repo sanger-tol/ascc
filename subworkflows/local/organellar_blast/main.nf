@@ -25,7 +25,7 @@ workflow ORGANELLAR_BLAST {
 
     reference_tuple
         .combine(organellar_tuple)
-        .map { ref_meta, ref_file, org_meta, org_file ->
+        .map { ref_meta, ref_file, org_meta, _org_file ->
             def meta = ref_meta + [ og: org_meta.id]
             [meta, ref_file]
         }
@@ -55,7 +55,7 @@ workflow ORGANELLAR_BLAST {
     //
     SED_SED.out.sed
         .combine(BLAST_MAKEBLASTDB.out.db)
-        .multiMap{ meta, ref, meta2, blast_db ->
+        .multiMap{ meta, ref, _meta2, blast_db ->
             reference_tuple:    [meta, ref]
             blastdb_tuple:      [meta, blast_db]
         }
@@ -76,7 +76,7 @@ workflow ORGANELLAR_BLAST {
     //
     BLAST_BLASTN.out.txt
         .combine ( organellar_tuple )
-        .map { meta, file, org_meta, org_file ->
+        .map { meta, file, org_meta, _org_file ->
             [[  id: meta.id,                // Assembly Name
                 og: org_meta.id,            // Organellar Name
                 sz: file.size()             // Size of assembly
@@ -147,7 +147,7 @@ workflow ORGANELLAR_BLAST {
     //
     EXTRACT_CONTAMINANTS.out.contamination_bed
         .combine ( organellar_tuple)
-        .map { blast_meta, blast_txt, organelle_meta, organelle_fasta ->
+        .map { blast_meta, blast_txt, organelle_meta, _organelle_fasta ->
             [[  id:         blast_meta.id,
                 organelle:  organelle_meta.id
             ], blast_txt ]

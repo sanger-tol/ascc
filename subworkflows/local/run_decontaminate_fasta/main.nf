@@ -7,7 +7,7 @@ include { GZIP                              } from '../../../modules/local/gzip/
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder               } from "${projectDir}/lib/ascc_utils.groovy"
+include { getEmptyPlaceholder   } from '../../../functions/local/ascc_utils'
 
 workflow RUN_DECONTAMINATE_FASTA {
     take:
@@ -21,7 +21,7 @@ workflow RUN_DECONTAMINATE_FASTA {
     plastid_recommendations
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // LOGIC: DATAMAPPER FOR DECONTAMINATE_GENERATE_BED

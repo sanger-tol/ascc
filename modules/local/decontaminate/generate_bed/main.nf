@@ -35,7 +35,7 @@ process DECONTAMINATE_GENERATE_BED {
     generate_contamination_bed.py \\
         --assembly_path $fasta \\
         --decon_tolid_type_dir "./dataset" \\
-        --assembly_type ${meta.id} \\
+        --assembly_type ${prefix} \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

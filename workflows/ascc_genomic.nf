@@ -31,7 +31,7 @@ include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder                           } from "${projectDir}/lib/ascc_utils.groovy"
+include { getEmptyPlaceholder                           } from '../functions/local/ascc_utils'
 
 
 
@@ -46,10 +46,10 @@ workflow ASCC_GENOMIC {
     take:
     ch_samplesheet          // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
-    fcs_ov                  // params.fcs_override
+    _fcs_ov                  // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet for override
     fcs_db                  // [path(path)]
-    reads
+    _reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
     ncbi_taxonomy_path
@@ -61,7 +61,7 @@ workflow ASCC_GENOMIC {
     nt_kraken_db_path
     vecscreen_database_path
     reads_path
-    reads_layout
+    _reads_layout
     reads_type
     btk_lineages
     btk_lineages_path
@@ -108,7 +108,7 @@ workflow ASCC_GENOMIC {
     // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
     //
     ej_reference_tuple
-        .map { meta, file ->
+        .map { _meta, file ->
             file.countFasta() * 3
         }
         .set {autoencoder_epochs_count}
@@ -117,7 +117,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS
     //
     GET_KMERS_PROFILE (
-        ej_reference_tuple.filter{ meta, file -> params.run_kmers in run_conditionals },
+        ej_reference_tuple.filter{ _meta, _file -> params.run_kmers in run_conditionals },
         params.kmer_length,
         params.dimensionality_reduction_methods,
         autoencoder_epochs_count
@@ -137,7 +137,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     TIARA_TIARA (
-        ej_reference_tuple.filter{ meta, file -> params.run_tiara in run_conditionals }
+        ej_reference_tuple.filter{ _meta, _file -> params.run_tiara in run_conditionals }
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
     ch_tiara            = TIARA_TIARA.out.classifications
@@ -151,7 +151,7 @@ workflow ASCC_GENOMIC {
     //
 
     EXTRACT_NT_BLAST (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_nt_blast in run_conditionals
         },
         nt_database_path.first(),
@@ -169,7 +169,7 @@ workflow ASCC_GENOMIC {
     //
 
     NR_DIAMOND (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_nr_diamond in run_conditionals
         },
         diamond_nr_db_path.first()
@@ -192,7 +192,7 @@ workflow ASCC_GENOMIC {
     //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send
     //  evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     UP_DIAMOND (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_uniprot_diamond in run_conditionals
         },
         diamond_uniprot_db_path.first()
@@ -213,10 +213,10 @@ workflow ASCC_GENOMIC {
     // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH
     //
     organellar_check = organellar_genomes
-        .filter{ meta, file ->
+        .filter{ _meta, _file ->
             params.run_organellar_blast in run_conditionals
         }
-        .branch { meta, assembly ->
+        .branch { meta, _assembly ->
             mito:       meta.assembly_type == "MITO"
             plastid:    meta.assembly_type == "PLASTID"
             invalid:    true    // if value but not of the above conditions
@@ -278,7 +278,7 @@ workflow ASCC_GENOMIC {
         .set { duplicated_db }
 
     PACBIO_BARCODE_CHECK (
-        duplicated_db.reference.filter{ meta, file ->
+        duplicated_db.reference.filter{ _meta, _file ->
             params.run_pacbio_barcodes in run_conditionals
         },
         ch_barcodes,
@@ -293,7 +293,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUN FCS-ADAPTOR TO IDENTIDY ADAPTOR AND VECTORR CONTAMINATION
     //
     RUN_FCSADAPTOR (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_fcs_adaptor in run_conditionals
         }
     )
@@ -311,8 +311,8 @@ workflow ASCC_GENOMIC {
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
-            .multiMap { meta, ref, db, tax_id, tax_path ->
-                new_meta = [id: meta.id, taxid: meta.taxid]
+            .multiMap { meta, ref, db, _tax_id, tax_path ->
+                def new_meta = [id: meta.id, taxid: meta.taxid]
                 reference: [new_meta, ref]
                 fcs_db_path: db
                 ncbi_tax_path: tax_path
@@ -353,7 +353,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: CALCULATE AVERAGE READ COVERAGE
     //
     RUN_READ_COVERAGE (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_coverage in run_conditionals
         },
         reads_path,
@@ -370,7 +370,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: SCREENING FOR VECTOR SEQUENCE
     //
     RUN_VECSCREEN (
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_vecscreen in run_conditionals
         },
         vecscreen_database_path.first()
@@ -384,7 +384,7 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: RUN THE KRAKEN CLASSIFIER
     //
     RUN_NT_KRAKEN(
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_kraken in run_conditionals
         },
         nt_kraken_db_path.first(),
@@ -517,7 +517,7 @@ workflow ASCC_GENOMIC {
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
-        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{it[1]}
+        ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly.map{_meta, file -> file}
         ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
 
         //
@@ -575,7 +575,7 @@ workflow ASCC_GENOMIC {
                         },
                 by: [0]
             )
-        .branch { meta, assembly, data ->
+        .branch { _meta, _assembly, data ->
             def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
             def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
 
@@ -587,13 +587,13 @@ workflow ASCC_GENOMIC {
         }
 
     run_btk_conditional.skip_btk
-        .map { meta, file, data ->
+        .map { meta, file, _data ->
             log.info "[ASCC INFO]: CONTAMINATION THRESHOLD NOT MET"
             log.info "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
             log.info "\t- You can verify here: $file"
             return [meta, file]
         }
-        .set { skipped_btk_ch }
+        //.set { skipped_btk_ch }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
         log.warn "[ASCC WARN]: run_autofilter_assembly is off, but run_btk_busco != off"
@@ -604,14 +604,14 @@ workflow ASCC_GENOMIC {
     // Noticed a race condition, this should fix that.
     //
     run_btk_conditional.run_btk
-        .map { meta, file, data -> [meta.id, meta, file] }
+        .map { meta, file, _data -> [meta.id, meta, file] }
         .join(
             ch_autofilt_alarm_file
                 .map { meta, file ->
                     [meta.id, meta, file]
                 }
         )
-        .map { id, ref_meta, ref_file, alarm_meta, alarm_file ->
+        .map { _id, ref_meta, ref_file, alarm_meta, alarm_file ->
             def merged_meta = ref_meta + alarm_meta
             [merged_meta, ref_file, alarm_file]
         }
@@ -627,7 +627,7 @@ workflow ASCC_GENOMIC {
         .combine( reads_path.collect()
             .map { paths -> [paths] }
         )
-        .map { meta, ref, alarm, path_list ->
+        .map { meta, _ref, _alarm, path_list ->
             [[id:meta.id], path_list]
         }
         .set { ch_meta_reads }
@@ -803,7 +803,7 @@ workflow ASCC_GENOMIC {
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
         ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ it.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,
@@ -822,10 +822,6 @@ workflow ASCC_GENOMIC {
     // Params file
     ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
-    // Templates and CSS
-    ch_jinja_templates = channel.fromPath("${baseDir}/assets/templates/*.jinja").collect()
-    ch_css_files       = channel.fromPath("${baseDir}/assets/css/*.css").collect()
-
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
         ch_fcsadapt,
@@ -835,7 +831,7 @@ workflow ASCC_GENOMIC {
         merged_table,
         merged_phylum_count,
         ch_kmers_results,
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter{ _meta, _file ->
             params.run_html_report in run_conditionals
         },
         ej_fasta_sanitation_log,
