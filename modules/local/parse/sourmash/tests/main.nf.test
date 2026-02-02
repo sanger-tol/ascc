@@ -9,6 +9,37 @@ nextflow_process {
     tag "parse"
     tag "parse/sourmash"
 
+    setup {
+        // Download required test files from S3 (skip if already exist)
+        def test_data_dir = "${projectDir}/TEST_DATA/sourmash_testfiles"
+        def parse_sourmash_dir = "${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash"
+        def base_url = "https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/sourmash_testfiles"
+
+        new File(parse_sourmash_dir).mkdirs()
+
+        def files_to_download = [
+            "nf-tests/parse_sourmash/test_multisearch_results.csv": parse_sourmash_dir,
+            "nf-tests/parse_sourmash/test_assembly_taxa_db.csv": parse_sourmash_dir
+        ]
+
+        for (entry in files_to_download) {
+            def file_path = entry.key
+            def dest_dir = entry.value
+            def file_name = file_path.split("/")[-1]
+            def dest_file = new File("${dest_dir}/${file_name}")
+
+            if (!dest_file.exists()) {
+                println "Downloading ${file_name}..."
+                def command = ['bash', '-c', "curl -sL ${base_url}/${file_path} -o ${dest_dir}/${file_name}"]
+                def proc = command.execute()
+                proc.waitFor()
+                if (proc.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${file_name}: ${proc.err.text}")
+                }
+            }
+        }
+    }
+
     test("Parse sourmash results with target_taxa order:enterobacterales") {
 
         when {
@@ -19,9 +50,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome' ],
-                    file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
+                    file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
                 ]
-                input[1] = file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
+                input[1] = file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
                 input[2] = 'order:enterobacterales'
                 """
             }
@@ -38,8 +69,8 @@ nextflow_process {
                     // Check CSV header (first line, no comment lines anymore)
                     assert lines[0].contains('header,assembly_accession,taxa,top_n,containment,jaccard,intersect_hashes,is_target')
 
-                    // Check data rows exist and have correct columns
-                    assert lines.size() > 1 : "Should have data rows"
+                    // Check data rows exist and have correct columns (7 lines = 1 header + 6 data rows)
+                    assert lines.size() == 7 : "Should have 1 header + 6 data rows"
                     def dataRow = lines[1].split(',')
                     assert dataRow.size() == 8 : "Should have 8 columns"
                 },
@@ -75,9 +106,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome_nomatch' ],
-                    file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
+                    file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
                 ]
-                input[1] = file('${projectDir}/assets/sourmash_testing/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
+                input[1] = file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
                 input[2] = 'phylum:chordata'
                 """
             }
@@ -91,8 +122,8 @@ nextflow_process {
                 {
                     def lines = path(process.out.multisearch_summary[0][1]).readLines()
 
-                    // Check CSV structure (first line is header, no comment lines anymore)
-                    assert lines.size() > 1 : "Should have header and data rows"
+                    // Check CSV structure (7 lines = 1 header + 6 data rows)
+                    assert lines.size() == 7 : "Should have 1 header + 6 data rows"
 
                     // Check that is_target column shows None (no target_taxa matches found in DB)
                     def dataRow = lines[1].split(',')
@@ -102,8 +133,8 @@ nextflow_process {
                 { assert path(process.out.multisearch_non_target[0][1]).exists() },
                 {
                     def lines = path(process.out.multisearch_non_target[0][1]).readLines()
-                    // Should have header + data rows (all 1 query should be non-target)
-                    assert lines.size() >= 2 : "Should have non-target contigs when target_taxa doesn't match"
+                    // Should have header + 3 non-target queries (4 lines total)
+                    assert lines.size() == 4 : "Should have 1 header + 3 non-target queries when target_taxa doesn't match"
                 },
                 // Check versions - split line to avoid timestamp/path issues
                 {
@@ -125,9 +156,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome' ],
-                    file('test_multisearch_results.csv')
+                    file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
                 ]
-                input[1] = file('test_assembly_taxa_db.csv')
+                input[1] = file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)
                 input[2] = 'order:enterobacterales'
                 """
             }

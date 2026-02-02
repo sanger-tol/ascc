@@ -1,0 +1,100 @@
+{
+    "E.coli genome with multiple databases (k=21 and k=31)": {
+        "content": [
+            [
+                "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                "versions.yml:md5,536cc413a49981bea53cdc43325a08a9",
+                "versions.yml:md5,6574ae9aa716e85b8809a278f8604818",
+                "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                "versions.yml:md5,97d5a5ed34d747ad47f6904d7775e93d",
+                "versions.yml:md5,b9764cab7325e660d5e7181d56491392",
+                "versions.yml:md5,b9764cab7325e660d5e7181d56491392"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2026-01-30T12:01:59.671985"
+    },
+    "E.coli genome with single database (k=21)": {
+        "content": [
+            [
+                "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                "versions.yml:md5,536cc413a49981bea53cdc43325a08a9",
+                "versions.yml:md5,6574ae9aa716e85b8809a278f8604818",
+                "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                "versions.yml:md5,97d5a5ed34d747ad47f6904d7775e93d",
+                "versions.yml:md5,b9764cab7325e660d5e7181d56491392"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2026-01-30T12:01:36.874512"
+    },
+    "Stub run - structure validation": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.summary.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.non_target.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                    "versions.yml:md5,536cc413a49981bea53cdc43325a08a9",
+                    "versions.yml:md5,6574ae9aa716e85b8809a278f8604818",
+                    "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                    "versions.yml:md5,97d5a5ed34d747ad47f6904d7775e93d",
+                    "versions.yml:md5,b9764cab7325e660d5e7181d56491392"
+                ],
+                "sourmash_non_target": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.non_target.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "sourmash_summary": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.summary.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                    "versions.yml:md5,536cc413a49981bea53cdc43325a08a9",
+                    "versions.yml:md5,6574ae9aa716e85b8809a278f8604818",
+                    "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                    "versions.yml:md5,97d5a5ed34d747ad47f6904d7775e93d",
+                    "versions.yml:md5,b9764cab7325e660d5e7181d56491392"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2026-01-30T12:02:17.449692"
+    }
+}

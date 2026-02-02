@@ -10,32 +10,60 @@ nextflow_workflow {
     tag "run_sourmash"
     tag "sourmash"
 
-    test("E.coli genome with single database (k=21)") {
+    setup {
+        // Download required test files from S3 (skip if already exist)
+        def test_data_dir = "${projectDir}/TEST_DATA/sourmash_testfiles"
+        def test_data_db_dir = "${projectDir}/TEST_DATA/sourmash_testfiles/db"
+        def base_url = "https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/sourmash_testfiles"
 
-        setup {
-            // Download NCBI taxonomy database (rankedlineage.dmp)
-            new File("${projectDir}/NCBI_TAXONOMY").mkdirs()
+        new File(test_data_db_dir).mkdirs()
 
-            def rankedlineageFile = new File("${projectDir}/NCBI_TAXONOMY/rankedlineage.dmp")
-            if (!rankedlineageFile.exists()) {
-                println "\nDownloading NCBI taxonomy database..."
+        def files_to_download = [
+            "GCF_000005845.2_ASM584v2_genomic.fna.gz": test_data_dir,
+            "db/gtdb_k21_k31_k51_s200_batch_1.zip": test_data_db_dir,
+            "db/gtdb_k21_k31_k51_s200_batch_2.zip": test_data_db_dir,
+            "db/ascc_sourmash_test_subset_taxa.csv": test_data_db_dir
+        ]
 
-                def command = ['bash', '-c',
-                    "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz " +
-                    "--output ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz && " +
-                    "tar -C ${projectDir}/NCBI_TAXONOMY -xzf ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz rankedlineage.dmp"
-                ]
-                def process = command.execute()
-                process.waitFor()
+        for (entry in files_to_download) {
+            def file_path = entry.key
+            def dest_dir = entry.value
+            def file_name = file_path.split("/")[-1]
+            def dest_file = new File("${dest_dir}/${file_name}")
 
-                if (process.exitValue() != 0) {
-                    throw new RuntimeException("Error - failed to download NCBI taxonomy: ${process.err.text}")
+            if (!dest_file.exists()) {
+                println "Downloading ${file_name}..."
+                def command = ['bash', '-c', "curl -sL ${base_url}/${file_path} -o ${dest_dir}/${file_name}"]
+                def proc = command.execute()
+                proc.waitFor()
+                if (proc.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${file_name}: ${proc.err.text}")
                 }
-                println "Done"
-            } else {
-                println "NCBI taxonomy database already exists, skipping download"
             }
         }
+
+        // Download NCBI taxonomy database (rankedlineage.dmp)
+        new File("${projectDir}/NCBI_TAXONOMY").mkdirs()
+
+        def rankedlineageFile = new File("${projectDir}/NCBI_TAXONOMY/rankedlineage.dmp")
+        if (!rankedlineageFile.exists()) {
+            println "Downloading NCBI taxonomy database..."
+
+            def command = ['bash', '-c',
+                "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz " +
+                "--output ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz && " +
+                "tar -C ${projectDir}/NCBI_TAXONOMY -xzf ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz rankedlineage.dmp"
+            ]
+            def proc = command.execute()
+            proc.waitFor()
+
+            if (proc.exitValue() != 0) {
+                throw new RuntimeException("Error - failed to download NCBI taxonomy: ${proc.err.text}")
+            }
+        }
+    }
+
+    test("E.coli genome with single database (k=21)") {
 
         when {
             workflow {
@@ -75,45 +103,25 @@ nextflow_workflow {
                 { assert workflow.out.sourmash_summary.get(0).get(0).id == 'test_ecoli' },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).exists() },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).getFileName().toString().endsWith('.summary.csv') },
+                // Check CSV has header + 5 data rows = 6 lines total
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines().size() == 6 },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines()[0].contains('assembly_accession') },
 
                 // Check sourmash_non_target output
                 { assert workflow.out.sourmash_non_target },
                 { assert workflow.out.sourmash_non_target.get(0).get(0).id == 'test_ecoli' },
                 { assert path(workflow.out.sourmash_non_target.get(0).get(1)).exists() },
                 { assert path(workflow.out.sourmash_non_target.get(0).get(1)).getFileName().toString().endsWith('.non_target.csv') },
+                // Check non_target CSV has only header (no non-target matches for E.coli)
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).readLines().size() == 1 },
 
-                // Check versions
-                { assert workflow.out.versions }
+                // Snapshot for versions
+                { assert snapshot(workflow.out.versions).match() }
             )
         }
     }
 
     test("E.coli genome with multiple databases (k=21 and k=31)") {
-
-        setup {
-            // Download NCBI taxonomy database (rankedlineage.dmp)
-            new File("${projectDir}/NCBI_TAXONOMY").mkdirs()
-
-            def rankedlineageFile = new File("${projectDir}/NCBI_TAXONOMY/rankedlineage.dmp")
-            if (!rankedlineageFile.exists()) {
-                println "\nDownloading NCBI taxonomy database..."
-
-                def command = ['bash', '-c',
-                    "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz " +
-                    "--output ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz && " +
-                    "tar -C ${projectDir}/NCBI_TAXONOMY -xzf ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz rankedlineage.dmp"
-                ]
-                def process = command.execute()
-                process.waitFor()
-
-                if (process.exitValue() != 0) {
-                    throw new RuntimeException("Error - failed to download NCBI taxonomy: ${process.err.text}")
-                }
-                println "Done"
-            } else {
-                println "NCBI taxonomy database already exists, skipping download"
-            }
-        }
 
         when {
             workflow {
@@ -165,19 +173,23 @@ nextflow_workflow {
                 { assert workflow.out.sourmash_summary },
                 { assert workflow.out.sourmash_summary.get(0).get(0).id == 'test_ecoli' },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).exists() },
+                // Check CSV has combined results from 2 databases (header + data rows)
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines().size() >= 6 },
 
                 // Check sourmash_non_target output
                 { assert workflow.out.sourmash_non_target },
                 { assert workflow.out.sourmash_non_target.get(0).get(0).id == 'test_ecoli' },
                 { assert path(workflow.out.sourmash_non_target.get(0).get(1)).exists() },
+                // non_target should have at least header
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).readLines().size() >= 1 },
 
                 // Verify that results contain expected data structure
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).text.contains('assembly_accession') },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).text.contains('containment') },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).text.contains('is_target') },
 
-                // Check versions
-                { assert workflow.out.versions }
+                // Snapshot for versions
+                { assert snapshot(workflow.out.versions).match() }
             )
         }
     }
@@ -185,31 +197,6 @@ nextflow_workflow {
     test("Stub run - structure validation") {
 
         options "-stub"
-
-        setup {
-            // Download NCBI taxonomy database (rankedlineage.dmp)
-            new File("${projectDir}/NCBI_TAXONOMY").mkdirs()
-
-            def rankedlineageFile = new File("${projectDir}/NCBI_TAXONOMY/rankedlineage.dmp")
-            if (!rankedlineageFile.exists()) {
-                println "\nDownloading NCBI taxonomy database..."
-
-                def command = ['bash', '-c',
-                    "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz " +
-                    "--output ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz && " +
-                    "tar -C ${projectDir}/NCBI_TAXONOMY -xzf ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz rankedlineage.dmp"
-                ]
-                def process = command.execute()
-                process.waitFor()
-
-                if (process.exitValue() != 0) {
-                    throw new RuntimeException("Error - failed to download NCBI taxonomy: ${process.err.text}")
-                }
-                println "Done"
-            } else {
-                println "NCBI taxonomy database already exists, skipping download"
-            }
-        }
 
         when {
             workflow {
@@ -243,16 +230,8 @@ nextflow_workflow {
             assertAll(
                 { assert workflow.success },
 
-                // Check outputs exist (stub files)
-                { assert workflow.out.sourmash_summary },
-                { assert workflow.out.sourmash_summary.get(0).get(0).id == 'test_stub' },
-                { assert path(workflow.out.sourmash_summary.get(0).get(1)).exists() },
-
-                { assert workflow.out.sourmash_non_target },
-                { assert workflow.out.sourmash_non_target.get(0).get(0).id == 'test_stub' },
-                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).exists() },
-
-                { assert workflow.out.versions }
+                // Snapshot entire output structure for stub test
+                { assert snapshot(workflow.out).match() }
             )
         }
     }
