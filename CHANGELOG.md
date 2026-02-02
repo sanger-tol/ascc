@@ -31,9 +31,9 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - New Python scripts:
   - `bin/sourmash_taxonomy_parser.py`: Parse sourmash multisearch results and taxonomy
   - `bin/get_target_taxa_from_taxid.py`: Extract target taxonomic level from taxid
-- Support for multiple sourmash databases with flexible configuration
-  - Direct parameter configuration via `--sourmash_databases`
-  - CSV-based configuration via `--sourmash_db_config`
+- Sourmash database configuration via CSV file (`--sourmash_db_config`)
+  - Replaces dictionary-based configuration with simplified CSV format
+  - Native Nextflow CSV parsing without custom Groovy classes
 - Comprehensive nf-test suite for all sourmash modules and subworkflows
 - Integration tests with Plasmodium and E.coli test databases
 - Addition of @zilov as contributor

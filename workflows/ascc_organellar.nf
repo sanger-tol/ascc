@@ -113,40 +113,43 @@ workflow ASCC_ORGANELLAR {
     //
 
     //
-    // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION (same as genomic workflow)
+    // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION FROM CSV
     //
-    def sourmashConfig = new SourmashDatabaseConfig()
-    def sourmash_databases = sourmashConfig.parseDatabaseConfig(params)
-
-    // Validate databases if Sourmash is enabled
-    if (params.run_sourmash == "both" || params.run_sourmash == "organellar") {
-        if (sourmash_databases.size() > 0) {
-            def validation = sourmashConfig.validateDatabases(sourmash_databases)
-
-            // Log warnings
-            validation.warnings.each { warning ->
-                log.warn "[ASCC Sourmash Organellar] ${warning}"
+    if (params.sourmash_db_config && (params.run_sourmash == "both" || params.run_sourmash == "organellar")) {
+        ch_sourmash_databases = Channel
+            .fromPath(params.sourmash_db_config, checkIfExists: true)
+            .splitCsv(header: true)
+            .map { row ->
+                def k_available = row.k_available.replaceAll(/[\[\]]/, '').split(',').collect { it.trim() as Integer }
+                [
+                    name: row.name,
+                    path: file(row.path, checkIfExists: true),
+                    k_available: k_available,
+                    k_for_search: row.k_for_search as Integer,
+                    s: row.s as Integer,
+                    assembly_taxa_db: file(row.assembly_taxa_db, checkIfExists: true)
+                ]
             }
 
-            // Log summary if valid
-            if (validation.valid) {
-                log.info sourmashConfig.getDatabaseSummary(sourmash_databases)
-            } else {
-                log.error "[ASCC Sourmash Organellar] Database validation failed. Sourmash will be skipped."
-                sourmash_databases = []
+        ch_sourmash_databases
+            .collect()
+            .subscribe { dbs ->
+                log.info "[ASCC Sourmash Organellar] Loaded ${dbs.size()} database(s):"
+                dbs.each { db ->
+                    log.info "  - ${db.name}: k=${db.k_for_search}, s=${db.s}"
+                }
             }
-        } else {
-            log.warn "[ASCC Sourmash Organellar] No Sourmash databases configured. Sourmash will be skipped."
+    } else {
+        if (params.run_sourmash == "both" || params.run_sourmash == "organellar") {
+            log.warn "[ASCC Sourmash Organellar] No database configuration file provided (--sourmash_db_config). Sourmash will be skipped."
         }
+        ch_sourmash_databases = Channel.empty()
     }
-
-    // Create channel for Sourmash databases
-    ch_sourmash_databases = Channel.fromList(sourmash_databases)
 
     if ( params.run_sourmash == "both" || params.run_sourmash == "organellar" ) {
 
-        // Only run if databases are configured and validated
-        if (sourmash_databases.size() > 0) {
+        // Only run if database configuration file is provided
+        if (params.sourmash_db_config) {
 
             RUN_SOURMASH (
                 reference_tuple_from_GG,
@@ -170,7 +173,7 @@ workflow ASCC_ORGANELLAR {
             ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
 
         } else {
-            // Skip Sourmash if no databases configured
+            // Skip Sourmash if no database configuration file provided
             ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) }
             ch_sourmash         = Channel.of( [[],[]] )
         }
