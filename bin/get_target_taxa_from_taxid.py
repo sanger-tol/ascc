@@ -7,7 +7,7 @@ Returns target_taxa in format 'level:taxa_name' (e.g., 'order:Artiodactyla').
 Usage:
     get_target_taxa_from_taxid.py --taxid <taxid> --rankedlineage <path> --level <level> --output <output_file>
 
-Author: GitHub Copilot
+Author: Danil Zilov (@zilov)
 Version: 1.0.0
 """
 
@@ -103,7 +103,13 @@ def get_target_taxa(lineage_dict, taxonomy_level):
     return f"{taxonomy_level}:{taxa_name}"
 
 
-def main():
+def parse_args():
+    """
+    Parse command line arguments.
+
+    Returns:
+        Parsed arguments
+    """
     parser = argparse.ArgumentParser(
         description="Extract target taxa from taxid using NCBI rankedlineage.dmp",
         formatter_class=argparse.RawDescriptionHelpFormatter
@@ -140,7 +146,11 @@ def main():
         version=f'%(prog)s {VERSION}'
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
 
     # Parse rankedlineage file
     lineage_dict = parse_rankedlineage(args.rankedlineage, args.taxid)
@@ -148,11 +158,11 @@ def main():
     if lineage_dict is None:
         sys.stderr.write(
             f"WARNING: Taxid '{args.taxid}' not found in rankedlineage file.\n"
-            f"Sourmash will be skipped for this sample.\n"
+            "Sourmash will be skipped for this sample.\n"
         )
         # Write empty file to indicate failure but allow pipeline to continue
         with open(args.output, 'w') as f:
-            f.write("TAXID_NOT_FOUND\n")
+            pass  # Create empty file
         sys.exit(0)
 
     # Extract target taxa at specified level
@@ -166,7 +176,7 @@ def main():
         )
         # Write empty file to indicate failure but allow pipeline to continue
         with open(args.output, 'w') as f:
-            f.write("LEVEL_EMPTY\n")
+            pass  # Create empty file
         sys.exit(0)
 
     # Write successful result
