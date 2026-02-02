@@ -7,7 +7,7 @@ import sys
 import argparse
 import textwrap
 
-VERSION = "V1.0.3"
+VERSION = "V1.1.0"
 
 DESCRIPTION = """
 -------------------------------------
