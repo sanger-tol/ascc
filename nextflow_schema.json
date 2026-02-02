@@ -210,6 +210,14 @@
                     "enum": ["warn", "remove"],
                     "help_text": "Determines how AUTOFILTER handles contigs identified as non-target by Sourmash. 'warn' (default, conservative): flags contigs but does not remove them - to test in production before switching to 'remove'. 'remove' (aggressive): excludes non-target contigs from the filtered assembly - useful for testing or when high confidence in contamination detection is required. Works in parallel with FCS-GX filtering."
                 },
+                "tiara_action_mode": {
+                    "type": "string",
+                    "description": "Action mode for Tiara contamination filtering in AUTOFILTER",
+                    "fa_icon": "fas fa-filter",
+                    "default": "warn",
+                    "enum": ["warn", "remove"],
+                    "help_text": "Determines how AUTOFILTER handles contigs identified as non-target by Tiara. 'warn' (default, conservative): flags contigs but does not remove them. 'remove' (aggressive): excludes non-target contigs from the filtered assembly. Works in parallel with FCS-GX and Sourmash filtering."
+                },
                 "seqkit_sliding": {
                     "type": "integer",
                     "description": "Length of slide for Seqkit",
