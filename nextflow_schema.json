@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/main/nextflow_schema.json",
     "title": "sanger-tol/ascc pipeline parameters",
     "description": "Assembly Screen for Cobionts and Contaminants",
     "type": "object",
