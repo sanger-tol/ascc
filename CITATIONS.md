@@ -28,7 +28,7 @@
 
   > Karlicki, Michał, Stanisław Antonowicz, and Anna Karnkowska. 2022. “Tiara: Deep Learning-Based Classification System for Eukaryotic Sequences.” Bioinformatics 38 (2): 344–50.
 
-- [Sourmash](https://github.com/sourmash-bio/sourmash)
+- [Sourmash](https://doi.org/10.12688/f1000research.19675.1)
 
   > Irber, Luiz, Phillip T. Brooks, Taylor Reiter, N. Tessa Pierce-Ward, Mahmudur Rahman Hera, David Koslicki, and C. Titus Brown. 2024. "Sourmash v4: A Multitool to Quickly Search, Compare, and Analyze Genomic and Metagenomic Data Sets." Journal of Open Source Software 9 (98): 6830. https://doi.org/10.21105/joss.06830
   >
