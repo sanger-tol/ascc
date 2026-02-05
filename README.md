@@ -90,8 +90,8 @@ Now, you can run the pipeline using:
 nextflow run sanger-tol/ascc \
    -profile <docker/singularity/.../institute> \
    --input samplesheet \
-   --params-input YAML \
-   --outdir <OUTDIR> -entry SANGERTOL_ASCC
+   -params-input YAML \
+   --outdir <OUTDIR>
 ```
 
 > [!WARNING]
