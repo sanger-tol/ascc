@@ -14,35 +14,39 @@ process PARSE_SOURMASH {
     val target_taxa
 
     output:
-    tuple val(meta), path("*.summary.csv"), emit: multisearch_summary
-    tuple val(meta), path("*.non_target.csv"), emit: multisearch_non_target
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*.summary.csv")    , emit: multisearch_summary
+    tuple val(meta), path("*.non_target.csv") , emit: multisearch_non_target
+    path "versions.yml"                       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    // required defaults for the tool to run, but can be overridden
-    def args = task.ext.args ?: ""
+    def args   = task.ext.args   ?: ""
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    sourmash_taxonomy_parser.py -s $sourmash_multisearch_results_merged -a $assembly_taxa_db --target_taxa $target_taxa -o ./
+    sourmash_taxonomy_parser.py \\
+        ${args} \\
+        -s $sourmash_multisearch_results_merged \\
+        -a $assembly_taxa_db \\
+        --target_taxa $target_taxa \\
+        -o ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sourmash_taxonomy_parser: \$(sourmash_taxonomy_parser.py --version 2>/dev/null | cut -d' ' -f2 || echo "unknown")
+        sourmash_taxonomy_parser: \$(sourmash_taxonomy_parser.py --version 2>&1)
     END_VERSIONS
     """
 
     stub:
-    def prefix = task.ext.prefix   ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.multisearch_results.summary.csv
     touch ${prefix}.multisearch_results.non_target.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sourmash_taxonomy_parser: \$(sourmash_taxonomy_parser.py --version 2>/dev/null | cut -d' ' -f2 || echo "unknown")
+        sourmash_taxonomy_parser: \$(sourmash_taxonomy_parser.py --version 2>&1)
     END_VERSIONS
     """
 }
