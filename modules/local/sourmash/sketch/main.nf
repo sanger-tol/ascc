@@ -1,5 +1,5 @@
 process SOURMASH_SKETCH {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -9,7 +9,7 @@ process SOURMASH_SKETCH {
 
     input:
     tuple val(meta), path(sequence)
-    val sketch_params  // Dynamic sketch parameters: "dna -p scaled=X,k=Y,k=Z,..."
+    val sketch_params
 
     output:
     tuple val(meta), path("*.sig"), emit: signatures
@@ -19,12 +19,12 @@ process SOURMASH_SKETCH {
     task.ext.when == null || task.ext.when
 
     script:
-    // Use provided sketch_params or fall back to task.ext.args or default
-    def args = sketch_params ?: (task.ext.args ?: "dna -p scaled=1000,k=21,k=31,k=51,abund")
+    def args   = task.ext.args   ?: ""
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     sourmash sketch \\
-        $args \\
+        ${sketch_params} \\
+        ${args} \\
         --merge '${prefix}' \\
         --output '${prefix}.sig' \\
         $sequence
@@ -36,7 +36,7 @@ process SOURMASH_SKETCH {
     """
 
     stub:
-    def prefix = task.ext.prefix   ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.sig
 
