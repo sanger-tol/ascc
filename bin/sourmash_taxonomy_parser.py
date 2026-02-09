@@ -3,13 +3,14 @@
 import sys
 import argparse
 import logging
+import re
 from collections import defaultdict
 from typing import Dict
 import pandas as pd
 import os
 
 # Version of sourmash_taxonomy_parser
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 def setup_logger():
     """Configure and return a logger for the application."""
@@ -28,6 +29,41 @@ def setup_logger():
     logger.addHandler(ch)
     return logger
 
+def log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output_file, description):
+    """Log run parameters to the logger."""
+    logger.info("=" * 60)
+    logger.info(f"{description} generation parameters:")
+    sourmash_files_str = ', '.join(sourmash_files) if sourmash_files else 'N/A'
+    logger.info(f"  Sourmash results files: {sourmash_files_str}")
+    assembly_dbs_str = ', '.join(assembly_dbs) if assembly_dbs else 'N/A'
+    logger.info(f"  Assembly database files: {assembly_dbs_str}")
+    if target_taxa:
+        target_taxa_str = ', '.join([f"{k}:{v}" for k, v in target_taxa.items()])
+        logger.info(f"  Target taxa: {target_taxa_str}")
+    else:
+        logger.info("  Target taxa: None")
+    logger.info(f"  Output file: {output_file}")
+    logger.info("=" * 60)
+
+def parse_target_taxa(target_taxa_args, logger):
+    """Parse target taxa from command line arguments."""
+    target_taxa = {}
+    if target_taxa_args:
+        for item in target_taxa_args:
+            try:
+                level, value = item.split(':', 1)  # Split only on first colon
+                target_taxa[level.lower().strip()] = value.lower().strip()
+                logger.info(f"Added target taxa filter: {level.lower().strip()} = {value.lower().strip()}")
+            except ValueError:
+                logger.warning(f"Invalid target taxa format '{item}'. Expected format is 'taxon:value'")
+    return target_taxa
+
+def validate_file_paths(file_paths, file_type):
+    """Validate that all file paths exist."""
+    for file_path in file_paths:
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"{file_type} file not found: {file_path}")
+
 def extract_contig_number(query_name):
     """
     Extract numeric contig number from query_name.
@@ -42,7 +78,6 @@ def extract_contig_number(query_name):
     Returns:
         int: The extracted contig number, or infinity if not found
     """
-    import re
     # Look for one or more digits at the end of the string, possibly preceded by underscore or other separator
     match = re.search(r'(\d+)$', query_name)
     if match:
@@ -51,62 +86,114 @@ def extract_contig_number(query_name):
         # No number found - sort these to the end
         return float('inf')
 
-def parse_sourmash_results(file_path):
-    """Parse the sourmash results file and extract query-match relationships."""
+def parse_sourmash_results(file_paths):
+    """Parse the sourmash results files and extract query-match relationships."""
+    validate_file_paths(file_paths, "Sourmash results")
+
     query_matches = defaultdict(list)
+    all_dfs = []
 
-    try:
-        df = pd.read_csv(file_path)
-        logger.info(f"Loaded {len(df)} sourmash results")
+    logger.info(f"Processing {len(file_paths)} sourmash results file(s)")
 
-        for _, row in df.iterrows():
-            query_name = row['query_name']
-            match_name = row['match_name']
-
-            # Skip rows where containment or jaccard are not numeric (duplicate headers)
-            try:
-                containment = float(row['containment'])
-                jaccard = float(row['jaccard'])
-                # Ensure intersect_hashes is numeric (float or int)
-                intersect_hashes = float(row.get('intersect_hashes', 0)) if pd.notna(row.get('intersect_hashes', 0)) else 0.0
-            except (ValueError, TypeError):
-                # Skip this row - it's likely a duplicate header
-                logger.warning(f"Skipping row with non-numeric values: query_name={query_name}, match_name={match_name}")
+    for file_path in file_paths:
+        try:
+            df = pd.read_csv(file_path)
+            if df.empty:
+                logger.warning(f"Sourmash results file {file_path} is empty")
                 continue
+            required_columns = ['query_name', 'match_name', 'containment', 'jaccard']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                raise ValueError(f"Missing required columns in {file_path}: {missing_columns}")
+            logger.info(f"Loaded {len(df)} sourmash results from {file_path}")
+            all_dfs.append(df)
+        except pd.errors.EmptyDataError:
+            logger.warning(f"Sourmash results file {file_path} is empty or has no columns")
+            continue
+        except Exception as e:
+            logger.error(f"Error loading sourmash results file {file_path}: {e}")
+            raise
 
-            if " " in match_name:
-                # Handle cases where match_name contains spaces
-                match_name = match_name.strip().split(" ")[0]
+    if not all_dfs:
+        raise ValueError("No valid sourmash results files provided")
 
-            query_matches[query_name].append({
-                'match_name': match_name,
-                'containment': containment,
-                'jaccard': jaccard,
-                'intersect_hashes': intersect_hashes
-            })
+    # Concatenate all DataFrames
+    combined_df = pd.concat(all_dfs, ignore_index=True)
+    logger.info(f"Combined sourmash results: {len(combined_df)} total rows")
 
-        return query_matches
-    except Exception as e:
-        logger.error(f"Error parsing sourmash results file: {e}")
-        raise
+    for _, row in combined_df.iterrows():
+        query_name = row['query_name']
+        match_name = row['match_name']
 
-def parse_assembly_database(file_path):
-    """Parse the assembly database file and return a DataFrame with taxonomic information."""
-    try:
-        assembly_df = pd.read_csv(file_path)
-        logger.info(f"Loaded {len(assembly_df)} assembly records from database")
+        # Skip rows where containment or jaccard are not numeric (duplicate headers)
+        try:
+            containment = float(row['containment'])
+            jaccard = float(row['jaccard'])
+            # Ensure intersect_hashes is numeric (float or int)
+            intersect_hashes = float(row.get('intersect_hashes', 0)) if pd.notna(row.get('intersect_hashes', 0)) else 0.0
+        except (ValueError, TypeError):
+            # Skip this row - it's likely a duplicate header
+            logger.warning(f"Skipping row with non-numeric values: query_name={query_name}, match_name={match_name}")
+            continue
 
-        # Set assembly name as index for faster lookups
-        if 'assembly_accession' in assembly_df.columns:
-            assembly_df.set_index('assembly_accession', inplace=True)
-        else:
-            # Use first column as index if standard names not found
-            assembly_df.set_index(assembly_df.columns[0], inplace=True)
+        if " " in match_name:
+            # Handle cases where match_name contains spaces
+            match_name = match_name.strip().split(" ")[0]
 
-        return assembly_df
-    except Exception as e:
-        logger.error(f"Error parsing assembly database file: {e}")
-        raise
+        query_matches[query_name].append({
+            'match_name': match_name,
+            'containment': containment,
+            'jaccard': jaccard,
+            'intersect_hashes': intersect_hashes
+        })
+
+    return query_matches
+
+def parse_assembly_database(file_paths):
+    """Parse the assembly database files and return a DataFrame with taxonomic information."""
+    validate_file_paths(file_paths, "Assembly database")
+
+    all_dfs = []
+
+    logger.info(f"Processing {len(file_paths)} assembly database file(s)")
+
+    for file_path in file_paths:
+        try:
+            assembly_df = pd.read_csv(file_path)
+            if assembly_df.empty:
+                logger.warning(f"Assembly database file {file_path} is empty")
+                continue
+            logger.info(f"Loaded {len(assembly_df)} assembly records from {file_path}")
+            all_dfs.append(assembly_df)
+        except pd.errors.EmptyDataError:
+            logger.warning(f"Assembly database file {file_path} is empty or has no columns")
+            continue
+        except Exception as e:
+            logger.error(f"Error loading assembly database file {file_path}: {e}")
+            raise
+
+    if not all_dfs:
+        raise ValueError("No valid assembly database files provided")
+
+    # Concatenate all DataFrames
+    combined_df = pd.concat(all_dfs, ignore_index=True)
+    logger.info(f"Combined assembly database: {len(combined_df)} total rows")
+
+    # Check for duplicate indices if setting assembly_accession
+    if 'assembly_accession' in combined_df.columns:
+        if combined_df['assembly_accession'].duplicated().any():
+            logger.warning("Duplicate assembly_accession values found after merging. Keeping first occurrence.")
+            combined_df = combined_df.drop_duplicates(subset='assembly_accession')
+        combined_df.set_index('assembly_accession', inplace=True)
+    else:
+        # Use first column as index if standard names not found
+        first_col = combined_df.columns[0]
+        if combined_df[first_col].duplicated().any():
+            logger.warning(f"Duplicate values in first column '{first_col}' after merging. Keeping first occurrence.")
+            combined_df = combined_df.drop_duplicates(subset=first_col)
+        combined_df.set_index(first_col, inplace=True)
+
+    return combined_df
 
 def generate_summary(query_matches):
     """Generate summary of taxonomic matches for each query."""
@@ -152,7 +239,7 @@ def get_target_genomes(assembly_df, target_taxa):
     logger.info(f"Total target genomes: {len(target_genomes)}")
     return target_genomes
 
-def write_summary_output(summary, output_file, assembly_df=None, target_taxa=None, sourmash_file=None, assembly_db=None):
+def write_summary_output(summary, output_file, assembly_df=None, target_taxa=None, sourmash_files=None, assembly_dbs=None):
     """Write summary output to a file."""
     # Pre-compute target genomes set
     target_genomes = get_target_genomes(assembly_df, target_taxa)
@@ -170,18 +257,8 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
         key=lambda x: (extract_contig_number(x[0]), -float(x[5]))
     )
 
-    # Log run parameters to stdout/stderr instead of file
-    logger.info("=" * 60)
-    logger.info("Summary file generation parameters:")
-    logger.info(f"  Sourmash results file: {sourmash_file or 'N/A'}")
-    logger.info(f"  Assembly database file: {assembly_db or 'N/A'}")
-    if target_taxa:
-        target_taxa_str = ', '.join([f"{k}:{v}" for k, v in target_taxa.items()])
-        logger.info(f"  Target taxa: {target_taxa_str}")
-    else:
-        logger.info(f"  Target taxa: None")
-    logger.info(f"  Output file: {output_file}")
-    logger.info("=" * 60)
+    # Log run parameters
+    log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output_file, "Summary file")
 
     with open(output_file, 'w') as f:
         # Write header only (no comments)
@@ -202,8 +279,11 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
             # Write the output
             f.write(f"{query_name},{match_name},{taxa},{rank},{containment:.6f},{jaccard:.6f},{intersect_hashes},{is_target_str}\n")
 
-def write_non_target_output(summary_file, output_file, assembly_df, sourmash_file=None, assembly_db=None, target_taxa=None):
+def write_non_target_output(summary_file, output_file, assembly_df, sourmash_files=None, assembly_dbs=None, target_taxa=None):
     """Write non-target queries with lineage information of top1 match."""
+    if not os.path.exists(summary_file):
+        raise FileNotFoundError(f"Summary file not found: {summary_file}")
+
     # Read the summary file to identify non-target queries (no comment lines now)
     df = pd.read_csv(summary_file)
 
@@ -222,19 +302,9 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
                 top1_row = top1_rows.iloc[0]
                 non_target_queries.append(top1_row)
 
-    # Log run parameters to stdout/stderr instead of file
-    logger.info("=" * 60)
-    logger.info("Non-target file generation parameters:")
-    logger.info(f"  Sourmash results file: {sourmash_file or 'N/A'}")
-    logger.info(f"  Assembly database file: {assembly_db or 'N/A'}")
-    if target_taxa:
-        target_taxa_str = ', '.join([f"{k}:{v}" for k, v in target_taxa.items()])
-        logger.info(f"  Target taxa: {target_taxa_str}")
-    else:
-        logger.info(f"  Target taxa: None")
-    logger.info(f"  Output file: {output_file}")
+    # Log run parameters
+    log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output_file, "Non-target file")
     logger.info(f"  Non-target queries found: {len(non_target_queries)}")
-    logger.info("=" * 60)
 
     # Write the non-target queries file
     with open(output_file, 'w') as f:
@@ -249,7 +319,7 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
             jaccard = row['jaccard']
             intersect_hashes = row['intersect_hashes']
 
-            # Get lineage information
+            # Get lineage information using vectorized operations
             lineage_info = ["None"] * 7  # species, genus, family, order, class, phylum, kingdom
             try:
                 if match_name in assembly_df.index:
@@ -265,7 +335,7 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
             lineage_str = ",".join(lineage_info)
             f.write(f"{query_name},{match_name},{taxa},{containment:.6f},{jaccard:.6f},{intersect_hashes},{lineage_str}\n")
 
-def main(sourmash_file=None, assembly_db=None, target_taxa=None, outdir=None):
+def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None):
     """Main function to run the sourmash parser."""
 
     # Initialize variables
@@ -273,15 +343,12 @@ def main(sourmash_file=None, assembly_db=None, target_taxa=None, outdir=None):
     query_matches = defaultdict(list)
 
     # Process assembly database if provided
-    if assembly_db:
-        logger.info(f"Processing assembly database: {assembly_db}")
-        assembly_df = parse_assembly_database(assembly_db)
+    if assembly_dbs:
+        logger.info(f"Processing assembly database files: {assembly_dbs}")
+        assembly_df = parse_assembly_database(assembly_dbs)
 
-    if target_taxa:
-        logger.info(f"Target taxa filters: {target_taxa}")
-
-    logger.info(f"Processing sourmash results file: {sourmash_file}")
-    query_matches = parse_sourmash_results(sourmash_file)
+    logger.info(f"Processing sourmash results files: {sourmash_files}")
+    query_matches = parse_sourmash_results(sourmash_files)
 
     # Generate summary
     summary = generate_summary(query_matches)
@@ -290,7 +357,8 @@ def main(sourmash_file=None, assembly_db=None, target_taxa=None, outdir=None):
     os.makedirs(outdir, exist_ok=True)
 
     # Generate output filenames
-    sourmash_basename = os.path.basename(sourmash_file)
+    # Use 'sourmash_results' as basename if multiple files, else use the single file's basename
+    sourmash_basename = "sourmash_results" if len(sourmash_files) > 1 else os.path.splitext(os.path.basename(sourmash_files[0]))[0]
 
     # Create target taxa suffix for filename
     taxa_suffix = ""
@@ -306,19 +374,19 @@ def main(sourmash_file=None, assembly_db=None, target_taxa=None, outdir=None):
     logger.info(f"Writing summary to: {summary_file}")
 
     # Write summary output
-    write_summary_output(summary, summary_file, assembly_df, target_taxa, sourmash_file, assembly_db)
+    write_summary_output(summary, summary_file, assembly_df, target_taxa, sourmash_files, assembly_dbs)
 
     # Write non-target queries if assembly database and target taxa are available
     if assembly_df is not None and target_taxa:
         non_target_filename = f"{sourmash_basename}{taxa_suffix}.non_target.csv"
         non_target_file = os.path.join(outdir, non_target_filename)
         logger.info(f"Writing non-target queries to: {non_target_file}")
-        write_non_target_output(summary_file, non_target_file, assembly_df, sourmash_file, assembly_db, target_taxa)
+        write_non_target_output(summary_file, non_target_file, assembly_df, sourmash_files, assembly_dbs, target_taxa)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse sourmash results and extract query-match relationships with similarity scores.")
-    parser.add_argument('-s', '--sourmash_results', help='Path to the sourmash results file to parse', required=False)
-    parser.add_argument('-a', '--assembly_db', help='Path to assembly database file with taxonomic information', required=False)
+    parser.add_argument('-s', '--sourmash_results', nargs='+', help='Path(s) to the sourmash results file(s) to parse', required=False)
+    parser.add_argument('-a', '--assembly_db', nargs='+', help='Path(s) to assembly database file(s) with taxonomic information', required=False)
     parser.add_argument('--target_taxa', nargs='+', help='Target taxa in format taxon:value (e.g., order:coleoptera family:Carabidae)')
     parser.add_argument('--log', help='Path to log file (if not provided, logs to stderr)', default=None)
     parser.add_argument('-o', '--outdir', help='Output directory for results (default: current directory)', default=None)
@@ -344,14 +412,6 @@ if __name__ == "__main__":
         logger.addHandler(file_handler)
 
     # Parse target taxa
-    target_taxa = {}
-    if args.target_taxa:
-        for item in args.target_taxa:
-            try:
-                level, value = item.split(':')
-                target_taxa[level.lower().strip()] = value.lower().strip()
-                logger.info(f"Added target taxa filter: {level.lower().strip()} = {value.lower().strip()}")
-            except ValueError:
-                logger.warning(f"Invalid target taxa format '{item}'. Expected format is 'taxon:value'")
+    target_taxa = parse_target_taxa(args.target_taxa, logger)
 
-    main(sourmash_file=args.sourmash_results, assembly_db=args.assembly_db, target_taxa=target_taxa, outdir=args.outdir)
+    main(sourmash_files=args.sourmash_results, assembly_dbs=args.assembly_db, target_taxa=target_taxa, outdir=args.outdir)
