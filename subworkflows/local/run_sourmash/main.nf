@@ -2,8 +2,6 @@
 
 include { SOURMASH_SKETCH                    }   from '../../../modules/local/sourmash/sketch/main'
 include { SOURMASH_MULTISEARCH               }   from '../../../modules/local/sourmash/multisearch/main'
-include { CAT_CAT as CAT_MULTISEARCH_RESULTS }   from '../../../modules/nf-core/cat/cat/main'
-include { CAT_CAT as CAT_TAXA_DB             }   from '../../../modules/nf-core/cat/cat/main'
 include { PARSE_SOURMASH                     }   from '../../../modules/local/parse/sourmash/main'
 include { GET_TARGET_TAXA                    }   from '../../../modules/local/get/target_taxa/main'
 
@@ -59,42 +57,21 @@ workflow RUN_SOURMASH {
     )
     ch_versions = ch_versions.mix(SOURMASH_MULTISEARCH.out.versions)
 
-    // Merge all database search results per sample
+    // Group multisearch results per sample
     SOURMASH_MULTISEARCH.out.multisearch_results
         .groupTuple()
-        .set { ch_cat_multisearch_input }
-
-    CAT_MULTISEARCH_RESULTS (
-        ch_cat_multisearch_input
-    )
-    ch_versions = ch_versions.mix(CAT_MULTISEARCH_RESULTS.out.versions)
+        .set { ch_multisearch_results_grouped }
 
     // Collect unique assembly_taxa_db files from all databases
     ch_all_databases
         .map { db_list ->
             def taxa_paths = db_list.collect { it.assembly_taxa_db }.unique()
-            def all_taxa_paths = db_list.collect { it.assembly_taxa_db }
-            def duplicates = all_taxa_paths.findAll { p -> all_taxa_paths.count(p) > 1 }.unique()
-            if (duplicates.size() > 0) {
-                log.warn "[RUN_SOURMASH] Multiple databases share the same assembly_taxa_db: ${duplicates.join(', ')}"
-            }
             taxa_paths
         }
         .flatten()
         .map { path -> file(path) }
         .collect()
-        .branch { files ->
-            multiple: files.size() > 1
-                return [[id: 'merged_taxa'], files]
-            single: true
-                return [[id: 'single_taxa'], files[0]]
-        }
-        .set { ch_taxa_branched }
-
-    CAT_TAXA_DB (
-        ch_taxa_branched.multiple.mix(ch_taxa_branched.single)
-    )
-    ch_versions = ch_versions.mix(CAT_TAXA_DB.out.versions)
+        .set { ch_taxa_db_files }
 
     // Extract target taxa from NCBI taxonomy using meta.taxid
     GET_TARGET_TAXA (
@@ -111,22 +88,19 @@ workflow RUN_SOURMASH {
         }
         .set { ch_target_taxa_val }
 
-    CAT_MULTISEARCH_RESULTS.out.file_out
-        .map { meta, file -> [meta.id, meta, file] }
+    ch_multisearch_results_grouped
+        .map { meta, files -> [meta.id, meta, files] }
         .join(ch_target_taxa_val)
-        .map { id, meta, results_file, target_taxa_str ->
-            [meta, results_file, target_taxa_str]
+        .map { id, meta, results_files, target_taxa_str ->
+            [meta, results_files, target_taxa_str]
         }
         .set { ch_results_with_target }
 
-    // Parse merged results and taxonomy database
-    ch_taxa_db_file = CAT_TAXA_DB.out.file_out.map { meta, file -> file }
-    ch_target_taxa_val = ch_results_with_target.map { meta, results, target_taxa -> target_taxa }
-
+    // Parse results and taxonomy database
     PARSE_SOURMASH (
         ch_results_with_target.map { meta, results, target_taxa -> [meta, results] },
-        ch_taxa_db_file,
-        ch_target_taxa_val
+        ch_taxa_db_files,
+        ch_results_with_target.map { meta, results, target_taxa -> target_taxa }
     )
     ch_versions = ch_versions.mix(PARSE_SOURMASH.out.versions)
 

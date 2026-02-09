@@ -9,8 +9,8 @@ process PARSE_SOURMASH {
 
 
     input:
-    tuple val(meta), path(sourmash_multisearch_results_merged)
-    path(assembly_taxa_db)
+    tuple val(meta), path(sourmash_multisearch_results, stageAs: "sourmash_results_*")
+    path(assembly_taxa_db_files, stageAs: "taxa_db_*")
     val target_taxa
 
     output:
@@ -27,8 +27,8 @@ process PARSE_SOURMASH {
     """
     sourmash_taxonomy_parser.py \\
         ${args} \\
-        -s $sourmash_multisearch_results_merged \\
-        -a $assembly_taxa_db \\
+        -s ${sourmash_multisearch_results.join(' ')} \\
+        -a ${assembly_taxa_db_files.join(' ')} \\
         --target_taxa $target_taxa \\
         -o ./
 

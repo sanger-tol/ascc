@@ -96,7 +96,7 @@ nextflow_workflow {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert workflow.trace.succeeded().size() == 6 }, // SKETCH, MULTISEARCH, CAT x2, GET_TARGET_TAXA, PARSE_SOURMASH
+                { assert workflow.trace.succeeded().size() == 4 }, // SKETCH, MULTISEARCH, GET_TARGET_TAXA, PARSE_SOURMASH
 
                 // Check sourmash_summary output
                 { assert workflow.out.sourmash_summary },
@@ -166,8 +166,8 @@ nextflow_workflow {
                 { assert workflow.success },
 
                 // Check that multiple databases were processed
-                // SKETCH (1) + MULTISEARCH (2) + CAT_MULTISEARCH (1) + CAT_TAXA_DB (1) + GET_TARGET_TAXA (1) + PARSE_SOURMASH (1) = 7
-                { assert workflow.trace.succeeded().size() == 7 },
+                // SKETCH (1) + MULTISEARCH (2) + GET_TARGET_TAXA (1) + PARSE_SOURMASH (1) = 5
+                { assert workflow.trace.succeeded().size() == 5 },
 
                 // Check sourmash_summary output
                 { assert workflow.out.sourmash_summary },
