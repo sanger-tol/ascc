@@ -193,6 +193,13 @@ def parse_assembly_database(file_paths):
             combined_df = combined_df.drop_duplicates(subset=first_col)
         combined_df.set_index(first_col, inplace=True)
 
+    # Filter out assemblies without valid taxid
+    if 'taxid' in combined_df.columns:
+        initial_count = len(combined_df)
+        combined_df = combined_df[combined_df['taxid'].notna() & (combined_df['taxid'].astype(str).str.strip() != 'nan')]
+        filtered_count = len(combined_df)
+        logger.info(f"Filtered out {initial_count - filtered_count} assemblies without valid taxid")
+
     return combined_df
 
 def generate_summary(query_matches):
@@ -271,7 +278,9 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
             is_target = match_name in target_genomes if target_genomes else None
 
             # Fast lookup: get taxid from pre-computed dictionary
-            taxa = taxid_dict.get(match_name, "None")
+            taxa = taxid_dict.get(match_name, "nan")
+            if taxa == "nan":
+                logger.warning(f"Assembly {match_name} not found in assembly_taxa database")
 
             # Format the values
             is_target_str = str(is_target) if is_target is not None else "None"
@@ -300,6 +309,10 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
             top1_rows = group[group['top_n'] == 1]
             if not top1_rows.empty:
                 top1_row = top1_rows.iloc[0]
+                taxa = top1_row['taxa']
+                # Skip if taxa is None/nan (unknown taxonomy)
+                if pd.isna(taxa) or str(taxa).strip() in ['None', 'nan']:
+                    continue
                 non_target_queries.append(top1_row)
 
     # Log run parameters
