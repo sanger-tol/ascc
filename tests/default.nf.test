@@ -134,9 +134,21 @@ nextflow_pipeline {
                 println "Done"
             }
 
-            // Useful for debugging
-            // String result = "ls -lha ".execute().text
-            // println result.toUpperCase()
+            // Sourmash database configuration: Generate CSV
+            def sourmash_test_dir = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles"
+            def sourmash_db_dir = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db"
+
+            // Generate Sourmash database configuration CSV
+            def sourmash_csv_file = new File("${sourmash_test_dir}/sourmash_db_config.csv")
+
+            println "Generating Sourmash database configuration CSV..."
+
+            def sourmash_csv_lines = ["name,path,k_available,k_for_search,s,assembly_taxa_db"]
+            sourmash_csv_lines.add("plasmodium_batch1,${sourmash_db_dir}/plasmodium_k21_k31_k51_s200_batch_1.zip,\"[21,31,51]\",21,200,${sourmash_db_dir}/plasmodium_sourmash_input_subset_taxa.csv")
+            sourmash_csv_lines.add("plasmodium_batch2,${sourmash_db_dir}/plasmodium_k21_k31_k51_s200_batch_2.zip,\"[21,31,51]\",21,200,${sourmash_db_dir}/plasmodium_sourmash_input_subset_taxa.csv")
+
+            sourmash_csv_file.text = sourmash_csv_lines.join('\n')
+            println "Done"
 
         }
 
@@ -155,25 +167,8 @@ nextflow_pipeline {
                 diamond_uniprot_database_path   = "${launchDir}/DIAMOND/diamond.dmnd"
                 diamond_nr_database_path        = "${launchDir}/DIAMOND/diamond.dmnd"
 
-                // Sourmash databases (local test files in assets/sourmash_testing/db/)
-                sourmash_databases              = [
-                    [
-                        name: 'plasmodium_k21_k31_k51_s200_batch_1',
-                        path: "${projectDir}/assets/sourmash_testing/db/plasmodium_k21_k31_k51_s200_batch_1.zip",
-                        k_available: [21, 31, 51],
-                        k_for_search: 21,
-                        s: 200,
-                        assembly_taxa_db: "${projectDir}/assets/sourmash_testing/db/plasmodium_sourmash_input_subset_taxa.csv"
-                    ],
-                    [
-                        name: 'plasmodium_k21_k31_k51_s200_batch_2',
-                        path: "${projectDir}/assets/sourmash_testing/db/plasmodium_k21_k31_k51_s200_batch_2.zip",
-                        k_available: [21, 31, 51],
-                        k_for_search: 21,
-                        s: 200,
-                        assembly_taxa_db: "${projectDir}/assets/sourmash_testing/db/plasmodium_sourmash_input_subset_taxa.csv"
-                    ]
-                ]
+                // Sourmash database configuration
+                sourmash_db_config              = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/sourmash_db_config.csv"
 
                 // other params can be found in `/conf/test.config`
             }
@@ -224,6 +219,9 @@ nextflow_pipeline {
             def summarise_vecscreen = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/summarise_vecscreen_output/*vecscreen_contamination"])
             def tiara_raw_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/tiara_raw_output/*.txt"])
             def trailingns          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/trailingns/*_trim_Ns"])
+
+            def sourmash_summary_files    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/sourmash/*.summary.csv"])
+            def sourmash_non_target_files = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/sourmash/*.non_target.csv"])
 
             // Pipeline completion file, needed for Sanger internal processes
             def completion_file     = getAllFilesFromDir(params.outdir, include: ["workflow_completed.txt"])
