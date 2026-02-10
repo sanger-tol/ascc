@@ -115,12 +115,15 @@ workflow ASCC_ORGANELLAR {
     //
     // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION FROM CSV
     //
-    if (params.sourmash_db_config && (params.run_sourmash == "both" || params.run_sourmash == "organellar")) {
+    if (params.sourmash_db_config && (params.run_sourmash == "both" || params.run_sourmash == "genomic")) {
         ch_sourmash_databases = Channel
             .fromPath(params.sourmash_db_config, checkIfExists: true)
-            .splitCsv(header: true)
+            .splitCsv(header: true, quote: '"')
             .map { row ->
-                def k_available = row.k_available.replaceAll(/[\[\]]/, '').split(',').collect { it.trim() as Integer }
+                def k_available = row.k_available
+                                    .replaceAll(/[\[\]"\s]/, '')  // Remove [, ], ", and whitespace
+                                    .split(',')
+                                    .collect { it as Integer }
                 [
                     name: row.name,
                     path: file(row.path, checkIfExists: true),
@@ -134,55 +137,37 @@ workflow ASCC_ORGANELLAR {
         ch_sourmash_databases
             .collect()
             .subscribe { dbs ->
-                log.info "[ASCC Sourmash Organellar] Loaded ${dbs.size()} database(s):"
+                log.info "[ASCC Sourmash] Loaded ${dbs.size()} database(s):"
                 dbs.each { db ->
                     log.info "  - ${db.name}: k=${db.k_for_search}, s=${db.s}"
                 }
             }
-    } else {
-        if (params.run_sourmash == "both" || params.run_sourmash == "organellar") {
-            log.warn "[ASCC Sourmash Organellar] No database configuration file provided (--sourmash_db_config). Sourmash will be skipped."
-        }
-        ch_sourmash_databases = Channel.empty()
-    }
 
-    if ( params.run_sourmash == "both" || params.run_sourmash == "organellar" ) {
-
-        // Only run if database configuration file is provided
-        if (params.sourmash_db_config) {
-
-            RUN_SOURMASH (
-                reference_tuple_from_GG,
+        RUN_SOURMASH (
+                ej_reference_tuple,
                 ch_sourmash_databases,
                 ncbi_ranked_lineage_path,
                 params.sourmash_taxonomy_level
             )
 
-            // Output channels for downstream use (analogous to genomic workflow)
-            ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
-                                        .map { meta, file ->
-                                            [[id: meta.id, process: "SOURMASH"], file]
-                                        }
-                                        .ifEmpty { [[],[]] }
-            ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
-                                        .map { meta, file -> tuple([id: meta.id], file) }
-                                        .ifEmpty { reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) } }
+        // Output channels for downstream use
+        ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                    .map { meta, file ->
+                                        [[id: meta.id], file]
+                                    }
+                                    .ifEmpty { [[:],[]] }
 
-            // This will be used for btk input if we decide to go that route
-            ch_sourmash         = Channel.of( [[],[]] )
-            ch_versions         = ch_versions.mix(RUN_SOURMASH.out.versions)
+        ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+                                    .map { meta, file ->
+                                        [[id: meta.id], file]
+                                    }
+                                    .ifEmpty { [[:],[]] }
 
-        } else {
-            // Skip Sourmash if no database configuration file provided
-            ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) }
-            ch_sourmash         = Channel.of( [[],[]] )
-        }
-
+        ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
+        
     } else {
-        // Skip Sourmash entirely
-        ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, _fasta -> tuple([id: meta.id], file('NO_FILE')) }
-        ch_sourmash         = Channel.of( [[],[]] )
-    }
+        throw new RuntimeException("[ASCC Sourmash] No database configuration file provided (--sourmash_db_config). Pipeline cannot proceed without valid Sourmash configuration.")
+    } 
 
 
     //
@@ -577,10 +562,10 @@ workflow ASCC_ORGANELLAR {
             .multiMap{
                 meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:      tuple(new_meta, ref)
-                    tiara_file:     tuple(new_meta, tiara)
-                    fcs_file:       tuple(new_meta, fcs)
-                    sourmash_file:  tuple(new_meta, sourmash)
+                    reference:     [new_meta, ref]
+                    tiara_file:    [new_meta, tiara]
+                    fcs_file:      [new_meta, fcs]
+                    sourmash_file: [new_meta, sourmash]
                     ncbi_rank:      ncbi
             }
             .set { autofilter_input_formatted }

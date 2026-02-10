@@ -14,7 +14,6 @@ include { BLOBTOOLKIT_GENERATECSV                       } from '../modules/sange
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
-// include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
@@ -126,9 +125,12 @@ workflow ASCC_GENOMIC {
     if (params.sourmash_db_config && (params.run_sourmash == "both" || params.run_sourmash == "genomic")) {
         ch_sourmash_databases = Channel
             .fromPath(params.sourmash_db_config, checkIfExists: true)
-            .splitCsv(header: true)
+            .splitCsv(header: true, quote: '"')
             .map { row ->
-                def k_available = row.k_available.replaceAll(/[\[\]]/, '').split(',').collect { it.trim() as Integer }
+                def k_available = row.k_available
+                                    .replaceAll(/[\[\]"\s]/, '')  // Remove [, ], ", and whitespace
+                                    .split(',')
+                                    .collect { it as Integer }
                 [
                     name: row.name,
                     path: file(row.path, checkIfExists: true),
@@ -147,56 +149,37 @@ workflow ASCC_GENOMIC {
                     log.info "  - ${db.name}: k=${db.k_for_search}, s=${db.s}"
                 }
             }
-    } else {
-        if (params.run_sourmash == "both" || params.run_sourmash == "genomic") {
-            log.warn "[ASCC Sourmash] No database configuration file provided (--sourmash_db_config). Sourmash will be skipped."
-        }
-        ch_sourmash_databases = Channel.empty()
-    }
 
-
-    if ( params.run_sourmash == "both" || params.run_sourmash == "genomic" ) {
-
-        // Only run if database configuration file is provided
-        if (params.sourmash_db_config) {
-
-            RUN_SOURMASH (
-                reference_tuple_from_GG,
+        RUN_SOURMASH (
+                ej_reference_tuple,
                 ch_sourmash_databases,
                 ncbi_ranked_lineage_path,
                 params.sourmash_taxonomy_level
             )
 
-            // Output channels for downstream use
-            ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
-                                        .map { meta, file ->
-                                            [[id: meta.id, process: "SOURMASH"], file]
-                                        }
-                                        .ifEmpty { [[],[]] }
-            ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
-            ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
-        } else {
-            ch_sourmash_summary     = Channel.of( [[],[]] )
-            ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
-        }
+        // Output channels for downstream use
+        ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                    .map { meta, file ->
+                                        [[id: meta.id], file]
+                                    }
+                                    .ifEmpty { [[:],[]] }
 
+        ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+                                    .map { meta, file ->
+                                        [[id: meta.id], file]
+                                    }
+                                    .ifEmpty { [[:],[]] }
+
+        ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
+
+
+
+        
     } else {
-        ch_sourmash_summary     = Channel.of( [[],[]] )
-        ch_sourmash_non_target  = reference_tuple_from_GG.map { meta, ref -> [meta, file('NO_FILE')] }
-    }
+        throw new RuntimeException("[ASCC Sourmash] No database configuration file provided (--sourmash_db_config). Pipeline cannot proceed without valid Sourmash configuration.")
+    } 
 
 
-    if ( params.run_kmers == "both" || params.run_kmers == "genomic" ) {
-        //
-        // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
-        //
-        reference_tuple_from_GG
-            .map { meta, file ->
-                file.countFasta() * 3
-            }
-            .set {autoencoder_epochs_count}
-            
-            
     //-------------------------------------------------------------------------
     //
     // LOGIC: CONVERT THE CHANNEL I AN EPOCH COUNT FOR THE GET_KMER_PROFILE
@@ -639,7 +622,7 @@ workflow ASCC_GENOMIC {
             )
             .combine(
                 ch_sourmash_non_target
-                    .map{ it -> tuple([id: it[0].id], it[1])},
+                    .map{ meta, file -> [[id: meta.id], file]},
                 by: 0
             )
             .combine(
@@ -651,10 +634,10 @@ workflow ASCC_GENOMIC {
             .multiMap{
                 meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:      tuple(new_meta, ref)
-                    tiara_file:     tuple(new_meta, tiara)
-                    fcs_file:       tuple(new_meta, fcs)
-                    sourmash_file:  tuple(new_meta, sourmash)
+                    reference:     [new_meta, ref]
+                    tiara_file:    [new_meta, tiara]
+                    fcs_file:      [new_meta, fcs]
+                    sourmash_file: [new_meta, sourmash]
                     ncbi_rank:      ncbi
             }
             .set { autofilter_input_formatted }
