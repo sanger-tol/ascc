@@ -26,17 +26,17 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     def args    = task.ext.args     ?: ""
-    def sourmash_arg = sourmash_nontarget.name != 'NO_FILE' ? "--sourmash ${sourmash_nontarget}" : ""
+
     """
     autofilter.py \\
         $reference \\
         --taxid $meta.taxid \\
         --tiara $tiara_txt \\
+        --sourmash ${sourmash_nontarget} \\
         --fcsgx_sum $fcs_csv \\
         --out_prefix $prefix \\
         --ncbi_rankedlineage_path $ncbi_rankedlineage \\
         ${args} \\
-        ${sourmash_arg}
 
     abnormal_contamination_check.py \\
         $reference \\
