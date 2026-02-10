@@ -30,10 +30,10 @@ process BLOBTOOLKIT_GENERATECSV {
         [meta2 + [data_type: "ont"],    ont_files,      "SINGLE"],
         [meta3 + [data_type: "hic"],    illumina_files, illumina_layout]
       ].collect {
-        meta, lst, layout ->
+        this_meta, lst, layout ->
         lst.collect {
           fa ->
-          [meta.data_type, fa, layout].join(",")
+          [this_meta.data_type, fa, layout].join(",")
         }
       }
       .flatten()

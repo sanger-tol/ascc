@@ -61,8 +61,9 @@ A text file containing a report of trailing Ns found in the genome. Trailing Ns 
 
 <details markdown="1">
 <summary>Output files</summary>
+
 - `mito_organellar_blast/`
-  `*-mitochondrial_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected mitochondrial contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
+`*-mitochondrial_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected mitochondrial contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
 </details>
 
 This subworkflow uses BLAST against a user-provided mitochondrial sequence to detect leftover organellar sequences in the assembly file that should contain only chromosomal DNA sequences. A BLAST nucleotide database is made from the user-provided organellar sequence. BLAST with the chromosomal DNA assembly is then ran against this database with the following settings: -task megablast -word_size 28 -best_hit_overhang 0.1 -best_hit_score_edge 0.1 -dust yes -evalue 0.0001 -perc_identity 80 -soft_masking true. The BLAST results are filtered to keep only hits with alignment length that is at least 200 bp.
@@ -73,8 +74,10 @@ Depending on the alignment length and percentage identity, the script can recomm
 ### Plastid Organellar Blast
 
 <details markdown="1">
+<summary>Output files</summary>
+
 - `plastid_organellar_blast/`
-  `*-plastid_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected plastid contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected mitochondrial contaminants.
+  `*-plastid_genome.contamination_recommendation` - A file that contains the names of sequences that are suspected plastid contaminants in the nuclear DNA assembly, tagged as either "REMOVE" or "Investigate" depending on the BLAST hit alignment length and percentage identity. The file is empty if there are no suspected plastid contaminants.
 
 </details>
 
@@ -170,6 +173,20 @@ Creates a BlobToolKit dataset folder compatible with BlobToolKit viewer (https:/
   `fcs-gx_alarm_indicator_file.txt` - Contains text to control the running of BlobToolKit pipeline. If enough contamination is found by FCS-GX, an alarm is triggered to switch on the running of BlobToolKit pipeline.
 
 </details>
+
+The `fcs-gx_alarm_indicator_file.txt` file contains a series of alarm thresholds which are metrics of contamination in the genome and how much they effect it. If alarms are triggered then `SANGER_TOL_BTK` is triggered (in conditional mode, which is default).
+
+An example is:
+
+```
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: TOTAL_LENGTH_REMOVED == 155375 : Alarm threshold == 10000000.0
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: PERCENTAGE_LENGTH_REMOVED == 0.017758325257176553 : Alarm threshold == 3
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: LARGEST_SCAFFOLD_REMOVED == 53073 : Alarm threshold == 1800000.0
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: PERCENTAGE_SCAFFOLDS_REMOVED == 6.557377049180328 : Alarm threshold == 10.0
+NO_ABNORMAL_CONTAMINATION: Stage 1 decon for icSitLine7_HAP1_filtered.fasta: REVIEW_OR_INFO == 0 : Alarm threshold == 0
+```
+
+`NO_ABNORMAL_CONTAMINATION` or `YES_ABNORMAL_CONTAMINATION` based on whether the threshold has been met. Followed by `Stage 1` (BTK is considered Stage 2) for {ASSEMBLY OF INTEREST} and then the threshold name and observed value, along with the threshold trigger value. In total there are 5 metrics, however, more can be added by modifying the `bin/autofilter_contamination_check.py` script.
 
 Autofilter and check assembly returns a decontaminated genome file as well as summaries of the contamination found.
 

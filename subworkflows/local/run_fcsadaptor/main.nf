@@ -29,18 +29,14 @@ workflow RUN_FCSADAPTOR {
     )
     ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_EUK.out.versions)
 
-
-    //
-    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-    //          SO STRIP IT DOWN BEFORE USE, WE ALSO MERGE THE OUTPUT TOGETHER FOR SIMPLICITY
-    //
     FCS_FCSADAPTOR_EUK.out.adaptor_report
-        .combine(
-            FCS_FCSADAPTOR_PROK.out.adaptor_report.map{meta, file -> file}
+        .map{ meta, file -> [meta.id, file] }
+        .mix(
+            FCS_FCSADAPTOR_PROK.out.adaptor_report
+                .map{ meta, file -> [meta.id, file] }
         )
-        .map { meta, file1, file2 ->
-            [[id: meta.id], file1, file2 ]
-        }
+        .groupTuple()
+        .map { id, files -> [[id: id], files] }
         .set { ch_fcsadapt }
 
     emit:

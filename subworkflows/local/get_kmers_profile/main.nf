@@ -10,7 +10,7 @@ workflow GET_KMERS_PROFILE {
     take:
     assembly_fasta                      // channel [ val(meta), path(file) ]
     kmer_size                           // channel [ val(integer) ]
-    dimensionality_reduction_methods    // channel [ val(string) ]
+    _dimensionality_reduction_methods    // channel [ val(string) ]
     autoencoder_epochs_count            // channel [ val(integer) ]
 
     main:
@@ -86,21 +86,21 @@ workflow GET_KMERS_PROFILE {
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
     //
     KMER_COUNT_DIM_REDUCTION.out.kmers_dim_reduction_dir
-        .filter{meta, file -> !file.toString().contains("EMPTY")}
+        .filter{_meta, file -> !file.toString().contains("EMPTY")}
         .groupTuple(by: [0])
         .set { collected_files_for_combine }
 
     kmers_results = collected_files_for_combine
-        .map { meta, file ->
-            [[id: meta.id, process: "KMER_RESULTS"], file]
-        }
-        .ifEmpty { [[process: "KMER_RESULTS"],[]] }
+        .map { meta, file -> [[ id: meta.id ], file]  }
+        .ifEmpty { [[:],[]] }
+
 
     //
     // LOGIC: Collect the results directories from KMER_COUNT_DIM_REDUCTION
     //
+    // TODO: Why is this here?
     KMER_COUNT_DIM_REDUCTION.out.results_dir
-        .filter{meta, dir -> !dir.toString().contains("EMPTY")}
+        .filter{_meta, dir -> !dir.toString().contains("EMPTY")}
         .groupTuple(by: [0])
         .set { collected_results_dirs }
 
@@ -112,15 +112,13 @@ workflow GET_KMERS_PROFILE {
         collected_files_for_combine
     )
     ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
-
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-                        .map { meta, file ->
-                            [[id: meta.id, process: "KMERS"], file]
-                        }
-                        .ifEmpty { [[process: "KMERS"],[]] }
+                        .map { meta, file -> [[ id: meta.id ], file] }
+                        .ifEmpty { [[:],[]] }
 
     emit:
     combined_csv
+    collected_dirs = collected_results_dirs
     kmers_results
     versions      = ch_versions
 }

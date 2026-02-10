@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["input", "outdir", "coverage_reads_per_chunk"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -205,6 +205,12 @@
                     "minimum": 0,
                     "maximum": 1900000000
                 },
+                "coverage_reads_per_chunk": {
+                    "type": "integer",
+                    "default": 1000000,
+                    "fa_icon": "fas fa-calculator",
+                    "description": "Number of reads to map to a reference in a single chunk."
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -332,6 +338,12 @@
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
+                "run_decontaminate_fasta": {
+                    "type": "string",
+                    "description": "Run decontaminate fasta, fasta will automatically be decontaminated if btk doesn't run",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "both"
+                },
                 "btk_busco_run_mode": {
                     "type": "string",
                     "description": "Should btk be run as mandatory or conditional on levels of contamination.",
@@ -342,14 +354,12 @@
                 "genomic_only": {
                     "type": "boolean",
                     "description": "Switch off the organellar workflow",
-                    "fa_icon": "fas fa-file-lines",
-                    "default": false
+                    "fa_icon": "fas fa-file-lines"
                 },
                 "fcs_override": {
                     "type": "boolean",
-                    "description": "Use provided fcs samplesheet",
-                    "fa_icon": "fas fa-file-lines",
-                    "default": false
+                    "description": "Use provided fcs sampleshet",
+                    "fa_icon": "fas fa-file-lines"
                 },
                 "fcs_override_samplesheet": {
                     "type": "string",
@@ -478,6 +488,18 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "help": {
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "description": "Display the full detailed help message."
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         }

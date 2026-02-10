@@ -52,6 +52,7 @@ workflow SANGERTOL_ASCC {
     btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
     btk_lineages_path           // Path to the ODB10 lineages
     barcodes                    // ["barcode_1,barcode_2"]
+    val_reads_per_chunk         // int: number of reads per chunk to map when estimating coverage
 
     main:
 
@@ -81,7 +82,8 @@ workflow SANGERTOL_ASCC {
         reads_type,
         btk_lineages,
         btk_lineages_path,
-        barcodes
+        barcodes,
+        val_reads_per_chunk
     )
 }
 
@@ -103,7 +105,10 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input
+        params.input,
+        params.help,
+        params.help_full,
+        params.show_hidden
     )
 
 
@@ -120,20 +125,21 @@ workflow {
         PIPELINE_INITIALISATION.out.collected_reads,
         params.scientific_name,
         PIPELINE_INITIALISATION.out.pacbio_db,
-        Channel.fromPath(params.ncbi_taxonomy_path),
-        Channel.fromPath(params.ncbi_ranked_lineage_path),
-        Channel.fromPath(params.nt_database_path),
-        Channel.fromPath(params.diamond_nr_database_path),
-        Channel.fromPath(params.diamond_uniprot_database_path),
-        Channel.of(params.taxid),
-        Channel.fromPath(params.nt_kraken_database_path),
-        Channel.fromPath(params.vecscreen_database_path),
-        Channel.from(params.reads_path),
-        Channel.of(params.reads_layout),
-        Channel.of(params.reads_type),
-        Channel.of(params.busco_lineages),
-        Channel.fromPath(params.busco_lineages_folder),
-        PIPELINE_INITIALISATION.out.barcodes
+        channel.fromPath(params.ncbi_taxonomy_path),
+        channel.fromPath(params.ncbi_ranked_lineage_path),
+        channel.fromPath(params.nt_database_path),
+        channel.fromPath(params.diamond_nr_database_path),
+        channel.fromPath(params.diamond_uniprot_database_path),
+        channel.of(params.taxid),
+        channel.fromPath(params.nt_kraken_database_path),
+        channel.fromPath(params.vecscreen_database_path),
+        channel.from(params.reads_path),
+        channel.of(params.reads_layout),
+        params.reads_type,
+        channel.of(params.busco_lineages),
+        channel.fromPath(params.busco_lineages_folder),
+        PIPELINE_INITIALISATION.out.barcodes,
+        params.coverage_reads_per_chunk
     )
 
 
@@ -146,8 +152,37 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url
+        params.hook_url,
     )
+
+
+}
+
+workflow.onComplete {
+    if (workflow.success) {
+        try {
+            def completionFile = file("${params.outdir}/workflow_completed.txt")
+            def du = ["du", "-sh", workflow.workDir.toString()].execute()
+            du.waitFor()
+            completionFile.text = """
+                Workflow completed successfully!
+                Completed at: ${workflow.complete}
+                Duration: ${workflow.duration}
+                Success: ${workflow.success}
+                Work directory: ${workflow.workDir}
+                Work directory size: ${du.text.trim()}
+                Exit status: ${workflow.exitStatus}
+                Run name: ${workflow.runName}
+                Session ID: ${workflow.sessionId}
+                Project directory: ${workflow.projectDir}
+                Launch directory: ${workflow.launchDir}
+                Command line: ${workflow.commandLine}
+            """.stripIndent()
+            log.info "[ASCC INFO] Completion file created: ${completionFile}"
+        } catch (Exception e) {
+            log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
+        }
+    }
 }
 
 

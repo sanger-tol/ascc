@@ -33,18 +33,12 @@ workflow RUN_NT_KRAKEN {
         false,               // val save_output_fastqs
         true                 // val save_reads_assignment
     )
-    ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions)
-
     classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
-                        .map { meta, file ->
-                            [[id: meta.id, process: "KRAKEN_1"], file]
-                        }
+                        .map { meta, file -> [[ id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
     report          = KRAKEN2_KRAKEN2.out.report
-                        .map { meta, file ->
-                            [[id: meta.id, process: "KRAKEN_2"], file]
-                        }
+                        .map { meta, file -> [[ id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
 
@@ -56,11 +50,8 @@ workflow RUN_NT_KRAKEN {
         ncbi_rankedlineage_path
     )
     ch_versions     = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
-
     lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
-                        .map { meta, file ->
-                            [[id: meta.id, process: "KRAKEN_3"], file]
-                        }
+                        .map { meta, file -> [[ id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
 

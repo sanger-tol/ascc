@@ -5,20 +5,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v1.1.0] - Purple Frame [##/##/2026]
 
-THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
-
-Release 10 of sanger-tol/ascc, addition of a report generator.
-
-### `Added`
-
-- Reporting for the pipeline output into a more human readable output (html) @eaunin
-- Standardised some channel names
-- Standardised log info and warning calls
-- Changed the main method of kmer counting for memory efficiency
-  - Also added a module to re-generate the kmer string
-- Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel.
-- Added process tags to all channels
-  - caused an issue where combining channels will produce PRIMARY, HAPLOTYPE and null channels, ending pipeline execution, this requires filtering out null channels in some places.
 - `RUN_SOURMASH` subworkflow for k-mer based taxonomic classification
   - `SOURMASH_SKETCH`: Create MinHash sketches from assembly sequences
   - `SOURMASH_MULTISEARCH`: Search sketches against multiple databases
@@ -42,16 +28,11 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - `modules/local/parse/sourmash/main.nf`: Fixed YAML versions block to handle stderr correctly
 - `modules/local/ascc/merge_tables/main.nf`: Fixed optional sourmash parameter handling
 
-### `Bugs`
-
-### `Dependencies`
-
 | Module               | Old Version | New Versions |
 | -------------------- | ----------- | ------------ |
-| CAT_CAT              | NA          | 2.3.4        |
 | SOURMASH_SKETCH      | NA          | 4.8.11       |
 | SOURMASH_MULTISEARCH | NA          | 4.8.11       |
-| PARSE_SOURMASH       | NA          | 1.0.0        |
+| PARSE_SOURMASH       | NA          | 1.1.0        |
 | GET_TARGET_TAXA      | NA          | 1.0.0        |
 
 ### Parameters
@@ -67,8 +48,72 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 
 - Sourmash databases require MinHash sketches with k-mer sizes and scaled values
 - Target taxa is automatically extracted from NCBI taxonomy based on input taxid
-- Integration tests successfully validated with 121 processes (26 minutes runtime)
-- Four critical bugs were identified and fixed during integration testing
+
+## [0.6.0] - Red Notebook [28/01/2025]
+
+THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
+
+Release 10 of sanger-tol/ascc, addition of a report generator.
+
+### `Added`
+
+- Minimum Nextflow version is 25.10.0!
+- Version bump to 0.6.0, this is RC1 for a version 1.0.0 release.
+- Reporting for the pipeline output into a more human readable output (html) @eaunin
+- Standardised some channel names
+- Standardised log info and warning calls
+- Standardise tuples, ifEmpty and other operators
+- Changed the main method of kmer counting for memory efficiency
+  - See https://github.com/CobiontID/kmer-counter
+  - Also added a module to re-generate the kmer strings
+- Changed a number of empty channels to empty tuples to allow downstreams to run even without files in the channel
+- If/else control for processes has been updated to used filter control
+- Strict Syntax update to remove it[0] and replace with named variables, remove the few `|` operators that existed
+- Simplification of data-mapper channel processing before some processes
+- Production profile, update to give blobtoolkit a cleaner name on Sanger LSF
+- Update `ASCC_MERGE_TABLES` to be aware of empty files
+- Use sanger-tol chunked mapping subworkflow for read mapping (by @prototaxites)
+- Use coverm's contig mode for contig depth estimation (by @prototaxites)
+- Adding the `RUN_DECONTAMINATION` subworkflow which will produce a decontamination fasta in gz format.
+  - Added extra conditionals to subworkflow, run_autofilter_assembly must also be active. The ABNORMAL.csv is currently vital to the use of the decontamination scripts.
+- Added a `du -sh` command to the completion file so we can easily see how much storage the run eats up.
+- More outputs from the `ORGANELLAT_BLAST` processes.
+- Fixed small bug in `PACBIO_BARCODE_CHECK` which stopped proper reporting, no impact on output.
+- NF-test has been updated to latest outputs.
+- Updated to better follow strict syntax changes. Includes:
+  - prepending of `_` to unused vars
+  - C to c for channels
+  - No ENV outputs, instead output to file and read file.
+- Removed `lib/ascc_utils.groovy` in favour of `functions/local/ascc_utils.nf`
+- Updated NF-core modules that now support version topics, some of these do include tool version updates.
+- Removed modules as no longe needed
+  - `CAT_CAT`
+  - `GET_LARGEST_SCAFFOLD` as we now nolonger need a comparator to use TBI or CSI indexes.
+
+### `Bugs`
+
+- Fixed a bug that has stopped barcodes being reported correctly, `BLAST_BLASTN` was not configured correctly and so real hits were much sparcer than expected.
+- Currently, `DECONTAMINATE_CLIP_REGIONS_FASTA` should only run if `BLOBTOOLKIT` is not run. This is because, `BTK` would indicate there is enough contamination in the assembly to make a "decontaminated.fa" useless.
+
+### `Dependencies`
+
+| Module                           | Tool                          | Old Version | New Versions |
+| -------------------------------- | ----------------------------- | ----------- | ------------ |
+| GENERATE_HTML_REPORT             | generate_html_report.py       | NA          | 1.0          |
+| KMER_COUNTER                     | kmer-counter                  | 1.0.0       | 0.1.2        |
+| REFORMAT_NPY2CSV                 | npy_2_csv.py                  | NA          | 1.0.0        |
+| ASCC_MERGE_TABLES                | merge_btk_datasets.p          | 2.0.1       | 2.0.2        |
+| FASTXALIGN_PYFASTXINDEX          | slice_fasta.py                | NA          | 1.0.0        |
+| FASTXALIGN_MINIMAP2ALIGN         | slice_fasta.py                | NA          | 1.0.0        |
+| FASTXALIGN_MINIMAP2ALIGN         | minimap2                      | NA          | 2.30         |
+| SAMTOOLS_DEPTH                   | samtools                      | 1.22.1      | NA           |
+| SAMTOOLS_DEPTH_AVERAGE_COVERAGE  | samtools                      | 1.0         | NA           |
+| COVERM_CONTIG                    | coverm                        | NA          | 0.70         |
+| DECONTAMINATE_CLIP_REGIONS_FASTA | clip_regions.py               | NA          | 1.1.0        |
+| DECONTAMINATE_GENERATE_BED       | generate_contamination_bed.py | NA          | 1.1.0        |
+| GZIP                             | gzip                          | 1.13        |              |
+| PACBIO_BARCODE_CHECK             | pacbio_barcode_check.py       | 1.0.0       | 1.0.1        |
+| CAT_CAT                          | pigz                          | 2.3.8       | NA           |
 
 ## [0.5.3] - Red Spider-Boat (H3) [13/10/2025]
 

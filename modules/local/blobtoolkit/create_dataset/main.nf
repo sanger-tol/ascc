@@ -1,28 +1,24 @@
 process CREATE_BTK_DATASET {
     tag "$meta.id"
     label 'process_medium'
-
-
-    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        exit 1, "CREATE_BTK_DATASET module does not support Conda. Please use Docker / Singularity / Podman instead."
-    }
     container "docker.io/genomehubs/blobtoolkit:4.3.9"
 
     input:
-    tuple val(id), val(meta),   path(reference),
-        val(nt_blast_meta),     path(nt_blast_file, stageAs: "BLAST_HITS.tsv"),
-        val(tiara_meta),        path(tiara_file, stageAs: "TIARA.txt"),
-        val(kraken2_meta),      path(kraken2_file, stageAs: "KRAKEN_REPORT.txt"),
-        val(genome_meta),       path(dot_genome, stageAs: "SORTED.genome"),
-        val(kmers_meta),        path(kmers_file, stageAs: "KMERS_dim_reduction_embeddings_combined.csv"),
-        val(fcsgx_meta),        path(fcsgx_file, stageAs: "FCSGX_parsed.csv"),
-        val(nr_full_meta),      path(nr_full_file, stageAs: "NUCLEOT_DIAMOND_FULL.tsv"),
-        val(un_full_meta),      path(un_full_file, stageAs: "UNIPROT_DIAMOND_FULL.tsv"),
-        val(mapped_bam_meta),   path(mapped_bam_file, stageAs: "MAPPED.bam"),
-        val(coverage_meta),     path(coverage_file, stageAs: "COVERAGE_AVERAGE.txt"),
-        val(kraken1_meta),      path(kraken1_file, stageAs: "KRAKEN_CLASSIFIED.txt"),
-        val(kraken3_meta),      path(kraken3_file, stageAs: "KRAKEN_LINEAGE.txt")
+    tuple val(meta),   path(reference),
+        path(nt_blast_file,     stageAs: "BLAST_HITS.tsv"),
+        path(tiara_file,        stageAs: "TIARA.txt"),
+        path(dot_genome,        stageAs: "SORTED.genome"),
+        path(fcsgx_file,        stageAs: "FCSGX_parsed.csv"),
+        path(mapped_bam_file,   stageAs: "MAPPED.bam"),
+        path(coverage_file,     stageAs: "COVERAGE_AVERAGE.txt"),
+        path(kmers_file,        stageAs: "KMERS_dim_reduction_embeddings_combined.csv"),
+        path(kraken1_file,      stageAs: "KRAKEN_CLASSIFIED.txt"),
+        path(kraken2_file,      stageAs: "KRAKEN_REPORT.txt"),
+        path(kraken3_file,      stageAs: "KRAKEN_LINEAGE.txt"),
+        path(nr_full_file,      stageAs: "NUCLEOT_DIAMOND_FULL.tsv"),
+        path(un_full_file,      stageAs: "UNIPROT_DIAMOND_FULL.tsv")
 
+    val taxid
     path ncbi_taxdump,  stageAs: "TAXDUMP"
     val(scientific_name)
 
@@ -36,6 +32,10 @@ process CREATE_BTK_DATASET {
     task.ext.when == null || task.ext.when
 
     script:
+    if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
+        exit 1, "CREATE_BTK_DATASET module does not support Conda. Please use Docker / Singularity / Podman instead."
+    }
+
     def prefix          = task.ext.prefix   ?: "${meta.id}"
     def args            = task.ext.args     ?: ""
     def blastn_arg      = nt_blast_file     ? "-bh ${nt_blast_file}"     : ""
@@ -56,7 +56,7 @@ process CREATE_BTK_DATASET {
         -d ./1/ \\
         -n "${prefix}" \\
         -tn "${scientific_name}" \\
-        -id ${meta.taxid} \\
+        -id ${taxid} \\
         -td ${ncbi_taxdump}/ \\
         $blastn_arg \\
         $nt_diamond_arg \\
