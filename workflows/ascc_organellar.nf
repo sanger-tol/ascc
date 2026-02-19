@@ -152,10 +152,10 @@ workflow ASCC_ORGANELLAR {
                                     .ifEmpty { [[:],[]] }
 
         ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
-        
+
     } else {
         throw new RuntimeException("[ASCC Sourmash] No database configuration file provided (--sourmash_db_config). Pipeline cannot proceed without valid Sourmash configuration.")
-    } 
+    }
 
 
     //

@@ -164,10 +164,10 @@ workflow ASCC_GENOMIC {
 
 
 
-        
+
     } else {
         throw new RuntimeException("[ASCC Sourmash] No database configuration file provided (--sourmash_db_config). Pipeline cannot proceed without valid Sourmash configuration.")
-    } 
+    }
 
 
     //-------------------------------------------------------------------------
