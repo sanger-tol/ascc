@@ -188,15 +188,15 @@ def get_fcs_gx_action_dict(fcs_gx_summary_path):
     return fcs_gx_action_dict
 
 
-def get_sourmash_action_dict(sourmash_nontarget_path):
+def get_sourmash_action_dict(sourmash_nontarget_path, sourmash_mode="remove"):
     """
     Input: path to Sourmash non-target contigs CSV file
     Format: CSV with header line (no comments)
     header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom
     contig_1,GCF_000001,562,0.95,0.85,1000,...
 
-    Output: dictionary where the keys are scaffold names (from 'header' column) and the values are 'EXCLUDE'
-    All contigs in this file are non-target taxa and should be marked for exclusion
+    Output: dictionary where the keys are scaffold names (from 'header' column) and the values are
+    'EXCLUDE' when `sourmash_mode` == 'remove' or 'WARN' when `sourmash_mode` == 'warn'.
     """
     sourmash_action_dict = dict()
     if sourmash_nontarget_path is None or not os.path.isfile(sourmash_nontarget_path):
@@ -212,7 +212,10 @@ def get_sourmash_action_dict(sourmash_nontarget_path):
 
         contig_name = line.split(',')[0].strip()
         if contig_name:
-            sourmash_action_dict[contig_name] = "EXCLUDE"
+            if sourmash_mode == "warn":
+                sourmash_action_dict[contig_name] = "WARN"
+            else:
+                sourmash_action_dict[contig_name] = "EXCLUDE"
 
     return sourmash_action_dict
 
@@ -272,7 +275,7 @@ def main():
     target_domain = get_domain_from_taxid(args.taxid, ncbi_rankedlist)
     tiara_action_dict = process_tiara_results(tiara_results_path, target_domain)
     fcs_gx_action_dict = get_fcs_gx_action_dict(fcs_gx_summary_path)
-    sourmash_action_dict = get_sourmash_action_dict(sourmash_nontarget_path)
+    sourmash_action_dict = get_sourmash_action_dict(sourmash_nontarget_path, args.sourmash_action_mode)
 
     combined_action_dict = dict()
     scaffs_to_exclude = list()
@@ -299,22 +302,21 @@ def main():
             combined_action = "EXCLUDE"
             combined_action_source = "FCS-GX"
 
-        # Sourmash has equal priority - if it says EXCLUDE, we exclude
+        # Sourmash has equal priority with FCS-GX.
         if sourmash_action == "EXCLUDE":
-            if args.sourmash_action_mode == "remove":
-                if combined_action == "EXCLUDE":
-                    # Both FCS-GX and Sourmash agree
-                    combined_action_source = "FCS-GX_and_Sourmash"
-                else:
-                    combined_action = "EXCLUDE"
-                    combined_action_source = "Sourmash"
-            elif args.sourmash_action_mode == "warn":
-                if combined_action == "EXCLUDE":
-                    # FCS-GX already excluded it
-                    combined_action_source = "FCS-GX_and_Sourmash"
-                else:
-                    combined_action = "WARN"
-                    combined_action_source = "Sourmash"
+            if combined_action == "EXCLUDE":
+                # Both FCS-GX and Sourmash agree
+                combined_action_source = "FCS-GX_and_Sourmash"
+            else:
+                combined_action = "EXCLUDE"
+                combined_action_source = "Sourmash"
+        elif sourmash_action == "WARN":
+            if combined_action == "EXCLUDE":
+                # FCS-GX already excluded it
+                combined_action_source = "FCS-GX"
+            else:
+                combined_action = "WARN"
+                combined_action_source = "Sourmash"
 
         # If combined_action is still NA, check non-EXCLUDE FCS-GX actions
         if combined_action == "NA" and fcs_gx_action != "NA" and fcs_gx_action != "EXCLUDE":
