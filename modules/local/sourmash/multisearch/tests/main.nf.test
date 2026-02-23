@@ -67,7 +67,7 @@ nextflow_process {
                         sig,
                         file('${projectDir}/TEST_DATA/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_1.zip', checkIfExists: true),
                         21,
-                        200
+                        1000
                     ]
                 }
                 """
@@ -99,7 +99,7 @@ nextflow_process {
                         sig,
                         file('${projectDir}/TEST_DATA/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_2.zip', checkIfExists: true),
                         31,
-                        200
+                        1000
                     ]
                 }
                 """
@@ -129,7 +129,7 @@ nextflow_process {
                     file('test.sig.zip'),
                     file('${projectDir}/TEST_DATA/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_1.zip', checkIfExists: true),
                     21,
-                    200
+                    1000
                 ]
                 """
             }
