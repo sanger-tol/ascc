@@ -1,0 +1,238 @@
+nextflow_workflow {
+
+    name "Test Workflow RUN_SOURMASH"
+    script "../main.nf"
+    config "./nextflow.config"
+    workflow "RUN_SOURMASH"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "run_sourmash"
+    tag "sourmash"
+
+    setup {
+        // Download required test files from S3 (skip if already exist)
+        def test_data_dir = "${projectDir}/TEST_DATA/sourmash_testfiles"
+        def test_data_db_dir = "${projectDir}/TEST_DATA/sourmash_testfiles/db"
+        def base_url = "https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/sourmash_testfiles"
+
+        new File(test_data_db_dir).mkdirs()
+
+        def files_to_download = [
+            "GCF_000005845.2_ASM584v2_genomic.fna.gz": test_data_dir,
+            "db/gtdb_k21_k31_k51_s200_batch_1.zip": test_data_db_dir,
+            "db/gtdb_k21_k31_k51_s200_batch_2.zip": test_data_db_dir,
+            "db/ascc_sourmash_test_subset_taxa.csv": test_data_db_dir
+        ]
+
+        for (entry in files_to_download) {
+            def file_path = entry.key
+            def dest_dir = entry.value
+            def file_name = file_path.split("/")[-1]
+            def dest_file = new File("${dest_dir}/${file_name}")
+
+            if (!dest_file.exists()) {
+                println "Downloading ${file_name}..."
+                def command = ['bash', '-c', "curl -sL ${base_url}/${file_path} -o ${dest_dir}/${file_name}"]
+                def proc = command.execute()
+                proc.waitFor()
+                if (proc.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${file_name}: ${proc.err.text}")
+                }
+            }
+        }
+
+        // Download NCBI taxonomy database (rankedlineage.dmp)
+        new File("${projectDir}/NCBI_TAXONOMY").mkdirs()
+
+        def rankedlineageFile = new File("${projectDir}/NCBI_TAXONOMY/rankedlineage.dmp")
+        if (!rankedlineageFile.exists()) {
+            println "Downloading NCBI taxonomy database..."
+
+            def command = ['bash', '-c',
+                "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz " +
+                "--output ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz && " +
+                "tar -C ${projectDir}/NCBI_TAXONOMY -xzf ${projectDir}/NCBI_TAXONOMY/new_taxdump.tar.gz rankedlineage.dmp"
+            ]
+            def proc = command.execute()
+            proc.waitFor()
+
+            if (proc.exitValue() != 0) {
+                throw new RuntimeException("Error - failed to download NCBI taxonomy: ${proc.err.text}")
+            }
+        }
+    }
+
+    test("E.coli genome with single database (k=21)") {
+
+        when {
+            workflow {
+                """
+                // Input genome with taxid in meta
+                input[0] = Channel.of([
+                    [id: 'test_ecoli', taxid: '561'],  // E.coli taxid
+                    file(params.test_data_base + '/GCF_000005845.2_ASM584v2_genomic.fna.gz', checkIfExists: true)
+                ])
+
+                // Single database configuration
+                input[1] = Channel.of([
+                    name: 'gtdb_batch_1_k21',
+                    path: params.test_data_base + '/db/gtdb_k21_k31_k51_s200_batch_1.zip',
+                    k_available: [21, 31, 51],
+                    k_for_search: 21,
+                    s: 200,
+                    assembly_taxa_db: params.test_data_base + '/db/ascc_sourmash_test_subset_taxa.csv'
+                ])
+
+                // NCBI ranked lineage file
+                input[2] = file(params.rankedlineage, checkIfExists: true)
+
+                // Taxonomy level
+                input[3] = 'order'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.succeeded().size() == 4 }, // SKETCH, MULTISEARCH, GET_TARGET_TAXA, PARSE_SOURMASH
+
+                // Check sourmash_summary output
+                { assert workflow.out.sourmash_summary },
+                { assert workflow.out.sourmash_summary.get(0).get(0).id == 'test_ecoli' },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).exists() },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).getFileName().toString().endsWith('.summary.csv') },
+                // Check CSV has header + 5 data rows = 6 lines total
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines().size() == 6 },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines()[0].contains('assembly_accession') },
+
+                // Check sourmash_non_target output
+                { assert workflow.out.sourmash_non_target },
+                { assert workflow.out.sourmash_non_target.get(0).get(0).id == 'test_ecoli' },
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).exists() },
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).getFileName().toString().endsWith('.non_target.csv') },
+                // Check non_target CSV has only header (no non-target matches for E.coli)
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).readLines().size() == 1 },
+
+                // Snapshot for versions
+                { assert snapshot(workflow.out.versions).match() }
+            )
+        }
+    }
+
+    test("E.coli genome with multiple databases (k=21 and k=31)") {
+
+        when {
+            workflow {
+                """
+                // Input genome with taxid in meta
+                input[0] = Channel.of([
+                    [id: 'test_ecoli', taxid: '561'],
+                    file(params.test_data_base + '/GCF_000005845.2_ASM584v2_genomic.fna.gz', checkIfExists: true)
+                ])
+
+                // Two databases with different k values
+                input[1] = Channel.of(
+                    [
+                        name: 'gtdb_batch_1_k21',
+                        path: params.test_data_base + '/db/gtdb_k21_k31_k51_s200_batch_1.zip',
+                        k_available: [21, 31, 51],
+                        k_for_search: 21,
+                        s: 200,
+                        assembly_taxa_db: params.test_data_base + '/db/ascc_sourmash_test_subset_taxa.csv'
+                    ],
+                    [
+                        name: 'gtdb_batch_2_k31',
+                        path: params.test_data_base + '/db/gtdb_k21_k31_k51_s200_batch_2.zip',
+                        k_available: [21, 31, 51],
+                        k_for_search: 31,
+                        s: 200,
+                        assembly_taxa_db: params.test_data_base + '/db/ascc_sourmash_test_subset_taxa.csv'
+                    ]
+                )
+
+                // NCBI ranked lineage file
+                input[2] = file(params.rankedlineage, checkIfExists: true)
+
+                // Taxonomy level
+                input[3] = 'order'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+
+                // Check that multiple databases were processed
+                // SKETCH (1) + MULTISEARCH (2) + GET_TARGET_TAXA (1) + PARSE_SOURMASH (1) = 5
+                { assert workflow.trace.succeeded().size() == 5 },
+
+                // Check sourmash_summary output
+                { assert workflow.out.sourmash_summary },
+                { assert workflow.out.sourmash_summary.get(0).get(0).id == 'test_ecoli' },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).exists() },
+                // Check CSV has combined results from 2 databases (header + data rows)
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines().size() >= 6 },
+
+                // Check sourmash_non_target output
+                { assert workflow.out.sourmash_non_target },
+                { assert workflow.out.sourmash_non_target.get(0).get(0).id == 'test_ecoli' },
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).exists() },
+                // non_target should have at least header
+                { assert path(workflow.out.sourmash_non_target.get(0).get(1)).readLines().size() >= 1 },
+
+                // Verify that results contain expected data structure
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).text.contains('assembly_accession') },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).text.contains('containment') },
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).text.contains('is_target') },
+
+                // Snapshot for versions
+                { assert snapshot(workflow.out.versions).match() }
+            )
+        }
+    }
+
+    test("Stub run - structure validation") {
+
+        options "-stub"
+
+        when {
+            workflow {
+                """
+                // Input genome with taxid
+                input[0] = Channel.of([
+                    [id: 'test_stub', taxid: '561'],
+                    file(params.test_data_base + '/GCF_000005845.2_ASM584v2_genomic.fna.gz', checkIfExists: true)
+                ])
+
+                // Single database
+                input[1] = Channel.of([
+                    name: 'gtdb_batch_1_k21',
+                    path: params.test_data_base + '/db/gtdb_k21_k31_k51_s200_batch_1.zip',
+                    k_available: [21, 31, 51],
+                    k_for_search: 21,
+                    s: 200,
+                    assembly_taxa_db: params.test_data_base + '/db/ascc_sourmash_test_subset_taxa.csv'
+                ])
+
+                // NCBI ranked lineage
+                input[2] = file(params.rankedlineage, checkIfExists: true)
+
+                // Taxonomy level
+                input[3] = 'order'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+
+                // Snapshot entire output structure for stub test
+                { assert snapshot(workflow.out).match() }
+            )
+        }
+    }
+}

@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            137,
+            150,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -107,6 +107,10 @@
                     "python": "3.9.1",
                     "get_lineage_for_top": "1.0.0"
                 },
+                "GET_TARGET_TAXA": {
+                    "python": "3.9.1",
+                    "get_target_taxa_from_taxid": "1.0.0"
+                },
                 "GNU_SORT": {
                     "coreutils": 9.5
                 },
@@ -140,6 +144,9 @@
                 "PARSE_FCSGX_RESULT": {
                     "parse_fcsgx_result": "1.0.1"
                 },
+                "PARSE_SOURMASH": {
+                    "sourmash_taxonomy_parser": "1.1.0"
+                },
                 "REFORMAT_DIAMOND_OUTFMT6": {
                     "python": "3.9.1",
                     "reformat_diamond_outfmt6": 1.0
@@ -170,6 +177,13 @@
                 },
                 "SEQKIT_SLIDING": {
                     "seqkit": "2.8.0"
+                },
+                "SOURMASH_MULTISEARCH": {
+                    "sourmash": "4.9.4",
+                    "sourmash_plugin_branchwater": "0.9.14"
+                },
+                "SOURMASH_SKETCH": {
+                    "sourmash": "4.9.4"
                 },
                 "SUMMARISE_VECSCREEN_OUTPUT": {
                     "python": "3.9.1",
@@ -316,6 +330,10 @@
                 "asccTinyTest_V2_HAPLO/html_report/report/site/templates/ascc_report.html.jinja",
                 "asccTinyTest_V2_HAPLO/kmer_data",
                 "asccTinyTest_V2_HAPLO/kmer_data/asccTinyTest_V2_HAPLO_kmers_dim_reduction_embeddings_combined.csv",
+                "asccTinyTest_V2_HAPLO/sourmash",
+                "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO.sig",
+                "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
+                "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
                 "asccTinyTest_V2_HAPLO/summarise_vecscreen_output",
                 "asccTinyTest_V2_HAPLO/summarise_vecscreen_output/asccTinyTest_V2_HAPLO.vecscreen_contamination",
                 "asccTinyTest_V2_HAPLO/tiara_raw_output",
@@ -407,6 +425,12 @@
                 "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_trim_ns.html.jinja",
                 "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_vecscreen.html.jinja",
                 "asccTinyTest_V2_MITO/html_report/report/site/templates/ascc_report.html.jinja",
+                "asccTinyTest_V2_MITO/sourmash",
+                "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO.sig",
+                "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
+                "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
+                "asccTinyTest_V2_MITO/sourmash/sourmash_results_order_haemosporida.non_target.csv",
+                "asccTinyTest_V2_MITO/sourmash/sourmash_results_order_haemosporida.summary.csv",
                 "asccTinyTest_V2_MITO/summarise_vecscreen_output",
                 "asccTinyTest_V2_MITO/summarise_vecscreen_output/asccTinyTest_V2_MITO.vecscreen_contamination",
                 "asccTinyTest_V2_MITO/tiara_raw_output",
@@ -543,6 +567,12 @@
                 "asccTinyTest_V2_PRIMARY/html_report/report/site/templates/ascc_report.html.jinja",
                 "asccTinyTest_V2_PRIMARY/kmer_data",
                 "asccTinyTest_V2_PRIMARY/kmer_data/asccTinyTest_V2_PRIMARY_kmers_dim_reduction_embeddings_combined.csv",
+                "asccTinyTest_V2_PRIMARY/sourmash",
+                "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY.sig",
+                "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
+                "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
+                "asccTinyTest_V2_PRIMARY/sourmash/sourmash_results_order_haemosporida.non_target.csv",
+                "asccTinyTest_V2_PRIMARY/sourmash/sourmash_results_order_haemosporida.summary.csv",
                 "asccTinyTest_V2_PRIMARY/summarise_vecscreen_output",
                 "asccTinyTest_V2_PRIMARY/summarise_vecscreen_output/asccTinyTest_V2_PRIMARY.vecscreen_contamination",
                 "asccTinyTest_V2_PRIMARY/tiara_raw_output",
@@ -551,8 +581,7 @@
                 "asccTinyTest_V2_PRIMARY/trailingns",
                 "asccTinyTest_V2_PRIMARY/trailingns/asccTinyTest_V2_PRIMARY_trim_Ns",
                 "pipeline_info",
-                "pipeline_info/ascc_software_versions.yml",
-                "workflow_completed.txt"
+                "pipeline_info/ascc_software_versions.yml"
             ],
             true,
             true,
@@ -568,10 +597,10 @@
             ],
             true,
             [
-                "asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
+                "asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv:md5,1c757782b1527c33cdf5bccfe523b0b7",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "fcs-gx_alarm_indicator_file.txt:md5,912dc11ad86f82d2020f152411fec508",
-                "asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
+                "asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv:md5,1c757782b1527c33cdf5bccfe523b0b7",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "fcs-gx_alarm_indicator_file.txt:md5,4e51ff92a0dd9a35d81b02e5d2b8b627"
             ],
@@ -796,12 +825,20 @@
                 "asccTinyTest_V2_PRIMARY_trim_Ns:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             true,
-            true
+            [
+                "sourmash_results_order_haemosporida.summary.csv:md5,c21a0982406e3552adbe51c213568f52"
+            ],
+            false,
+            [
+                "sourmash_results_order_haemosporida.non_target.csv:md5,70233fd1cf564c07f7c45dbe6a0a4eef"
+            ],
+            false,
+            false
         ],
+        "timestamp": "2026-02-25T16:46:33.691134",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-01-29T15:05:55.139592"
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
     }
 }

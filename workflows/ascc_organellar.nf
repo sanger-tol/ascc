@@ -10,6 +10,7 @@ include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
 
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
+include { RUN_SOURMASH                                  } from '../subworkflows/local/run_sourmash/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
 include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
@@ -94,6 +95,69 @@ workflow ASCC_ORGANELLAR {
 
 
     //-------------------------------------------------------------------------
+    //
+    // SUBWORKFLOW: RUN SOURMASH TO GET TAXONOMIC INFORMATION ABOUT
+    //              SCAFFOLDS IN ASSEMBLY
+    //
+
+    //
+    // LOGIC: PARSE SOURMASH DATABASE CONFIGURATION FROM CSV
+    //
+    if (params.sourmash_db_config && (params.run_sourmash == "both" || params.run_sourmash == "genomic")) {
+        ch_sourmash_databases = Channel
+            .fromPath(params.sourmash_db_config, checkIfExists: true)
+            .splitCsv(header: true, quote: '"')
+            .map { row ->
+                def k_available = row.k_available
+                                    .replaceAll(/[\[\]"\s]/, '')  // Remove [, ], ", and whitespace
+                                    .split(',')
+                                    .collect { it as Integer }
+                [
+                    name: row.name,
+                    path: file(row.path, checkIfExists: true),
+                    k_available: k_available,
+                    k_for_search: row.k_for_search as Integer,
+                    s: row.s as Integer,
+                    assembly_taxa_db: file(row.assembly_taxa_db, checkIfExists: true)
+                ]
+            }
+
+        ch_sourmash_databases
+            .collect()
+            .subscribe { dbs ->
+                log.info "[ASCC Sourmash] Loaded ${dbs.size()} database(s):"
+                dbs.each { db ->
+                    log.info "  - ${db.name}: k=${db.k_for_search}, s=${db.s}"
+                }
+            }
+
+        RUN_SOURMASH (
+                ej_reference_tuple,
+                ch_sourmash_databases,
+                ncbi_ranked_lineage_path,
+                params.sourmash_taxonomy_level
+            )
+
+        // Output channels for downstream use
+        ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                    .map { meta, file ->
+                                        [[id: meta.id], file]
+                                    }
+                                    .ifEmpty { [[:],[]] }
+
+        ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+                                    .map { meta, file ->
+                                        [[id: meta.id], file]
+                                    }
+                                    .ifEmpty { [[:],[]] }
+
+        ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
+
+    } else {
+        throw new RuntimeException("[ASCC Sourmash] No database configuration file provided (--sourmash_db_config). Pipeline cannot proceed without valid Sourmash configuration.")
+    }
+
+
     //
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
@@ -427,18 +491,23 @@ workflow ASCC_ORGANELLAR {
                 ch_fcsgx.map{ meta, file -> [[id: meta.id], file] }, by: 0
             )
             .combine(
+                ch_sourmash_non_target,
+                by: 0
+            )
+            .combine(
                 ncbi_ranked_lineage_path
             )
             .combine(
                 taxid
             )
             .multiMap{
-                meta, ref, tiara, fcs, ncbi, thetaxid ->
+                meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  [new_meta, ref]
-                    tiara_file: [new_meta, tiara]
-                    fcs_file:   [new_meta, fcs]
-                    ncbi_rank:  ncbi
+                    reference:     [new_meta, ref]
+                    tiara_file:    [new_meta, tiara]
+                    fcs_file:      [new_meta, fcs]
+                    sourmash_file: [new_meta, sourmash]
+                    ncbi_rank:      ncbi
             }
             .set { autofilter_input_formatted }
 
@@ -450,6 +519,7 @@ workflow ASCC_ORGANELLAR {
             autofilter_input_formatted.reference,
             autofilter_input_formatted.tiara_file,
             autofilter_input_formatted.fcs_file,
+            autofilter_input_formatted.sourmash_file,
             autofilter_input_formatted.ncbi_rank
         )
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
@@ -502,6 +572,7 @@ workflow ASCC_ORGANELLAR {
             .join(ch_create_summary,remainder: true)
             .join(channel.of([[:],[]]), remainder: true) //busco_merge_btk - not in organellar
             .join(ch_fcsgx,         remainder: true)
+            .join(ch_sourmash_summary, remainder: true)
             .filter { items ->
                 def meta = items[0]
                 meta != null &&
@@ -582,11 +653,13 @@ workflow ASCC_ORGANELLAR {
         },
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
-        ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+        ch_fcsadapt.map { meta, files ->
+            def copy = new ArrayList(files)
+            [meta, copy.find{ file -> file.name ==~ /.*_euk\.fcs_adaptor_report\.txt/ }]
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,
+        ch_sourmash_non_target,
         channel.of( [[:],[]] ),
         channel.of( [[:],[]] )
     )

@@ -63,7 +63,7 @@ def get_sequence_lengths(assembly_fasta_path):
 
 def load_fcs_gx_results(seq_dict, fcs_gx_and_tiara_summary_path):
     """
-    Loads FCS-GX actions from the FCS-GX and Tiara results summary file, adds them to the dictionary that contains sequence lengths
+    Loads FCS-GX actions from the FCS-GX, Sourmash, and Tiara results summary file, adds them to the dictionary that contains sequence lengths
     """
     fcs_gx_and_tiara_summary_data = gpf.l(fcs_gx_and_tiara_summary_path)
     fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[
@@ -71,7 +71,8 @@ def load_fcs_gx_results(seq_dict, fcs_gx_and_tiara_summary_path):
     ]
     for line in fcs_gx_and_tiara_summary_data:
         split_line = line.split(",")
-        assert len(split_line) == 5
+        # Updated format: scaff,fcs_gx_action,sourmash_action,tiara_action,combined_action,combined_action_source
+        assert len(split_line) == 6, f"Expected 6 columns, got {len(split_line)}: {line}"
         seq_name = split_line[0]
         fcs_gx_action = split_line[1]
         seq_dict[seq_name]["fcs_gx_action"] = fcs_gx_action

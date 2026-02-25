@@ -1,0 +1,92 @@
+{
+    "E.coli genome with multiple databases (k=21 and k=31)": {
+        "content": [
+            [
+                "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                "versions.yml:md5,b56624516b39b336b0c8441220992111",
+                "versions.yml:md5,bd8a1378d91318fba494231e3512632e",
+                "versions.yml:md5,bd8a1378d91318fba494231e3512632e"
+            ]
+        ],
+        "timestamp": "2026-02-19T16:24:07.957781",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    },
+    "E.coli genome with single database (k=21)": {
+        "content": [
+            [
+                "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                "versions.yml:md5,b56624516b39b336b0c8441220992111",
+                "versions.yml:md5,bd8a1378d91318fba494231e3512632e"
+            ]
+        ],
+        "timestamp": "2026-02-19T16:23:53.361421",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    },
+    "Stub run - structure validation": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.summary.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.non_target.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                    "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                    "versions.yml:md5,b56624516b39b336b0c8441220992111",
+                    "versions.yml:md5,bd8a1378d91318fba494231e3512632e"
+                ],
+                "sourmash_non_target": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.non_target.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "sourmash_summary": [
+                    [
+                        {
+                            "id": "test_stub",
+                            "taxid": "561"
+                        },
+                        "test_stub.multisearch_results.summary.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,1703b6371de0441c8d7b0d32d8b485d7",
+                    "versions.yml:md5,85a7115a01d5b259d6e5b83172918fa5",
+                    "versions.yml:md5,b56624516b39b336b0c8441220992111",
+                    "versions.yml:md5,bd8a1378d91318fba494231e3512632e"
+                ]
+            }
+        ],
+        "timestamp": "2026-02-19T16:24:18.087334",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    }
+}

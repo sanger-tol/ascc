@@ -7,7 +7,7 @@ import sys
 import argparse
 import textwrap
 
-VERSION = "V1.0.2"
+VERSION = "V1.1.0"
 
 DESCRIPTION = """
 -------------------------------------
@@ -16,11 +16,12 @@ DESCRIPTION = """
 -------------------------------------
 Written by Eerik Aunin
 Modified by Damon-Lee Pointon
+Modified by Danil Zilov (Sourmash integration)
 -------------------------------------
 
 Script for filtering the assembly to
 remove putative contaminants based on
-FCS-GX and Tiara results.
+FCS-GX, Sourmash, and Tiara results.
 -------------------------------------
 
 """
@@ -38,6 +39,9 @@ def parse_args():
     )
     parser.add_argument(
         "-s", "--fcsgx_summary", type=str, help="Path to the fcs-gx_summary.csv file"
+    )
+    parser.add_argument(
+        "--sourmash", type=str, help="Path to Sourmash non-target contigs CSV file"
     )
     parser.add_argument(
         "--out_prefix", type=str, help="Prefix for output files", default="assembly"
@@ -67,6 +71,14 @@ def parse_args():
         choices=["warn", "remove"],
         default="warn",
         help="Action when Tiara detects a putative contaminant that is not reported as a contaminant by FCS-GX. The choices are 'warn' (print a warning) or 'remove' (remove this sequence from the assembly). Default: warn",
+    )
+    ## we can remove the argument and related code after testing in production
+    parser.add_argument(
+        "--sourmash_action_mode",
+        type=str,
+        choices=["warn", "remove"],
+        default="warn",
+        help="Action when Sourmash detects non-target taxa contigs. The choices are 'warn' (print a warning) or 'remove' (remove this sequence from the assembly). Default: warn",
     )
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
@@ -176,6 +188,38 @@ def get_fcs_gx_action_dict(fcs_gx_summary_path):
     return fcs_gx_action_dict
 
 
+def get_sourmash_action_dict(sourmash_nontarget_path, sourmash_mode="remove"):
+    """
+    Input: path to Sourmash non-target contigs CSV file
+    Format: CSV with header line (no comments)
+    header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom
+    contig_1,GCF_000001,562,0.95,0.85,1000,...
+
+    Output: dictionary where the keys are scaffold names (from 'header' column) and the values are
+    'EXCLUDE' when `sourmash_mode` == 'remove' or 'WARN' when `sourmash_mode` == 'warn'.
+    """
+    sourmash_action_dict = dict()
+    if sourmash_nontarget_path is None or not os.path.isfile(sourmash_nontarget_path):
+        return sourmash_action_dict
+
+    sourmash_data = gpf.ll(sourmash_nontarget_path)
+    for counter, line in enumerate(sourmash_data):
+        line = line.strip()
+
+        # Skip header
+        if counter == 0:
+            continue
+
+        contig_name = line.split(',')[0].strip()
+        if contig_name:
+            if sourmash_mode == "warn":
+                sourmash_action_dict[contig_name] = "WARN"
+            else:
+                sourmash_action_dict[contig_name] = "EXCLUDE"
+
+    return sourmash_action_dict
+
+
 def get_scaff_names(assembly_path):
     """
     Reads FASTA headers from a FASTA file and returns them as a list
@@ -200,7 +244,7 @@ def filter_assembly(assembly_path, scaffs_to_exclude, filtered_assembly_path):
             out_list.extend(split_seq)
         else:
             sys.stderr.write(
-                f"Excluding the sequence {header} from the filtered assembly ({filtered_assembly_path}), as it appears to be a contaminant based on FCS-GX and/or Tiara results\n"
+                f"Excluding the sequence {header} from the filtered assembly ({filtered_assembly_path}), as it appears to be a contaminant based on FCS-GX, Sourmash, and/or Tiara results\n"
             )
     gpf.export_list_as_line_break_separated_file(out_list, filtered_assembly_path)
 
@@ -209,20 +253,21 @@ def main():
     args = parse_args()
     if args.taxid == -1:
         sys.stderr.write(
-            "The filtering of assembly based on FCS-GX and Tiara results requires a taxID but a valid taxID has not been provided (the provided taxID is -1, which is a placeholder value)\n"
+            "The filtering of assembly based on FCS-GX, Sourmash, and Tiara results requires a taxID but a valid taxID has not been provided (the provided taxID is -1, which is a placeholder value)\n"
         )
 
     assembly_path = args.fasta
     tiara_results_path = args.tiara
     fcs_gx_summary_path = args.fcsgx_summary
+    sourmash_nontarget_path = args.sourmash
     filtered_assembly_path = f"{args.out_prefix}_autofiltered.fasta"
     # combined_summary = args.fcs_gx_and_tiara_summary
     excluded_seq_list_path = args.rejected_seq
     ncbi_rankedlist = args.ncbi_rankedlineage_path
 
-    Path(f"./fasta/filtered").mkdir(parents=True, exist_ok=True)
+    Path("./fasta/filtered").mkdir(parents=True, exist_ok=True)
 
-    for i in [ncbi_rankedlist, tiara_results_path, fcs_gx_summary_path, assembly_path]:
+    for i in [ncbi_rankedlist, tiara_results_path, fcs_gx_summary_path, assembly_path, sourmash_nontarget_path]:
         if not os.path.isfile(i):
             sys.stderr.write(f"{i} was not at the expected location\n")
             sys.exit(1)
@@ -230,6 +275,7 @@ def main():
     target_domain = get_domain_from_taxid(args.taxid, ncbi_rankedlist)
     tiara_action_dict = process_tiara_results(tiara_results_path, target_domain)
     fcs_gx_action_dict = get_fcs_gx_action_dict(fcs_gx_summary_path)
+    sourmash_action_dict = get_sourmash_action_dict(sourmash_nontarget_path, args.sourmash_action_mode)
 
     combined_action_dict = dict()
     scaffs_to_exclude = list()
@@ -237,26 +283,64 @@ def main():
     for scaff in scaffs:
         combined_action_source = "NA"
         fcs_gx_action = "NA"
+        sourmash_action = "NA"
         tiara_action = "NA"
+
         if scaff in fcs_gx_action_dict:
             fcs_gx_action = fcs_gx_action_dict[scaff]
-            combined_action_source = "FCS-GX"
+
+        if scaff in sourmash_action_dict:
+            sourmash_action = sourmash_action_dict[scaff]
+
         if scaff in tiara_action_dict:
             tiara_action = tiara_action_dict[scaff]
-        combined_action = fcs_gx_action
-        if fcs_gx_action == "NA" and tiara_action == "EXCLUDE":
+
+        combined_action = "NA"
+
+        # FCS-GX has priority - if it says EXCLUDE, we exclude
+        if fcs_gx_action == "EXCLUDE":
+            combined_action = "EXCLUDE"
+            combined_action_source = "FCS-GX"
+
+        # Sourmash has equal priority with FCS-GX.
+        if sourmash_action == "EXCLUDE":
+            if combined_action == "EXCLUDE":
+                # Both FCS-GX and Sourmash agree
+                combined_action_source = "FCS-GX_and_Sourmash"
+            else:
+                combined_action = "EXCLUDE"
+                combined_action_source = "Sourmash"
+        elif sourmash_action == "WARN":
+            if combined_action == "EXCLUDE":
+                # FCS-GX already excluded it
+                combined_action_source = "FCS-GX"
+            else:
+                combined_action = "WARN"
+                combined_action_source = "Sourmash"
+
+        # If combined_action is still NA, check non-EXCLUDE FCS-GX actions
+        if combined_action == "NA" and fcs_gx_action != "NA" and fcs_gx_action != "EXCLUDE":
+            combined_action = fcs_gx_action
+            combined_action_source = "FCS-GX"
+
+        # Tiara only works if both FCS-GX and Sourmash are silent (NA)
+        if fcs_gx_action == "NA" and sourmash_action == "NA" and tiara_action == "EXCLUDE":
             if args.tiara_action_mode == "remove":
                 combined_action = "EXCLUDE"
                 combined_action_source = "Tiara"
             elif args.tiara_action_mode == "warn":
                 combined_action = "WARN"
                 combined_action_source = "Tiara"
-        if fcs_gx_action == "EXCLUDE" and tiara_action == "EXCLUDE":
-            combined_action_source = "FCS-GX_and_Tiara"
+
+        if fcs_gx_action == "EXCLUDE" and sourmash_action == "EXCLUDE" and tiara_action == "EXCLUDE":
+            combined_action_source = "FCS-GX_and_Sourmash_and_Tiara"
+
         if combined_action == "EXCLUDE":
             scaffs_to_exclude.append(scaff)
+
         combined_action_dict[scaff] = {
             "fcs_gx_action": fcs_gx_action,
+            "sourmash_action": sourmash_action,
             "tiara_action": tiara_action,
             "combined_action": combined_action,
             "combined_action_source": combined_action_source,
@@ -267,9 +351,9 @@ def main():
     )
 
     out_csv_list = list()
-    out_csv_list.append("scaff,fcs_gx_action,tiara_action,combined_action,combined_action_source")
+    out_csv_list.append("scaff,fcs_gx_action,sourmash_action,tiara_action,combined_action,combined_action_source")
     for scaff, scaff_properties in combined_action_dict.items():
-        out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
+        out_line = f"{scaff},{scaff_properties['fcs_gx_action']},{scaff_properties['sourmash_action']},{scaff_properties['tiara_action']},{scaff_properties['combined_action']},{scaff_properties['combined_action_source']}"
         out_csv_list.append(out_line)
     #Output the Excluded sequence list in the csv
     gpf.export_list_as_line_break_separated_file(

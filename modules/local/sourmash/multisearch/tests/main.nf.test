@@ -1,0 +1,146 @@
+nextflow_process {
+
+    name "Test Process SOURMASH_MULTISEARCH"
+    script "../main.nf"
+    process "SOURMASH_MULTISEARCH"
+    config "./nextflow.config"
+    tag "modules"
+    tag "modules_local"
+    tag "sourmash"
+    tag "sourmash/multisearch"
+
+    setup {
+        // Download required test files from S3 (skip if already exist)
+        def test_data_dir = "${projectDir}/TEST_DATA/sourmash_testfiles"
+        def test_data_db_dir = "${projectDir}/TEST_DATA/sourmash_testfiles/db"
+        def base_url = "https://tolit.cog.sanger.ac.uk/test-data/resources/ascc/asccTinyTest_V2/sourmash_testfiles"
+
+        new File(test_data_db_dir).mkdirs()
+
+        def files_to_download = [
+            "GCF_000005845.2_ASM584v2_genomic.fna.gz": test_data_dir,
+            "db/gtdb_k21_k31_k51_s200_batch_1.zip": test_data_db_dir,
+            "db/gtdb_k21_k31_k51_s200_batch_2.zip": test_data_db_dir
+        ]
+
+        for (entry in files_to_download) {
+            def file_path = entry.key
+            def dest_dir = entry.value
+            def file_name = file_path.split("/")[-1]
+            def dest_file = new File("${dest_dir}/${file_name}")
+
+            if (!dest_file.exists()) {
+                println "Downloading ${file_name}..."
+                def command = ['bash', '-c', "curl -sL ${base_url}/${file_path} -o ${dest_dir}/${file_name}"]
+                def proc = command.execute()
+                proc.waitFor()
+                if (proc.exitValue() != 0) {
+                    throw new RuntimeException("Error - failed to download ${file_name}: ${proc.err.text}")
+                }
+            }
+        }
+
+        run("SOURMASH_SKETCH") {
+            script "modules/nf-core/sourmash/sketch/main.nf"
+            process {
+                """
+                input[0] = [
+                    [ id:'test_ecoli' ],
+                    file('${projectDir}/TEST_DATA/sourmash_testfiles/GCF_000005845.2_ASM584v2_genomic.fna.gz', checkIfExists: true)
+                ]
+                """
+            }
+        }
+    }
+
+    test("E. coli genome - gtdb_batch_1_k21 database") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = SOURMASH_SKETCH.out.signatures.map{ meta, sig ->
+                    [
+                        [ id: meta.id, db_name: 'gtdb_batch_1_k21' ],
+                        sig,
+                        file('${projectDir}/TEST_DATA/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_1.zip', checkIfExists: true),
+                        21,
+                        1000
+                    ]
+                }
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.multisearch_results[0][1]).readLines()[0].contains('query_name,query_md5,match_name') },
+                // 6 lines = 1 header + 5 match results for E.coli in gtdb_batch_1_k21
+                { assert path(process.out.multisearch_results[0][1]).readLines().size() == 6 },
+                { assert snapshot(process.out.versions).match() }
+            )
+        }
+    }
+
+    test("E. coli genome - gtdb_batch_2_k31 database") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = SOURMASH_SKETCH.out.signatures.map{ meta, sig ->
+                    [
+                        [ id: meta.id, db_name: 'gtdb_batch_2_k31' ],
+                        sig,
+                        file('${projectDir}/TEST_DATA/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_2.zip', checkIfExists: true),
+                        31,
+                        1000
+                    ]
+                }
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.multisearch_results[0][1]).exists() },
+                // gtdb_batch_2_k31 have no matches for E.coli
+                { assert path(process.out.multisearch_results[0][1]).readLines().size() == 0 },
+                { assert snapshot(process.out.versions).match() }
+            )
+        }
+    }
+
+    test("E. coli genome - gtdb_batch_1_k21 database - stub") {
+
+        options '-stub'
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test_ecoli', db_name:'gtdb_batch_1_k21' ],
+                    file('test.sig.zip'),
+                    file('${projectDir}/TEST_DATA/sourmash_testfiles/db/gtdb_k21_k31_k51_s200_batch_1.zip', checkIfExists: true),
+                    21,
+                    1000
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+}

@@ -146,6 +146,39 @@
                     "description": "Path to NR Diamond DB",
                     "fa_icon": "fas fa-file-lines"
                 },
+                "sourmash_db_config": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.csv$",
+                    "description": "Path to CSV file containing Sourmash database configuration",
+                    "fa_icon": "fas fa-file-csv",
+                    "help_text": "CSV file with columns: name, path, k_available, k_for_search, s, assembly_taxa_db. Each row defines one database. The k_available column should contain values like [31,51] (with or without quotes). Example: see assets/sourmash_databases_production.csv for format details."
+                },
+                "sourmash_taxonomy_level": {
+                    "type": "string",
+                    "description": "Taxonomic level to use for target taxa extraction from NCBI taxonomy",
+                    "fa_icon": "fas fa-sitemap",
+                    "default": "order",
+                    "enum": ["class", "family", "order", "genus", "phylum"],
+                    "help_text": "The taxonomic rank to extract from NCBI taxonomy database using the sample's taxid. This determines the level at which target taxa will be identified for Sourmash filtering. Common values are 'order' (default) for broad taxonomic groups, or 'family'/'genus' for more specific classification."
+                },
+                "sourmash_action_mode": {
+                    "type": "string",
+                    "description": "Action mode for Sourmash contamination filtering in AUTOFILTER",
+                    "fa_icon": "fas fa-filter",
+                    "default": "warn",
+                    "enum": ["warn", "remove"],
+                    "help_text": "Determines how AUTOFILTER handles contigs identified as non-target by Sourmash. 'warn' (default, conservative): flags contigs but does not remove them - to test in production before switching to 'remove'. 'remove' (aggressive): excludes non-target contigs from the filtered assembly - useful for testing or when high confidence in contamination detection is required. Works in parallel with FCS-GX filtering."
+                },
+                "tiara_action_mode": {
+                    "type": "string",
+                    "description": "Action mode for Tiara contamination filtering in AUTOFILTER",
+                    "fa_icon": "fas fa-filter",
+                    "default": "warn",
+                    "enum": ["warn", "remove"],
+                    "help_text": "Determines how AUTOFILTER handles contigs identified as non-target by Tiara. 'warn' (default, conservative): flags contigs but does not remove them. 'remove' (aggressive): excludes non-target contigs from the filtered assembly. Works in parallel with FCS-GX and Sourmash filtering."
+                },
                 "seqkit_sliding": {
                     "type": "integer",
                     "description": "Length of slide for Seqkit",
@@ -194,6 +227,12 @@
                 "run_essentials": {
                     "type": "string",
                     "description": "Run essential jobs on assemblies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "both"
+                },
+                "run_sourmash": {
+                    "type": "string",
+                    "description": "Run sourmash for additional taxonomic sorting",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
