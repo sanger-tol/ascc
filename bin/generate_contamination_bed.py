@@ -78,7 +78,7 @@ def main():
 
     decon_tolid_type_dir = args.decon_tolid_type_dir
     is_organelle = args.is_organelle
-    merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files = get_decon_bed_files(decon_tolid_type_dir, is_organelle, args.no_fcs_gx, args.no_barcodes, [])
+    merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files, sourmash_non_target_file = get_decon_bed_files(decon_tolid_type_dir, is_organelle, args.no_fcs_gx, args.no_barcodes, [])
 
     # BASE BED FILE NAMES OFF ASSEMBLY
     main_bed_output_file = f"{re.sub('.fa(sta)?.gz$', '', args.assembly_path)}.contamination.bed"
@@ -95,9 +95,13 @@ def main():
     lengths_removed = []
 
     # Parse FCS-GX file
-    fcs_gx_taxonomy_for_scaffold = {}
-    if not args.no_fcs_gx and not args.is_organelle:
+    fcs_gx_taxonomy_for_scaffold: Dict[str, str] = {}
+    if not args.no_fcs_gx and not args.is_organelle and fcs_gx_file is not None:
         fcs_gx_taxonomy_for_scaffold = parse_fcs_gx_file(fcs_gx_file)
+
+    sourmash_taxonomy_for_scaffold: Dict[str, str] = {}
+    if sourmash_non_target_file is not None:
+        sourmash_taxonomy_for_scaffold = parse_sourmash_non_target(sourmash_non_target_file)
 
     sequences_removed_by_reason = collections.defaultdict(list)
     scaffolds_removed = 0
@@ -158,50 +162,82 @@ def main():
         lengths_removed.append(val)
 
     fcs_gx_taxonomy_removed = collections.defaultdict(list)
+    sourmash_taxonomy_removed = collections.defaultdict(list)
     fcs_ambiguity_text = ""
 
     if not args.no_fcs_gx and not args.is_organelle:
-        main_bed_output_handle.write("# Merged ASCC call\n")
-        with open(merged_filter_file) as merged_filter_handle:
-            for line in merged_filter_handle:
-                fields = re.split(",", line.rstrip())
-                if fields[3] == "EXCLUDE":
+        if merged_filter_file is not None:
+            main_bed_output_handle.write("# Merged ASCC call\n")
+            with open(merged_filter_file) as merged_filter_handle:
+                for line in merged_filter_handle:
+                    fields = re.split(",", line.rstrip())
+                    # Skip empty lines
+                    if len(fields) == 0:
+                        continue
+                    # Skip header line produced by autofilter
+                    if fields[0] == "scaff":
+                        continue
+
+                    # Expect standard 6-column autofilter output
+                    if len(fields) < 6:
+                        logger.info(f"Unexpected merged filter line (expected 6 columns): {line.rstrip()}")
+                        continue
+
                     scaffold = fields[0]
-                    start = 0
-                    if fields[0] in length_for_scaffold:
-                        end = length_for_scaffold[fields[0]]
-                    else:
-                        exit(f"Cannot find scaffold {scaffold} in FASTA assembly")
-                    treatment = "REMOVE"
-                    if fields[4] in ("FCS-GX_and_Tiara", "FCS-GX"):
-                        main_bed_output_handle.write(
-                            "\t".join([scaffold, str(start), str(end), treatment])
-                            + "\n"
-                        )
-                        lengths_removed.append(end)
+                    fcs_gx_action = fields[1]
+                    # Record ambiguous FCS-GX calls
+                    if fcs_gx_action in ("REVIEW", "INFO"):
+                        fcs_ambiguity_text += f"FCS-GX assigns scaffold {scaffold} ambiguous verdict {fcs_gx_action} which requires manual review\n"
 
-                        scaffolds_removed += 1
+                    combined_action = fields[4]
+                    combined_source = fields[5]
 
-                        if scaffold in fcs_gx_taxonomy_for_scaffold:
-                            fcs_gx_taxonomy_removed[
-                                fcs_gx_taxonomy_for_scaffold[scaffold]
-                            ].append(length_for_scaffold[fields[0]])
-                            # TODO Put in an exception for scaffolds where FCS-GX cannot make a determination
+                    if combined_action == "EXCLUDE":
+                        start = 0
+                        if scaffold in length_for_scaffold:
+                            end = length_for_scaffold[scaffold]
                         else:
-                            exit(f"Cannot find {scaffold} in FCS-GX file")
-                    elif fields[4] == "Tiara":
-                        tiara_bed_output_handle.write(
-                            "\t".join([scaffold, str(start), str(end), treatment])
-                            + "\n"
-                        )
-                # Cases called as REVIEW or INFO by FCS-GX should be manually reviewed
-                if fields[1] in ("REVIEW", "INFO"):
-                    fcs_ambiguity_text += f"FCS-GX assigns scaffold {scaffold} ambiguous verdict {fields[1]} which requires manual review\n"
+                            exit(f"Cannot find scaffold {scaffold} in FASTA assembly")
+                        treatment = "REMOVE"
+
+                        # If Tiara-only, write to tiara bed and do not count in main removed stats
+                        if combined_source == "Tiara":
+                            tiara_bed_output_handle.write(
+                                "\t".join([scaffold, str(start), str(end), treatment])
+                                + "\n"
+                            )
+                        else:
+                            # Write a single main bed entry for this EXCLUDE
+                            main_bed_output_handle.write(
+                                "\t".join([scaffold, str(start), str(end), treatment])
+                                + "\n"
+                            )
+                            lengths_removed.append(end)
+                            scaffolds_removed += 1
+
+                        # Record taxonomy for any tools mentioned in combined_source
+                        if "FCS-GX" in combined_source:
+                            if scaffold in fcs_gx_taxonomy_for_scaffold:
+                                fcs_gx_taxonomy_removed[
+                                    fcs_gx_taxonomy_for_scaffold[scaffold]
+                                ].append(length_for_scaffold[scaffold])
+                            else:
+                                logger.info(f"FCS-GX entry missing for scaffold {scaffold}; skipping FCS-GX taxonomy assignment")
+
+                        if "sourmash" in combined_source.lower():
+                            if scaffold in sourmash_taxonomy_for_scaffold:
+                                sourmash_taxonomy_removed[
+                                    sourmash_taxonomy_for_scaffold[scaffold]
+                                ].append(length_for_scaffold[scaffold])
+                            else:
+                                logger.info(f"Sourmash entry missing for scaffold {scaffold}; skipping Sourmash taxonomy assignment")
+        else:
+            logger.info("No merged/abnormal-check file found; skipping merged ASCC call parsing")
 
     main_bed_output_handle.close()
     tiara_bed_output_handle.close()
 
-    contamination_report, is_abnormal, abnormal_details = build_contamination_report(args.assembly_type, length_for_scaffold, lengths_removed, scaffolds_removed, scaffold_count, fcs_gx_taxonomy_removed, sequences_removed_by_reason, fcs_ambiguity_text)
+    contamination_report, is_abnormal, abnormal_details = build_contamination_report(args.assembly_type, length_for_scaffold, lengths_removed, scaffolds_removed, scaffold_count, fcs_gx_taxonomy_removed, sourmash_taxonomy_removed, sequences_removed_by_reason, fcs_ambiguity_text)
 
     with open(f"{re.sub('.fa(sta)?.gz$', '', args.assembly_path)}.report.txt", 'w') as report_file:
         report_file.write(contamination_report)
@@ -212,7 +248,7 @@ def main():
     return contamination_report, is_abnormal, abnormal_details
 
 
-def build_contamination_report(assembly_type: str, length_for_scaffold, lengths_removed, scaffolds_removed, scaffold_count, fcs_gx_taxonomy_removed, sequences_removed_by_reason, fcs_ambiguity_text: str   ):
+def build_contamination_report(assembly_type: str, length_for_scaffold, lengths_removed, scaffolds_removed, scaffold_count, fcs_gx_taxonomy_removed, sourmash_taxonomy_removed, sequences_removed_by_reason, fcs_ambiguity_text: str   ):
     """Build contamination report for JIRA ticket, and determine if abnormal_contamination_report label should be added"""
 
     report_is_abnormal = False
@@ -239,6 +275,17 @@ def build_contamination_report(assembly_type: str, length_for_scaffold, lengths_
     )
     for taxonomy in fcs_gx_taxonomy_removed:
         jira_report += f"\t{taxonomy} ({len(fcs_gx_taxonomy_removed[taxonomy])}; {sum(fcs_gx_taxonomy_removed[taxonomy]):,})\n"
+
+    # Sourmash summary if available
+    if sourmash_taxonomy_removed is not None and len(sourmash_taxonomy_removed) > 0:
+        jira_report += "\nSourmash contaminant species (number of scaffolds; total length of scaffolds): \n"
+        sourmash_taxonomy_removed = dict(
+            sorted(
+                sourmash_taxonomy_removed.items(), key=lambda item: len(item[1]), reverse=True
+            )
+        )
+        for taxonomy in sourmash_taxonomy_removed:
+            jira_report += f"\t{taxonomy} ({len(sourmash_taxonomy_removed[taxonomy])}; {sum(sourmash_taxonomy_removed[taxonomy]):,})\n"
 
     alarm_threshold_for_parameter = {
         "TOTAL_LENGTH_REMOVED": 1e7,
@@ -327,6 +374,34 @@ def parse_fcs_gx_file(fcs_gx_file: str) -> Dict[str, str]:
             fcs_gx_taxonomy_for_scaffold[scaffold] = taxonomy
 
     return fcs_gx_taxonomy_for_scaffold
+
+
+def parse_sourmash_non_target(non_target_file: str) -> Dict[str, str]:
+    """Parse a sourmash non_target CSV and return mapping header -> best available taxonomy string."""
+    mapping: Dict[str, str] = {}
+    if non_target_file is None:
+        return mapping
+    try:
+        with open(non_target_file) as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                header = row.get('header')
+                if not header:
+                    continue
+                # Prefer species, then genus, then family... else use taxa field
+                lineage_cols = ['species', 'genus', 'family', 'order', 'class', 'phylum', 'kingdom']
+                chosen = None
+                for col in lineage_cols:
+                    val = row.get(col)
+                    if val is not None and str(val).strip() not in ['', 'None', 'nan']:
+                        chosen = str(val).strip()
+                        break
+                if chosen is None:
+                    chosen = row.get('taxa', '').strip()
+                mapping[header] = chosen
+    except Exception as e:
+        logger.info(f"Error parsing sourmash non-target file {non_target_file}: {e}")
+    return mapping
 
 def parse_fcs_adapator_file(fcs_adaptor_file: str, length_for_scaffold) -> Dict[str, int]:
     sequences_removed = {}
@@ -479,7 +554,12 @@ def get_decon_bed_files(decon_tolid_type_dir: str, is_organelle: bool, no_fcs_gx
             print(f"Could not find barcode file in {decon_tolid_type_dir}")
             sys.exit(1)
 
-    return merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files
+    # Try to find sourmash non-target output (optional)
+    sourmash_non_target_file = search_directory_for_file_pattern(
+        decon_tolid_type_dir + "/sourmash/", ".non_target.csv$", no_files_okay=True
+    )
+
+    return merged_filter_file, fcs_gx_file, fcs_adaptor_file, trim_ns_file, barcode_files, sourmash_non_target_file
 
 def search_directory_for_file_pattern(directory, pattern, multiple_results=False, no_files_okay = False):
     logger.info(f"Searching {directory} -- for {pattern}")

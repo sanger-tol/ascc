@@ -149,16 +149,17 @@ workflow ASCC_GENOMIC {
 
         // Output channels for downstream use
         ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+                                    .ifEmpty { [[:],[]] }
                                     .map { meta, file ->
                                         [[id: meta.id], file]
                                     }
-                                    .ifEmpty { [[:],[]] }
+                                    
 
         ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
+                                    .ifEmpty { [[:],[]] }
                                     .map { meta, file ->
                                         [[id: meta.id], file]
                                     }
-                                    .ifEmpty { [[:],[]] }
 
         ch_versions             = ch_versions.mix(RUN_SOURMASH.out.versions)
 
@@ -551,25 +552,37 @@ workflow ASCC_GENOMIC {
 
         ej_reference_tuple
             .map{ meta, file -> [[id: meta.id], file] }
-            .combine(
+            .join(
                 ch_tiara.map{ meta, file -> [[id: meta.id], file] },
-                by: 0
+                remainder: true
             )
-            .combine(
+            .join(
                 ch_fcsgx.map{ meta, file -> [[id: meta.id], file] },
-                by: 0
+                remainder: true
             )
-            .combine(
+            .join(
                 ch_sourmash_non_target
                     .map{ meta, file -> [[id: meta.id], file]},
-                by: 0
+                remainder: true
             )
+            // attach global/static channels (keep combine to broadcast singletons)
             .combine(
                 ncbi_ranked_lineage_path
             )
             .combine(
                 taxid
             )
+            .map { items ->
+                items.withIndex().collect { item, index ->
+                    if (item == null) {
+                        getEmptyPlaceholder(index)
+                    } else if (item instanceof List && item.isEmpty()) {
+                        getEmptyPlaceholder(index)
+                    } else {
+                        item
+                    }
+                }
+            }
             .multiMap{
                 meta, ref, tiara, fcs, sourmash, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
@@ -827,6 +840,7 @@ workflow ASCC_GENOMIC {
             .join(ch_create_summary,remainder: true)
             .join(busco_merge_btk,  remainder: true)
             .join(ch_fcsgx,         remainder: true)
+            .join(ch_sourmash_summary, remainder: true)
             .filter { items ->
                 def meta = items[0]
                 meta != null &&
@@ -876,11 +890,15 @@ workflow ASCC_GENOMIC {
         },
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
-        ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+        // got ERROR ~ Unexpected error [ConcurrentModificationException] at this line
+        // changed it to work with copy of files list
+        ch_fcsadapt.map { meta, files ->
+            def copy = new ArrayList(files)
+            [meta, copy.find { file -> file.name ==~ /.*_euk\.fcs_adaptor_report\.txt/ }]
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,
+        ch_sourmash_non_target,
         ch_mito_full,
         ch_chloro_full
     )

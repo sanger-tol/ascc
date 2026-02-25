@@ -20,7 +20,7 @@ process ASCC_MERGE_TABLES {
         path (uniprot_diamond,          stageAs: "uniprot.csv"),
         path (btk),
         path (btk_busco),
-        path (fcs_gx)
+        path (fcs_gx),
         path (sourmash_summary,         stageAs: "sourmash_summary.csv")
 
     output:

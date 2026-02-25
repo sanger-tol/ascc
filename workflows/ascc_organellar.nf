@@ -572,6 +572,7 @@ workflow ASCC_ORGANELLAR {
             .join(ch_create_summary,remainder: true)
             .join(channel.of([[:],[]]), remainder: true) //busco_merge_btk - not in organellar
             .join(ch_fcsgx,         remainder: true)
+            .join(ch_sourmash_summary, remainder: true)
             .filter { items ->
                 def meta = items[0]
                 meta != null &&
@@ -652,11 +653,13 @@ workflow ASCC_ORGANELLAR {
         },
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
-        ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+        ch_fcsadapt.map { meta, files ->
+            def copy = new ArrayList(files)
+            [meta, copy.find{ file -> file.name ==~ /.*_euk\.fcs_adaptor_report\.txt/ }]
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,
+        ch_sourmash_non_target,
         channel.of( [[:],[]] ),
         channel.of( [[:],[]] )
     )
