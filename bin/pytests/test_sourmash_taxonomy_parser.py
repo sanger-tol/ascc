@@ -6,7 +6,7 @@ import pandas as pd
 from collections import defaultdict
 
 # Add bin directory to path to import the script
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'bin'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import sourmash_taxonomy_parser as stp
 
 # Initialize logger for testing
