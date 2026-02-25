@@ -81,26 +81,28 @@ workflow RUN_SOURMASH {
     )
     ch_versions = ch_versions.mix(GET_TARGET_TAXA.out.versions)
 
-    // Join multisearch results with target_taxa for parsing
-    GET_TARGET_TAXA.out.target_taxa
-        .map { meta, target_taxa_file ->
-            [meta.id, target_taxa_file.text.trim()]
-        }
-        .set { ch_target_taxa_val }
 
     ch_multisearch_results_grouped
-        .map { meta, files -> [meta.id, meta, files] }
-        .join(ch_target_taxa_val)
-        .map { id, meta, results_files, target_taxa_str ->
-            [meta, results_files, target_taxa_str]
+        .map { meta, files -> [meta, files] }
+        .join(GET_TARGET_TAXA.out.target_taxa.map { meta, tf -> [meta, tf.text.trim()] })
+        .multiMap { meta, results_files, target_taxa_str ->
+            results: tuple(meta, results_files)
+            target_taxa: target_taxa_str
         }
-        .set { ch_results_with_target }
+        .set { ch_parse_input }
+
+    // Debug: verify both channels have data
+    ch_parse_input.results
+        .view { meta, results -> "[DEBUG PARSE INPUT] id=${meta.id} num_results=${results.size()}" }
+
+    ch_parse_input.target_taxa
+        .view { target -> "[DEBUG TARGET TAXA] ${target}" }
 
     // Parse results and taxonomy database
     PARSE_SOURMASH (
-        ch_results_with_target.map { meta, results, target_taxa -> [meta, results] },
+        ch_parse_input.results,
         ch_taxa_db_files,
-        ch_results_with_target.map { meta, results, target_taxa -> target_taxa }
+        ch_parse_input.target_taxa
     )
     ch_versions = ch_versions.mix(PARSE_SOURMASH.out.versions)
 
