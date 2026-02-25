@@ -153,7 +153,7 @@ workflow ASCC_GENOMIC {
                                     .map { meta, file ->
                                         [[id: meta.id], file]
                                     }
-                                    
+
 
         ch_sourmash_non_target  = RUN_SOURMASH.out.sourmash_non_target
                                     .ifEmpty { [[:],[]] }
