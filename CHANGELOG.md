@@ -43,6 +43,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
 - Removed modules as no longe needed
   - `CAT_CAT`
   - `GET_LARGEST_SCAFFOLD` as we now nolonger need a comparator to use TBI or CSI indexes.
+- Updated to NF-Core template 3.5.2
 
 ### `Bugs`
 
