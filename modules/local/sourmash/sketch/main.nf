@@ -25,7 +25,6 @@ process SOURMASH_SKETCH {
     sourmash sketch \\
         ${sketch_params} \\
         ${args} \\
-        --merge '${prefix}' \\
         --output '${prefix}.sig' \\
         $sequence
 
