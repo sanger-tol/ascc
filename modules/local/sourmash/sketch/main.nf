@@ -25,6 +25,7 @@ process SOURMASH_SKETCH {
     sourmash sketch \\
         ${sketch_params} \\
         ${args} \\
+        --singleton \\
         --output '${prefix}.sig' \\
         $sequence
 
