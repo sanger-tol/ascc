@@ -9,12 +9,12 @@ workflow PREPARE_BLASTDB {
     take:
     sample_id               // val      params.sample-id
     pacbio_data             // val      params.pacbio_data
-    pacbio_type             // val      params.pacbio_type
+    _pacbio_type            // val      params.pacbio_type
     barcodes_file           // val      params.barcodes_file
     barcode_names           // val      (csv-list-string)
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
 
     //
@@ -33,15 +33,13 @@ workflow PREPARE_BLASTDB {
     //          ACTS AS A GATEKEEPER FOR THE FLOW
     //
     CHECK_BARCODE.out.result
-        .filter{it.contains("barcodes")} // Indicates it is a valid barcode
-        .combine( barcodes_file )
-        .map {str_info, file ->
-            tuple(
-                [id: "BARCODE_TO_MAKEDB", info: str_info],
-                file
-            )
+        .map { result_file -> result_file.text }
+        .filter { text -> text.contains('barcodes') } // Indicates it is a valid barcode
+        .combine(barcodes_file)
+        .map { str_info, file ->
+            [[id: 'BARCODE_TO_MAKEDB', info: str_info], file]
         }
-        .set {ch_new_barcodes}
+        .set { ch_new_barcodes }
 
 
     //

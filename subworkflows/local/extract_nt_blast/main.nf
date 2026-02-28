@@ -14,19 +14,16 @@ include { GET_LINEAGE_FOR_TOP   } from '../../../modules/local/get/lineage_for_t
 
 workflow EXTRACT_NT_BLAST {
     take:
-    input_genome            // Channel.of([ [ id: sample_id ], fasta ])
-    blastn_db_path          // Channel.fromPath( db )
-    ncbi_lineage_path       // Channel.fromPath( lineage_path )
+    input_genome            // channel.of([ [ id: sample_id ], fasta ])
+    blastn_db_path          // channel.fromPath( db )
+    ncbi_lineage_path       // channel.fromPath( lineage_path )
 
     main:
-    ch_versions             = Channel.empty()
+    ch_versions             = channel.empty()
 
     blastn_db_path
-        .map { it ->
-            [
-                [id: "db"],
-                it
-            ]
+        .map { db ->
+            [ [id: "db"], db ]
         }
         .set { ch_blast }
 
@@ -50,7 +47,7 @@ workflow EXTRACT_NT_BLAST {
     ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     input_genome
-        .map{ meta, file ->
+        .map{ meta, _file ->
             meta.id
         }
         .set { id }
@@ -60,7 +57,7 @@ workflow EXTRACT_NT_BLAST {
     // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
     //
     BLAST_BLASTN.out.txt
-        .map { meta, files ->
+        .map { _meta, files ->
             files
         }
         .collectFile(
@@ -69,9 +66,7 @@ workflow EXTRACT_NT_BLAST {
         )
         .combine( id )
         .map { file, identity ->
-            tuple(  [   id: identity    ],
-                    file
-                )
+            [[ id: identity ], file ]
             }
         .set { blast_results }
 
@@ -81,6 +76,11 @@ workflow EXTRACT_NT_BLAST {
     //
     BLAST_CHUNK_TO_FULL ( blast_results )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
+    ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full
+                                .map { meta, file -> [[ id: meta.id ], file] }
+
+    ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
+                                .map { meta, file -> [[ id: meta.id ], file] }
 
 
     //
@@ -94,8 +94,8 @@ workflow EXTRACT_NT_BLAST {
     // LOGIC: BRANCH DEPENDING ON WHETHER FILE HAS CONTENTS
     //
     REFORMAT_FULL_OUTFMT6.out.full
-        .branch {
-            valid:      it[1].readLines().size() >= 1
+        .branch { _meta, file ->
+            valid:      file.readLines().size() >= 1
             invalid:    true
         }
         .set { gatekeeper }
@@ -118,15 +118,16 @@ workflow EXTRACT_NT_BLAST {
         ncbi_lineage_path
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
+    ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
+                                .map { meta, file -> [[ id: meta.id ], file] }
 
     // No conversion needed - BLAST results are already in the format expected by BlobToolKit
 
     emit:
     ch_blast_results        = BLAST_BLASTN.out.txt
     ch_formatted_results    = REFORMAT_FULL_OUTFMT6.out.full
-    ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
-    ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
-    ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full  // Format for BTK - full coordinates file
+    ch_top_lineages
+    ch_blast_hits
+    ch_btk_format           // Format for BTK - full coordinates file
     versions                = ch_versions
-
 }

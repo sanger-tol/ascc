@@ -13,7 +13,7 @@ workflow RUN_VECSCREEN {
     vecscreen_database    // val(db_path)
 
     main:
-    ch_versions                 = Channel.empty()
+    ch_versions         = channel.empty()
 
 
     //
@@ -22,13 +22,10 @@ workflow RUN_VECSCREEN {
     CHUNK_ASSEMBLY_FOR_VECSCREEN(
         reference_tuple
     )
-    ch_versions                 = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
+    ch_versions         = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
 
-    vecscreen_database.map{ it ->
-        tuple(
-            [id: "db"],
-            it
-        )
+    vecscreen_database.map{ file ->
+        [[id: "db"], file]
     }
     .set { vecscreen_database_tuple }
 
@@ -40,7 +37,7 @@ workflow RUN_VECSCREEN {
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
         vecscreen_database_tuple
     )
-    ch_versions                 = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
+    ch_versions         = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
 
 
     //
@@ -50,7 +47,7 @@ workflow RUN_VECSCREEN {
     FILTER_VECSCREEN_RESULTS(
         NCBITOOLS_VECSCREEN.out.vecscreen_output
     )
-    ch_versions                 = ch_versions.mix( FILTER_VECSCREEN_RESULTS.out.versions )
+    ch_versions         = ch_versions.mix( FILTER_VECSCREEN_RESULTS.out.versions )
 
 
     //
@@ -60,10 +57,12 @@ workflow RUN_VECSCREEN {
     SUMMARISE_VECSCREEN_OUTPUT(
         FILTER_VECSCREEN_RESULTS.out.filtered_vecscreen_outfile
     )
-    ch_versions                 = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
-
+    ch_versions         = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
+    vecscreen_contam    = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
+                            .map { meta, file -> [[ id: meta.id ], file] }
+                            .ifEmpty { [[:],[]] }
 
     emit:
-    vecscreen_contam            = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
-    versions                    = ch_versions
+    vecscreen_contam
+    versions            = ch_versions
 }

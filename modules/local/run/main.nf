@@ -1,6 +1,3 @@
-import java.nio.file.Paths
-import java.nio.file.Files
-
 process NEXTFLOW_RUN {
     tag "$pipeline_name"
 
@@ -16,8 +13,8 @@ process NEXTFLOW_RUN {
 
     exec:
     // def args = task.ext.args ?: ''
-    def cache_dir = Paths.get(workflow.workDir.resolve(pipeline_name).toUri())
-    Files.createDirectories(cache_dir)
+    def cache_dir = java.nio.file.Paths.get(workflow.workDir.resolve(pipeline_name).toUri())
+    java.nio.file.Files.createDirectories(cache_dir)
     def nxf_cmd = [
         'nextflow run',
             pipeline_name,

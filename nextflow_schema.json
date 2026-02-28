@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["input", "outdir", "coverage_reads_per_chunk"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -172,6 +172,12 @@
                     "minimum": 0,
                     "maximum": 1900000000
                 },
+                "coverage_reads_per_chunk": {
+                    "type": "integer",
+                    "default": 1000000,
+                    "fa_icon": "fas fa-calculator",
+                    "description": "Number of reads to map to a reference in a single chunk."
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -187,105 +193,117 @@
                 },
                 "run_essentials": {
                     "type": "string",
-                    "description": "Run essential jobs on assebmlies",
+                    "description": "Run essential jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_kmers": {
                     "type": "string",
-                    "description": "Run kmer jobs on assebmlies",
+                    "description": "Run kmer jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_tiara": {
                     "type": "string",
-                    "description": "Run tiara jobs on assebmlies",
+                    "description": "Run tiara jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_coverage": {
                     "type": "string",
-                    "description": "Run coverage jobs on assebmlies",
+                    "description": "Run coverage jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_nt_blast": {
                     "type": "string",
-                    "description": "Run nt_blast jobs on assebmlies",
+                    "description": "Run nt_blast jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
+                "run_html_report": {
+                    "type": "string",
+                    "description": "Run HTML report generation on assemblies",
+                    "enum": ["genomic", "organellar", "both", "off"],
+                    "default": "off"
+                },
                 "run_nr_diamond": {
                     "type": "string",
-                    "description": "Run nr_diamond jobs on assebmlies",
+                    "description": "Run nr_diamond jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_uniprot_diamond": {
                     "type": "string",
-                    "description": "Run uniprot_diamond jobs on assebmlies",
+                    "description": "Run uniprot_diamond jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_kraken": {
                     "type": "string",
-                    "description": "Run kraken jobs on assebmlies",
+                    "description": "Run kraken jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_fcsgx": {
                     "type": "string",
-                    "description": "Run fcsgx jobs on assebmlies",
+                    "description": "Run fcsgx jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_fcs_adaptor": {
                     "type": "string",
-                    "description": "Run fcs_adaptor jobs on assebmlies",
+                    "description": "Run fcs_adaptor jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_vecscreen": {
                     "type": "string",
-                    "description": "Run vecscreen jobs on assebmlies",
+                    "description": "Run vecscreen jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_btk_busco": {
                     "type": "string",
-                    "description": "Run btk_busco jobs on assebmlies",
+                    "description": "Run btk_busco jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_pacbio_barcodes": {
                     "type": "string",
-                    "description": "Run pacbio_barcodes jobs on assebmlies",
+                    "description": "Run pacbio_barcodes jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_organellar_blast": {
                     "type": "string",
-                    "description": "Run organellar_blast jobs on assebmlies",
+                    "description": "Run organellar_blast jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_autofilter_assembly": {
                     "type": "string",
-                    "description": "Run autofilter_assembly jobs on assebmlies",
+                    "description": "Run autofilter_assembly jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
                 },
                 "run_create_btk_dataset": {
                     "type": "string",
-                    "description": "Run create_btk_dataset jobs on assebmlies",
+                    "description": "Run create_btk_dataset jobs on assemblies",
                     "enum": ["genomic", "organellar", "both", "off"],
                     "default": "both"
                 },
                 "run_merge_datasets": {
                     "type": "string",
-                    "description": "Run merge_datasets jobs on assebmlies",
+                    "description": "Run merge_datasets jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
                     "default": "genomic"
+                },
+                "run_decontaminate_fasta": {
+                    "type": "string",
+                    "description": "Run decontaminate fasta, fasta will automatically be decontaminated if btk doesn't run",
+                    "enum": ["genomic", "both", "off"],
+                    "default": "both"
                 },
                 "btk_busco_run_mode": {
                     "type": "string",
@@ -297,14 +315,12 @@
                 "genomic_only": {
                     "type": "boolean",
                     "description": "Switch off the organellar workflow",
-                    "fa_icon": "fas fa-file-lines",
-                    "default": false
+                    "fa_icon": "fas fa-file-lines"
                 },
                 "fcs_override": {
                     "type": "boolean",
                     "description": "Use provided fcs sampleshet",
-                    "fa_icon": "fas fa-file-lines",
-                    "default": false
+                    "fa_icon": "fas fa-file-lines"
                 },
                 "fcs_override_samplesheet": {
                     "type": "string",
@@ -433,6 +449,18 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "help": {
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "description": "Display the full detailed help message."
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         }

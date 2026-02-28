@@ -7,12 +7,12 @@ import os
 import sys
 import general_purpose_functions as gpf
 
-VERSION = "2.0.0"
+VERSION = "2.0.2"
 DESCRIPTION = """
 Script for merging contaminant check results into one table
 Version: {VERSION}
 ---
-Written by Eerik Anuin
+Written by Eerik Aunin
 
 Re-Written by Damon-Lee Pointon (dp24/DLBPointon)
 """
@@ -58,10 +58,10 @@ def check_paths(paths_dict, required_files):
     out_dict = dict()
 
     for data_type, input_file in paths_dict.items():
-        if input == None:
-            pass
-        else:
+        if input_file != None and not "EMPTY" in input_file:
             out_dict[data_type] = input_file
+        else:
+            out_dict[data_type] = None
 
     return out_dict
 
@@ -294,6 +294,7 @@ def parse_or_pass(input_file: str, name: str):
 
 def main(args):
     paths_dict = dict()
+
     paths_dict["gc_content"] = args.gc_cov
     paths_dict["coverage"] = args.coverage
     paths_dict["tiara"] = args.tiara
@@ -312,24 +313,41 @@ def main(args):
     required_files = ["gc_content"]
 
     paths_dict = check_paths(paths_dict, required_files)
+
     df = load_and_merge_dataframes(paths_dict)
     df.to_csv(f"{args.sample_name}_contamination_check_merged_table.csv", index=False)
 
-    if (
-        paths_dict["nt_blast"]
-        and paths_dict["nr_diamond"]
-        and paths_dict["uniprot_diamond"]
-        and paths_dict["coverage"]
-        and paths_dict["tiara"]
-        and paths_dict["nt_kraken"]
-    ):
+    # Check if we have enough data to generate the phylum coverage file
+    # We need at least one of: btk_bestsum_phylum, fcs_gx_phylum, nt_kraken_phylum, or tiara_classif
+    # And we need coverage data
+    has_taxonomy = False
+    if "btk_bestsum_phylum" in df.columns:
+        has_taxonomy = True
+    elif "fcs_gx_phylum" in df.columns:
+        has_taxonomy = True
+    elif "nt_kraken_phylum" in df.columns:
+        has_taxonomy = True
+    elif "tiara_classif" in df.columns:
+        has_taxonomy = True
+
+    has_coverage = "coverage" in df.columns
+
+    if has_taxonomy and has_coverage:
         process_results_tables_command = (
             f"process_result_tables.py . {args.sample_name}"
         )
         gpf.run_system_command(process_results_tables_command)
     else:
+        missing_data = []
+        if not has_taxonomy:
+            missing_data.append(
+                "taxonomy data (btk_bestsum_phylum, fcs_gx_phylum, nt_kraken_phylum, or tiara_classif)"
+            )
+        if not has_coverage:
+            missing_data.append("coverage data")
+
         sys.stderr.write(
-            f"Skipping generating the {args.sample_name}_phylum_counts_and_coverage.csv file, as the variables used in this run do not include all the required variables for this (nt_blast, nr_diamond, uniprot_diamond, coverage, tiara, nt_kraken)\n"
+            f"Skipping generating the {args.sample_name}_phylum_counts_and_coverage.csv file, as the variables used in this run do not include all the required variables for this: {', '.join(missing_data)}\n"
         )
 
 

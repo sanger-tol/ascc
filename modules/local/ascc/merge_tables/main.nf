@@ -1,5 +1,5 @@
 process ASCC_MERGE_TABLES {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -8,17 +8,19 @@ process ASCC_MERGE_TABLES {
         'quay.io/biocontainers/pandas:1.5.2' }"
 
     input:
-    tuple val(meta),            path (gc_content,               stageAs: "GC.txt"),
-        val(meta_coverage),     path (coverage),
-        val(meta_tiara),        path (tiara,                    stageAs: "TIARA.txt"),
-        val(meta_kraken),       path (nt_kraken,                stageAs: "LINEAGE.txt"),
-        val(meta_ntblast),      path (nt_blast),
-        val(meta_kmer),         path (dim_reduction_embeddings),
-        val(meta_nrdiamond),    path (nr_diamond),
-        val(meta_undiamon),     path (uniprot_diamond,          stageAs: "UP_DIAMOND.tsv"),
-        val(meta_btk),          path (btk,                      stageAs: "BTK_summary_table_full.tsv"),
-        val(meta_busco_btk),    path (btk_busco),
-        val(meta_fcs),          path (fcs_gx,                   stageAs: "FCSGX_parsed.csv")
+    // rewrite on new input
+    tuple val(meta), path(reference),
+        path (gc_content),
+        path (coverage),
+        path (tiara),
+        path (nt_kraken),
+        path (nt_blast),
+        path (dim_reduction_embeddings),
+        path (nr_diamond,               stageAs: "diamond.csv"),
+        path (uniprot_diamond,          stageAs: "uniprot.csv"),
+        path (btk),
+        path (btk_busco),
+        path (fcs_gx)
 
     output:
     tuple val(meta), path("*_contamination_check_merged_table.csv")         , emit: merged_table
@@ -30,33 +32,34 @@ process ASCC_MERGE_TABLES {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix                      = task.ext.prefix           ?: "${meta.id}"
-    def args                        = task.ext.args             ?: ""
-    def coverage                    = coverage                  ? "-c ${coverage}"                  : ""
-    def tiara                       = tiara                     ? "-t ${tiara}"                     : ""
-    def nt_kraken                   = nt_kraken                 ? "-nk ${nt_kraken}"                : ""
-    def nt_blast                    = nt_blast                  ? "-nb ${nt_blast}"                 : ""
-    def dim_reduction_embeddings    = dim_reduction_embeddings  ? "-dr ${dim_reduction_embeddings}" : ""
-    def nr_diamond                  = nr_diamond                ? "-nd ${nr_diamond}"               : ""
-    def uniprot_diamond             = uniprot_diamond           ? "-ud ${uniprot_diamond}"          : ""
-    def btk                         = btk                       ? "-btk ${btk}"                     : ""
-    def btk_busco                   = btk_busco                 ? "-bb ${btk_busco}"                : ""
-    def fcs_gx                      = fcs_gx                    ? "-fg ${fcs_gx}"                   : ""
+    def args                             = task.ext.args                    ?: ""
+
+    def empty_file_size                  = 80
+    def coverage_data                    = coverage.size()                   > empty_file_size   ? "-c ${coverage}"                  : ""
+    def tiara_data                       = tiara.size()                      > empty_file_size   ? "-t ${tiara}"                     : ""
+    def nt_kraken_data                   = nt_kraken.size()                  > empty_file_size   ? "-nk ${nt_kraken}"                : ""
+    def nt_blast_data                    = nt_blast.size()                   > empty_file_size   ? "-nb ${nt_blast}"                 : ""
+    def dim_reduction_embeddings_data    = dim_reduction_embeddings.size()   > empty_file_size   ? "-dr ${dim_reduction_embeddings}" : ""
+    def nr_diamond_data                  = nr_diamond.size()                 > empty_file_size   ? "-nd ${nr_diamond}"               : ""
+    def uniprot_diamond_data             = uniprot_diamond.size()            > empty_file_size   ? "-ud ${uniprot_diamond}"          : ""
+    def btk_data                         = btk.size()                        > empty_file_size   ? "-btk ${btk}"                     : ""
+    def btk_busco_data                   = btk_busco.size()                  > empty_file_size   ? "-bb ${btk_busco}"                : ""
+    def fcs_gx_data                      = fcs_gx.size()                     > empty_file_size   ? "-fg ${fcs_gx}"                   : ""
 
     """
     ascc_merge_tables.py \\
         --gc_cov $gc_content \\
         --sample_name $meta.id \\
-        $coverage \\
-        $tiara \\
-        $nt_kraken \\
-        $nt_blast \\
-        $dim_reduction_embeddings \\
-        $nr_diamond \\
-        $uniprot_diamond \\
-        $btk \\
-        $btk_busco \\
-        $fcs_gx \\
+        $coverage_data \\
+        $tiara_data \\
+        $nt_kraken_data \\
+        $nt_blast_data \\
+        $dim_reduction_embeddings_data \\
+        $nr_diamond_data \\
+        $uniprot_diamond_data \\
+        $btk_data \\
+        $btk_busco_data \\
+        $fcs_gx_data \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

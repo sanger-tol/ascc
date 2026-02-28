@@ -8,12 +8,12 @@ include { PARSE_FCSGX_RESULT    } from '../../../modules/local/fcsgx/parse_resul
 workflow RUN_FCSGX {
 
     take:
-    reference               // Channel [ val(meta), path(file) ]
-    fcsgxpath               // Channel path(file)
-    ncbi_rankedlineage_path // Channel path(file)
+    reference               // channel [ val(meta), path(file) ]
+    fcsgxpath               // channel path(file)
+    ncbi_rankedlineage_path // channel path(file)
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
     //
     // MODULE: Use SAMTOOLS_DICT to get origin file and md5sum of each sequence
@@ -29,8 +29,8 @@ workflow RUN_FCSGX {
     //         PRODUCTION_MODE WILL CHANGE HOW THE FCSGX MODULE IS RUN E.G IT IS SPECIFIC FOR `module`
     //
     SAMTOOLS_DICT.out.dict
-        .map { meta, ref, dict ->
-            tuple(meta, ref)
+        .map { meta, ref, _dict ->
+            [meta, ref]
         }
         .set { samtools_reference }
 
@@ -40,17 +40,24 @@ workflow RUN_FCSGX {
         [],
         "production" in workflow.profile.tokenize(',')
     )
-    ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
+    ch_versions         = ch_versions.mix( FCSGX_RUNGX.out.versions )
 
+    fcsgx_report_txt    = FCSGX_RUNGX.out.fcsgx_report
+                            .map { meta, file ->
+                                file ? [[ id: meta.id ], file] : [[:], []]
+                            }
+
+    fcsgx_taxonomy_rpt  = FCSGX_RUNGX.out.taxonomy_report
+                            .map { meta, file ->
+                                file ? [[ id: meta.id ], file] : [[:], []]
+                            }
 
     //
     // MODULE: CREATE INPUT CHANNEL FOR PARSING RESULT MODULE
     //
-    FCSGX_RUNGX.out.fcsgx_report
-        .map{ it ->
-                tuple(  it[0],
-                        it[1].getParent()
-                )
+    fcsgx_report_txt
+        .map{ meta, file ->
+            [meta, file.getParent()]
         }
         .set { report_path }
 
@@ -64,10 +71,17 @@ workflow RUN_FCSGX {
     )
     ch_versions     = ch_versions.mix( PARSE_FCSGX_RESULT.out.versions )
 
+    fcsgxresult     = PARSE_FCSGX_RESULT.out.fcsgxresult
+                        .map { meta, file ->
+                            file ? [[id: meta.id], file] : [[:], []]
+                        }
 
     emit:
-    fcsgxresult    = PARSE_FCSGX_RESULT.out.fcsgxresult
-    genomedict     = samtools_reference
-    versions       = ch_versions
+
+    fcsgxresult
+    genomedict         = samtools_reference
+    fcsgx_report_txt
+    fcsgx_taxonomy_rpt
+    versions           = ch_versions
 
 }

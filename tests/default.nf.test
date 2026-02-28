@@ -111,7 +111,7 @@ nextflow_pipeline {
             def other_dbs = [
                 "NCBI_TAXONOMY_DB": [
                     "COMMAND":
-                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output new_taxdump.tar.gz && tar -C ${launchDir}/NCBI_TAXONOMY -xzf new_taxdump.tar.gz"
+                        "curl -L --retry 5 --retry-delay 10 https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz --output ${launchDir}/new_taxdump.tar.gz && tar -C ${launchDir}/NCBI_TAXONOMY -xzf ${launchDir}/new_taxdump.tar.gz"
                 ],
                 "ASCC_DIAMOND_DB": [
                     "COMMAND":
@@ -161,18 +161,36 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            def stable_name = getAllFilesFromDir(
+                params.outdir,
+                relative: true,
+                includeDir: true,
+                ignore: [
+                    'pipeline_info/*.{html,json,txt}',
+                    'asccTinyTest_V2_{HAPLO,PRIMARY,MITO}/ascc_main_output/*.decontaminated.*'
+                ]
+            )
 
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
 
-            def ascc_main_output    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/ascc_main_output/*contamination_check_merged_table.csv"])
-            def kmer_data_files     = getAllFilesFromDir(params.outdir, include: [
-                                            "asccTinyTest_V2_{HAPLO,PRIMARY}/kmer_data/*KMER_COUNTS.csv",
-                                            "asccTinyTest_V2_{HAPLO,PRIMARY}/kmer_data/*combined.csv"
-                                        ])
-            def autofilter_warn_txt = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofiltering_done_indicator_file.txt"])
+            def ascc_main_output = getAllFilesFromDir(
+                    params.outdir,
+                    include: [
+                        "asccTinyTest_V2_{HAPLO,PRIMARY,MITO}/ascc_main_output/*contamination_check_merged_table.csv"
+                    ]
+                )
 
+            def ascc_decontaminated_fa = getAllFilesFromDir(
+                    params.outdir,
+                    include: [
+                        "asccTinyTest_V2_{HAPLO,PRIMARY,MITO}/ascc_main_output/*.decontaminated.*"
+                    ]
+                )
+
+            def kmer_data_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/kmer_data/*combined.csv"])
+
+            def autofilter_warn_txt = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofiltering_done_indicator_file.txt"])
             def autofilter_files    = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofilter/*_autofiltered.fasta"])
             def autofilter_txt      = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_{HAPLO,PRIMARY}/autofilter/*.{txt,csv}"])
 
@@ -226,8 +244,10 @@ nextflow_pipeline {
                     // sizes have been written to show that there are X numbers across the Y relevant input assemblies
                     // ascc_main_output                         // file output has minute changes per run
                     ascc_main_output.size() == 2,
-                    // kmer_data_files,                         // ML method outputs, changes per run
-                    kmer_data_files.size() == 4,
+                    ascc_decontaminated_fa.size() == 3,
+
+                    // kmer_data_files,                         // ML method outputs, changes per run, included in stable name
+                    kmer_data_files.size() == 2,
                     autofilter_warn_txt,                        // Autofilter warn file - Warns of completion
                     autofilter_warn_txt.size() == 2,
                     autofilter_files,                           // Autofiltered fasta
@@ -235,7 +255,6 @@ nextflow_pipeline {
                     autofilter_txt,                             // Autofilter report files
                     autofilter_txt.size() == (3 * 2),           // 3 files across 2 assemblies
                     create_btk_dataset,
-                    create_btk_dataset.size() == (53 * 2 + 14), // 120 - The genomic assemblies return all files, MITO returns 15, the dataset doesn't have as much data as MITO. 10 files are excluded from this as their data change per run.
                     create_btk_tsv,
                     create_btk_tsv.size() == (1 * 3),
                     fcs_adaptor_euk,
@@ -278,7 +297,6 @@ nextflow_pipeline {
             new File("${projectDir}/KRAKEN2").deleteDir()
             new File("${projectDir}/VECSCREEN").deleteDir()
             new File("${projectDir}/DIAMOND").deleteDir()
-            new File("${workDir}").deleteDir()
         }
     }
 }

@@ -15,7 +15,6 @@ process FILTER_BARCODE {
     path "versions.yml"                         , emit: versions
 
     script:
-    def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
     filter_barcode_blast_results.py \\
@@ -33,11 +32,10 @@ process FILTER_BARCODE {
     """
 
     stub:
-    def args        = task.ext.args     ?: ''
-    def prefix      = task.ext.prefix   ?: "${meta.id}"
-    def barcodes    = "bc1008"
+    def prefix          = task.ext.prefix   ?: "${meta.id}"
+    def barcodes_stub   = "bc1008"
     """
-    touch ${prefix}_${barcodes}_filtered.txt
+    touch ${prefix}_${barcodes_stub}_filtered.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

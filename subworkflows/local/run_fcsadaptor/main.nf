@@ -9,7 +9,7 @@ workflow RUN_FCSADAPTOR {
     reference_tuple
 
     main:
-    ch_versions     = Channel.empty()
+    ch_versions     = channel.empty()
 
 
     //
@@ -29,7 +29,18 @@ workflow RUN_FCSADAPTOR {
     )
     ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_EUK.out.versions)
 
+    FCS_FCSADAPTOR_EUK.out.adaptor_report
+        .map{ meta, file -> [meta.id, file] }
+        .mix(
+            FCS_FCSADAPTOR_PROK.out.adaptor_report
+                .map{ meta, file -> [meta.id, file] }
+        )
+        .groupTuple()
+        .map { id, files -> [[id: id], files] }
+        .set { ch_fcsadapt }
+
     emit:
+    ch_joint_report = ch_fcsadapt
     ch_euk          = FCS_FCSADAPTOR_EUK.out.adaptor_report
     ch_prok         = FCS_FCSADAPTOR_PROK.out.adaptor_report
 

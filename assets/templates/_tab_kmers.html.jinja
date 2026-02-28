@@ -1,0 +1,90 @@
+{% from "_macros.html.jinja" import source_files %}
+
+<div class="narrow-table-wrapper">
+<h2>K-mer Analysis</h2>
+<div class="narrow-text-container">
+<p>K-mer analysis counts the frequency of short nucleotide sequences (k-mers) in each sequence of the assembly. Dimensionality reduction techniques are then applied to these counts to visualise patterns. Sequences originating from the same species typically cluster together in these visualisations, helping to identify potential contamination or cobionts. Various dimensionality reduction methods (PCA, UMAP, t-SNE, etc.) are available to provide different perspectives on the data.</p>
+</div>
+
+{{ source_files(kmers_dir, "K-mer results directory") }}
+
+{% if kmer_length %}
+<div class="notice-container">
+<p><strong>K-mer length used in this analysis: {{ kmer_length }}</strong></p>
+</div>
+{% endif %}
+
+{% if kmers_results %}
+    <h3>Dimensionality Reduction Results</h3>
+
+    {% set methods = {} %}
+    {% for key, value in kmers_results.items() %}
+        {% set method_name = key.split('_')[0] %}
+        {% if method_name not in methods %}
+            {% set _ = methods.update({method_name: []}) %}
+        {% endif %}
+        {% set _ = methods[method_name].append(key) %}
+    {% endfor %}
+
+    <div id="kmer-methods-tabs">
+        <ul>
+            {% for method_name, keys in methods.items() %}
+                <li><a href="#kmer-method-{{ method_name }}">{{ method_name|upper }}</a></li>
+            {% endfor %}
+        </ul>
+
+        {% for method_name, keys in methods.items() %}
+            <div id="kmer-method-{{ method_name }}">
+                <h4 class="method-name">{{ method_name|upper }} Dimensionality Reduction</h4>
+
+                {# Group metrics by type #}
+                {% set regular_metrics = [] %}
+                {% set clustering_metrics = [] %}
+                {% set visualizations = [] %}
+
+                {% for key in keys %}
+                    {% if key.endswith('_metrics.txt') and not key.endswith('_clustering_metrics.txt') %}
+                        {% set _ = regular_metrics.append(key) %}
+                    {% elif key.endswith('_clustering_metrics.txt') %}
+                        {% set _ = clustering_metrics.append(key) %}
+                    {% elif key.endswith('_visualisation.png') %}
+                        {% set _ = visualizations.append(key) %}
+                    {% endif %}
+                {% endfor %}
+
+                {# Display regular metrics #}
+                {% if regular_metrics %}
+                    <div class="result-section">
+                        <h5>{{ method_name|upper }} Metrics</h5>
+                        {% for key in regular_metrics %}
+                            {{ kmers_results[key] }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# Display clustering metrics #}
+                {% if clustering_metrics %}
+                    <div class="result-section">
+                        <h5>{{ method_name|upper }} Clustering Metrics</h5>
+                        {% for key in clustering_metrics %}
+                            {{ kmers_results[key] }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# Display visualizations #}
+                {% for key in visualizations %}
+                    <div class="result-section">
+                        <h5>{{ method_name|upper }} Visualisation</h5>
+                        <div class="visualization-container">
+                            <img class="visualization-image" src="data:image/png;base64,{{ kmers_results[key] }}" alt="{{ method_name }} Visualisation">
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No k-mer analysis results found.</p>
+{% endif %}
+</div>
