@@ -21,15 +21,20 @@ process SOURMASH_MULTISEARCH {
     def args           = task.ext.args   ?: ""
     def prefix         = task.ext.prefix ?: "${meta.id}"
     def PLUGIN_VERSION = "0.9.14" // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+    def out_csv        = "${prefix}_vs_${db.getBaseName()}.multisearch_results.csv"
     """
     sourmash scripts multisearch \\
         ${args} \\
         -k $k \\
         -s $s \\
         -m DNA \\
-        -o "${prefix}_vs_${db.getBaseName()}.multisearch_results.csv" \\
+        -o tmp_multisearch_raw.csv \\
         $signature \\
         $db
+
+    # Keep header + rows where intersect_hashes (column 9) > 0
+    awk -F',' 'NR==1 || \$9+0 > 0' tmp_multisearch_raw.csv > "${out_csv}"
+    rm tmp_multisearch_raw.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
