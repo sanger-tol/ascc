@@ -4,7 +4,7 @@ process PARSE_SOURMASH {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/python_pip_polars:750936e8d3d4ea43' :
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/c4/c452d87bf8039e112d8e868781331d220b0127e0d8c626650894317139cf49d0/data' :
         'community.wave.seqera.io/library/python_pip_polars:8ef3dfabf82d3525' }"
 
 
