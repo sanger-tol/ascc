@@ -6,11 +6,11 @@ import logging
 import re
 from collections import defaultdict
 from typing import Dict
-import pandas as pd
+import polars as pl
 import os
 
 # Version of sourmash_taxonomy_parser
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 # Module-level logger — always available when the module is imported.
 # Handlers are added by setup_logger() at runtime (CLI) or by the caller (tests).
@@ -108,12 +108,10 @@ def parse_sourmash_results(file_paths, exclude_accessions=None):
                 exclude_set.add(acc.strip())
         logger.info(f"Excluding {len(exclude_set)} accessions: {', '.join(sorted(exclude_set))}")
 
-    filtered_count = 0
-
     for file_path in file_paths:
         try:
-            df = pd.read_csv(file_path)
-            if df.empty:
+            df = pl.read_csv(file_path, infer_schema_length=0)  # read all as Utf8 to handle duplicate headers
+            if df.is_empty():
                 logger.warning(f"Sourmash results file {file_path} is empty")
                 continue
             required_columns = ['query_name', 'match_name', 'containment', 'jaccard']
@@ -122,7 +120,7 @@ def parse_sourmash_results(file_paths, exclude_accessions=None):
                 raise ValueError(f"Missing required columns in {file_path}: {missing_columns}")
             logger.info(f"Loaded {len(df)} sourmash results from {file_path}")
             all_dfs.append(df)
-        except pd.errors.EmptyDataError:
+        except pl.exceptions.NoDataError:
             logger.warning(f"Sourmash results file {file_path} is empty or has no columns")
             continue
         except Exception as e:
@@ -133,38 +131,46 @@ def parse_sourmash_results(file_paths, exclude_accessions=None):
         raise ValueError("No valid sourmash results files provided")
 
     # Concatenate all DataFrames
-    combined_df = pd.concat(all_dfs, ignore_index=True)
+    combined_df = pl.concat(all_dfs, how="diagonal_relaxed")
     logger.info(f"Combined sourmash results: {len(combined_df)} total rows")
 
-    for _, row in combined_df.iterrows():
-        query_name = row['query_name']
-        match_name = row['match_name']
+    # Drop rows where containment/jaccard are non-numeric (duplicate header rows)
+    combined_df = combined_df.filter(
+        pl.col("containment").str.contains(r"^[0-9]") &
+        pl.col("jaccard").str.contains(r"^[0-9]")
+    )
 
-        # Skip rows where containment or jaccard are not numeric (duplicate headers)
-        try:
-            containment = float(row['containment'])
-            jaccard = float(row['jaccard'])
-            # Ensure intersect_hashes is numeric (float or int)
-            intersect_hashes = float(row.get('intersect_hashes', 0)) if pd.notna(row.get('intersect_hashes', 0)) else 0.0
-        except (ValueError, TypeError):
-            # Skip this row - it's likely a duplicate header
-            logger.warning(f"Skipping row with non-numeric values: query_name={query_name}, match_name={match_name}")
-            continue
+    # Cast numeric columns
+    combined_df = combined_df.with_columns([
+        pl.col("containment").cast(pl.Float64),
+        pl.col("jaccard").cast(pl.Float64),
+        pl.when(pl.col("intersect_hashes").is_not_null())
+          .then(pl.col("intersect_hashes").cast(pl.Float64))
+          .otherwise(pl.lit(0.0))
+          .alias("intersect_hashes")
+        if "intersect_hashes" in combined_df.columns
+        else pl.lit(0.0).alias("intersect_hashes")
+    ])
 
-        if " " in match_name:
-            # Handle cases where match_name contains spaces
-            match_name = match_name.strip().split(" ")[0]
+    # Strip accession from match_name (take first token before space)
+    combined_df = combined_df.with_columns(
+        pl.col("match_name").str.split(" ").list.first().alias("match_name")
+    )
 
-        # Skip if match_name is in exclude set
-        if exclude_set and match_name in exclude_set:
-            filtered_count += 1
-            continue
+    # Exclude accessions
+    filtered_count = 0
+    if exclude_set:
+        before = len(combined_df)
+        combined_df = combined_df.filter(~pl.col("match_name").is_in(list(exclude_set)))
+        filtered_count = before - len(combined_df)
 
-        query_matches[query_name].append({
-            'match_name': match_name,
-            'containment': containment,
-            'jaccard': jaccard,
-            'intersect_hashes': intersect_hashes
+    # Build query_matches dict from polars rows (avoid iterrows overhead)
+    for row in combined_df.iter_rows(named=True):
+        query_matches[row["query_name"]].append({
+            "match_name": row["match_name"],
+            "containment": row["containment"],
+            "jaccard": row["jaccard"],
+            "intersect_hashes": row["intersect_hashes"],
         })
 
     # Log filtering statistics
@@ -176,7 +182,12 @@ def parse_sourmash_results(file_paths, exclude_accessions=None):
     return query_matches
 
 def parse_assembly_database(file_paths):
-    """Parse the assembly database files and return a DataFrame with taxonomic information."""
+    """Parse the assembly database files and return a polars DataFrame with taxonomic information.
+
+    Returns a polars DataFrame. The accession column is kept as a regular column named
+    'assembly_accession' (or first column) — lookups use polars filter/join instead of
+    pandas index.
+    """
     validate_file_paths(file_paths, "Assembly database")
 
     all_dfs = []
@@ -185,13 +196,13 @@ def parse_assembly_database(file_paths):
 
     for file_path in file_paths:
         try:
-            assembly_df = pd.read_csv(file_path)
-            if assembly_df.empty:
+            assembly_df = pl.read_csv(file_path, infer_schema_length=1000)
+            if assembly_df.is_empty():
                 logger.warning(f"Assembly database file {file_path} is empty")
                 continue
             logger.info(f"Loaded {len(assembly_df)} assembly records from {file_path}")
             all_dfs.append(assembly_df)
-        except pd.errors.EmptyDataError:
+        except pl.exceptions.NoDataError:
             logger.warning(f"Assembly database file {file_path} is empty or has no columns")
             continue
         except Exception as e:
@@ -202,29 +213,31 @@ def parse_assembly_database(file_paths):
         raise ValueError("No valid assembly database files provided")
 
     # Concatenate all DataFrames
-    combined_df = pd.concat(all_dfs, ignore_index=True)
+    combined_df = pl.concat(all_dfs, how="diagonal_relaxed")
     logger.info(f"Combined assembly database: {len(combined_df)} total rows")
 
-    # Check for duplicate indices if setting assembly_accession
-    if 'assembly_accession' in combined_df.columns:
-        if combined_df['assembly_accession'].duplicated().any():
-            logger.warning("Duplicate assembly_accession values found after merging. Keeping first occurrence.")
-            combined_df = combined_df.drop_duplicates(subset='assembly_accession')
-        combined_df.set_index('assembly_accession', inplace=True)
-    else:
-        # Use first column as index if standard names not found
-        first_col = combined_df.columns[0]
-        if combined_df[first_col].duplicated().any():
-            logger.warning(f"Duplicate values in first column '{first_col}' after merging. Keeping first occurrence.")
-            combined_df = combined_df.drop_duplicates(subset=first_col)
-        combined_df.set_index(first_col, inplace=True)
+    # Validate required columns
+    required_cols = ['assembly_accession', 'taxid']
+    missing_required = [c for c in required_cols if c not in combined_df.columns]
+    if missing_required:
+        raise ValueError(
+            f"Assembly database is missing required column(s): {missing_required}. "
+            f"Found columns: {combined_df.columns}"
+        )
+
+    # Deduplicate on accession column
+    before = len(combined_df)
+    combined_df = combined_df.unique(subset=['assembly_accession'], keep="first")
+    if len(combined_df) < before:
+        logger.warning("Duplicate 'assembly_accession' values found after merging. Keeping first occurrence.")
 
     # Filter out assemblies without valid taxid
-    if 'taxid' in combined_df.columns:
-        initial_count = len(combined_df)
-        combined_df = combined_df[combined_df['taxid'].notna() & (combined_df['taxid'].astype(str).str.strip() != 'nan')]
-        filtered_count = len(combined_df)
-        logger.info(f"Filtered out {initial_count - filtered_count} assemblies without valid taxid")
+    initial_count = len(combined_df)
+    combined_df = combined_df.filter(
+        pl.col('taxid').is_not_null() &
+        (pl.col('taxid').cast(pl.Utf8).str.strip_chars() != 'nan')
+    )
+    logger.info(f"Filtered out {initial_count - len(combined_df)} assemblies without valid taxid")
 
     return combined_df
 
@@ -257,17 +270,25 @@ def get_target_genomes(assembly_df, target_taxa):
     target_genomes = set()
 
     for level, target_value in target_taxa.items():
-        if level in assembly_df.columns:
-            # Vectorized search for this taxonomic level
-            mask = (
-                assembly_df[level].notna() &
-                (assembly_df[level].astype(str).str.lower().str.strip() == target_value) &
-                (assembly_df[level].astype(str).str.strip() != 'nan')
+        if level not in assembly_df.columns:
+            logger.warning(
+                f"Target taxa level '{level}' not found in assembly database columns: "
+                f"{assembly_df.columns} — this filter will match nothing"
             )
-            level_matches = set(assembly_df[mask].index)
-            target_genomes.update(level_matches)
-
-            logger.info(f"Found {len(level_matches)} genomes matching {level}={target_value}")
+            continue
+        # Vectorized search for this taxonomic level (polars)
+        level_matches = (
+            assembly_df
+            .filter(
+                pl.col(level).is_not_null() &
+                (pl.col(level).cast(pl.Utf8).str.to_lowercase().str.strip_chars() == target_value) &
+                (pl.col(level).cast(pl.Utf8).str.strip_chars() != 'nan')
+            )
+            .get_column('assembly_accession')
+            .to_list()
+        )
+        target_genomes.update(level_matches)
+        logger.info(f"Found {len(level_matches)} genomes matching {level}={target_value}")
 
     logger.info(f"Total target genomes: {len(target_genomes)}")
     return target_genomes
@@ -280,7 +301,13 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
     # Pre-compute taxid dictionary for faster lookup
     taxid_dict = {}
     if assembly_df is not None and 'taxid' in assembly_df.columns:
-        taxid_dict = assembly_df['taxid'].dropna().astype(str).str.strip().to_dict()
+        taxid_dict = {
+            row[0]: row[1]
+            for row in assembly_df
+            .filter(pl.col('taxid').is_not_null())
+            .select(['assembly_accession', pl.col('taxid').cast(pl.Utf8).str.strip_chars()])
+            .iter_rows()
+        }
 
     # Sort summary with priority:
     # 1. By contig number in query_name (ascending: contig_1, contig_2, ...)
@@ -300,13 +327,23 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
         for row in sorted_summary:
             query_name, match_name, rank, containment, jaccard, intersect_hashes = row
 
-            # Fast lookup: is this genome in target set?
-            is_target = match_name in target_genomes if target_genomes else None
-
             # Fast lookup: get taxid from pre-computed dictionary
             taxa = taxid_dict.get(match_name, "nan")
-            if taxa == "nan":
-                logger.warning(f"Assembly {match_name} not found in assembly_taxa database")
+            unknown_taxid = (taxa == "nan")
+            if unknown_taxid:
+                logger.warning(
+                    f"Assembly {match_name} not found in assembly_taxa database — "
+                    f"treating as target (safe side) to avoid accidental removal"
+                )
+
+            # Fast lookup: is this genome in target set?
+            # Unknown taxonomy is treated as target (conservative: never remove unknowns automatically)
+            if unknown_taxid:
+                is_target = True
+            elif target_genomes:
+                is_target = match_name in target_genomes
+            else:
+                is_target = None
 
             # Format the values
             is_target_str = str(is_target) if is_target is not None else "None"
@@ -319,58 +356,69 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
     if not os.path.exists(summary_file):
         raise FileNotFoundError(f"Summary file not found: {summary_file}")
 
-    # Read the summary file to identify non-target queries (no comment lines now)
-    df = pd.read_csv(summary_file)
+    # Read the summary file (polars)
+    df = pl.read_csv(summary_file, infer_schema_length=1000)
 
-    # Group by header and check if any row has is_target=True
-    query_groups = df.groupby('header')
-    non_target_queries = []
+    # Cast is_target to boolean-compatible: 'True' -> True
+    df = df.with_columns(
+        pl.col('is_target').cast(pl.Utf8).str.to_lowercase().str.strip_chars().alias('is_target_str')
+    )
 
-    for query_name, group in query_groups:
-        # Check if this query has any target taxa matches
-        has_target = group['is_target'].any()
+    # For each query (header), find those where NO row has is_target=True
+    # and grab the top_n==1 row
+    has_target_df = (
+        df
+        .filter(pl.col('is_target_str') == 'true')
+        .select('header')
+        .unique()
+    )
+    has_target_set = set(has_target_df.get_column('header').to_list())
 
-        if not has_target:
-            # Get the top1 match (top_n == 1)
-            top1_rows = group[group['top_n'] == 1]
-            if not top1_rows.empty:
-                top1_row = top1_rows.iloc[0]
-                taxa = top1_row['taxa']
-                # Skip if taxa is None/nan (unknown taxonomy)
-                if pd.isna(taxa) or str(taxa).strip() in ['None', 'nan']:
-                    continue
-                non_target_queries.append(top1_row)
+    non_target_df = (
+        df
+        .filter(
+            ~pl.col('header').is_in(list(has_target_set)) &
+            (pl.col('top_n') == 1)
+        )
+    )
+
+    non_target_queries = non_target_df.to_dicts()
 
     # Log run parameters
     log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, "Non-target file")
     logger.info(f"  Non-target queries found: {len(non_target_queries)}")
+
+    # Build lineage lookup dict: accession -> {col: value}
+    lineage_columns = ['species', 'genus', 'family', 'order', 'class', 'phylum', 'kingdom']
+    avail_lineage_cols = [c for c in lineage_columns if c in assembly_df.columns]
+    lineage_lookup: dict[str, dict] = {}
+    for row in assembly_df.select(['assembly_accession'] + avail_lineage_cols).iter_rows(named=True):
+        lineage_lookup[row['assembly_accession']] = row
 
     # Write the non-target queries file
     with open(output_file, 'w') as f:
         # Write header only (no comments)
         f.write("header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom\n")
 
-        for _, row in enumerate(non_target_queries):
+        for row in non_target_queries:
             query_name = row['header']
             match_name = row['assembly_accession']
             taxa = row['taxa']
-            containment = row['containment']
-            jaccard = row['jaccard']
+            containment = float(row['containment'])
+            jaccard = float(row['jaccard'])
             intersect_hashes = row['intersect_hashes']
 
-            # Get lineage information using vectorized operations
-            lineage_info = ["None"] * 7  # species, genus, family, order, class, phylum, kingdom
+            lineage_info = ["None"] * 7
             try:
-                if match_name in assembly_df.index:
-                    lineage_row = assembly_df.loc[match_name]
-                    lineage_columns = ['species', 'genus', 'family', 'order', 'class', 'phylum', 'kingdom']
+                if match_name in lineage_lookup:
+                    lrow = lineage_lookup[match_name]
                     for i, col in enumerate(lineage_columns):
-                        if col in lineage_row.index and pd.notna(lineage_row[col]) and str(lineage_row[col]).strip() != 'nan':
-                            lineage_info[i] = str(lineage_row[col]).strip()
+                        val = lrow.get(col)
+                        if val is not None and str(val).strip() not in ('nan', 'None', ''):
+                            lineage_info[i] = str(val).strip()
             except Exception as e:
                 logger.debug(f"Error getting lineage for {match_name}: {e}")
 
-            # Write the output
             lineage_str = ",".join(lineage_info)
             f.write(f"{query_name},{match_name},{taxa},{containment:.6f},{jaccard:.6f},{intersect_hashes},{lineage_str}\n")
 

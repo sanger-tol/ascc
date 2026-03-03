@@ -2,7 +2,8 @@ import pytest
 import tempfile
 import os
 import sys
-import pandas as pd
+import pandas as pd          # still used in helper assertions that read CSV outputs
+import polars as pl
 from collections import defaultdict
 
 # Add bin directory to path to import the script
@@ -86,10 +87,45 @@ def test_parse_sourmash_results_multiple_files(temp_sourmash_file):
 def test_parse_assembly_database(temp_assembly_file):
     """Test parsing assembly database file."""
     result = stp.parse_assembly_database([temp_assembly_file])
-    assert isinstance(result, pd.DataFrame)
+    assert isinstance(result, pl.DataFrame)
     assert len(result) == 3
-    assert 'GCA_000001' in result.index
-    assert result.loc['GCA_000001', 'species'] == 'Homo sapiens'
+    # assembly_accession is a regular column (not an index) in the polars version
+    assert 'GCA_000001' in result.get_column('assembly_accession').to_list()
+    homo_row = result.filter(pl.col('assembly_accession') == 'GCA_000001')
+    assert homo_row['species'][0] == 'Homo sapiens'
+
+def test_parse_assembly_database_missing_assembly_accession():
+    """Assembly DB without 'assembly_accession' column must raise ValueError."""
+    csv = "accession,taxid,species\nGCA_1,9606,Homo sapiens\n"
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+        f.write(csv)
+        tmp = f.name
+    try:
+        with pytest.raises(ValueError, match="assembly_accession"):
+            stp.parse_assembly_database([tmp])
+    finally:
+        os.unlink(tmp)
+
+def test_parse_assembly_database_missing_taxid():
+    """Assembly DB without 'taxid' column must raise ValueError."""
+    csv = "assembly_accession,species\nGCA_1,Homo sapiens\n"
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+        f.write(csv)
+        tmp = f.name
+    try:
+        with pytest.raises(ValueError, match="taxid"):
+            stp.parse_assembly_database([tmp])
+    finally:
+        os.unlink(tmp)
+
+def test_get_target_genomes_missing_column_warns(temp_assembly_file, caplog):
+    """get_target_genomes warns when requested taxonomic level is absent from DB."""
+    import logging
+    assembly_df = stp.parse_assembly_database([temp_assembly_file])
+    with caplog.at_level(logging.WARNING, logger='sourmash_taxonomy_parser'):
+        result = stp.get_target_genomes(assembly_df, {'nonexistent_rank': 'somevalue'})
+    assert result == set()
+    assert any('nonexistent_rank' in msg for msg in caplog.messages)
 
 def test_generate_summary():
     """Test generating summary from query matches."""
@@ -416,3 +452,155 @@ def test_main_integration_with_exclude(temp_sourmash_file, temp_assembly_file):
         assert 'contig_2' in df['header'].values
         # Total rows: contig_1 has 1 match left, contig_2 has 1 → 2 rows
         assert len(df) == 2
+
+
+# ---------------------------------------------------------------------------
+# Tests for unknown-taxid / missing-from-database behaviour
+# Rule: if an accession is not in the assembly DB → is_target=True (conservative)
+#       so the contig is NEVER written to non_target.csv automatically.
+# ---------------------------------------------------------------------------
+
+def _write_pair(tmp, sm_csv, asm_csv, target_taxa):
+    """Helper: write CSVs, run full pipeline, return (summary_df, non_target_df or None)."""
+    sm_file  = os.path.join(tmp, 'sm.csv')
+    db_file  = os.path.join(tmp, 'db.csv')
+    with open(sm_file, 'w') as f: f.write(sm_csv)
+    with open(db_file, 'w') as f: f.write(asm_csv)
+
+    assembly_df  = stp.parse_assembly_database([db_file])
+    query_matches = stp.parse_sourmash_results([sm_file])
+    summary      = stp.generate_summary(query_matches)
+    summary_file = os.path.join(tmp, 'summary.csv')
+    stp.write_summary_output(summary, summary_file, assembly_df, target_taxa, [sm_file], [db_file])
+
+    non_target_file = os.path.join(tmp, 'non_target.csv')
+    stp.write_non_target_output(summary_file, non_target_file, assembly_df,
+                                [sm_file], [db_file], target_taxa)
+
+    s_df  = pd.read_csv(summary_file)
+    nt_df = pd.read_csv(non_target_file)
+    return s_df, nt_df
+
+
+def test_unknown_taxid_treated_as_target_in_summary():
+    """Match not present in assembly DB → is_target=True in summary.csv."""
+    sm_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_UNKNOWN,0.9,0.85,900\n"
+    )
+    asm_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        s_df, _ = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        row = s_df[s_df['assembly_accession'] == 'GCA_UNKNOWN']
+        assert not row.empty
+        # Unknown accession must be flagged as target (conservative — never auto-remove)
+        assert row.iloc[0]['is_target'] == True
+
+
+def test_unknown_taxid_contig_not_in_non_target():
+    """Contig whose only match is unknown-taxid must NOT appear in non_target.csv."""
+    sm_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_UNKNOWN,0.9,0.85,900\n"
+    )
+    asm_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        assert 'contig_1' not in nt_df['header'].values, (
+            "contig_1 matched only an unknown accession → should be treated as target, "
+            "NOT written to non_target.csv"
+        )
+
+
+def test_mixed_known_unknown_contig_not_in_non_target():
+    """Contig with one known non-target match AND one unknown match → treated as target.
+
+    Because the unknown match gets is_target=True, the contig has at least one
+    target match and must NOT appear in non_target.csv.
+    """
+    sm_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_000002,0.6,0.5,60\n"   # known, Rodentia → non-target vs primates
+        "contig_1,GCA_UNKNOWN,0.8,0.7,80\n"  # unknown → treated as target
+    )
+    asm_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"
+        "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        assert 'contig_1' not in nt_df['header'].values, (
+            "contig_1 has an unknown match (treated as target) → must NOT be in non_target"
+        )
+
+
+def test_all_nontarget_known_contig_in_non_target():
+    """Contig with exclusively known non-target matches → appears in non_target.csv."""
+    sm_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_000002,0.7,0.6,70\n"
+        "contig_1,GCA_000003,0.5,0.4,50\n"
+    )
+    asm_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
+        "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        assert 'contig_1' in nt_df['header'].values, (
+            "contig_1 has only known non-target matches → must appear in non_target.csv"
+        )
+
+
+def test_single_target_match_prevents_non_target_entry():
+    """Even one target match among many non-target ones → contig excluded from non_target.csv.
+
+    This is the strict rule: ALL matches must be non-target.
+    """
+    sm_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_000001,0.9,0.85,900\n"   # target (Primates)
+        "contig_1,GCA_000002,0.7,0.6,70\n"     # non-target (Rodentia)
+        "contig_1,GCA_000003,0.5,0.4,50\n"     # non-target (Diptera)
+    )
+    asm_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"
+        "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
+        "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        assert 'contig_1' not in nt_df['header'].values, (
+            "contig_1 has at least one target match → must NOT appear in non_target.csv "
+            "(strict rule: ALL matches must be non-target)"
+        )
+
+
+def test_non_target_output_top1_row_written():
+    """The row written to non_target.csv is the top1 match (highest intersect_hashes)."""
+    sm_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_000002,0.5,0.4,50\n"   # rank 2 (fewer hashes)
+        "contig_1,GCA_000003,0.7,0.6,200\n"  # rank 1 (more hashes) → this should appear
+    )
+    asm_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
+        "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        assert 'contig_1' in nt_df['header'].values
+        row = nt_df[nt_df['header'] == 'contig_1'].iloc[0]
+        assert row['assembly_accession'] == 'GCA_000003', (
+            "non_target.csv should contain the top1 match (most intersect_hashes)"
+        )
