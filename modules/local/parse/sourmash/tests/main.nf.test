@@ -174,4 +174,48 @@ nextflow_process {
         }
     }
 
+    test("Parse sourmash results with exclude_accessions") {
+
+        config "./acc_exclude.config"
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome_exclude' ],
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)]
+                ]
+                input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = 'order:enterobacterales'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                // Check summary file exists and has fewer rows due to exclusions
+                { assert path(process.out.multisearch_summary[0][1]).exists() },
+                {
+                    def lines = path(process.out.multisearch_summary[0][1]).readLines()
+                    // Should have fewer data rows due to exclusions
+                    assert lines.size() < 7 : "Should have fewer rows due to excluded accessions"
+                    assert lines[0].contains('header,assembly_accession,taxa,top_n,containment,jaccard,intersect_hashes,is_target')
+                },
+                // Check non_target file exists
+                { assert path(process.out.multisearch_non_target[0][1]).exists() },
+                // Check versions
+                {
+                    def versionContent = path(process.out.versions[0]).text
+                    def versionLines = versionContent.readLines()
+                    assert versionLines[0] == '"PARSE_SOURMASH":'
+                    assert versionLines[1].contains('sourmash_taxonomy_parser:')
+                }
+            )
+        }
+    }
+
 }
