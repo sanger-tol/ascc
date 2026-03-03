@@ -191,6 +191,10 @@ def main(args):
     with open(meta_json_outpath, "w") as json_outfile:
         json.dump(merged_jsons_dict, json_outfile, indent=1, sort_keys=True)
 
+    meta_json_gz_outpath = f"{args.new_output_directory}/meta.json.gz"
+    with gzip.open(meta_json_gz_outpath, "wt", encoding="UTF-8") as gz_outfile:
+        json.dump(merged_jsons_dict, gz_outfile, indent=1, sort_keys=True)
+
     buscogenes_present_flag = detect_buscogenes_variables(merged_jsons_dict)
 
     btk_busco_table_outpath = (

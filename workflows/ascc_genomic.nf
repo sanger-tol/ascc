@@ -529,7 +529,7 @@ workflow ASCC_GENOMIC {
             .branch { meta, data ->
                 log.info("[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
 
-                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION")
+                run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION") || params.btk_busco_run_mode == "mandatory"
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
             }
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
@@ -708,8 +708,26 @@ workflow ASCC_GENOMIC {
                         .map { meta, file ->
                             [meta.id, [meta, file]]
                     })
-                .map { _id, ref_meta, ref_file, _btk_meta, btk_file ->
-                    [ref_meta, ref_file, btk_file]
+                .map { items ->
+                    def ref_meta
+                    def ref_file
+                    def btk_file
+
+                    // Nextflow can emit joined records in different list layouts.
+                    // Handle both flattened and nested forms here.
+                    if (items.size() >= 5) {
+                        ref_meta = items[1]
+                        ref_file = items[2]
+                        btk_file = items[4]
+                    } else {
+                        def ref_pair = items[1]
+                        def btk_pair = items[2]
+                        ref_meta = ref_pair[0]
+                        ref_file = ref_pair[1]
+                        btk_file = btk_pair[1]
+                    }
+
+                    tuple(ref_meta, ref_file, btk_file)
                 }
 
             MERGE_BTK_DATASETS (
@@ -803,7 +821,8 @@ workflow ASCC_GENOMIC {
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
         ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
+            def files_snapshot = files instanceof List ? files.toList() : [files]
+            [meta, files_snapshot.find{ file -> file?.name?.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
         }, // We only want the EUKARYOTIC report
         ej_trailing_ns,
         ch_barcode_check,

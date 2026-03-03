@@ -32,6 +32,14 @@ process SANGER_TOL_BTK {
     def pipeline            =   task.ext.pipeline           ?: "sanger-tol/blobtoolkit"
     def pipeline_version    =   task.ext.version            ?: "0.8.0"
     def trace_config        =   blobtoolkit_trace_config    ? "-c ${blobtoolkit_trace_config}" : ""
+    def singularity_cache_dir = System.getenv('NXF_SINGULARITY_CACHEDIR') ?: System.getenv('SINGULARITY_CACHEDIR') ?: System.getenv('APPTAINER_CACHEDIR') ?: ""
+    // Only redirect the image cache here. Do not override TMPDIR:
+    // extracting SIF to a sandbox can be very slow on some filesystems, and /tmp is often faster.
+    def cache_exports = singularity_cache_dir ? """
+    export NXF_SINGULARITY_CACHEDIR="${singularity_cache_dir}"
+    export SINGULARITY_CACHEDIR="${singularity_cache_dir}"
+    export APPTAINER_CACHEDIR="${singularity_cache_dir}"
+    """ : ""
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -52,6 +60,8 @@ process SANGER_TOL_BTK {
     """
     mv $reference ${prefix}.fasta
 
+    $cache_exports
+
     nextflow run ${pipeline} \\
         -r $pipeline_version \\
         -c $blobtoolkit_config_file \\
@@ -70,6 +80,13 @@ process SANGER_TOL_BTK {
         --use_work_dir_as_temp true \\
         --align \\
         $args
+
+    # BTK v0.9.0 can name the dataset directory by accession (e.g. GCA_...),
+    # while ASCC expects a ${prefix}-based directory for downstream channel matching.
+    dataset_dir=\$(find ${prefix}_btk_out/blobtoolkit -mindepth 1 -maxdepth 1 -type d ! -name plots | head -n 1)
+    if [[ -n "\$dataset_dir" ]]; then
+        ln -sfn "\$(basename "\$dataset_dir")" "${prefix}_btk_out/blobtoolkit/${prefix}"
+    fi
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
 

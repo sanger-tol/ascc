@@ -83,7 +83,7 @@ def load_and_merge_dataframes(paths_dict):
 
     coverage_df = None
     if paths_dict["coverage"] is not None:
-        coverage_df = pd.read_csv(paths_dict["coverage"], sep=",", header=None)
+        coverage_df = pd.read_csv(paths_dict["coverage"], sep="\t")
         if coverage_df.shape[0] > 0:
             coverage_df.columns = ["scaff", "coverage"]
         else:

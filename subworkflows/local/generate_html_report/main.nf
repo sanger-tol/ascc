@@ -45,7 +45,8 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .join(fcs_adaptor
             .map { meta, files ->
                         // LOGIC: SORT INTO PREDICTABLE ORDER
-                        def sorted_files = files.sort { file ->
+                        def files_snapshot = files instanceof List ? files.toList() : [files]
+                        def sorted_files = files_snapshot.sort { file ->
                             file.toString().contains('_euk') ? 0 :
                             file.toString().contains('_prok') ? 1 : 2
                         }
