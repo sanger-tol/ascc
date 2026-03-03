@@ -171,6 +171,12 @@
                     "enum": ["warn", "remove"],
                     "help_text": "Determines how AUTOFILTER handles contigs identified as non-target by Sourmash. 'warn' (default, conservative): flags contigs but does not remove them - to test in production before switching to 'remove'. 'remove' (aggressive): excludes non-target contigs from the filtered assembly - useful for testing or when high confidence in contamination detection is required. Works in parallel with FCS-GX filtering."
                 },
+                "sourmash_accessions_to_exclude": {
+                    "type": "string",
+                    "description": "Comma-separated list of assembly accessions to exclude from Sourmash multisearch results.",
+                    "fa_icon": "fas fa-ban",
+                    "help_text": "Provide a comma-separated list of assembly accessions (e.g. 'GCF_000001405.40,GCF_000001635.27') that should be ignored when parsing Sourmash multisearch results."
+                },
                 "tiara_action_mode": {
                     "type": "string",
                     "description": "Action mode for Tiara contamination filtering in AUTOFILTER",
