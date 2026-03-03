@@ -10,26 +10,30 @@ import pandas as pd
 import os
 
 # Version of sourmash_taxonomy_parser
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
-def setup_logger():
-    """Configure and return a logger for the application."""
-    logger = logging.getLogger('sourmash_taxonomy_parser')
+# Module-level logger — always available when the module is imported.
+# Handlers are added by setup_logger() at runtime (CLI) or by the caller (tests).
+logger = logging.getLogger(__name__)
+
+
+def setup_logger(log_file=None):
+    """Add stderr (and optionally file) handlers to the module logger."""
     logger.setLevel(logging.INFO)
 
-    # Create console handler
-    ch = logging.StreamHandler(sys.stderr)
-    ch.setLevel(logging.INFO)
+    # Avoid adding duplicate handlers if called more than once
+    if not logger.handlers:
+        ch = logging.StreamHandler(sys.stderr)
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        logger.addHandler(ch)
 
-    # Create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
+    if log_file:
+        fh = logging.FileHandler(log_file)
+        fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        logger.addHandler(fh)
 
-    # Add handler to logger
-    logger.addHandler(ch)
-    return logger
-
-def log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output_file, description):
+def log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, description):
     """Log run parameters to the logger."""
     logger.info("=" * 60)
     logger.info(f"{description} generation parameters:")
@@ -45,7 +49,7 @@ def log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output
     logger.info(f"  Output file: {output_file}")
     logger.info("=" * 60)
 
-def parse_target_taxa(target_taxa_args, logger):
+def parse_target_taxa(target_taxa_args):
     """Parse target taxa from command line arguments."""
     target_taxa = {}
     if target_taxa_args:
@@ -86,7 +90,7 @@ def extract_contig_number(query_name):
         # No number found - sort these to the end
         return float('inf')
 
-def parse_sourmash_results(file_paths):
+def parse_sourmash_results(file_paths, exclude_accessions=None):
     """Parse the sourmash results files and extract query-match relationships."""
     validate_file_paths(file_paths, "Sourmash results")
 
@@ -94,6 +98,17 @@ def parse_sourmash_results(file_paths):
     all_dfs = []
 
     logger.info(f"Processing {len(file_paths)} sourmash results file(s)")
+
+    # Prepare exclude set for fast lookup
+    exclude_set = set()
+    if exclude_accessions:
+        for acc_arg in exclude_accessions:
+            # Split by comma in case comma-separated values are passed
+            for acc in acc_arg.split(','):
+                exclude_set.add(acc.strip())
+        logger.info(f"Excluding {len(exclude_set)} accessions: {', '.join(sorted(exclude_set))}")
+
+    filtered_count = 0
 
     for file_path in file_paths:
         try:
@@ -140,12 +155,23 @@ def parse_sourmash_results(file_paths):
             # Handle cases where match_name contains spaces
             match_name = match_name.strip().split(" ")[0]
 
+        # Skip if match_name is in exclude set
+        if exclude_set and match_name in exclude_set:
+            filtered_count += 1
+            continue
+
         query_matches[query_name].append({
             'match_name': match_name,
             'containment': containment,
             'jaccard': jaccard,
             'intersect_hashes': intersect_hashes
         })
+
+    # Log filtering statistics
+    total_matches = sum(len(matches) for matches in query_matches.values())
+    logger.info(f"Total matches after filtering: {total_matches}")
+    if exclude_set:
+        logger.info(f"Filtered out {filtered_count} matches due to excluded accessions")
 
     return query_matches
 
@@ -265,7 +291,7 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
     )
 
     # Log run parameters
-    log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output_file, "Summary file")
+    log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, "Summary file")
 
     with open(output_file, 'w') as f:
         # Write header only (no comments)
@@ -316,7 +342,7 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
                 non_target_queries.append(top1_row)
 
     # Log run parameters
-    log_run_parameters(logger, sourmash_files, assembly_dbs, target_taxa, output_file, "Non-target file")
+    log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, "Non-target file")
     logger.info(f"  Non-target queries found: {len(non_target_queries)}")
 
     # Write the non-target queries file
@@ -348,7 +374,7 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
             lineage_str = ",".join(lineage_info)
             f.write(f"{query_name},{match_name},{taxa},{containment:.6f},{jaccard:.6f},{intersect_hashes},{lineage_str}\n")
 
-def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None):
+def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, exclude_accessions=None):
     """Main function to run the sourmash parser."""
 
     # Initialize variables
@@ -361,7 +387,7 @@ def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None):
         assembly_df = parse_assembly_database(assembly_dbs)
 
     logger.info(f"Processing sourmash results files: {sourmash_files}")
-    query_matches = parse_sourmash_results(sourmash_files)
+    query_matches = parse_sourmash_results(sourmash_files, exclude_accessions)
 
     # Generate summary
     summary = generate_summary(query_matches)
@@ -401,6 +427,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--sourmash_results', nargs='+', help='Path(s) to the sourmash results file(s) to parse', required=False)
     parser.add_argument('-a', '--assembly_db', nargs='+', help='Path(s) to assembly database file(s) with taxonomic information', required=False)
     parser.add_argument('--target_taxa', nargs='+', help='Target taxa in format taxon:value (e.g., order:coleoptera family:Carabidae)')
+    parser.add_argument('--accessions_to_exclude', nargs='+', help='List of assembly accessions to exclude from results (comma-separated or multiple values)', default=None)
     parser.add_argument('--log', help='Path to log file (if not provided, logs to stderr)', default=None)
     parser.add_argument('-o', '--outdir', help='Output directory for results (default: current directory)', default=None)
     parser.add_argument('--version', action='version', version=f'sourmash_taxonomy_parser {__version__}')
@@ -415,16 +442,10 @@ if __name__ == "__main__":
     if not args.sourmash_results or not args.assembly_db or not args.outdir:
         parser.error("the following arguments are required: -s/--sourmash_results, -a/--assembly_db, -o/--outdir")
 
-    # Initialize logger
-    logger = setup_logger()
-
-    # Configure file logging if requested
-    if args.log:
-        file_handler = logging.FileHandler(args.log)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-        logger.addHandler(file_handler)
+    # Initialise logger (add handlers; file handler only if --log provided)
+    setup_logger(log_file=args.log)
 
     # Parse target taxa
-    target_taxa = parse_target_taxa(args.target_taxa, logger)
+    target_taxa = parse_target_taxa(args.target_taxa)
 
-    main(sourmash_files=args.sourmash_results, assembly_dbs=args.assembly_db, target_taxa=target_taxa, outdir=args.outdir)
+    main(sourmash_files=args.sourmash_results, assembly_dbs=args.assembly_db, target_taxa=target_taxa, outdir=args.outdir, exclude_accessions=args.accessions_to_exclude)

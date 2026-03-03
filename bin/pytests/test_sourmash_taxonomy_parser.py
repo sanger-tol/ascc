@@ -9,8 +9,8 @@ from collections import defaultdict
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import sourmash_taxonomy_parser as stp
 
-# Initialize logger for testing
-stp.logger = stp.setup_logger()
+# Initialize logger for testing (adds stderr handler; no return value)
+stp.setup_logger()
 
 # Sample data for testing
 SAMPLE_SOURMASH_CSV = """query_name,match_name,containment,jaccard,intersect_hashes
@@ -181,12 +181,12 @@ def test_extract_contig_number():
 
 def test_parse_target_taxa_valid():
     """Test parsing valid target taxa."""
-    result = stp.parse_target_taxa(['order:primates', 'family:hominidae'], stp.logger)
+    result = stp.parse_target_taxa(['order:primates', 'family:hominidae'])
     assert result == {'order': 'primates', 'family': 'hominidae'}
 
 def test_parse_target_taxa_invalid():
     """Test parsing invalid target taxa format."""
-    result = stp.parse_target_taxa(['orderprimates'], stp.logger)  # No colon
+    result = stp.parse_target_taxa(['orderprimates'])  # No colon
     assert result == {}  # Should be empty due to invalid format
 
 def test_validate_file_paths_exists(temp_sourmash_file):
@@ -239,3 +239,180 @@ def test_parse_sourmash_results_duplicate_headers():
         assert len(result['contig_1']) == 1  # Should skip duplicate header row
     finally:
         os.unlink(temp_file)
+
+def test_parse_sourmash_results_with_exclude_accessions(temp_sourmash_file):
+    """Test parsing sourmash results with excluded accessions."""
+    # Exclude GCA_000001, which should remove one match from contig_1
+    result = stp.parse_sourmash_results([temp_sourmash_file], exclude_accessions=['GCA_000001'])
+    assert 'contig_1' in result
+    assert 'contig_2' in result
+    assert len(result['contig_1']) == 1  # Only GCA_000002 remains
+    assert len(result['contig_2']) == 1  # GCA_000003 not excluded
+    assert result['contig_1'][0]['match_name'] == 'GCA_000002'
+
+def test_parse_sourmash_results_exclude_multiple_accessions(temp_sourmash_file):
+    """Test parsing sourmash results with multiple excluded accessions."""
+    # Exclude both matches for contig_1
+    result = stp.parse_sourmash_results([temp_sourmash_file], exclude_accessions=['GCA_000001', 'GCA_000002'])
+    assert 'contig_1' not in result  # No matches left for contig_1
+    assert 'contig_2' in result
+    assert len(result['contig_2']) == 1
+
+def test_parse_sourmash_results_exclude_nonexistent_accession(temp_sourmash_file):
+    """Test parsing sourmash results with excluded accession that doesn't exist."""
+    # Exclude a non-existent accession
+    result = stp.parse_sourmash_results([temp_sourmash_file], exclude_accessions=['GCA_999999'])
+    assert 'contig_1' in result
+    assert 'contig_2' in result
+    assert len(result['contig_1']) == 2  # No change
+    assert len(result['contig_2']) == 1
+
+
+def test_parse_sourmash_results_exclude_comma_separated_string(temp_sourmash_file):
+    """Test that comma-separated accessions in a single string are split correctly.
+
+    This mirrors how ext.args passes the value from Nextflow:
+        ext.args = '--accessions_to_exclude GCF_000009045.1,GCF_000013265.1'
+    which arrives as a single element list ['GCF_000009045.1,GCF_000013265.1'].
+    """
+    result = stp.parse_sourmash_results(
+        [temp_sourmash_file],
+        exclude_accessions=['GCA_000001,GCA_000002']  # single comma-separated string
+    )
+    assert 'contig_1' not in result   # both matches excluded
+    assert 'contig_2' in result       # GCA_000003 untouched
+
+
+def test_write_summary_output_is_target_values(temp_sourmash_file, temp_assembly_file):
+    """Test that is_target column is correctly True/False/None for each row."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        output_file = os.path.join(temp_dir, 'summary.csv')
+        query_matches = stp.parse_sourmash_results([temp_sourmash_file])
+        summary = stp.generate_summary(query_matches)
+        assembly_df = stp.parse_assembly_database([temp_assembly_file])
+        # Only Primates match → GCA_000001 is target, GCA_000002 and GCA_000003 are not
+        target_taxa = {'order': 'primates'}
+
+        stp.write_summary_output(summary, output_file, assembly_df, target_taxa,
+                                 [temp_sourmash_file], [temp_assembly_file])
+
+        df = pd.read_csv(output_file)
+        # GCA_000001 (Homo sapiens, Primates) → True
+        row_target = df[df['assembly_accession'] == 'GCA_000001']
+        assert not row_target.empty
+        assert row_target.iloc[0]['is_target'] == True
+
+        # GCA_000002 (Rodentia) → False
+        row_non = df[df['assembly_accession'] == 'GCA_000002']
+        assert not row_non.empty
+        assert row_non.iloc[0]['is_target'] == False
+
+        # GCA_000003 (Diptera) → False
+        row_non2 = df[df['assembly_accession'] == 'GCA_000003']
+        assert not row_non2.empty
+        assert row_non2.iloc[0]['is_target'] == False
+
+
+def test_write_non_target_exact_content(temp_sourmash_file, temp_assembly_file):
+    """Test that non_target.csv contains the correct query and lineage info."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        summary_file = os.path.join(temp_dir, 'summary.csv')
+        non_target_file = os.path.join(temp_dir, 'non_target.csv')
+
+        query_matches = stp.parse_sourmash_results([temp_sourmash_file])
+        summary = stp.generate_summary(query_matches)
+        assembly_df = stp.parse_assembly_database([temp_assembly_file])
+        # order:primates → GCA_000001 is target; contig_1 has a target match so it's excluded from non_target
+        # contig_2 top1 = GCA_000003 (Diptera) → non-target
+        target_taxa = {'order': 'primates'}
+        stp.write_summary_output(summary, summary_file, assembly_df, target_taxa,
+                                 [temp_sourmash_file], [temp_assembly_file])
+        stp.write_non_target_output(summary_file, non_target_file, assembly_df,
+                                    [temp_sourmash_file], [temp_assembly_file], target_taxa)
+
+        df = pd.read_csv(non_target_file)
+        # Only contig_2 should appear (contig_1 has a target match)
+        assert list(df['header']) == ['contig_2']
+        assert df.iloc[0]['assembly_accession'] == 'GCA_000003'
+        # Lineage should be populated
+        assert df.iloc[0]['order'] == 'Diptera'
+        assert df.iloc[0]['phylum'] == 'Arthropoda'
+
+
+def test_exclude_top1_changes_non_target(temp_assembly_file):
+    """When the top1 target match is excluded, the next match becomes top1.
+
+    contig_1 matches: GCA_000001 (Primates, 100 hashes) and GCA_000002 (Rodentia, 80 hashes).
+    If GCA_000001 is excluded, GCA_000002 becomes top1 → contig_1 is non-target.
+    """
+    # Build sourmash results with known hashes so the ranking is deterministic
+    sourmash_csv = (
+        "query_name,match_name,containment,jaccard,intersect_hashes\n"
+        "contig_1,GCA_000001,0.8,0.7,100\n"
+        "contig_1,GCA_000002,0.6,0.5,80\n"
+    )
+    assembly_csv = (
+        "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,12345,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Metazoa\n"
+        "GCA_000002,67890,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Metazoa\n"
+    )
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        sm_file = os.path.join(temp_dir, 'sm.csv')
+        db_file = os.path.join(temp_dir, 'db.csv')
+        summary_file = os.path.join(temp_dir, 'summary.csv')
+        non_target_file = os.path.join(temp_dir, 'non_target.csv')
+
+        with open(sm_file, 'w') as f:
+            f.write(sourmash_csv)
+        with open(db_file, 'w') as f:
+            f.write(assembly_csv)
+
+        # Without exclude: GCA_000001 is top1, is_target=True → contig_1 not in non_target
+        query_matches = stp.parse_sourmash_results([sm_file])
+        assembly_df = stp.parse_assembly_database([db_file])
+        summary = stp.generate_summary(query_matches)
+        target_taxa = {'order': 'primates'}
+        stp.write_summary_output(summary, summary_file, assembly_df, target_taxa, [sm_file], [db_file])
+        stp.write_non_target_output(summary_file, non_target_file, assembly_df, [sm_file], [db_file], target_taxa)
+
+        df_nt = pd.read_csv(non_target_file)
+        assert df_nt.empty, "contig_1 should NOT be in non_target when GCA_000001 (target) is top1"
+
+        # With exclude GCA_000001: GCA_000002 becomes top1, is_target=False → contig_1 IS non-target
+        summary_excl_file = os.path.join(temp_dir, 'summary_excl.csv')
+        non_target_excl_file = os.path.join(temp_dir, 'non_target_excl.csv')
+
+        query_matches_excl = stp.parse_sourmash_results([sm_file], exclude_accessions=['GCA_000001'])
+        summary_excl = stp.generate_summary(query_matches_excl)
+        stp.write_summary_output(summary_excl, summary_excl_file, assembly_df, target_taxa, [sm_file], [db_file])
+        stp.write_non_target_output(summary_excl_file, non_target_excl_file, assembly_df, [sm_file], [db_file], target_taxa)
+
+        df_nt_excl = pd.read_csv(non_target_excl_file)
+        assert not df_nt_excl.empty, "contig_1 SHOULD be in non_target after excluding GCA_000001"
+        assert df_nt_excl.iloc[0]['header'] == 'contig_1'
+        assert df_nt_excl.iloc[0]['assembly_accession'] == 'GCA_000002'
+
+
+def test_main_integration_with_exclude(temp_sourmash_file, temp_assembly_file):
+    """Integration test: main() with exclude_accessions produces fewer summary rows."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        stp.main(
+            sourmash_files=[temp_sourmash_file],
+            assembly_dbs=[temp_assembly_file],
+            target_taxa={'order': 'primates'},
+            outdir=temp_dir,
+            exclude_accessions=['GCA_000001']
+        )
+
+        files = os.listdir(temp_dir)
+        summary_file = next(f for f in files if 'summary.csv' in f)
+        df = pd.read_csv(os.path.join(temp_dir, summary_file))
+
+        # GCA_000001 must not appear anywhere in the output
+        assert 'GCA_000001' not in df['assembly_accession'].values
+        # contig_1 still present (GCA_000002 remains), contig_2 still present
+        assert 'contig_1' in df['header'].values
+        assert 'contig_2' in df['header'].values
+        # Total rows: contig_1 has 1 match left, contig_2 has 1 → 2 rows
+        assert len(df) == 2
