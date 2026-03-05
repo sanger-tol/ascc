@@ -31,6 +31,10 @@ process PARSE_SOURMASH {
         -a ${assembly_taxa_db_files.join(' ')} \\
         --target_taxa $target_taxa \\
         -o ./
+    
+    # Rename output files to include the sample prefix
+    mv sourmash_results*.summary.csv ${prefix}.multisearch_results.summary.csv
+    mv sourmash_results*.non_target.csv ${prefix}.multisearch_results.non_target.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
