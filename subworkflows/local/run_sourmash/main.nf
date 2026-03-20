@@ -37,9 +37,19 @@ workflow RUN_SOURMASH {
     ch_sketch_params = ch_sketch_and_dbs.params
     ch_all_databases = ch_sketch_and_dbs.databases
 
+    // Split reference_tuple explicitly so SKETCH and GET_TARGET_TAXA
+    // each get an independent channel subscription (avoids implicit value-channel
+    // consumption issues when ch_sketch_params is a single-emission channel).
+    reference_tuple
+        .multiMap { meta, fasta ->
+            for_sketch:      [meta, fasta]
+            for_target_taxa: [meta, meta.taxid ?: "UNKNOWN"]
+        }
+        .set { ch_ref_split }
+
     // Create sketch once with all k values needed across databases
     SOURMASH_SKETCH (
-        reference_tuple,
+        ch_ref_split.for_sketch,
         ch_sketch_params
     )
     ch_versions = ch_versions.mix(SOURMASH_SKETCH.out.versions)
@@ -74,35 +84,24 @@ workflow RUN_SOURMASH {
         .set { ch_taxa_db_files }
 
     // Extract target taxa from NCBI taxonomy using meta.taxid
+    // ncbi_ranked_lineage is a queue channel (single path); .first() converts it to
+    // a value channel so GET_TARGET_TAXA can run once per sample (not just the first).
     GET_TARGET_TAXA (
-        reference_tuple.map { meta, fasta -> [meta, meta.taxid ?: "UNKNOWN"] },
-        ncbi_ranked_lineage,
+        ch_ref_split.for_target_taxa,
+        ncbi_ranked_lineage.first(),
         taxonomy_level
     )
     ch_versions = ch_versions.mix(GET_TARGET_TAXA.out.versions)
 
 
     ch_multisearch_results_grouped
-        .map { meta, files -> [meta, files] }
         .join(GET_TARGET_TAXA.out.target_taxa.map { meta, tf -> [meta, tf.text.trim()] })
-        .multiMap { meta, results_files, target_taxa_str ->
-            results: tuple(meta, results_files)
-            target_taxa: target_taxa_str
-        }
         .set { ch_parse_input }
-
-    // Debug: verify both channels have data
-    ch_parse_input.results
-        .view { meta, results -> "[DEBUG PARSE INPUT] id=${meta.id} num_results=${results.size()}" }
-
-    ch_parse_input.target_taxa
-        .view { target -> "[DEBUG TARGET TAXA] ${target}" }
 
     // Parse results and taxonomy database
     PARSE_SOURMASH (
-        ch_parse_input.results,
-        ch_taxa_db_files,
-        ch_parse_input.target_taxa
+        ch_parse_input,
+        ch_taxa_db_files
     )
     ch_versions = ch_versions.mix(PARSE_SOURMASH.out.versions)
 

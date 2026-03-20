@@ -9,9 +9,8 @@ process PARSE_SOURMASH {
 
 
     input:
-    tuple val(meta), path(sourmash_multisearch_results, stageAs: "sourmash_results_*")
+    tuple val(meta), path(sourmash_multisearch_results, stageAs: "sourmash_results_*"), val(target_taxa)
     path(assembly_taxa_db_files, stageAs: "taxa_db_*")
-    val target_taxa
 
     output:
     tuple val(meta), path("*.summary.csv")    , emit: multisearch_summary

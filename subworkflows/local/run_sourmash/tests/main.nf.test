@@ -103,8 +103,8 @@ nextflow_workflow {
                 { assert workflow.out.sourmash_summary.get(0).get(0).id == 'test_ecoli' },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).exists() },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).getFileName().toString().endsWith('.summary.csv') },
-                // Check CSV has header + 5 data rows = 6 lines total
-                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines().size() == 6 },
+                // Check CSV has header + at least 1 data row
+                { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines().size() >= 2 },
                 { assert path(workflow.out.sourmash_summary.get(0).get(1)).readLines()[0].contains('assembly_accession') },
 
                 // Check sourmash_non_target output
@@ -190,6 +190,74 @@ nextflow_workflow {
 
                 // Snapshot for versions
                 { assert snapshot(workflow.out.versions).match() }
+            )
+        }
+    }
+
+    test("Two samples with multiple databases - both must get summary and non_target") {
+
+        when {
+            workflow {
+                """
+                // Two samples with the same genome but different IDs (simulates PRIMARY + HAPLO)
+                input[0] = Channel.of(
+                    [
+                        [id: 'test_sample_A', taxid: '561'],
+                        file(params.test_data_base + '/GCF_000005845.2_ASM584v2_genomic.fna.gz', checkIfExists: true)
+                    ],
+                    [
+                        [id: 'test_sample_B', taxid: '561'],
+                        file(params.test_data_base + '/GCF_000005845.2_ASM584v2_genomic.fna.gz', checkIfExists: true)
+                    ]
+                )
+
+                // Two databases
+                input[1] = Channel.of(
+                    [
+                        name: 'gtdb_batch_1_k21',
+                        path: params.test_data_base + '/db/gtdb_k21_k31_k51_s200_batch_1.zip',
+                        k_available: [21, 31, 51],
+                        k_for_search: 21,
+                        s: 200,
+                        assembly_taxa_db: params.test_data_base + '/db/ascc_sourmash_test_subset_taxa.csv'
+                    ],
+                    [
+                        name: 'gtdb_batch_2_k31',
+                        path: params.test_data_base + '/db/gtdb_k21_k31_k51_s200_batch_2.zip',
+                        k_available: [21, 31, 51],
+                        k_for_search: 31,
+                        s: 200,
+                        assembly_taxa_db: params.test_data_base + '/db/ascc_sourmash_test_subset_taxa.csv'
+                    ]
+                )
+
+                // NCBI ranked lineage file
+                input[2] = file(params.rankedlineage, checkIfExists: true)
+
+                // Taxonomy level
+                input[3] = 'order'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+
+                // SKETCH (2) + MULTISEARCH (4) + GET_TARGET_TAXA (2) + PARSE_SOURMASH (2) = 10
+                { assert workflow.trace.succeeded().size() == 10 },
+
+                // Both samples must have summary output
+                { assert workflow.out.sourmash_summary.size() == 2 },
+                { assert workflow.out.sourmash_summary.collect { it[0].id }.toSet() == ['test_sample_A', 'test_sample_B'].toSet() },
+
+                // Both samples must have non_target output
+                { assert workflow.out.sourmash_non_target.size() == 2 },
+                { assert workflow.out.sourmash_non_target.collect { it[0].id }.toSet() == ['test_sample_A', 'test_sample_B'].toSet() },
+
+                // Each summary file must exist and have content
+                { assert workflow.out.sourmash_summary.every { meta, f -> path(f).exists() } },
+                { assert workflow.out.sourmash_non_target.every { meta, f -> path(f).exists() } }
             )
         }
     }

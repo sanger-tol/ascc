@@ -50,10 +50,10 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome' ],
-                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)]
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
+                    'order:enterobacterales'
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
-                input[2] = 'order:enterobacterales'
                 """
             }
         }
@@ -106,10 +106,10 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome_nomatch' ],
-                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)]
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
+                    'phylum:chordata'
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
-                input[2] = 'phylum:chordata'
                 """
             }
         }
@@ -156,10 +156,10 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome' ],
-                    file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)
+                    file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true),
+                    'order:enterobacterales'
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
-                input[2] = 'order:enterobacterales'
                 """
             }
         }
@@ -186,10 +186,10 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test_genome_exclude' ],
-                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)]
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
+                    'order:enterobacterales'
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
-                input[2] = 'order:enterobacterales'
                 """
             }
         }
