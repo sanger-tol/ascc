@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import csv
 import logging
 import re
 from collections import defaultdict
@@ -10,7 +11,7 @@ import polars as pl
 import os
 
 # Version of sourmash_taxonomy_parser
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 # Module-level logger — always available when the module is imported.
 # Handlers are added by setup_logger() at runtime (CLI) or by the caller (tests).
@@ -263,7 +264,15 @@ def generate_summary(query_matches):
     return summary
 
 def get_target_genomes(assembly_df, target_taxa):
-    """Pre-compute set of all genomes that match target taxa."""
+    """Pre-compute set of all genomes that match target taxa.
+
+    Returns a set of assembly accessions that match the target taxa, or
+    a sentinel value of None if target_taxa were specified but no matching
+    genomes were found in the database. Callers must distinguish between:
+      - empty set  → target_taxa not provided (skip is_target classification)
+      - None       → target_taxa provided but taxon absent from DB (conservative fallback)
+      - non-empty  → normal case
+    """
     if assembly_df is None or not target_taxa:
         return set()
 
@@ -289,6 +298,24 @@ def get_target_genomes(assembly_df, target_taxa):
         )
         target_genomes.update(level_matches)
         logger.info(f"Found {len(level_matches)} genomes matching {level}={target_value}")
+
+    if not target_genomes:
+        # target_taxa were specified but the taxon is absent from the database
+        # (e.g. rare/unsequenced order like Andreaeales).
+        # Return None as sentinel so write_summary_output can apply conservative
+        # fallback (treat all as is_target=True) rather than outputting None for
+        # every scaffold which silently breaks non-target detection.
+        # TODO: implement automatic taxonomic level fallback (order → class → phylum)
+        # so that rare taxa are handled gracefully without user intervention.
+        # See: https://github.com/sanger-tol/ascc/issues — sourmash fallback taxa level
+        logger.warning(
+            f"Target taxa {target_taxa} not found in assembly database — "
+            f"no genomes matched. Applying conservative fallback: all scaffolds "
+            f"will be treated as is_target=True to prevent accidental removal. "
+            f"Consider using a higher taxonomic level (class/phylum) or adding "
+            f"target genomes to the database."
+        )
+        return None
 
     logger.info(f"Total target genomes: {len(target_genomes)}")
     return target_genomes
@@ -320,9 +347,9 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
     # Log run parameters
     log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, "Summary file")
 
-    with open(output_file, 'w') as f:
-        # Write header only (no comments)
-        f.write("header,assembly_accession,taxa,top_n,containment,jaccard,intersect_hashes,is_target\n")
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["header", "assembly_accession", "taxa", "top_n", "containment", "jaccard", "intersect_hashes", "is_target"])
 
         for row in sorted_summary:
             query_name, match_name, rank, containment, jaccard, intersect_hashes = row
@@ -337,19 +364,27 @@ def write_summary_output(summary, output_file, assembly_df=None, target_taxa=Non
                 )
 
             # Fast lookup: is this genome in target set?
-            # Unknown taxonomy is treated as target (conservative: never remove unknowns automatically)
+            # Conservative rules (never remove unknowns or when DB is incomplete):
+            #   unknown_taxid  → is_target=True  (accession not in DB at all)
+            #   target_genomes is None → is_target=True  (taxa specified but 0 DB matches,
+            #                           sentinel returned by get_target_genomes)
+            #   target_genomes is non-empty set → normal membership test
+            #   target_genomes is empty set → target_taxa not provided, is_target=None
             if unknown_taxid:
+                is_target = True
+            elif target_genomes is None:
+                # Sentinel: target_taxa given but nothing matched in DB — conservative fallback
                 is_target = True
             elif target_genomes:
                 is_target = match_name in target_genomes
             else:
+                # target_taxa not provided at all
                 is_target = None
 
             # Format the values
             is_target_str = str(is_target) if is_target is not None else "None"
 
-            # Write the output
-            f.write(f"{query_name},{match_name},{taxa},{rank},{containment:.6f},{jaccard:.6f},{intersect_hashes},{is_target_str}\n")
+            writer.writerow([query_name, match_name, taxa, rank, f"{containment:.6f}", f"{jaccard:.6f}", intersect_hashes, is_target_str])
 
 def write_non_target_output(summary_file, output_file, assembly_df, sourmash_files=None, assembly_dbs=None, target_taxa=None):
     """Write non-target queries with lineage information of top1 match."""
@@ -396,9 +431,9 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
         lineage_lookup[row['assembly_accession']] = row
 
     # Write the non-target queries file
-    with open(output_file, 'w') as f:
-        # Write header only (no comments)
-        f.write("header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom\n")
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["header", "assembly_accession", "taxa", "containment", "jaccard", "intersect_hashes", "species", "genus", "family", "order", "class", "phylum", "kingdom"])
 
         for row in non_target_queries:
             query_name = row['header']
@@ -419,8 +454,7 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
             except Exception as e:
                 logger.debug(f"Error getting lineage for {match_name}: {e}")
 
-            lineage_str = ",".join(lineage_info)
-            f.write(f"{query_name},{match_name},{taxa},{containment:.6f},{jaccard:.6f},{intersect_hashes},{lineage_str}\n")
+            writer.writerow([query_name, match_name, taxa, f"{containment:.6f}", f"{jaccard:.6f}", intersect_hashes] + lineage_info)
 
 def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, exclude_accessions=None):
     """Main function to run the sourmash parser."""
