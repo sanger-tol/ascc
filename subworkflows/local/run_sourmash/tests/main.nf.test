@@ -85,7 +85,7 @@ nextflow_workflow {
                 ])
 
                 // NCBI ranked lineage file
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.fromPath(params.rankedlineage).first()
 
                 // Taxonomy level
                 input[3] = 'order'
@@ -153,7 +153,7 @@ nextflow_workflow {
                 )
 
                 // NCBI ranked lineage file
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.fromPath(params.rankedlineage).first()
 
                 // Taxonomy level
                 input[3] = 'order'
@@ -232,7 +232,7 @@ nextflow_workflow {
                 )
 
                 // NCBI ranked lineage file
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.fromPath(params.rankedlineage).first()
 
                 // Taxonomy level
                 input[3] = 'order'
@@ -286,7 +286,7 @@ nextflow_workflow {
                 ])
 
                 // NCBI ranked lineage
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.fromPath(params.rankedlineage).first()
 
                 // Taxonomy level
                 input[3] = 'order'
