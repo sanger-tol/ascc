@@ -4,11 +4,22 @@
 Script to extract target taxa from a taxid using NCBI rankedlineage.dmp file.
 Returns target_taxa in format 'level:taxa_name' (e.g., 'order:Artiodactyla').
 
+By default, writes the full fallback chain starting from the requested taxonomy
+level up to kingdom, one entry per line.  The downstream parser
+(sourmash_taxonomy_parser.py) will then pick the first level that has enough
+genomes in the assembly database (see --min_target_genomes).
+
+Example output for --level order when the full lineage is available:
+    order:Artiodactyla
+    class:Mammalia
+    phylum:Chordata
+    kingdom:Metazoa
+
 Usage:
     get_target_taxa_from_taxid.py --taxid <taxid> --rankedlineage <path> --level <level> --output <output_file>
 
 Author: Danil Zilov (@zilov)
-Version: 1.0.0
+Version: 1.1.0
 """
 
 import argparse
@@ -16,7 +27,7 @@ import sys
 import os
 
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 # Mapping of taxonomy levels to their column indices in rankedlineage.dmp
 # Format: taxid | name | species | genus | family | order | class | phylum | kingdom | domain
@@ -30,6 +41,10 @@ TAXONOMY_LEVELS = {
     'kingdom': 8,
     'domain': 9
 }
+
+# Ordered fallback chain: from most specific to least specific.
+# Used to build the fallback list written to the output file.
+FALLBACK_ORDER = ['species', 'genus', 'family', 'order', 'class', 'phylum', 'kingdom']
 
 
 def parse_rankedlineage(rankedlineage_path, target_taxid):
@@ -78,14 +93,16 @@ def parse_rankedlineage(rankedlineage_path, target_taxid):
 
 def get_target_taxa(lineage_dict, taxonomy_level):
     """
-    Extract target taxa from lineage dictionary at specified taxonomy level.
+    Build a fallback chain of target taxa starting from taxonomy_level up to kingdom.
 
     Args:
         lineage_dict: Dictionary with taxonomy information
-        taxonomy_level: Taxonomy level to extract (e.g., 'order', 'class')
+        taxonomy_level: Taxonomy level to start from (e.g., 'order', 'class')
 
     Returns:
-        String in format 'level:taxa_name' or None if level is empty
+        List of strings in format 'level:taxa_name', from most specific (taxonomy_level)
+        to least specific (kingdom).  Empty strings / missing levels are skipped.
+        Returns an empty list if the requested level itself is empty.
     """
     if taxonomy_level not in TAXONOMY_LEVELS:
         sys.stderr.write(
@@ -94,13 +111,25 @@ def get_target_taxa(lineage_dict, taxonomy_level):
         )
         sys.exit(1)
 
-    taxa_name = lineage_dict.get(taxonomy_level, '')
+    # Start from the requested level; include all levels above it up to kingdom
+    try:
+        start_idx = FALLBACK_ORDER.index(taxonomy_level)
+    except ValueError:
+        # taxonomy_level not in FALLBACK_ORDER (e.g. 'domain') — just use that single level
+        start_idx = len(FALLBACK_ORDER)
 
-    # Check if the taxa name is empty or just whitespace
-    if not taxa_name or taxa_name.strip() == '':
-        return None
+    chain = []
+    # Always try the requested level first; if it's empty, return empty list (caller handles)
+    primary_value = lineage_dict.get(taxonomy_level, '').strip()
+    if not primary_value:
+        return []
 
-    return f"{taxonomy_level}:{taxa_name}"
+    for level in FALLBACK_ORDER[start_idx:]:
+        value = lineage_dict.get(level, '').strip()
+        if value:
+            chain.append(f"{level}:{value}")
+
+    return chain
 
 
 def parse_args():
@@ -165,10 +194,10 @@ def main():
             pass  # Create empty file
         sys.exit(0)
 
-    # Extract target taxa at specified level
-    target_taxa = get_target_taxa(lineage_dict, args.level)
+    # Build fallback chain from requested level upwards
+    target_taxa_chain = get_target_taxa(lineage_dict, args.level)
 
-    if target_taxa is None:
+    if not target_taxa_chain:
         sys.stderr.write(
             f"WARNING: Taxonomy level '{args.level}' is empty for taxid '{args.taxid}'.\n"
             f"Available lineage: {lineage_dict}\n"
@@ -179,11 +208,14 @@ def main():
             pass  # Create empty file
         sys.exit(0)
 
-    # Write successful result
+    # Write fallback chain — comma-separated on a single line, most specific first
     with open(args.output, 'w') as f:
-        f.write(f"{target_taxa}\n")
+        f.write(','.join(target_taxa_chain) + '\n')
 
-    sys.stdout.write(f"Successfully extracted target taxa: {target_taxa}\n")
+    sys.stdout.write(
+        f"Successfully extracted target taxa chain ({len(target_taxa_chain)} levels): "
+        f"{', '.join(target_taxa_chain)}\n"
+    )
 
 
 if __name__ == '__main__':

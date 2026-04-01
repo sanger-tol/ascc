@@ -153,7 +153,7 @@ def test_write_summary_output(temp_sourmash_file, temp_assembly_file):
         query_matches = stp.parse_sourmash_results([temp_sourmash_file])
         summary = stp.generate_summary(query_matches)
         assembly_df = stp.parse_assembly_database([temp_assembly_file])
-        target_taxa = {'order': 'primates'}
+        target_taxa = [{'order': 'primates'}]
 
         stp.write_summary_output(summary, output_file, assembly_df, target_taxa, [temp_sourmash_file], [temp_assembly_file])
 
@@ -174,7 +174,7 @@ def test_write_non_target_output(temp_sourmash_file, temp_assembly_file):
         query_matches = stp.parse_sourmash_results([temp_sourmash_file])
         summary = stp.generate_summary(query_matches)
         assembly_df = stp.parse_assembly_database([temp_assembly_file])
-        target_taxa = {'order': 'primates'}  # Only GCA_000001 matches
+        target_taxa = [{'order': 'primates'}]  # Only GCA_000001 matches
         stp.write_summary_output(summary, summary_file, assembly_df, target_taxa, [temp_sourmash_file], [temp_assembly_file])
 
         # Now create non-target file
@@ -192,7 +192,7 @@ def test_main_integration(temp_sourmash_file, temp_assembly_file):
         stp.main(
             sourmash_files=[temp_sourmash_file],
             assembly_dbs=[temp_assembly_file],
-            target_taxa={'order': 'primates'},
+            target_taxa=[{'order': 'primates'}],
             outdir=temp_dir
         )
 
@@ -222,12 +222,12 @@ def test_extract_contig_number():
 def test_parse_target_taxa_valid():
     """Test parsing valid target taxa."""
     result = stp.parse_target_taxa(['order:primates', 'family:hominidae'])
-    assert result == {'order': 'primates', 'family': 'hominidae'}
+    assert result == [{'order': 'primates'}, {'family': 'hominidae'}]
 
 def test_parse_target_taxa_invalid():
     """Test parsing invalid target taxa format."""
     result = stp.parse_target_taxa(['orderprimates'])  # No colon
-    assert result == {}  # Should be empty due to invalid format
+    assert result == []  # Should be empty due to invalid format
 
 def test_validate_file_paths_exists(temp_sourmash_file):
     """Test validation of existing file paths."""
@@ -242,7 +242,7 @@ def test_validate_file_paths_not_exists():
 def test_get_target_genomes_with_matches(temp_assembly_file):
     """Test get_target_genomes with matching taxa."""
     assembly_df = stp.parse_assembly_database([temp_assembly_file])
-    target_taxa = {'order': 'primates'}
+    target_taxa = [{'order': 'primates'}]
     result = stp.get_target_genomes(assembly_df, target_taxa)
     assert 'GCA_000001' in result  # Homo sapiens is Primates
 
@@ -253,7 +253,7 @@ def test_get_target_genomes_no_matches(temp_assembly_file):
     when target_taxa is provided but matches 0 assemblies.
     """
     assembly_df = stp.parse_assembly_database([temp_assembly_file])
-    target_taxa = {'order': 'nonexistent'}
+    target_taxa = [{'order': 'nonexistent'}]
     result = stp.get_target_genomes(assembly_df, target_taxa)
     assert result is None  # None = sentinel: target_taxa given but 0 DB matches
 
@@ -335,7 +335,7 @@ def test_write_summary_output_is_target_values(temp_sourmash_file, temp_assembly
         summary = stp.generate_summary(query_matches)
         assembly_df = stp.parse_assembly_database([temp_assembly_file])
         # Only Primates match → GCA_000001 is target, GCA_000002 and GCA_000003 are not
-        target_taxa = {'order': 'primates'}
+        target_taxa = [{'order': 'primates'}]
 
         stp.write_summary_output(summary, output_file, assembly_df, target_taxa,
                                  [temp_sourmash_file], [temp_assembly_file])
@@ -368,7 +368,7 @@ def test_write_non_target_exact_content(temp_sourmash_file, temp_assembly_file):
         assembly_df = stp.parse_assembly_database([temp_assembly_file])
         # order:primates → GCA_000001 is target; contig_1 has a target match so it's excluded from non_target
         # contig_2 top1 = GCA_000003 (Diptera) → non-target
-        target_taxa = {'order': 'primates'}
+        target_taxa = [{'order': 'primates'}]
         stp.write_summary_output(summary, summary_file, assembly_df, target_taxa,
                                  [temp_sourmash_file], [temp_assembly_file])
         stp.write_non_target_output(summary_file, non_target_file, assembly_df,
@@ -416,7 +416,7 @@ def test_exclude_top1_changes_non_target(temp_assembly_file):
         query_matches = stp.parse_sourmash_results([sm_file])
         assembly_df = stp.parse_assembly_database([db_file])
         summary = stp.generate_summary(query_matches)
-        target_taxa = {'order': 'primates'}
+        target_taxa = [{'order': 'primates'}]
         stp.write_summary_output(summary, summary_file, assembly_df, target_taxa, [sm_file], [db_file])
         stp.write_non_target_output(summary_file, non_target_file, assembly_df, [sm_file], [db_file], target_taxa)
 
@@ -444,7 +444,7 @@ def test_main_integration_with_exclude(temp_sourmash_file, temp_assembly_file):
         stp.main(
             sourmash_files=[temp_sourmash_file],
             assembly_dbs=[temp_assembly_file],
-            target_taxa={'order': 'primates'},
+            target_taxa=[{'order': 'primates'}],
             outdir=temp_dir,
             exclude_accessions=['GCA_000001']
         )
@@ -501,7 +501,7 @@ def test_unknown_taxid_treated_as_target_in_summary():
         "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"
     )
     with tempfile.TemporaryDirectory() as tmp:
-        s_df, _ = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        s_df, _ = _write_pair(tmp, sm_csv, asm_csv, [{'order': 'primates'}])
         row = s_df[s_df['assembly_accession'] == 'GCA_UNKNOWN']
         assert not row.empty
         # Unknown accession must be flagged as target (conservative — never auto-remove)
@@ -519,7 +519,7 @@ def test_unknown_taxid_contig_not_in_non_target():
         "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"
     )
     with tempfile.TemporaryDirectory() as tmp:
-        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, [{'order': 'primates'}])
         assert 'contig_1' not in nt_df['header'].values, (
             "contig_1 matched only an unknown accession → should be treated as target, "
             "NOT written to non_target.csv"
@@ -543,7 +543,7 @@ def test_mixed_known_unknown_contig_not_in_non_target():
         "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
     )
     with tempfile.TemporaryDirectory() as tmp:
-        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, [{'order': 'primates'}])
         assert 'contig_1' not in nt_df['header'].values, (
             "contig_1 has an unknown match (treated as target) → must NOT be in non_target"
         )
@@ -568,7 +568,7 @@ def test_all_nontarget_known_contig_in_non_target():
         "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
     )
     with tempfile.TemporaryDirectory() as tmp:
-        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, [{'order': 'primates'}])
         assert 'contig_1' in nt_df['header'].values, (
             "contig_1 has only known non-target matches → must appear in non_target.csv"
         )
@@ -592,7 +592,7 @@ def test_single_target_match_prevents_non_target_entry():
         "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
     )
     with tempfile.TemporaryDirectory() as tmp:
-        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, [{'order': 'primates'}])
         assert 'contig_1' not in nt_df['header'].values, (
             "contig_1 has at least one target match → must NOT appear in non_target.csv "
             "(strict rule: ALL matches must be non-target)"
@@ -618,7 +618,7 @@ def test_non_target_output_top1_row_written():
         "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
     )
     with tempfile.TemporaryDirectory() as tmp:
-        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, {'order': 'primates'})
+        _, nt_df = _write_pair(tmp, sm_csv, asm_csv, [{'order': 'primates'}])
         assert 'contig_1' in nt_df['header'].values
         row = nt_df[nt_df['header'] == 'contig_1'].iloc[0]
         assert row['assembly_accession'] == 'GCA_000003', (

@@ -11,7 +11,7 @@ import polars as pl
 import os
 
 # Version of sourmash_taxonomy_parser
-__version__ = "1.3.1"
+__version__ = "1.4.0"
 
 # Module-level logger — always available when the module is imported.
 # Handlers are added by setup_logger() at runtime (CLI) or by the caller (tests).
@@ -43,7 +43,9 @@ def log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, d
     assembly_dbs_str = ', '.join(assembly_dbs) if assembly_dbs else 'N/A'
     logger.info(f"  Assembly database files: {assembly_dbs_str}")
     if target_taxa:
-        target_taxa_str = ', '.join([f"{k}:{v}" for k, v in target_taxa.items()])
+        target_taxa_str = ', '.join(
+            f"{k}:{v}" for entry in target_taxa for k, v in entry.items()
+        )
         logger.info(f"  Target taxa: {target_taxa_str}")
     else:
         logger.info("  Target taxa: None")
@@ -51,17 +53,38 @@ def log_run_parameters(sourmash_files, assembly_dbs, target_taxa, output_file, d
     logger.info("=" * 60)
 
 def parse_target_taxa(target_taxa_args):
-    """Parse target taxa from command line arguments."""
-    target_taxa = {}
+    """Parse target taxa from command line arguments.
+
+    Accepts a list of strings, each of which may be a single 'level:value' entry
+    OR a comma-separated fallback chain (as produced by get_target_taxa_from_taxid.py).
+    Returns an *ordered* list of dicts so that the fallback order is preserved
+    for get_target_genomes().
+
+    Returns:
+        list[dict]: ordered list of {level: value} dicts, most-specific first.
+    """
+    chain = []
+    seen = set()
     if target_taxa_args:
         for item in target_taxa_args:
-            try:
-                level, value = item.split(':', 1)  # Split only on first colon
-                target_taxa[level.lower().strip()] = value.lower().strip()
-                logger.info(f"Added target taxa filter: {level.lower().strip()} = {value.lower().strip()}")
-            except ValueError:
-                logger.warning(f"Invalid target taxa format '{item}'. Expected format is 'taxon:value'")
-    return target_taxa
+            # Each item may be comma-separated (e.g. 'order:x,class:y,phylum:z')
+            for token in item.split(','):
+                token = token.strip()
+                if not token:
+                    continue
+                try:
+                    level, value = token.split(':', 1)
+                    level = level.lower().strip()
+                    value = value.lower().strip()
+                    if level not in seen:
+                        chain.append({level: value})
+                        seen.add(level)
+                        logger.info(f"Added target taxa filter: {level} = {value}")
+                except ValueError:
+                    logger.warning(f"Invalid target taxa format '{token}'. Expected format is 'taxon:value'")
+    return chain
+
+
 
 def validate_file_paths(file_paths, file_type):
     """Validate that all file paths exist."""
@@ -263,67 +286,91 @@ def generate_summary(query_matches):
 
     return summary
 
-def get_target_genomes(assembly_df, target_taxa):
-    """Pre-compute set of all genomes that match target taxa.
+def get_target_genomes(assembly_df, target_taxa, min_genomes=10):
+    """Pre-compute set of all genomes that match target taxa, with automatic
+    taxonomic level fallback.
 
-    Returns a set of assembly accessions that match the target taxa, or
-    a sentinel value of None if target_taxa were specified but no matching
-    genomes were found in the database. Callers must distinguish between:
+    ``target_taxa`` is an ordered list of dicts (most-specific first), as
+    returned by ``parse_target_taxa()``.  For each entry the function checks
+    how many assembly accessions match in the database.  The first level that
+    returns >= ``min_genomes`` results is used.  If no level passes the
+    threshold the function falls back to the level with the most matches (even
+    if < min_genomes), logging a warning.
+
+    Returns:
       - empty set  → target_taxa not provided (skip is_target classification)
-      - None       → target_taxa provided but taxon absent from DB (conservative fallback)
-      - non-empty  → normal case
+      - None       → target_taxa provided but ALL levels returned 0 matches
+                     (conservative fallback: treat every scaffold as is_target=True)
+      - non-empty set → normal case (first level meeting threshold, or best available)
     """
     if assembly_df is None or not target_taxa:
         return set()
 
-    target_genomes = set()
+    # Normalise: accept both old dict format (single level) and new list-of-dicts
+    if isinstance(target_taxa, dict):
+        chain = [{k: v} for k, v in target_taxa.items()]
+    else:
+        chain = target_taxa  # already list of dicts
 
-    for level, target_value in target_taxa.items():
-        if level not in assembly_df.columns:
-            logger.warning(
-                f"Target taxa level '{level}' not found in assembly database columns: "
-                f"{assembly_df.columns} — this filter will match nothing"
-            )
-            continue
-        # Vectorized search for this taxonomic level (polars)
-        level_matches = (
-            assembly_df
-            .filter(
-                pl.col(level).is_not_null() &
-                (pl.col(level).cast(pl.Utf8).str.to_lowercase().str.strip_chars() == target_value) &
-                (pl.col(level).cast(pl.Utf8).str.strip_chars() != 'nan')
-            )
-            .get_column('assembly_accession')
-            .to_list()
-        )
-        target_genomes.update(level_matches)
-        logger.info(f"Found {len(level_matches)} genomes matching {level}={target_value}")
+    best_level = None
+    best_value = None
+    best_matches = set()
 
-    if not target_genomes:
-        # target_taxa were specified but the taxon is absent from the database
-        # (e.g. rare/unsequenced order like Andreaeales).
-        # Return None as sentinel so write_summary_output can apply conservative
-        # fallback (treat all as is_target=True) rather than outputting None for
-        # every scaffold which silently breaks non-target detection.
-        # TODO: implement automatic taxonomic level fallback (order → class → phylum)
-        # so that rare taxa are handled gracefully without user intervention.
-        # See: https://github.com/sanger-tol/ascc/issues — sourmash fallback taxa level
+    for entry in chain:
+        for level, target_value in entry.items():
+            if level not in assembly_df.columns:
+                logger.warning(
+                    f"Target taxa level '{level}' not found in assembly database columns: "
+                    f"{assembly_df.columns} — skipping this fallback level"
+                )
+                continue
+            level_matches = (
+                assembly_df
+                .filter(
+                    pl.col(level).is_not_null() &
+                    (pl.col(level).cast(pl.Utf8).str.to_lowercase().str.strip_chars() == target_value) &
+                    (pl.col(level).cast(pl.Utf8).str.strip_chars() != 'nan')
+                )
+                .get_column('assembly_accession')
+                .to_list()
+            )
+            n = len(level_matches)
+            logger.info(f"Fallback check: {level}={target_value} → {n} genomes in DB")
+
+            if n > len(best_matches):
+                best_level = level
+                best_value = target_value
+                best_matches = set(level_matches)
+
+            if n >= min_genomes:
+                logger.info(
+                    f"Selected taxonomy level for target detection: "
+                    f"{level}={target_value} ({n} genomes, threshold={min_genomes})"
+                )
+                return best_matches
+
+    # No level reached the threshold
+    if best_matches:
         logger.warning(
-            f"Target taxa {target_taxa} not found in assembly database — "
-            f"no genomes matched. Applying conservative fallback: all scaffolds "
-            f"will be treated as is_target=True to prevent accidental removal. "
-            f"Consider using a higher taxonomic level (class/phylum) or adding "
-            f"target genomes to the database."
+            f"No taxonomy level reached the minimum of {min_genomes} genomes. "
+            f"Using best available level: {best_level}={best_value} "
+            f"({len(best_matches)} genomes). Target detection may be less reliable."
         )
-        return None
+        return best_matches
 
-    logger.info(f"Total target genomes: {len(target_genomes)}")
-    return target_genomes
+    # All levels returned 0 matches — conservative fallback
+    chain_str = ', '.join(f"{k}:{v}" for entry in chain for k, v in entry.items())
+    logger.warning(
+        f"Target taxa chain [{chain_str}] not found in assembly database — "
+        f"no genomes matched at any level. Applying conservative fallback: all "
+        f"scaffolds will be treated as is_target=True to prevent accidental removal."
+    )
+    return None
 
-def write_summary_output(summary, output_file, assembly_df=None, target_taxa=None, sourmash_files=None, assembly_dbs=None):
+def write_summary_output(summary, output_file, assembly_df=None, target_taxa=None, sourmash_files=None, assembly_dbs=None, min_target_genomes=10):
     """Write summary output to a file."""
     # Pre-compute target genomes set
-    target_genomes = get_target_genomes(assembly_df, target_taxa)
+    target_genomes = get_target_genomes(assembly_df, target_taxa, min_genomes=min_target_genomes)
 
     # Pre-compute taxid dictionary for faster lookup
     taxid_dict = {}
@@ -456,7 +503,7 @@ def write_non_target_output(summary_file, output_file, assembly_df, sourmash_fil
 
             writer.writerow([query_name, match_name, taxa, f"{containment:.6f}", f"{jaccard:.6f}", intersect_hashes] + lineage_info)
 
-def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, exclude_accessions=None):
+def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, exclude_accessions=None, min_target_genomes=10):
     """Main function to run the sourmash parser."""
 
     # Initialize variables
@@ -481,13 +528,11 @@ def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, 
     # Use 'sourmash_results' as basename if multiple files, else use the single file's basename
     sourmash_basename = "sourmash_results" if len(sourmash_files) > 1 else os.path.splitext(os.path.basename(sourmash_files[0]))[0]
 
-    # Create target taxa suffix for filename
+    # Create target taxa suffix for filename (use primary — first — level only)
     taxa_suffix = ""
     if target_taxa:
-        taxa_parts = []
-        for level, value in target_taxa.items():
-            taxa_parts.append(f"{level}_{value}")
-        taxa_suffix = "_" + "_".join(taxa_parts)
+        first_entry = target_taxa[0]
+        taxa_suffix = "_" + "_".join(f"{k}_{v}" for k, v in first_entry.items())
 
     summary_filename = f"{sourmash_basename}{taxa_suffix}.summary.csv"
     summary_file = os.path.join(outdir, summary_filename)
@@ -495,7 +540,7 @@ def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, 
     logger.info(f"Writing summary to: {summary_file}")
 
     # Write summary output
-    write_summary_output(summary, summary_file, assembly_df, target_taxa, sourmash_files, assembly_dbs)
+    write_summary_output(summary, summary_file, assembly_df, target_taxa, sourmash_files, assembly_dbs, min_target_genomes=min_target_genomes)
 
     # Write non-target queries if assembly database and target taxa are available
     if assembly_df is not None and target_taxa:
@@ -508,7 +553,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse sourmash results and extract query-match relationships with similarity scores.")
     parser.add_argument('-s', '--sourmash_results', nargs='+', help='Path(s) to the sourmash results file(s) to parse', required=False)
     parser.add_argument('-a', '--assembly_db', nargs='+', help='Path(s) to assembly database file(s) with taxonomic information', required=False)
-    parser.add_argument('--target_taxa', nargs='+', help='Target taxa in format taxon:value (e.g., order:coleoptera family:Carabidae)')
+    parser.add_argument('--target_taxa', nargs='+', help='Target taxa as a comma-separated fallback chain: level:value[,level:value,...] (e.g. order:coleoptera,class:insecta). Produced by get_target_taxa_from_taxid.py.')
+    parser.add_argument('--min_target_genomes', type=int, default=10, help='Minimum number of genomes a taxonomy level must have in the DB before it is used for target detection. Fallback levels are tried in order until this threshold is met (default: 10).')
     parser.add_argument('--accessions_to_exclude', nargs='+', help='List of assembly accessions to exclude from results (comma-separated or multiple values)', default=None)
     parser.add_argument('--log', help='Path to log file (if not provided, logs to stderr)', default=None)
     parser.add_argument('-o', '--outdir', help='Output directory for results (default: current directory)', default=None)
@@ -527,7 +573,7 @@ if __name__ == "__main__":
     # Initialise logger (add handlers; file handler only if --log provided)
     setup_logger(log_file=args.log)
 
-    # Parse target taxa
+    # Parse target taxa (comma-separated fallback chain from get_target_taxa_from_taxid.py)
     target_taxa = parse_target_taxa(args.target_taxa)
 
-    main(sourmash_files=args.sourmash_results, assembly_dbs=args.assembly_db, target_taxa=target_taxa, outdir=args.outdir, exclude_accessions=args.accessions_to_exclude)
+    main(sourmash_files=args.sourmash_results, assembly_dbs=args.assembly_db, target_taxa=target_taxa, outdir=args.outdir, exclude_accessions=args.accessions_to_exclude, min_target_genomes=args.min_target_genomes)
