@@ -119,12 +119,16 @@ def test_parse_assembly_database_missing_taxid():
         os.unlink(tmp)
 
 def test_get_target_genomes_missing_column_warns(temp_assembly_file, caplog):
-    """get_target_genomes warns when requested taxonomic level is absent from DB."""
+    """get_target_genomes warns when requested taxonomic level is absent from DB.
+
+    Conservative fallback: returns None (sentinel) instead of set()
+    when target_taxa is provided but matches 0 assemblies.
+    """
     import logging
     assembly_df = stp.parse_assembly_database([temp_assembly_file])
     with caplog.at_level(logging.WARNING, logger='sourmash_taxonomy_parser'):
         result = stp.get_target_genomes(assembly_df, {'nonexistent_rank': 'somevalue'})
-    assert result == set()
+    assert result is None  # None = sentinel: target_taxa given but 0 DB matches
     assert any('nonexistent_rank' in msg for msg in caplog.messages)
 
 def test_generate_summary():
@@ -243,11 +247,15 @@ def test_get_target_genomes_with_matches(temp_assembly_file):
     assert 'GCA_000001' in result  # Homo sapiens is Primates
 
 def test_get_target_genomes_no_matches(temp_assembly_file):
-    """Test get_target_genomes with no matching taxa."""
+    """Test get_target_genomes with no matching taxa.
+
+    Conservative fallback: returns None (sentinel) instead of set()
+    when target_taxa is provided but matches 0 assemblies.
+    """
     assembly_df = stp.parse_assembly_database([temp_assembly_file])
     target_taxa = {'order': 'nonexistent'}
     result = stp.get_target_genomes(assembly_df, target_taxa)
-    assert result == set()
+    assert result is None  # None = sentinel: target_taxa given but 0 DB matches
 
 def test_parse_sourmash_results_missing_columns():
     """Test parsing sourmash results with missing required columns."""
@@ -542,7 +550,12 @@ def test_mixed_known_unknown_contig_not_in_non_target():
 
 
 def test_all_nontarget_known_contig_in_non_target():
-    """Contig with exclusively known non-target matches → appears in non_target.csv."""
+    """Contig with exclusively known non-target matches → appears in non_target.csv.
+
+    DB must contain at least one Primates assembly so get_target_genomes returns
+    a non-empty set (not None sentinel); otherwise conservative fallback fires
+    and nothing goes to non_target.
+    """
     sm_csv = (
         "query_name,match_name,containment,jaccard,intersect_hashes\n"
         "contig_1,GCA_000002,0.7,0.6,70\n"
@@ -550,6 +563,7 @@ def test_all_nontarget_known_contig_in_non_target():
     )
     asm_csv = (
         "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"  # target anchor
         "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
         "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
     )
@@ -586,7 +600,12 @@ def test_single_target_match_prevents_non_target_entry():
 
 
 def test_non_target_output_top1_row_written():
-    """The row written to non_target.csv is the top1 match (highest intersect_hashes)."""
+    """The row written to non_target.csv is the top1 match (highest intersect_hashes).
+
+    DB must contain at least one Primates assembly so get_target_genomes returns
+    a non-empty set (not None sentinel); otherwise conservative fallback fires
+    and nothing goes to non_target.
+    """
     sm_csv = (
         "query_name,match_name,containment,jaccard,intersect_hashes\n"
         "contig_1,GCA_000002,0.5,0.4,50\n"   # rank 2 (fewer hashes)
@@ -594,6 +613,7 @@ def test_non_target_output_top1_row_written():
     )
     asm_csv = (
         "assembly_accession,taxid,species,genus,family,order,class,phylum,kingdom\n"
+        "GCA_000001,9606,Homo sapiens,Homo,Hominidae,Primates,Mammalia,Chordata,Animalia\n"  # target anchor
         "GCA_000002,10090,Mus musculus,Mus,Muridae,Rodentia,Mammalia,Chordata,Animalia\n"
         "GCA_000003,7227,Drosophila melanogaster,Drosophila,Drosophilidae,Diptera,Insecta,Arthropoda,Animalia\n"
     )
