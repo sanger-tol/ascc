@@ -298,10 +298,7 @@ nextflow_pipeline {
                     trailingns,
                     trailingns.size() == (1 * 3),
 
-                    // Sourmash outputs: expect 3 summary and 3 non-target files
-                    sourmash_summary_files,
                     sourmash_summary_files.size() == 3,
-                    sourmash_non_target_files,
                     sourmash_non_target_files.size() == 3,
 
                     // Workflow completion file

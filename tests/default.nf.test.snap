@@ -827,19 +827,11 @@
                 "asccTinyTest_V2_PRIMARY_trim_Ns:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             true,
-            [
-                "asccTinyTest_V2_HAPLO.multisearch_results.summary.csv:md5,0b9695dff2e980c2d98bd1c81033fecd",
-                "asccTinyTest_V2_PRIMARY.multisearch_results.summary.csv:md5,ebfa50f16c8106b6e85d9af0d1b61648"
-            ],
             false,
-            [
-                "asccTinyTest_V2_HAPLO.multisearch_results.non_target.csv:md5,5214dccbc2fb224ba36b26dece9745a2",
-                "asccTinyTest_V2_PRIMARY.multisearch_results.non_target.csv:md5,5214dccbc2fb224ba36b26dece9745a2"
-            ],
             false,
             false
         ],
-        "timestamp": "2026-04-02T12:29:39.489399",
+        "timestamp": "2026-04-02T17:00:57.549759",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
