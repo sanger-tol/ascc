@@ -135,8 +135,8 @@ nextflow_pipeline {
             }
 
             // Sourmash database configuration: Generate CSV
-            def sourmash_test_dir = "${db_dir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles"
-            def sourmash_db_dir = "${db_dir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db"
+            def sourmash_test_dir = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles"
+            def sourmash_db_dir = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db"
 
             // Generate Sourmash database configuration CSV
             def sourmash_csv_file = new File("${sourmash_test_dir}/sourmash_db_config.csv")
