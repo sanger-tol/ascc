@@ -135,8 +135,8 @@ nextflow_pipeline {
             }
 
             // Sourmash database configuration: Generate CSV
-            def sourmash_test_dir = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles"
-            def sourmash_db_dir = "${launchDir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db"
+            def sourmash_test_dir = "${db_dir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles"
+            def sourmash_db_dir = "${db_dir}/TEST_DATA/asccTinyTest_V2/sourmash_testfiles/db"
 
             // Generate Sourmash database configuration CSV
             def sourmash_csv_file = new File("${sourmash_test_dir}/sourmash_db_config.csv")
@@ -297,6 +297,12 @@ nextflow_pipeline {
                     tiara_raw_files.size() == (2 * 3),
                     trailingns,
                     trailingns.size() == (1 * 3),
+
+                    // Sourmash outputs: expect 3 summary and 3 non-target files
+                    sourmash_summary_files,
+                    sourmash_summary_files.size() == 3,
+                    sourmash_non_target_files,
+                    sourmash_non_target_files.size() == 3,
 
                     // Workflow completion file
                     completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check

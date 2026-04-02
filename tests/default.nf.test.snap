@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            150,
+            152,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -109,7 +109,7 @@
                 },
                 "GET_TARGET_TAXA": {
                     "python": "3.9.1",
-                    "get_target_taxa_from_taxid": "1.0.0"
+                    "get_target_taxa_from_taxid": "1.1.0"
                 },
                 "GNU_SORT": {
                     "coreutils": 9.5
@@ -145,7 +145,7 @@
                     "parse_fcsgx_result": "1.0.1"
                 },
                 "PARSE_SOURMASH": {
-                    "sourmash_taxonomy_parser": "1.1.0"
+                    "sourmash_taxonomy_parser": "1.4.0"
                 },
                 "REFORMAT_DIAMOND_OUTFMT6": {
                     "python": "3.9.1",
@@ -331,6 +331,8 @@
                 "asccTinyTest_V2_HAPLO/kmer_data",
                 "asccTinyTest_V2_HAPLO/kmer_data/asccTinyTest_V2_HAPLO_kmers_dim_reduction_embeddings_combined.csv",
                 "asccTinyTest_V2_HAPLO/sourmash",
+                "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO.multisearch_results.non_target.csv",
+                "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO.multisearch_results.summary.csv",
                 "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO.sig",
                 "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
                 "asccTinyTest_V2_HAPLO/sourmash/asccTinyTest_V2_HAPLO_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
@@ -426,11 +428,11 @@
                 "asccTinyTest_V2_MITO/html_report/report/site/templates/_tab_vecscreen.html.jinja",
                 "asccTinyTest_V2_MITO/html_report/report/site/templates/ascc_report.html.jinja",
                 "asccTinyTest_V2_MITO/sourmash",
+                "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO.multisearch_results.non_target.csv",
+                "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO.multisearch_results.summary.csv",
                 "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO.sig",
                 "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
                 "asccTinyTest_V2_MITO/sourmash/asccTinyTest_V2_MITO_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
-                "asccTinyTest_V2_MITO/sourmash/sourmash_results_order_haemosporida.non_target.csv",
-                "asccTinyTest_V2_MITO/sourmash/sourmash_results_order_haemosporida.summary.csv",
                 "asccTinyTest_V2_MITO/summarise_vecscreen_output",
                 "asccTinyTest_V2_MITO/summarise_vecscreen_output/asccTinyTest_V2_MITO.vecscreen_contamination",
                 "asccTinyTest_V2_MITO/tiara_raw_output",
@@ -568,11 +570,11 @@
                 "asccTinyTest_V2_PRIMARY/kmer_data",
                 "asccTinyTest_V2_PRIMARY/kmer_data/asccTinyTest_V2_PRIMARY_kmers_dim_reduction_embeddings_combined.csv",
                 "asccTinyTest_V2_PRIMARY/sourmash",
+                "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY.multisearch_results.non_target.csv",
+                "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY.multisearch_results.summary.csv",
                 "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY.sig",
                 "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY_vs_plasmodium_k21_k31_k51_s200_batch_1.multisearch_results.csv",
                 "asccTinyTest_V2_PRIMARY/sourmash/asccTinyTest_V2_PRIMARY_vs_plasmodium_k21_k31_k51_s200_batch_2.multisearch_results.csv",
-                "asccTinyTest_V2_PRIMARY/sourmash/sourmash_results_order_haemosporida.non_target.csv",
-                "asccTinyTest_V2_PRIMARY/sourmash/sourmash_results_order_haemosporida.summary.csv",
                 "asccTinyTest_V2_PRIMARY/summarise_vecscreen_output",
                 "asccTinyTest_V2_PRIMARY/summarise_vecscreen_output/asccTinyTest_V2_PRIMARY.vecscreen_contamination",
                 "asccTinyTest_V2_PRIMARY/tiara_raw_output",
@@ -826,16 +828,18 @@
             ],
             true,
             [
-                "sourmash_results_order_haemosporida.summary.csv:md5,c21a0982406e3552adbe51c213568f52"
+                "asccTinyTest_V2_HAPLO.multisearch_results.summary.csv:md5,0b9695dff2e980c2d98bd1c81033fecd",
+                "asccTinyTest_V2_PRIMARY.multisearch_results.summary.csv:md5,ebfa50f16c8106b6e85d9af0d1b61648"
             ],
             false,
             [
-                "sourmash_results_order_haemosporida.non_target.csv:md5,70233fd1cf564c07f7c45dbe6a0a4eef"
+                "asccTinyTest_V2_HAPLO.multisearch_results.non_target.csv:md5,5214dccbc2fb224ba36b26dece9745a2",
+                "asccTinyTest_V2_PRIMARY.multisearch_results.non_target.csv:md5,5214dccbc2fb224ba36b26dece9745a2"
             ],
             false,
             false
         ],
-        "timestamp": "2026-02-25T16:46:33.691134",
+        "timestamp": "2026-04-02T12:29:39.489399",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
