@@ -796,10 +796,9 @@ workflow ASCC_GENOMIC {
     //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
     //              AND ABNORMAL CONTAMINATION IS FOUND
     RUN_DECONTAMINATE_FASTA(
-        ej_reference_tuple.filter{ meta, file ->
+        ej_reference_tuple.filter { meta, file ->
             params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly == "both"
-            return [[id: meta.id], file]
-        },
+        }.map { meta, file -> [[id: meta.id], file] },
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
         ch_fcsadapt.map{ meta, files ->
