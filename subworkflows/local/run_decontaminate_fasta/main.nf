@@ -55,6 +55,9 @@ workflow RUN_DECONTAMINATE_FASTA {
                 }
             }
         }
+        // really nasty fudge. bin it as soon as nextflow improves its joins
+        .combine(input_genome.map { tuple -> [] })
+        .map { tuple -> tuple.dropRight() }
         .set{ merge_input_channel}
 
 
