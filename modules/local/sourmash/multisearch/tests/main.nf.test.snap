@@ -1,0 +1,61 @@
+{
+    "E. coli genome - gtdb_batch_1_k21 database": {
+        "content": [
+            [
+                "versions.yml:md5,e7fa4ee2fa2347fc2c93d37bda5eedc5"
+            ]
+        ],
+        "timestamp": "2026-02-19T16:42:16.574191",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    },
+    "E. coli genome - gtdb_batch_1_k21 database - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_ecoli",
+                            "db_name": "gtdb_batch_1_k21"
+                        },
+                        "test_ecoli.multisearch_results.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,e7fa4ee2fa2347fc2c93d37bda5eedc5"
+                ],
+                "multisearch_results": [
+                    [
+                        {
+                            "id": "test_ecoli",
+                            "db_name": "gtdb_batch_1_k21"
+                        },
+                        "test_ecoli.multisearch_results.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,e7fa4ee2fa2347fc2c93d37bda5eedc5"
+                ]
+            }
+        ],
+        "timestamp": "2026-02-19T16:25:37.720862",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    },
+    "E. coli genome - gtdb_batch_2_k31 database": {
+        "content": [
+            [
+                "versions.yml:md5,e7fa4ee2fa2347fc2c93d37bda5eedc5"
+            ]
+        ],
+        "timestamp": "2026-02-19T16:42:28.511977",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.4"
+        }
+    }
+}

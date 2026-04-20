@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::sourmash=4.9.4
+  - sourmash_plugin_branchwater=0.9.14

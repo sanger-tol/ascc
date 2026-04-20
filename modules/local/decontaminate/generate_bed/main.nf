@@ -14,6 +14,7 @@ process DECONTAMINATE_GENERATE_BED {
         path(fcs_adaptor_file,          stageAs: "./dataset/fcs_adaptor/*"),
         path(trailingns,                stageAs: "./dataset/trailingns/*"),
         path(barcodes,                  stageAs: "./dataset/filter_barcode/**"),
+        path(sourmash_non_target,       stageAs: "./dataset/sourmash/*"),
         path(mito_recommendations,      stageAs: "./dataset/organelle_contamination_recommendations.mito_mito/*"),
         path(plastid_recommendations,   stageAs: "./dataset/organelle_contamination_recommendations.plastid_plastid/*")
     tuple val(meta2), path(longreads)

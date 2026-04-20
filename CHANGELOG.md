@@ -3,6 +3,52 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.1.0] - Purple Frame [##/##/2026]
+
+- `RUN_SOURMASH` subworkflow for k-mer based taxonomic classification
+  - `SOURMASH_SKETCH`: Create MinHash sketches from assembly sequences
+  - `SOURMASH_MULTISEARCH`: Search sketches against multiple databases
+  - `PARSE_SOURMASH`: Parse results and identify non-target taxa contigs
+  - `GET_TARGET_TAXA`: Extract target taxonomic level from NCBI taxonomy
+- Integration with `AUTOFILTER_AND_CHECK_ASSEMBLY` module
+  - Sourmash results combined with FCS-GX and Tiara for contamination filtering
+  - Configurable action mode (`warn` or `remove`) for sourmash detections
+- Integration with `ASCC_MERGE_TABLES` to include sourmash results in final CSV output
+- New Python scripts:
+  - `bin/sourmash_taxonomy_parser.py`: Parse sourmash multisearch results and taxonomy
+  - `bin/get_target_taxa_from_taxid.py`: Extract target taxonomic level from taxid
+- Sourmash database configuration via CSV file (`--sourmash_db_config`)
+  - Replaces dictionary-based configuration with simplified CSV format
+  - Native Nextflow CSV parsing without custom Groovy classes
+- Comprehensive nf-test suite for all sourmash modules and subworkflows
+- Integration tests with Plasmodium and E.coli test databases
+- Addition of @zilov as contributor
+- `bin/autofilter.py`: Updated to handle sourmash_action column in CSV format (6 columns instead of 5)
+- `bin/abnormal_contamination_check.py`: Updated CSV format validation for new sourmash_action column
+- `modules/local/parse/sourmash/main.nf`: Fixed YAML versions block to handle stderr correctly
+- `modules/local/ascc/merge_tables/main.nf`: Fixed optional sourmash parameter handling
+
+| Module               | Old Version | New Versions |
+| -------------------- | ----------- | ------------ |
+| SOURMASH_SKETCH      | NA          | 4.8.11       |
+| SOURMASH_MULTISEARCH | NA          | 4.8.11       |
+| PARSE_SOURMASH       | NA          | 1.1.0        |
+| GET_TARGET_TAXA      | NA          | 1.0.0        |
+
+### Parameters
+
+| Old Parameter | New Parameter             | Description                                           |
+| ------------- | ------------------------- | ----------------------------------------------------- |
+| NA            | --run_sourmash            | Control sourmash execution ('off', 'genomic', 'both') |
+| NA            | --sourmash_db_config      | Path to CSV file with database configuration          |
+| NA            | --sourmash_taxonomy_level | Taxonomic level for target taxa ('order' by default)  |
+| NA            | --sourmash_action_mode    | Action mode for autofilter ('warn' or 'remove')       |
+
+### `Notes`
+
+- Sourmash databases require MinHash sketches with k-mer sizes and scaled values
+- Target taxa is automatically extracted from NCBI taxonomy based on input taxid
+
 ## [0.6.0] - Red Notebook [28/01/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.

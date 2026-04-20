@@ -20,7 +20,8 @@ process ASCC_MERGE_TABLES {
         path (uniprot_diamond,          stageAs: "uniprot.csv"),
         path (btk),
         path (btk_busco),
-        path (fcs_gx)
+        path (fcs_gx),
+        path (sourmash_summary,         stageAs: "sourmash_summary.csv")
 
     output:
     tuple val(meta), path("*_contamination_check_merged_table.csv")         , emit: merged_table
@@ -45,6 +46,8 @@ process ASCC_MERGE_TABLES {
     def btk_data                         = btk.size()                        > empty_file_size   ? "-btk ${btk}"                     : ""
     def btk_busco_data                   = btk_busco.size()                  > empty_file_size   ? "-bb ${btk_busco}"                : ""
     def fcs_gx_data                      = fcs_gx.size()                     > empty_file_size   ? "-fg ${fcs_gx}"                   : ""
+    def sourmash_data                    = sourmash_summary.size()           > empty_file_size   ? "-sm ${sourmash_summary}"         : ""
+
 
     """
     ascc_merge_tables.py \\
@@ -60,6 +63,7 @@ process ASCC_MERGE_TABLES {
         $btk_data \\
         $btk_busco_data \\
         $fcs_gx_data \\
+        $sourmash_data \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

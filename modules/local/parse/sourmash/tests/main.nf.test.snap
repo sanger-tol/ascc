@@ -1,0 +1,87 @@
+{
+    "Parse sourmash results without target_taxa": {
+        "content": [
+            [
+                
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2025-11-14T15:34:58.069347"
+    },
+    "Parse sourmash results with target_taxa order:enterobacterales": {
+        "content": [
+            [
+                "versions.yml:md5,e687915e0608933329586e47a3041642"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2025-11-14T15:38:04.794383"
+    },
+    "Parse sourmash results - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_genome"
+                        },
+                        "test_genome.multisearch_results.multisearch_results.summary.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test_genome"
+                        },
+                        "test_genome.multisearch_results.multisearch_results.non_target.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,c3b8dd1f6dd954113ba53a7fdb28f526"
+                ],
+                "multisearch_non_target": [
+                    [
+                        {
+                            "id": "test_genome"
+                        },
+                        "test_genome.multisearch_results.multisearch_results.non_target.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "multisearch_summary": [
+                    [
+                        {
+                            "id": "test_genome"
+                        },
+                        "test_genome.multisearch_results.multisearch_results.summary.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,c3b8dd1f6dd954113ba53a7fdb28f526"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2025-11-14T15:38:46.133289"
+    },
+    "Parse sourmash results with non-matching target_taxa": {
+        "content": [
+            [
+                "versions.yml:md5,35b0cded66d8e77f223872d16c7eb0ce"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.3"
+        },
+        "timestamp": "2025-11-14T15:38:25.818234"
+    }
+}

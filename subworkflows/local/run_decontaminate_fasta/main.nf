@@ -17,6 +17,7 @@ workflow RUN_DECONTAMINATE_FASTA {
     fcs_adaptor_file
     trailingns
     barcodes
+    sourmash_non_target
     mito_recommendations
     plastid_recommendations
 
@@ -35,6 +36,7 @@ workflow RUN_DECONTAMINATE_FASTA {
         .join(fcs_adaptor_file,         remainder: true)
         .join(trailingns,               remainder: true)
         .join(barcodes,                 remainder: true)
+        .join(sourmash_non_target,      remainder: true)
         .join(mito_recommendations,     remainder: true)
         .join(plastid_recommendations,  remainder: true)
         .filter { items ->

@@ -8,9 +8,10 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         'biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta),        path(reference)
-    tuple val(tiara_meta),  path(tiara_txt)
-    tuple val(fcs_meta),    path(fcs_csv)
+    tuple val(meta),            path(reference)
+    tuple val(tiara_meta),      path(tiara_txt)
+    tuple val(fcs_meta),        path(fcs_csv)
+    tuple val(sourmash_meta),   path(sourmash_nontarget, stageAs: 'sourmash_nontarget.csv')
     path ncbi_rankedlineage
 
     output:
@@ -25,11 +26,13 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     def args    = task.ext.args     ?: ""
+
     """
     autofilter.py \\
         $reference \\
         --taxid $meta.taxid \\
         --tiara $tiara_txt \\
+        --sourmash ${sourmash_nontarget} \\
         --fcsgx_sum $fcs_csv \\
         --out_prefix $prefix \\
         --ncbi_rankedlineage_path $ncbi_rankedlineage \\
