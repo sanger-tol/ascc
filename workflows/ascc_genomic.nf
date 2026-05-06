@@ -795,15 +795,36 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: GENERATE DECONTAMINATION FILES AND POTENTIALLY A DECONTAMINATED FASTA
     //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
     //              AND ABNORMAL CONTAMINATION IS FOUND
+    //
+    ch_fcsadapt.view{"FCS ADAPT: $it"}
+
+    // We only want the EUKARYOTIC report
+    // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`
+    euk_fcsadapt = ch_fcsadapt.map{ meta, files ->
+        def filesCopy = (files ?: []).collect()    // defensive copy
+        [meta, filesCopy.find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
+    }
+
+    euk_fcsadapt.view{"EUK_FCSADAPT: $it"}
+    ej_reference_tuple.view{"REFERENCE: $it"}
+    ch_fcsgx.view{"FCSGX: $it"}
+    ch_autofilt_fcs_tiara.view{"AUTOFILT_FCS_TIARA: $it"}
+    ej_trailing_ns.view{"TRAILING_NS: $it"}
+    ch_barcode_check.view{"BARCODE_CHECK: $it"}
+    ch_mito_full.view{"MITO_FULL: $it"}
+    ch_chloro_full.view{"CHLORO_FULL: $it"}
+
+    ej_reference_tuple_filtered = ej_reference_tuple
+        .filter{ meta, file ->
+            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly in run_conditionals
+        }
+        .map{ meta, file -> [[id: meta.id], file] }
+
     RUN_DECONTAMINATE_FASTA(
-        ej_reference_tuple.filter { meta, file ->
-            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly == "both"
-        }.map { meta, file -> [[id: meta.id], file] },
+        ej_reference_tuple_filtered,
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
-        ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
-        }, // We only want the EUKARYOTIC report
+        euk_fcsadapt,
         ej_trailing_ns,
         ch_barcode_check,
         ch_mito_full,
@@ -821,6 +842,7 @@ workflow ASCC_GENOMIC {
     // Params file
     ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
+    log.info("[ASCC WORKFLOW STATUSGENERATE_HTML_REPORT_WORKFLOW: ${params.run_html_report}")
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
         ch_fcsadapt,
