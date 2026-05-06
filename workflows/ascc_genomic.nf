@@ -800,19 +800,11 @@ workflow ASCC_GENOMIC {
 
     // We only want the EUKARYOTIC report
     // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`
+    // `ch_fcsadapt` because it is a mix channel, is technically still mutable
     euk_fcsadapt = ch_fcsadapt.map{ meta, files ->
         def filesCopy = (files ?: []).collect()    // defensive copy
         [meta, filesCopy.find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
     }
-
-    euk_fcsadapt.view{"EUK_FCSADAPT: $it"}
-    ej_reference_tuple.view{"REFERENCE: $it"}
-    ch_fcsgx.view{"FCSGX: $it"}
-    ch_autofilt_fcs_tiara.view{"AUTOFILT_FCS_TIARA: $it"}
-    ej_trailing_ns.view{"TRAILING_NS: $it"}
-    ch_barcode_check.view{"BARCODE_CHECK: $it"}
-    ch_mito_full.view{"MITO_FULL: $it"}
-    ch_chloro_full.view{"CHLORO_FULL: $it"}
 
     ej_reference_tuple_filtered = ej_reference_tuple
         .filter{ meta, file ->

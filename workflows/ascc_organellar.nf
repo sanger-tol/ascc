@@ -585,13 +585,6 @@ workflow ASCC_ORGANELLAR {
         [meta, filesCopy.find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
     }
 
-    euk_fcsadapt.view{"EUK_FCSADAPT: $it"}
-    ej_reference_tuple.view{"REFERENCE: $it"}
-    ch_fcsgx.view{"FCSGX: $it"}
-    ch_autofilt_fcs_tiara.view{"AUTOFILT_FCS_TIARA: $it"}
-    ej_trailing_ns.view{"TRAILING_NS: $it"}
-    ch_barcode_check.view{"BARCODE_CHECK: $it"}
-
     ej_reference_tuple_filtered = ej_reference_tuple
         .filter{ meta, file ->
             params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly in run_conditionals
