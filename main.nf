@@ -155,7 +155,7 @@ workflow {
         params.hook_url,
     )
 
-    onComplete {
+    workflow.onComplete {
         if (workflow.success) {
             try {
                 def completionFile = file("${params.outdir}/workflow_completed.txt")
