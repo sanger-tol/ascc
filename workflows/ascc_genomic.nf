@@ -796,7 +796,6 @@ workflow ASCC_GENOMIC {
     //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
     //              AND ABNORMAL CONTAMINATION IS FOUND
     //
-    ch_fcsadapt.view{"FCS ADAPT: $it"}
 
     // We only want the EUKARYOTIC report
     // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`

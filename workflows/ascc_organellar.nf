@@ -575,7 +575,6 @@ workflow ASCC_ORGANELLAR {
     //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
     //              AND ABNORMAL CONTAMINATION IS FOUND
     //              AUTOFILTERING THE ASSEMBLY IS ESSENTIAL FOR DECON TO RUN
-    ch_fcsadapt.view{"FCS ADAPT: $it"}
 
     // We only want the EUKARYOTIC report
     // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`
