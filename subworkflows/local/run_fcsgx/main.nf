@@ -40,7 +40,6 @@ workflow RUN_FCSGX {
         [],
         "production" in workflow.profile.tokenize(',')
     )
-    ch_versions         = ch_versions.mix( FCSGX_RUNGX.out.versions )
 
     fcsgx_report_txt    = FCSGX_RUNGX.out.fcsgx_report
                             .map { meta, file ->
