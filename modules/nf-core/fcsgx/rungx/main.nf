@@ -1,5 +1,5 @@
 process FCSGX_RUNGX {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -18,7 +18,7 @@ process FCSGX_RUNGX {
     tuple val(meta), path("*.taxonomy.rpt")     , emit: taxonomy_report
     tuple val(meta), path("*.summary.txt")      , emit: log
     tuple val(meta), path("*.hits.tsv.gz")      , emit: hits, optional: true
-    path "versions.yml"                         , emit: versions
+    tuple val("${task.process}"), val('fcsgx'), eval("gx --help | sed '/build/!d; s/.*:v//; s/-.*//'"), emit: versions_fcsgx, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,7 +26,6 @@ process FCSGX_RUNGX {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def module_name = task.ext.module_name ?: ""
 
     // At Sanger we have a permenant home for the DB on NVME storage
     // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
@@ -34,20 +33,13 @@ process FCSGX_RUNGX {
     def database = ramdisk_path ?: gxdb
 
     if ( production_mode ) {
-        // Using just the module is not enough
-        // Due to how non-user processes set off the module at Sanger
-        // We need to create a module config and source it to work
-        // see: https://github.com/nextflow-io/nextflow/issues/5980
         """
         echo "Using Production FCSGX with local module"
-
-        modulecmd bash load ${module_name} > .module_def
-        source .module_def
 
         export GX_NUM_CORES=${task.cpus}
         export GX_INSTANTIATE_FASTA=1
 
-        run_gx \\
+        gx \\
             --fasta ${fasta} \\
             --gx-db ${database} \\
             --tax-id ${meta.taxid} \\
@@ -56,10 +48,6 @@ process FCSGX_RUNGX {
             --out-dir . \\
             ${args}
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
-        END_VERSIONS
         """
     } else {
         """
@@ -74,10 +62,6 @@ process FCSGX_RUNGX {
             --out-dir . \\
             ${args}
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
-        END_VERSIONS
         """
     }
 
@@ -90,9 +74,5 @@ process FCSGX_RUNGX {
     touch ${prefix}.summary.txt
     echo "" | gzip > ${prefix}.hits.tsv.gz
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        fcsgx: \$( gx --help | sed '/build/!d; s/.*:v//; s/;.*//' )
-    END_VERSIONS
     """
 }
