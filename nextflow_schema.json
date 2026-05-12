@@ -285,7 +285,7 @@
                     "type": "string",
                     "description": "Run autofilter_assembly jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
-                    "default": "genomic"
+                    "default": "both"
                 },
                 "run_create_btk_dataset": {
                     "type": "string",
