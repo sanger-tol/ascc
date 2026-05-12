@@ -833,7 +833,6 @@ workflow ASCC_GENOMIC {
     // Params file
     ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
 
-    log.info("[ASCC WORKFLOW STATUSGENERATE_HTML_REPORT_WORKFLOW: ${params.run_html_report}")
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
         ch_fcsadapt,
