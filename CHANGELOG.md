@@ -11,6 +11,16 @@ Release 11 of sanger-tol/ascc
 
 - Fixes to param evaluations which control process execution
 - Fixes to correct a `[ConcurrentModificationException]` stopping the use of FCS_ADAPTOR output
+- `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency.
+  - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table.
+
+### `Dependencies`
+
+| Module                  | Tool            | Old Version | New Versions |
+| ----------------------- | --------------- | ----------- | ------------ |
+| `KMER_COUNTER`          | kmer_counter.py | 1.0         | NA           |
+| `COBIONTID_KMERCOUNTER` | kmer-counter    | NA          | 1.1.2        |
+| `REFORMAT_NPY_2_CSV`    | npy_2_csv.py    | NA          | 1.0.0        |
 
 ## [0.6.0] - Red Notebook [28/01/2025]
 
