@@ -34,12 +34,12 @@ process FCSGX_RUNGX {
 
     if ( production_mode ) {
         """
-        echo "Using Production FCSGX with local module"
+        echo "Using Production FCSGX with local installation"
 
         export GX_NUM_CORES=${task.cpus}
         export GX_INSTANTIATE_FASTA=1
 
-        gx \\
+        run_gx \\
             --fasta ${fasta} \\
             --gx-db ${database} \\
             --tax-id ${meta.taxid} \\
