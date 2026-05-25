@@ -90,6 +90,17 @@ workflow ASCC_ASSEMBLY {
         }
 
 
+    //
+    // LOGIC: BUILD ASSEMBLY TYPE LOOKUP FROM THE ORIGINAL SAMPLESHEET BEFORE ESSENTIAL_JOBS.
+    //          ESSENTIAL_JOBS rebuilds meta internally with only id/sliding/window/taxid,
+    //          stripping assembly_type. This lookup is joined back onto the output channels
+    //          so that all isOrganellar() checks and the type branch work correctly.
+    //
+    ch_samplesheet
+        .map { meta, _f -> [[id: meta.id], meta.assembly_type] }
+        .set { ch_assembly_type_lookup }
+
+
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
@@ -99,13 +110,31 @@ workflow ASCC_ASSEMBLY {
         ch_samplesheet
     )
     ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
-    ej_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-    ej_seqkit_reference     = ESSENTIAL_JOBS.out.reference_with_seqkit
     ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
     ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
     ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
     ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
+
+    //
+    // LOGIC: RESTORE assembly_type TO ESSENTIAL_JOBS OUTPUT CHANNELS.
+    //          ESSENTIAL_JOBS strips assembly_type when it rebuilds meta to inject seqkit
+    //          sliding/window params. Rejoin against ch_assembly_type_lookup so that
+    //          isOrganellar() and the type branch below correctly route each assembly.
+    //
+    ej_reference_tuple = ESSENTIAL_JOBS.out.reference_tuple_from_GG
+        .map { meta, f -> [[id: meta.id], meta, f] }
+        .join(ch_assembly_type_lookup)
+        .map { _id_meta, meta, f, assembly_type ->
+            [meta + [assembly_type: assembly_type], f]
+        }
+
+    ej_seqkit_reference = ESSENTIAL_JOBS.out.reference_with_seqkit
+        .map { meta, f -> [[id: meta.id], meta, f] }
+        .join(ch_assembly_type_lookup)
+        .map { _id_meta, meta, f, assembly_type ->
+            [meta + [assembly_type: assembly_type], f]
+        }
 
 
     //-------------------------------------------------------------------------
