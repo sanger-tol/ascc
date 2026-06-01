@@ -16,6 +16,11 @@
                         "git_sha": "c7a7f06819adcf6f922e11b47f308b7c74484d67",
                         "installed_by": ["modules"]
                     },
+                    "cobiontid/kmercounter": {
+                        "branch": "master",
+                        "git_sha": "cde8632cf98462964ba4f61d77d702e433a8f761",
+                        "installed_by": ["modules"]
+                    },
                     "coverm/contig": {
                         "branch": "master",
                         "git_sha": "27e31681fdbf1e511257355a236037a8cd9c2b2e",

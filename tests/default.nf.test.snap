@@ -28,6 +28,9 @@
                     "python": "3.12.0",
                     "chunk_assembly_for_vecscreen.py": 1.0
                 },
+                "COBIONTID_KMERCOUNTER": {
+                    "kmer-counter": "0.1.2"
+                },
                 "COVERM_CONTIG": {
                     "coverm": "0.7.0"
                 },
@@ -93,9 +96,6 @@
                     "jinja2": "2.11.2",
                     "pandas": "1.0.5",
                     "generate_html_report": 1.0
-                },
-                "GET_KMER_COUNTS": {
-                    "kmer-counter": "0.1.2"
                 },
                 "GET_LINEAGE_FOR_KRAKEN": {
                     "python": "3.11.0",

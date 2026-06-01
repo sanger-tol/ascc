@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - Red Notebook (H1) [11/05/2025]
+
+Release 11 of sanger-tol/ascc
+
+### `Fixes`
+
+- Fixes to param evaluations which control process execution
+- Fixes to correct a `[ConcurrentModificationException]` stopping the use of FCS_ADAPTOR output
+- `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency.
+  - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table.
+
+### `Dependencies`
+
+| Module                  | Tool            | Old Version | New Versions |
+| ----------------------- | --------------- | ----------- | ------------ |
+| `KMER_COUNTER`          | kmer_counter.py | 1.0         | NA           |
+| `COBIONTID_KMERCOUNTER` | kmer-counter    | NA          | 1.1.2        |
+| `REFORMAT_NPY_2_CSV`    | npy_2_csv.py    | NA          | 1.0.0        |
+
 ## [0.6.0] - Red Notebook [28/01/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
@@ -44,6 +63,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
   - `CAT_CAT`
   - `GET_LARGEST_SCAFFOLD` as we now nolonger need a comparator to use TBI or CSI indexes.
 - Updated to NF-Core template 3.5.2
+- Update to param evaluation which was allowing certain subworkflows to run without needing to.
 
 ### `Bugs`
 

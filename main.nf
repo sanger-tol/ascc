@@ -154,8 +154,6 @@ workflow {
         params.monochrome_logs,
         params.hook_url,
     )
-
-
 }
 
 workflow.onComplete {

@@ -795,15 +795,27 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: GENERATE DECONTAMINATION FILES AND POTENTIALLY A DECONTAMINATED FASTA
     //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
     //              AND ABNORMAL CONTAMINATION IS FOUND
+    //
+
+    // We only want the EUKARYOTIC report
+    // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`
+    // `ch_fcsadapt` because it is a mix channel, is technically still mutable
+    euk_fcsadapt = ch_fcsadapt.map{ meta, files ->
+        def filesCopy = (files ?: []).collect()    // defensive copy
+        [meta, filesCopy.find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
+    }
+
+    ej_reference_tuple_filtered = ej_reference_tuple
+        .filter{ meta, file ->
+            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly in run_conditionals
+        }
+        .map{ meta, file -> [[id: meta.id], file] }
+
     RUN_DECONTAMINATE_FASTA(
-        ej_reference_tuple.filter { meta, file ->
-            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly == "both"
-        }.map { meta, file -> [[id: meta.id], file] },
+        ej_reference_tuple_filtered,
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
-        ch_fcsadapt.map{ meta, files ->
-            [meta, files.find{ file -> file.name.matches(".*_euk\\.fcs_adaptor_report\\.txt") }]
-        }, // We only want the EUKARYOTIC report
+        euk_fcsadapt,
         ej_trailing_ns,
         ch_barcode_check,
         ch_mito_full,
