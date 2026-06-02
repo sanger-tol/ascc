@@ -13,14 +13,18 @@ Release 11 of sanger-tol/ascc
 - Fixes to correct a `[ConcurrentModificationException]` stopping the use of FCS_ADAPTOR output
 - `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency.
   - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table.
+- `FCSGX_RUNGX` has been updated to not depend on `modulecmd` instead, production profiles will instead default to a local installation of fcs_gx. Avoiding containerised options provided in the module.
 
 ### `Dependencies`
 
-| Module                  | Tool            | Old Version | New Versions |
-| ----------------------- | --------------- | ----------- | ------------ |
-| `KMER_COUNTER`          | kmer_counter.py | 1.0         | NA           |
-| `COBIONTID_KMERCOUNTER` | kmer-counter    | NA          | 1.1.2        |
-| `REFORMAT_NPY_2_CSV`    | npy_2_csv.py    | NA          | 1.0.0        |
+| Module                  | Tool                | Old Version | New Versions  |
+| ----------------------- | ------------------- | ----------- | ------------- |
+| `KMER_COUNTER`          | kmer_counter.py     | 1.0         | NA            |
+| `COBIONTID_KMERCOUNTER` | kmer-counter        | NA          | 1.1.2         |
+| `REFORMAT_NPY_2_CSV`    | npy_2_csv.py        | NA          | 1.0.0         |
+| `SAMTOOLS_DICT`         | samtools            | 1.22.1      | 1.23.1        |
+| `SAMTOOLS_FAIDX`        | samtools            | 1.22.1      | 1.23.1        |
+| `MINIMAP2_ALIGN2`       | minimap2 + samtools | 2.29 + 1.21 | 2.30 + 1.23.1 |
 
 ## [0.6.0] - Red Notebook [28/01/2025]
 

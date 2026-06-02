@@ -1,0 +1,18 @@
+Changes in component 'sanger-tol/fastx_map_long_reads'
+'subworkflows/sanger-tol/fastx_map_long_reads/meta.yml' is unchanged
+Changes in 'fastx_map_long_reads/main.nf':
+--- subworkflows/sanger-tol/fastx_map_long_reads/main.nf
++++ subworkflows/sanger-tol/fastx_map_long_reads/main.nf
+@@ -128,7 +128,6 @@
+             ch_assemblies,
+             false
+         )
+-        ch_versions = ch_versions.mix(BAM_SAMTOOLS_MERGE_MARKDUP.out.versions)
+ 
+         ch_output_bam       = ch_output_bam.mix(BAM_SAMTOOLS_MERGE_MARKDUP.out.bam)
+         ch_output_bam_index = ch_output_bam.mix(BAM_SAMTOOLS_MERGE_MARKDUP.out.bam_index)
+
+'subworkflows/sanger-tol/fastx_map_long_reads/tests/nextflow.config' is unchanged
+'subworkflows/sanger-tol/fastx_map_long_reads/tests/main.nf.test' is unchanged
+'subworkflows/sanger-tol/fastx_map_long_reads/tests/main.nf.test.snap' is unchanged
+************************************************************

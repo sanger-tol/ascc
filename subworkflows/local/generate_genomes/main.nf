@@ -17,8 +17,7 @@ workflow GENERATE_GENOME {
     //          EMITS REFERENCE INDEX FILE MODIFIED FOR SCAFF SIZES
     //
     SAMTOOLS_FAIDX (
-        to_chromsize,
-        channel.of([[],[]]),
+        to_chromsize.map { meta, fasta -> [meta, fasta, []] },
         true
     )
 
