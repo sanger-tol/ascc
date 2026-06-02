@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            137,
+            139,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -163,7 +163,7 @@
                     "samtools": "1.23.1"
                 },
                 "SAMTOOLS_MERGE": {
-                    "samtools": "1.22.1"
+                    "samtools": "1.23.1"
                 },
                 "SED_SED": {
                     "coreutils": 9.1
