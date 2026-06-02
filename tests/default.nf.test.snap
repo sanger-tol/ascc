@@ -62,7 +62,7 @@
                     "slice_fasta.py": "1.0.0"
                 },
                 "FCSGX_RUNGX": {
-                    "fcsgx": "0.5.5-9-gfc836c1"
+                    "fcsgx": "0.5.5"
                 },
                 "FCS_FCSADAPTOR_EUK": {
                     "FCS-adaptor": "0.5.0"
@@ -157,7 +157,7 @@
                     "convert_to_hits": "2.0.0"
                 },
                 "SAMTOOLS_DICT": {
-                    "samtools": "1.22.1"
+                    "samtools": "1.23.1"
                 },
                 "SAMTOOLS_FAIDX": {
                     "samtools": "1.22.1"

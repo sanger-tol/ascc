@@ -22,6 +22,10 @@ Release 11 of sanger-tol/ascc
 | `KMER_COUNTER`          | kmer_counter.py | 1.0         | NA           |
 | `COBIONTID_KMERCOUNTER` | kmer-counter    | NA          | 1.1.2        |
 | `REFORMAT_NPY_2_CSV`    | npy_2_csv.py    | NA          | 1.0.0        |
+| `SAMTOOLS_DICT`         | samtools        | 1.22.1      | 1.23.1       |
+| `SAMTOOLS_FAIDX`        | samtools        | 1.22.1      | 1.23.1       |
+| `MINIMAP2_ALIGN2`       | minimap2 + samtools | 2.29 + 1.21        | 2.30 + 1.23.1        |
+
 
 ## [0.6.0] - Red Notebook [28/01/2025]
 
