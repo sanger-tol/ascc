@@ -88,8 +88,13 @@
                     },
                     "samtools/merge": {
                         "branch": "master",
-                        "git_sha": "9a48bce39a67e2cb34b8f125fc1d50f0ad98b616",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["bam_samtools_merge_markdup", "modules"]
+                    },
+                    "samtools/sort": {
+                        "branch": "master",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
                     },
                     "seqkit/sliding": {
                         "branch": "master",
@@ -148,7 +153,7 @@
                     },
                     "samtools/mergedup": {
                         "branch": "main",
-                        "git_sha": "fe57b32a304a149835e0fa829d4ca454b3b252e6",
+                        "git_sha": "729e9c8cfa83bc64c95ea6024dd5477c936e305e",
                         "installed_by": ["bam_samtools_merge_markdup", "modules"]
                     }
                 }
@@ -157,7 +162,7 @@
                 "sanger-tol": {
                     "bam_samtools_merge_markdup": {
                         "branch": "main",
-                        "git_sha": "3d708ba5f6d959da2fb814e51832c57664b57941",
+                        "git_sha": "dabc24fcfd9184c4bc95c6f48745c92aeee94c24",
                         "installed_by": ["fastx_map_long_reads"]
                     },
                     "fastx_map_long_reads": {
