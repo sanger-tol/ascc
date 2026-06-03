@@ -330,6 +330,7 @@
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_MITO/ascc_main_output",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.abnormal_details.txt",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.contamination.bed",
