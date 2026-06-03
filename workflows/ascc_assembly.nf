@@ -94,10 +94,10 @@ workflow ASCC_ASSEMBLY {
     // LOGIC: BUILD ASSEMBLY TYPE LOOKUP FROM THE ORIGINAL SAMPLESHEET BEFORE ESSENTIAL_JOBS.
     //          ESSENTIAL_JOBS rebuilds meta internally with only id/sliding/window/taxid,
     //          stripping assembly_type. This lookup is joined back onto the output channels
-    //          so that all isOrganellar() checks and the type branch work correctly.
+    //          so that all isOrganellar() checks and the type branch works correctly.
     //
     ch_samplesheet
-        .map { meta, _f -> [[id: meta.id], meta.assembly_type] }
+        .map { meta, _file -> [[id: meta.id], meta.assembly_type] }
         .set { ch_assembly_type_lookup }
 
 
