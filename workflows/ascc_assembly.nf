@@ -45,7 +45,7 @@ workflow ASCC_ASSEMBLY {
     take:
     ch_samplesheet          // channel: combined genomic + organellar assemblies; meta.assembly_type identifies each
     organellar_genomes      // channel: tuple(meta, reference) – organellar only, for ORGANELLAR_BLAST against genomic
-    _fcs_ov                  // params.fcs_override
+    _fcs_ov                 // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet (combined genomic + organellar entries)
     fcs_db                  // [path(path)]
     _reads
