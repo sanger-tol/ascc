@@ -44,26 +44,26 @@ workflow ORGANELLAR_BLAST {
     //
     // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
     //
-    BLAST_MAKEBLASTDB (
-        organellar_tuple
-    )
-    ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+    // BLAST_MAKEBLASTDB (
+    //     organellar_tuple
+    // )
+    // ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
 
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
     //
     SED_SED.out.sed
-        .combine(BLAST_MAKEBLASTDB.out.db)
-        .multiMap{ meta, ref, meta2, blast_db ->
-            reference_tuple: tuple(meta, ref)
-            blastdb_tuple: tuple(meta, blast_db)
+        .combine(organellar_tuple)
+        .multiMap{ meta, ref, meta2, subject ->
+            query_tuple: tuple(meta, ref)
+            subject_tuple: tuple(meta, subject)
         }
         .set { ref_and_db }
 
     BLAST_BLASTN (
-        ref_and_db.reference_tuple,
-        ref_and_db.blastdb_tuple,
+        ref_and_db.query_tuple,
+        ref_and_db.subject_tuple,
         [],
         [],
         []

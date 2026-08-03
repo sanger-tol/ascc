@@ -47,14 +47,15 @@ workflow PREPARE_BLASTDB {
     //
     // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
-    BLAST_MAKEBLASTDB (
-        ch_new_barcodes
-    )
-    ch_versions             = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+    // BLAST_MAKEBLASTDB (
+    //     ch_new_barcodes
+    // )
+    // ch_versions             = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
+    // BLAST_MAKEBLASTDB.out.db.view{"BLAST DB: ${it}"}
 
     emit:
-    barcodes_blast_db       = BLAST_MAKEBLASTDB.out.db
+    barcodes_blast_db       = ch_new_barcodes
     versions                = ch_versions
 
 }

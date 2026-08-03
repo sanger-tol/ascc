@@ -9,7 +9,7 @@ process BLAST_BLASTN {
 
     input:
     tuple val(meta) , path(fasta)
-    tuple val(meta2), path(db)
+    tuple val(meta2), path(db) // Now using this as an input fasta
     path taxidlist
     val taxids
     val negative_tax
@@ -38,16 +38,9 @@ process BLAST_BLASTN {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    DB=`find -L ./ -name "*.nal" | sed 's/\\.nal\$//'`
-    if [ -z "\$DB" ]; then
-        DB=`find -L ./ -name "*.nin" | sed 's/\\.nin\$//'`
-    fi
-    echo Using \$DB
-
     blastn \\
-        -num_threads ${task.cpus} \\
-        -db \$DB \\
         -query ${fasta_name} \\
+        -subject ${db} \\
         ${taxidlist_cmd} \\
         ${taxids_cmd} \\
         ${args} \\
