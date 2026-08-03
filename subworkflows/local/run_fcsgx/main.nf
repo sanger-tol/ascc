@@ -40,7 +40,7 @@ workflow RUN_FCSGX {
         [],
         "production" in workflow.profile.tokenize(',')
     )
-    ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions )
+    //ch_versions     = ch_versions.mix( FCSGX_RUNGX.out.versions_fcsgx )
 
 
     //
