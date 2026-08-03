@@ -152,7 +152,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // NOTE: Setting the basic channels form the input
     //
-    Channel.fromPath(params.pacbio_barcode_file, type: "dir")
+    Channel.fromPath(params.pacbio_barcode_file)
         .set {barcode_data_file}
 
     Channel.of(params.fcs_gx_database_path)
