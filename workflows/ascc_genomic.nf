@@ -806,7 +806,7 @@ workflow ASCC_GENOMIC {
     }
 
     ej_reference_tuple_filtered = ej_reference_tuple
-        .filter{ meta, file ->
+        .filter{ _meta, _file ->
             params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly in run_conditionals
         }
         .map{ meta, file -> [[id: meta.id], file] }

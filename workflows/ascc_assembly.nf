@@ -734,8 +734,7 @@ workflow ASCC_ASSEMBLY {
         log.warn "    `--btk_busco_run_mode mandatory`"
     }
 
-    // Noticed a race condition, this should fix that.
-    //
+    // NOTE: Noticed a race condition, this should fix that.
     run_btk_conditional.run_btk
         .map { meta, file, _data -> [meta.id, meta, file] }
         .join(
@@ -946,7 +945,7 @@ workflow ASCC_ASSEMBLY {
     }
 
     ej_reference_tuple_filtered = ej_reference_tuple
-        .filter{ meta, file ->
+        .filter{ meta, _file ->
             def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
             params.run_decontaminate_fasta in conds && params.run_autofilter_assembly in conds
         }
