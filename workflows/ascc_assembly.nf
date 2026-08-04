@@ -45,7 +45,7 @@ workflow ASCC_ASSEMBLY {
     take:
     ch_samplesheet          // channel: combined genomic + organellar assemblies; meta.assembly_type identifies each
     organellar_genomes      // channel: tuple(meta, reference) – organellar only, for ORGANELLAR_BLAST against genomic
-    _fcs_ov                  // params.fcs_override
+    _fcs_ov                 // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet (combined genomic + organellar entries)
     fcs_db                  // [path(path)]
     _reads
@@ -94,10 +94,10 @@ workflow ASCC_ASSEMBLY {
     // LOGIC: BUILD ASSEMBLY TYPE LOOKUP FROM THE ORIGINAL SAMPLESHEET BEFORE ESSENTIAL_JOBS.
     //          ESSENTIAL_JOBS rebuilds meta internally with only id/sliding/window/taxid,
     //          stripping assembly_type. This lookup is joined back onto the output channels
-    //          so that all isOrganellar() checks and the type branch work correctly.
+    //          so that all isOrganellar() checks and the type branch works correctly.
     //
     ch_samplesheet
-        .map { meta, _f -> [[id: meta.id], meta.assembly_type] }
+        .map { meta, _file -> [[id: meta.id], meta.assembly_type] }
         .set { ch_assembly_type_lookup }
 
 

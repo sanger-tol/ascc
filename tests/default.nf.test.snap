@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            137,
+            140,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -62,7 +62,7 @@
                     "slice_fasta.py": "1.0.0"
                 },
                 "FCSGX_RUNGX": {
-                    "fcsgx": "0.5.5-9-gfc836c1"
+                    "fcsgx": "0.5.5"
                 },
                 "FCS_FCSADAPTOR_EUK": {
                     "FCS-adaptor": "0.5.0"
@@ -157,13 +157,13 @@
                     "convert_to_hits": "2.0.0"
                 },
                 "SAMTOOLS_DICT": {
-                    "samtools": "1.22.1"
+                    "samtools": "1.23.1"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.22.1"
+                    "samtools": "1.23.1"
                 },
                 "SAMTOOLS_MERGE": {
-                    "samtools": "1.22.1"
+                    "samtools": "1.23.1"
                 },
                 "SED_SED": {
                     "coreutils": 9.1
@@ -330,6 +330,7 @@
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_MITO/ascc_main_output",
+                "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.abnormal_details.txt",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta.contamination.bed",
