@@ -701,16 +701,18 @@ workflow ASCC_GENOMIC {
             //
             // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
             //
+
             merged_channel = ch_create_btk_dataset
-                .map { meta, file -> [meta.id, [meta, file]] }
-                .join(
+                .map { meta, file -> [meta.id, meta, file] }
+                .combine(
                     SANGER_TOL_BTK.out.dataset
                         .map { meta, file ->
-                            [meta.id, [meta, file]]
-                    })
+                            [meta.id, meta, file]
+                    }, by: 0)
                 .map { _id, ref_meta, ref_file, _btk_meta, btk_file ->
                     [ref_meta, ref_file, btk_file]
                 }
+
 
             MERGE_BTK_DATASETS (
                 merged_channel
