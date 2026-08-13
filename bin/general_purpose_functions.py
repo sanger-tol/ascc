@@ -7,8 +7,7 @@ File for functions that can be reused in many Python scripts
 #
 # Copyright (c) 2020-2021 Genome Research Ltd.
 #
-# Author: Eerik Aunin (eeaunin@gmail.com)
-#
+# Author: Eerik Aunin (eeaunin@gmail.com
 # This file is a part of the Genome Decomposition Analysis (GDA) pipeline.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,13 +28,13 @@ File for functions that can be reused in many Python scripts
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-from os.path import isfile
-import sys
-import subprocess
-import signal
-from datetime import datetime
 import argparse
+import os
+import signal
+import subprocess
+import sys
+from datetime import datetime
+from os.path import isfile
 
 
 def l(path):
@@ -172,17 +171,15 @@ def string_to_chunks(line, n):
     return [line[i : i + n] for i in range(0, len(line), n)]
 
 
-def run_system_command(
-    system_command, verbose=True, dry_run=False, tries=1, expected_exit_code=0
-):
+def run_system_command(system_command, verbose=True, dry_run=False, tries=1, expected_exit_code=0):
     """
     Executes a system command and checks its exit code
     """
     triggering_script_name = sys.argv[0].split("/")[-1]
     try_counter_string = ""
-    if dry_run == False:
+    if not dry_run:
         for i in range(0, tries):
-            if verbose == True:
+            if verbose:
                 time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if i > 0:
                     try_counter_string = ", try {}".format(i + 1)
@@ -201,11 +198,7 @@ def run_system_command(
                 break
             except subprocess.CalledProcessError as exc:
                 out_errormessage = (
-                    "<"
-                    + triggering_script_name
-                    + "> "
-                    + " exited with error code "
-                    + str(exc.returncode)
+                    "<" + triggering_script_name + "> " + " exited with error code " + str(exc.returncode)
                 )
                 if exc.output.isspace() == False:
                     out_errormessage += ". Error message: " + exc.output
@@ -234,11 +227,7 @@ def get_file_paths(in_folder_path, extension):
     onlyfiles = list()
     selected_file_paths = list()
     if os.path.isdir(in_folder_path):
-        onlyfiles = [
-            f
-            for f in os.listdir(in_folder_path)
-            if os.path.isfile(os.path.join(in_folder_path, f))
-        ]
+        onlyfiles = [f for f in os.listdir(in_folder_path) if os.path.isfile(os.path.join(in_folder_path, f))]
         for file_item in onlyfiles:
             if "." + extension in file_item:
                 file_item_split = file_item.split(".")

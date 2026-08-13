@@ -36,7 +36,12 @@ workflow RUN_FCSADAPTOR {
                 .map{ meta, file -> [meta.id, file] }
         )
         .groupTuple()
-        .map { id, files -> [[id: id], files] }
+        // NOTE: `groupTuple()` emits its internal ArrayBag, and that SAME instance is
+        //       handed to every consumer of this channel. Any in-place operation
+        //       (sort/unique/add) by one consumer corrupts it for the others, which
+        //       surfaces as `Unexpected error [ConcurrentModificationException]`.
+        //       Emit a defensive copy so each downstream branch owns its own list.
+        .map { id, files -> [[id: id], new ArrayList(files)] }
         .set { ch_fcsadapt }
 
     emit:

@@ -22,7 +22,7 @@ include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/
 include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
 include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
 include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
-include { RUN_FCSGX                                     } from '../subworkflows/local/run_fcsgx/main'
+include { FCSGX_PARSECSV as RUN_FCSGX                   } from '../subworkflows/local/run_fcsgx/main'
 include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
 include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
 include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
@@ -96,9 +96,8 @@ workflow ASCC_ASSEMBLY {
     //          stripping assembly_type. This lookup is joined back onto the output channels
     //          so that all isOrganellar() checks and the type branch works correctly.
     //
-    ch_samplesheet
+    ch_assembly_type_lookup = ch_samplesheet
         .map { meta, _file -> [[id: meta.id], meta.assembly_type] }
-        .set { ch_assembly_type_lookup }
 
 
     //-------------------------------------------------------------------------
@@ -116,6 +115,7 @@ workflow ASCC_ASSEMBLY {
     ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
     ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
 
+
     //
     // LOGIC: RESTORE assembly_type TO ESSENTIAL_JOBS OUTPUT CHANNELS.
     //          ESSENTIAL_JOBS strips assembly_type when it rebuilds meta to inject seqkit
@@ -123,17 +123,17 @@ workflow ASCC_ASSEMBLY {
     //          isOrganellar() and the type branch below correctly route each assembly.
     //
     ej_reference_tuple = ESSENTIAL_JOBS.out.reference_tuple_from_GG
-        .map { meta, f -> [[id: meta.id], meta, f] }
+        .map { meta, file -> [[id: meta.id], meta, file] }
         .join(ch_assembly_type_lookup)
-        .map { _id_meta, meta, f, assembly_type ->
-            [meta + [assembly_type: assembly_type], f]
+        .map { _id_meta, meta, file, assembly_type ->
+            [meta + [assembly_type: assembly_type], file]
         }
 
     ej_seqkit_reference = ESSENTIAL_JOBS.out.reference_with_seqkit
-        .map { meta, f -> [[id: meta.id], meta, f] }
+        .map { meta, file -> [[id: meta.id], meta, file] }
         .join(ch_assembly_type_lookup)
-        .map { _id_meta, meta, f, assembly_type ->
-            [meta + [assembly_type: assembly_type], f]
+        .map { _id_meta, meta, file, assembly_type ->
+            [meta + [assembly_type: assembly_type], file]
         }
 
 
@@ -158,6 +158,7 @@ workflow ASCC_ASSEMBLY {
             file.countFasta() * 3
         }
         .set { autoencoder_epochs_count }
+
 
     //
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS (GENOMIC ONLY)
@@ -206,7 +207,7 @@ workflow ASCC_ASSEMBLY {
 
     //
     // LOGIC: FOR ORGANELLAR ASSEMBLIES, WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE
-    //          IS OF AT LEAST LENGTH OF params.seqkit_window BEFORE RUNNING BLAST/DIAMOND
+    //        IS OF AT LEAST LENGTH OF params.seqkit_window BEFORE RUNNING BLAST/DIAMOND
     //
     valid_length_fasta = ej_seqkit_reference
         .filter { meta, _f -> isOrganellar(meta) }
@@ -238,6 +239,13 @@ workflow ASCC_ASSEMBLY {
         .map{ meta, _file ->
             log.info "[ASCC INFO]: Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
         }
+
+    assemblies_to_blast = ch_type_branch.genomic
+        .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals }
+        .mix(
+            valid_length_fasta
+                .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals }
+        )
 
     EXTRACT_NT_BLAST (
         ch_type_branch.genomic
@@ -428,7 +436,6 @@ workflow ASCC_ASSEMBLY {
             joint_channel.fcs_db_path,
             joint_channel.ncbi_tax_path
         )
-        ch_versions         = ch_versions.mix(RUN_FCSGX.out.versions)
 
         ch_fcsgx            = RUN_FCSGX.out.fcsgxresult
         ch_fcsgx_report     = RUN_FCSGX.out.fcsgx_report_txt
@@ -664,7 +671,11 @@ workflow ASCC_ASSEMBLY {
         //          by joining against ch_type_branch.genomic before branching.
         //
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-            .join( ch_type_branch.genomic.map { meta, _f -> [[id: meta.id], true] } )
+            .map { meta, file -> [[id: meta.id], file] }
+            .join(
+                ch_type_branch.genomic
+                    .map { meta, _f -> [[id: meta.id], true] }
+            )
             .map { meta, file, _flag -> [meta, file] }
             .map { meta, file -> [meta, file.text.trim()] }
             .branch { meta, data ->
@@ -693,9 +704,7 @@ workflow ASCC_ASSEMBLY {
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
     run_btk_conditional = ch_type_branch.genomic
-        .map { meta, file ->
-                [[id: meta.id, taxid: meta.taxid], file]
-            }
+        .map { meta, file -> [[id: meta.id], file] }
         // below is combined into the tuple to enforce the block to only run when channel is present.
         .combine ( btk_bool_run_btk
                         .map{ meta, data ->
@@ -704,7 +713,7 @@ workflow ASCC_ASSEMBLY {
                                     .replaceAll(/\s+/, "-")          // Replace remaining spaces with "-"
                                     .replaceAll(/_+/, "_")           // Keep underscores as they are
                                     .replaceAll(/-+/, "-")           // Clean up multiple dashes
-                            [[id: meta.id, taxid: meta.taxid], joined_content]
+                            [[id: meta.id], joined_content]
                         },
                 by: [0]
             )
@@ -726,7 +735,6 @@ workflow ASCC_ASSEMBLY {
             log.info "\t- You can verify here: $file"
             return [meta, file]
         }
-        //.set { skipped_btk_ch }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
         log.warn "[ASCC WARN]: run_autofilter_assembly is off, but run_btk_busco != off"
@@ -764,6 +772,7 @@ workflow ASCC_ASSEMBLY {
         }
         .set { ch_meta_reads }
 
+
     BLOBTOOLKIT_GENERATECSV (
         ch_meta_reads,
         [[],[]],
@@ -798,6 +807,7 @@ workflow ASCC_ASSEMBLY {
         }
         .combine(btk_samplesheet, by: 0)
 
+
     combined_input
         .map{ meta, ref, samplesheet ->
             log.info("[ASCC INFO]: BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n")
@@ -829,33 +839,32 @@ workflow ASCC_ASSEMBLY {
     if (
             ( params.run_merge_datasets in genomicConditionals ) &&
             ( params.run_btk_busco in genomicConditionals )
-        ) {
-            //
-            // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
-            //
-            merged_channel = ch_create_btk_dataset
-                .map { meta, file -> [meta.id, [meta, file]] }
-                .join(
-                    SANGER_TOL_BTK.out.dataset
-                        .map { meta, file ->
-                            [meta.id, [meta, file]]
-                    })
-                .map { _id, ref_meta, ref_file, _btk_meta, btk_file ->
-                    [ref_meta, ref_file, btk_file]
-                }
-
-            MERGE_BTK_DATASETS (
-                merged_channel
+    ) {
+        //
+        // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
+        //
+        merged_channel = ch_create_btk_dataset
+            .map { meta, file -> tuple(meta.id, [meta, file]) }
+            .join(
+                SANGER_TOL_BTK.out.dataset
+                    .map { meta, file -> tuple(meta.id, [meta, file]) }
             )
-            ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
-            busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
-                                        .map{ meta, _tsv -> [[id: meta.id], _tsv] }
-            merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
-        } else {
-            busco_merge_btk         = channel.of( [[:],[]] )
-            merged_ds               = channel.of( [[:],[]] )
+            .map {
+                _id, ref, btk -> tuple(ref[0], ref[1], btk[1])
+            }
 
-        }
+        MERGE_BTK_DATASETS (
+            merged_channel
+        )
+        ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
+        busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
+                                    .map{ meta, _tsv -> [[id: meta.id], _tsv] }
+        merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
+    } else {
+        busco_merge_btk         = channel.of( [[:],[]] )
+        merged_ds               = channel.of( [[:],[]] )
+
+    }
 
 
     //-------------------------------------------------------------------------
@@ -936,12 +945,9 @@ workflow ASCC_ASSEMBLY {
     //              AND ABNORMAL CONTAMINATION IS FOUND
     //              AUTOFILTERING THE ASSEMBLY IS ESSENTIAL FOR DECON TO RUN
 
-    // We only want the EUKARYOTIC report
-    // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`
-    // `ch_fcsadapt` because it is a mix channel, is technically still mutable
+    // NOTE: We only want the EUKARYOTIC report.
     euk_fcsadapt = ch_fcsadapt.map{ meta, files ->
-        def filesCopy = (files ?: []).collect()    // defensive copy
-        [meta, filesCopy.find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
+        [meta, (files ?: []).find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
     }
 
     ej_reference_tuple_filtered = ej_reference_tuple
