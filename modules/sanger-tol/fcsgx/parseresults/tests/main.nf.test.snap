@@ -1,0 +1,112 @@
+{
+    "Laetiporus_sulphureus - fasta - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "Laetiporus_sulphureus"
+                        },
+                        "Laetiporus_sulphureus_parsed_fcsgx.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "python",
+                        "3.14.3"
+                    ]
+                ],
+                "2": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "parse_fcsgx_result",
+                        "1.1.0"
+                    ]
+                ],
+                "fcsgxresult": [
+                    [
+                        {
+                            "id": "Laetiporus_sulphureus"
+                        },
+                        "Laetiporus_sulphureus_parsed_fcsgx.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_parsefcsgx": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "parse_fcsgx_result",
+                        "1.1.0"
+                    ]
+                ],
+                "versions_python": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "python",
+                        "3.14.3"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-07-09T14:48:37.325284408",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "Laetiporus_sulphureus - csv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "Laetiporus_sulphureus"
+                        },
+                        "Laetiporus_sulphureus_parsed_fcsgx.csv:md5,2e0a628cce100843cc36d184a1d92653"
+                    ]
+                ],
+                "1": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "python",
+                        "3.14.3"
+                    ]
+                ],
+                "2": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "parse_fcsgx_result",
+                        "1.1.0"
+                    ]
+                ],
+                "fcsgxresult": [
+                    [
+                        {
+                            "id": "Laetiporus_sulphureus"
+                        },
+                        "Laetiporus_sulphureus_parsed_fcsgx.csv:md5,2e0a628cce100843cc36d184a1d92653"
+                    ]
+                ],
+                "versions_parsefcsgx": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "parse_fcsgx_result",
+                        "1.1.0"
+                    ]
+                ],
+                "versions_python": [
+                    [
+                        "FCSGX_PARSERESULTS",
+                        "python",
+                        "3.14.3"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-07-09T14:48:17.817628452",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

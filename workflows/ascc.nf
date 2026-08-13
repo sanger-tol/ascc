@@ -3,8 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { ASCC_GENOMIC      as GENOMIC      } from './ascc_genomic'
-include { ASCC_ORGANELLAR   as ORGANELLAR   } from './ascc_organellar'
+include { ASCC_ASSEMBLY     as ASSEMBLY     } from './ascc_assembly'
 
 include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
@@ -48,13 +47,15 @@ workflow ASCC {
     ch_versions     = channel.empty()
 
     //
-    // WORKFLOW: Run main workflow for GENOMIC samples
+    // WORKFLOW: Run main workflow for all assemblies (genomic + organellar)
     //
-    GENOMIC (
-        genomic_genomes,
+    ASSEMBLY (
+        params.genomic_only
+            ? genomic_genomes
+            : genomic_genomes.mix(organellar_genomes),
         organellar_genomes,
         fcs_override,
-        genomic_fcs_samplesheet,
+        genomic_fcs_samplesheet.mix(organellar_fcs_samplesheet),
         fcs_db,
         collected_reads,
         scientific_name,
@@ -75,36 +76,7 @@ workflow ASCC {
         barcodes,
         val_reads_per_chunk
     )
-    ch_versions         = ch_versions.mix(GENOMIC.out.versions)
-
-
-    //
-    // WORKFLOW: Run main workflow for ORGANELLAR samples
-    //
-    if ( !params.genomic_only ) {
-        ORGANELLAR (
-            organellar_genomes,
-            fcs_override,
-            organellar_fcs_samplesheet,
-            fcs_db,
-            collected_reads,
-            scientific_name,
-            pacbio_database,
-            ncbi_taxonomy_path,
-            ncbi_ranked_lineage_path,
-            nt_database_path,
-            diamond_nr_db_path,
-            diamond_uniprot_db_path,
-            taxid,
-            nt_kraken_db_path,
-            vecscreen_database_path,
-            reads_path,
-            reads_type,
-            barcodes,
-            val_reads_per_chunk
-        )
-        ch_versions     = ch_versions.mix(ORGANELLAR.out.versions)
-    }
+    ch_versions         = ch_versions.mix(ASSEMBLY.out.versions)
 
 
     //

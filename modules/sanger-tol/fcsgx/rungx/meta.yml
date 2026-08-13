@@ -39,6 +39,9 @@ input:
   - ramdisk_path:
       type: string
       description: Path to RAM disk for improved performance (optional)
+  - production_mode:
+      type: boolean
+      description: Whether to run in production mode (optional)
 output:
   fcsgx_report:
     - - meta:

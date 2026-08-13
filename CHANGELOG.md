@@ -14,6 +14,9 @@ Release 11 of sanger-tol/ascc
 - `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency.
   - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table.
 - `FCSGX_RUNGX` has been updated to not depend on `modulecmd` instead, production profiles will instead default to a local installation of fcs_gx. Avoiding containerised options provided in the module.
+- Samtools modules have been updated to `1.23.1`.
+- `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow.
+  - This was an artifact from when the two would have been doing significantly different processes.
 
 ### `Dependencies`
 
@@ -24,6 +27,7 @@ Release 11 of sanger-tol/ascc
 | `REFORMAT_NPY_2_CSV`    | npy_2_csv.py        | NA          | 1.0.0         |
 | `SAMTOOLS_DICT`         | samtools            | 1.22.1      | 1.23.1        |
 | `SAMTOOLS_FAIDX`        | samtools            | 1.22.1      | 1.23.1        |
+| `SAMTOOLS_SORT`         | samtools            | 1.22.1      | 1.23.1        |
 | `MINIMAP2_ALIGN2`       | minimap2 + samtools | 2.29 + 1.21 | 2.30 + 1.23.1 |
 
 ## [0.6.0] - Red Notebook [28/01/2025]

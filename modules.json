@@ -37,12 +37,6 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/fcs/fcsadaptor/fcs-fcsadaptor.diff"
                     },
-                    "fcsgx/rungx": {
-                        "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/fcsgx/rungx/fcsgx-rungx.diff"
-                    },
                     "gnu/sort": {
                         "branch": "master",
                         "git_sha": "7ad318b7b2c0ef6a101c01b6083b8acd6a9a63de",
@@ -150,6 +144,16 @@
                         "branch": "main",
                         "git_sha": "f919028603ca42cb01a59e45475c19106840372d",
                         "installed_by": ["fastx_map_long_reads"]
+                    },
+                    "fcsgx/parseresults": {
+                        "branch": "main",
+                        "git_sha": "17d7d065459873b60bb795714fac19137304b793",
+                        "installed_by": ["modules"]
+                    },
+                    "fcsgx/rungx": {
+                        "branch": "main",
+                        "git_sha": "864e75dc4bf5b4fc50f7a5e568a4cb6236bfb528",
+                        "installed_by": ["modules"]
                     },
                     "samtools/mergedup": {
                         "branch": "main",

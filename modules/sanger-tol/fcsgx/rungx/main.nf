@@ -8,9 +8,9 @@ process FCSGX_RUNGX {
         'quay.io/biocontainers/ncbi-fcs-gx:0.5.5--h9948957_0' }"
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), val(taxid), path(fasta)
     path gxdb
-    path ramdisk_path
+    val ramdisk_path
     val production_mode
 
     output:
@@ -27,52 +27,35 @@ process FCSGX_RUNGX {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
-    // At Sanger we have a permenant home for the DB on NVME storage
-    // def mv_database_to_ram = ramdisk_path ? "rclone copy $gxdb $ramdisk_path/$task.index/" : ''
-    // def database = ramdisk_path ? "$ramdisk_path/$task.index/" : gxdb // Use task.index to make memory location unique
     def database = ramdisk_path ?: gxdb
 
-    if ( production_mode ) {
+    ( ramdisk_path ?
         """
-        echo "Using Production FCSGX with local installation"
+        # Copy DB to RAM-disk when supplied. Otherwise, rungx is very slow.
+        rclone copy --ignore-existing ${gxdb} ${database}
+        """ : ""
+    )
 
-        export GX_NUM_CORES=${task.cpus}
-        export GX_INSTANTIATE_FASTA=1
+    """
+    export GX_NUM_CORES=${task.cpus}
+    export GX_INSTANTIATE_FASTA=1
 
-        run_gx \\
-            --fasta ${fasta} \\
-            --gx-db ${database} \\
-            --tax-id ${meta.taxid} \\
-            --generate-logfile true \\
-            --out-basename ${prefix} \\
-            --out-dir . \\
-            ${args}
-
-        """
-    } else {
-        """
-        echo "Using Standard FCSGX with container"
-
-        run_gx.py \\
-            --fasta ${fasta} \\
-            --gx-db ${database} \\
-            --tax-id ${meta.taxid} \\
-            --generate-logfile true \\
-            --out-basename ${prefix} \\
-            --out-dir . \\
-            ${args}
-
-        """
-    }
+    run_gx.py \\
+        --fasta ${fasta} \\
+        --gx-db ${database} \\
+        --tax-id ${taxid} \\
+        --generate-logfile true \\
+        --out-basename ${prefix} \\
+        --out-dir . \\
+        ${args}
+    """
 
     stub:
-    // def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.fcs_gx_report.txt
     touch ${prefix}.taxonomy.rpt
     touch ${prefix}.summary.txt
     echo "" | gzip > ${prefix}.hits.tsv.gz
-
     """
 }

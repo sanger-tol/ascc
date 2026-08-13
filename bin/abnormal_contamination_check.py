@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import general_purpose_functions as gpf
-import sys
+import argparse
 import os.path
 import pathlib
-import argparse
+import sys
 import textwrap
+
+import general_purpose_functions as gpf
 
 VERSION = "V1.2.0"
 
@@ -38,11 +39,33 @@ def parse_args():
     parser.add_argument("assembly", type=str, help="Path to the fasta assembly file")
     parser.add_argument("summary_path", type=str, help="Path to the tiara summary file")
     parser.add_argument("-q", "--out_prefix", type=str, help="Output file prefix for the report")
-    parser.add_argument("-o", "--output", type=str, help="Path to output file", default="fcs-gx_alarm_indicator_file.txt")
-    parser.add_argument("-p", "--alarm_percentage", type=int, help="Percentage of putative contaminant sequence in genomic assembly that will trip the alarm", default=3)
-    parser.add_argument("-l", "--alarm_length_removed", type=int, help="Length of removed sequence is greater than default, greater than this will trip the alarm.", default=1e7)
-    parser.add_argument("-s", "--alarm_scaff_length", type=int, help="Length of largest scaffold removed to trip alarm.", default=1.8e6)
-    parser.add_argument("-t", "--alarm_scaff_percent_removed", type=float, help="Percentage of Scaffolds set for removal from assembly to trip the alarm.", default=10.0)
+    parser.add_argument(
+        "-o", "--output", type=str, help="Path to output file", default="fcs-gx_alarm_indicator_file.txt"
+    )
+    parser.add_argument(
+        "-p",
+        "--alarm_percentage",
+        type=int,
+        help="Percentage of putative contaminant sequence in genomic assembly that will trip the alarm",
+        default=3,
+    )
+    parser.add_argument(
+        "-l",
+        "--alarm_length_removed",
+        type=int,
+        help="Length of removed sequence is greater than default, greater than this will trip the alarm.",
+        default=1e7,
+    )
+    parser.add_argument(
+        "-s", "--alarm_scaff_length", type=int, help="Length of largest scaffold removed to trip alarm.", default=1.8e6
+    )
+    parser.add_argument(
+        "-t",
+        "--alarm_scaff_percent_removed",
+        type=float,
+        help="Percentage of Scaffolds set for removal from assembly to trip the alarm.",
+        default=10.0,
+    )
     parser.add_argument("-r", "--review_info", type=int, help="Number of REVIEW/INFO to the trigger alarm", default=0)
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     return parser.parse_args()
@@ -66,9 +89,7 @@ def load_fcs_gx_results(seq_dict, fcs_gx_and_tiara_summary_path):
     Loads FCS-GX actions from the FCS-GX and Tiara results summary file, adds them to the dictionary that contains sequence lengths
     """
     fcs_gx_and_tiara_summary_data = gpf.l(fcs_gx_and_tiara_summary_path)
-    fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[
-        1 : len(fcs_gx_and_tiara_summary_data)
-    ]
+    fcs_gx_and_tiara_summary_data = fcs_gx_and_tiara_summary_data[1 : len(fcs_gx_and_tiara_summary_data)]
     for line in fcs_gx_and_tiara_summary_data:
         split_line = line.split(",")
         assert len(split_line) == 5
@@ -87,9 +108,7 @@ def main():
         sys.exit(1)
 
     if os.path.isfile(args.assembly) is False:
-        sys.stderr.write(
-            f"The assembly FASTA file was not found at the expected location ({args.assembly})\n"
-        )
+        sys.stderr.write(f"The assembly FASTA file was not found at the expected location ({args.assembly})\n")
         sys.exit(1)
 
     seq_dict = get_sequence_lengths(args.assembly)
@@ -115,7 +134,7 @@ def main():
         "PERCENTAGE_LENGTH_REMOVED": args.alarm_percentage,
         "LARGEST_SCAFFOLD_REMOVED": args.alarm_scaff_length,
         "PERCENTAGE_SCAFFOLDS_REMOVED": args.alarm_scaff_percent_removed,
-        "REVIEW_OR_INFO": args.review_info
+        "REVIEW_OR_INFO": args.review_info,
     }
 
     report_dict = {
@@ -124,7 +143,7 @@ def main():
         "LARGEST_SCAFFOLD_REMOVED": max(lengths_removed, default=0),
         "SCAFFOLDS_REMOVED": scaffolds_removed,
         "PERCENTAGE_SCAFFOLDS_REMOVED": 100 * scaffolds_removed / scaffold_count,
-        "REVIEW_OR_INFO": review_info
+        "REVIEW_OR_INFO": review_info,
     }
 
     # Seperated out to ensure that the file is written in one go and doesn't confuse Nextflow

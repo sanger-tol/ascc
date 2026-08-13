@@ -5,14 +5,19 @@ nextflow_process {
     process "FCSGX_RUNGX"
 
     tag "modules"
-    tag "modules_nfcore"
+    tag "modules_sangertol"
     tag "fcsgx"
-    tag "fcsgx/fetchdb"
+    tag "nf-core/fcsgx/fetchdb"
+    tag "nf-core/fetchdb"
     tag "fcsgx/rungx"
 
     setup {
+        nfcoreInitialise("${launchDir}/library/")
+        nfcoreInstall("${launchDir}/library/", ["fcsgx/fetchdb"])
+        nfcoreLink("${launchDir}/library/", "${baseDir}/modules")
+
         run("FCSGX_FETCHDB"){
-            script "../../fetchdb/main.nf"
+            script "../../../../nf-core/fcsgx/fetchdb/main.nf"
             process {
                 """
                 input[0] = file('https://ftp.ncbi.nlm.nih.gov/genomes/TOOLS/FCS/database/test-only/test-only.manifest', checkIfExists: true)
@@ -29,10 +34,11 @@ nextflow_process {
                 input[0] = [
                     [ id:'test', single_end:false ], // meta map
                     '2697049', // taxid for SARS-CoV-2
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
                 ]
                 input[1] = FCSGX_FETCHDB.out.database
                 input[2] = []
+                input[3] = channel.of(false)
                 """
             }
         }
@@ -65,10 +71,11 @@ nextflow_process {
                 input[0] = [
                     [ id:'test', single_end:false ], // meta map
                     '2697049', // taxid for SARS-CoV-2
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
+                    file(params.nfcore_modules_testdata_base_path + 'genomics/sarscov2/genome/genome.fasta', checkIfExists: true),
                 ]
                 input[1] = FCSGX_FETCHDB.out.database
                 input[2] = []
+                input[3] = channel.of(false)
                 """
             }
         }
