@@ -60,6 +60,7 @@ workflow SANGERTOL_ASCC {
     // WORKFLOW: Run pipeline
     //
     ASCC (
+<<<<<<< HEAD
         genomic,
         organelles,
         fcs_override,
@@ -84,6 +85,10 @@ workflow SANGERTOL_ASCC {
         btk_lineages_path,
         barcodes,
         val_reads_per_chunk
+=======
+        samplesheet,
+        params.outdir,
+>>>>>>> TEMPLATE
     )
 }
 
@@ -152,7 +157,6 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
     )
 }
 
