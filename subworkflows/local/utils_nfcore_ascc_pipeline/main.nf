@@ -61,7 +61,6 @@ workflow PIPELINE_INITIALISATION {
     // Validate parameters and generate parameter summary to stdout
     //
 
-<<<<<<< HEAD
     before_text = """
 -\033[2m----------------------------------------------------\033[0m-
 \033[0;34m   _____                               \033[0;32m _______   \033[0;31m _\033[0m
@@ -82,13 +81,9 @@ workflow PIPELINE_INITIALISATION {
 * Software dependencies
     https://github.com/sanger-tol/ascc/blob/main/CITATIONS.md
 """
-=======
-    def before_text = ""
-    def after_text = ""
     if (monochrome_logs) {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
     }
->>>>>>> TEMPLATE
 
     command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
 
@@ -101,12 +96,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-<<<<<<< HEAD
-        command
-=======
         command,
         false
->>>>>>> TEMPLATE
     )
 
     //

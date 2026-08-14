@@ -7,11 +7,8 @@ testing/
 testing*
 *.pyc
 null/
-<<<<<<< HEAD
 .nf-test/
 .nf-test.log
 *.tar.gz
 *.dmnd
-=======
 .lineage/
->>>>>>> TEMPLATE

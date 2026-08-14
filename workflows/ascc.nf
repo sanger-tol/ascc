@@ -18,7 +18,6 @@ include { paramsSummaryMap                  } from 'plugin/nf-schema'
 workflow ASCC {
 
     take:
-<<<<<<< HEAD
     genomic_genomes         // channel: samplesheet read in from --input
     organellar_genomes      // channel: tuple(meta, reference)
     fcs_override            // bool
@@ -43,10 +42,6 @@ workflow ASCC {
     btk_lineages_path
     barcodes
     val_reads_per_chunk
-=======
-    ch_samplesheet // channel: samplesheet read in from --input
-    outdir
->>>>>>> TEMPLATE
 
     main:
     ch_versions     = channel.empty()
@@ -83,10 +78,6 @@ workflow ASCC {
     )
     ch_versions         = ch_versions.mix(ASSEMBLY.out.versions)
 
-<<<<<<< HEAD
-=======
-    def ch_versions = channel.empty()
->>>>>>> TEMPLATE
 
     //
     // Collate and save software versions
@@ -116,11 +107,7 @@ workflow ASCC {
             sort: true,
             newLine: true
         )
-    emit:
-<<<<<<< HEAD
-    versions       = ch_collated_versions                 // channel: [ path(versions.yml) ]
 
-=======
+    emit:
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
->>>>>>> TEMPLATE
 }
