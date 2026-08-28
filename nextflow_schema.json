@@ -120,6 +120,11 @@
                     "description": "CSV list of lineages to use in run",
                     "fa_icon": "fas fa-input-text"
                 },
+                "busco_lineage_mapping_file": {
+                    "type": "string",
+                    "description": "Path to BUSCO lineage to taxid mapping file",
+                    "fa_icon": "fas fa-file-lines"
+                },
                 "fcs_gx_database_path": {
                     "type": "string",
                     "description": "FCS_GX folder containing database",

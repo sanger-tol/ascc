@@ -40,6 +40,7 @@ workflow ASCC {
     reads_type
     btk_lineages
     btk_lineages_path
+    btk_lineage_mapping_file
     barcodes
     val_reads_per_chunk
 
@@ -73,6 +74,7 @@ workflow ASCC {
         reads_type,
         btk_lineages,
         btk_lineages_path,
+        btk_lineage_mapping_file,
         barcodes,
         val_reads_per_chunk
     )
@@ -102,7 +104,7 @@ workflow ASCC {
     def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
         .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${outdir}/pipeline_info",
+            storeDir: "${params.outdir}/pipeline_info",
             name:  'ascc_software_'  + 'versions.yml',
             sort: true,
             newLine: true

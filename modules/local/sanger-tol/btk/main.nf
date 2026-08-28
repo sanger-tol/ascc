@@ -13,6 +13,7 @@ process SANGER_TOL_BTK {
     path blobtoolkit_trace_config
     val busco_lineages_folder
     val busco_lineages
+    val lineage_mapping_file
     val taxon
 
     output:
@@ -52,8 +53,7 @@ process SANGER_TOL_BTK {
     """
     mv $reference ${prefix}.fasta
 
-    nextflow run ${pipeline} \\
-        -r $pipeline_version \\
+    nextflow run /lustre/scratch124/tol/teams/tola/users/dp24/blobtoolkit/main.nf \\
         -c $blobtoolkit_config_file \\
         ${trace_config} \\
         -profile ${profiles} \\
@@ -62,6 +62,7 @@ process SANGER_TOL_BTK {
         --fasta ${prefix}.fasta \\
         --busco $busco_lineages_folder \\
         --busco_lineages $busco_lineages \\
+        --lineage_tax_ids $lineage_mapping_file \\
         --taxon $taxon \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\

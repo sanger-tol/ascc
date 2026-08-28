@@ -2,7 +2,7 @@
 // LOCAL SUBWORKFLOW IMPORTS
 //
 include { FASTX_MAP_LONG_READS as SE_MAPPING            } from '../../sanger-tol/fastx_map_long_reads/main'
-include { PE_MAPPING                                    } from '../pe_mapping/main'
+//include { PE_MAPPING                                    } from '../pe_mapping/main'
 
 //
 // NF-CORE MODULE IMPORTS
@@ -66,11 +66,11 @@ workflow RUN_READ_COVERAGE {
         //
         // MODULE: RUN PAIRED END MAPPING ON THE REFERENCE AND SHORTREAD DATA
         //
-        PE_MAPPING  (
-            ref_and_data
-        )
-        ch_versions     = ch_versions.mix(PE_MAPPING.out.versions)
-        ch_align_bam    = PE_MAPPING.out.mapped_bam
+        // PE_MAPPING  (
+        //     ref_and_data
+        // )
+        // ch_versions     = ch_versions.mix(PE_MAPPING.out.versions)
+        // ch_align_bam    = PE_MAPPING.out.mapped_bam
 
         //
         // MODULE: SORT THE MAPPED BAM
