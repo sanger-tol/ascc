@@ -50,7 +50,8 @@ workflow SANGERTOL_ASCC {
     reads_layout                // Layout of input reads [SINGLE, PAIRED]
     reads_type                  // Type of input reads [HIFI, CLR, ILLUMINA, etc...]
     btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
-    btk_lineages_path           // Path to the ODB10 lineages
+    btk_lineages_path           // Path to the ODB* lineages
+    btk_lineage_mapping_file    // Path to the ODB* lineage to taxid mapping file
     barcodes                    // ["barcode_1,barcode_2"]
     val_reads_per_chunk         // int: number of reads per chunk to map when estimating coverage
 
@@ -82,6 +83,7 @@ workflow SANGERTOL_ASCC {
         reads_type,
         btk_lineages,
         btk_lineages_path,
+        btk_lineage_mapping_file,
         barcodes,
         val_reads_per_chunk
     )
@@ -138,6 +140,7 @@ workflow {
         params.reads_type,
         channel.of(params.busco_lineages),
         channel.fromPath(params.busco_lineages_folder),
+        channel.fromPath(params.busco_lineage_mapping_file),
         PIPELINE_INITIALISATION.out.barcodes,
         params.coverage_reads_per_chunk
     )
@@ -152,36 +155,37 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
     )
-}
 
-workflow.onComplete {
-    if (workflow.success) {
-        try {
-            def completionFile = file("${params.outdir}/workflow_completed.txt")
-            def du = ["du", "-sh", workflow.workDir.toString()].execute()
-            du.waitFor()
-            completionFile.text = """
-                Workflow completed successfully!
-                Completed at: ${workflow.complete}
-                Duration: ${workflow.duration}
-                Success: ${workflow.success}
-                Work directory: ${workflow.workDir}
-                Work directory size: ${du.text.trim()}
-                Exit status: ${workflow.exitStatus}
-                Run name: ${workflow.runName}
-                Session ID: ${workflow.sessionId}
-                Project directory: ${workflow.projectDir}
-                Launch directory: ${workflow.launchDir}
-                Command line: ${workflow.commandLine}
-            """.stripIndent()
-            log.info "[ASCC INFO] Completion file created: ${completionFile}"
-        } catch (Exception e) {
-            log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
+    workflow.onComplete {
+        if (workflow.success) {
+            try {
+                def completionFile = file("${params.outdir}/workflow_completed.txt")
+                def du = ["du", "-sh", workflow.workDir.toString()].execute()
+                du.waitFor()
+                completionFile.text = """
+                    Workflow completed successfully!
+                    Completed at: ${workflow.complete}
+                    Duration: ${workflow.duration}
+                    Success: ${workflow.success}
+                    Work directory: ${workflow.workDir}
+                    Work directory size: ${du.text.trim()}
+                    Exit status: ${workflow.exitStatus}
+                    Run name: ${workflow.runName}
+                    Session ID: ${workflow.sessionId}
+                    Project directory: ${workflow.projectDir}
+                    Launch directory: ${workflow.launchDir}
+                    Command line: ${workflow.commandLine}
+                """.stripIndent()
+                log.info "[ASCC INFO] Completion file created: ${completionFile}"
+            } catch (Exception e) {
+                log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
+            }
         }
     }
 }
+
+
 
 
 /*

@@ -31,7 +31,7 @@ include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder                           } from '../functions/local/ascc_utils'
+include { getEmptyPlaceholder; isOrganellar; runConditionals; genomicConditionals; organellarConditionals } from '../functions/local/ascc_utils'
 
 
 /*
@@ -64,6 +64,7 @@ workflow ASCC_ASSEMBLY {
     reads_type
     btk_lineages
     btk_lineages_path
+    btk_lineage_mapping_file
     ch_barcodes
     val_reads_per_chunk
 
@@ -71,13 +72,14 @@ workflow ASCC_ASSEMBLY {
     ch_versions = channel.empty()
 
     //
-    // LOGIC: HELPER CLOSURE AND CONDITIONAL LISTS
-    //          isOrganellar resolves the correct run_conditionals list per assembly item,
-    //          preserving the original per-workflow gating logic in a single unified workflow.
+    // LOGIC: HELPER FUNCTIONS
+    //          isOrganellar / runConditionals are imported from functions/local/ascc_utils.
+    //          They MUST be functions rather than workflow-local closures: local variables
+    //          declared in a workflow body are not in scope inside operator closures under
+    //          the strict Nextflow syntax, and script-level variable declarations are not
+    //          permitted either. runConditionals(meta) resolves the correct run_conditionals
+    //          list per assembly item, preserving the original per-workflow gating logic.
     //
-    def genomicConditionals    = ["both", "genomic"]
-    def organellarConditionals = ["both", "organellar"]
-    def isOrganellar           = { meta -> meta.assembly_type in ["MITO", "PLASTID"] }
 
 
     //
@@ -164,7 +166,7 @@ workflow ASCC_ASSEMBLY {
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS (GENOMIC ONLY)
     //
     GET_KMERS_PROFILE (
-        ch_type_branch.genomic.filter{ _meta, _file -> params.run_kmers in genomicConditionals },
+        ch_type_branch.genomic.filter{ _meta, _file -> params.run_kmers in genomicConditionals() },
         params.kmer_length,
         params.dimensionality_reduction_methods,
         autoencoder_epochs_count
@@ -185,10 +187,10 @@ workflow ASCC_ASSEMBLY {
     //
     TIARA_TIARA (
         ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_tiara in genomicConditionals }
+            .filter{ _meta, _file -> params.run_tiara in genomicConditionals() }
             .mix(
                 ch_type_branch.organellar
-                    .filter{ _meta, _file -> params.run_tiara in organellarConditionals }
+                    .filter{ _meta, _file -> params.run_tiara in organellarConditionals() }
             )
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
@@ -241,18 +243,18 @@ workflow ASCC_ASSEMBLY {
         }
 
     assemblies_to_blast = ch_type_branch.genomic
-        .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals }
+        .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals() }
         .mix(
             valid_length_fasta
-                .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals }
+                .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals() }
         )
 
     EXTRACT_NT_BLAST (
         ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals }
+            .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals() }
             .mix(
                 valid_length_fasta
-                    .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals }
+                    .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals() }
             ),
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
@@ -270,10 +272,10 @@ workflow ASCC_ASSEMBLY {
 
     NR_DIAMOND (
         ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_nr_diamond in genomicConditionals }
+            .filter{ _meta, _file -> params.run_nr_diamond in genomicConditionals() }
             .mix(
                 valid_length_fasta
-                    .filter{ _meta, _file -> params.run_nr_diamond in organellarConditionals }
+                    .filter{ _meta, _file -> params.run_nr_diamond in organellarConditionals() }
             ),
         diamond_nr_db_path.first()
     )
@@ -296,10 +298,10 @@ workflow ASCC_ASSEMBLY {
     //  evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     UP_DIAMOND (
         ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_uniprot_diamond in genomicConditionals }
+            .filter{ _meta, _file -> params.run_uniprot_diamond in genomicConditionals() }
             .mix(
                 valid_length_fasta
-                    .filter{ _meta, _file -> params.run_uniprot_diamond in organellarConditionals }
+                    .filter{ _meta, _file -> params.run_uniprot_diamond in organellarConditionals() }
             ),
         diamond_uniprot_db_path.first()
     )
@@ -320,7 +322,7 @@ workflow ASCC_ASSEMBLY {
     //
     organellar_check = organellar_genomes
         .filter{ _meta, _file ->
-            params.run_organellar_blast in genomicConditionals
+            params.run_organellar_blast in genomicConditionals()
         }
         .branch { meta, _assembly ->
             mito:       meta.assembly_type == "MITO"
@@ -385,7 +387,7 @@ workflow ASCC_ASSEMBLY {
 
     PACBIO_BARCODE_CHECK (
         duplicated_db.reference.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_pacbio_barcodes in conds
         },
         ch_barcodes,
@@ -401,7 +403,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_FCSADAPTOR (
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_fcs_adaptor in conds
         }
     )
@@ -418,7 +420,7 @@ workflow ASCC_ASSEMBLY {
 
         joint_channel = ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_fcsgx in conds
             }
             .combine(fcs_db)
@@ -466,7 +468,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_READ_COVERAGE (
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_coverage in conds
         },
         reads_path,
@@ -484,7 +486,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_VECSCREEN (
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_vecscreen in conds
         },
         vecscreen_database_path.first()
@@ -499,7 +501,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_NT_KRAKEN(
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_kraken in conds
         },
         nt_kraken_db_path.first(),
@@ -537,7 +539,7 @@ workflow ASCC_ASSEMBLY {
         //
         ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_create_btk_dataset in conds
             }
             .map{meta, file -> [[id: meta.id], file]}
@@ -617,7 +619,7 @@ workflow ASCC_ASSEMBLY {
         //
         ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_tiara in conds && params.run_fcsgx in conds && params.run_autofilter_assembly in conds
             }
             .map{ meta, file -> [[id: meta.id], file] }
@@ -830,6 +832,7 @@ workflow ASCC_ASSEMBLY {
         file("${projectDir}/assets/btk_config_files/btk_trace.config"),
         btk_lineages_path.first(),
         btk_lineages.first(),
+        btk_lineage_mapping_file.first(),
         taxid.first(),
     )
     ch_versions     = ch_versions.mix(SANGER_TOL_BTK.out.versions)
@@ -837,8 +840,8 @@ workflow ASCC_ASSEMBLY {
 
     //-------------------------------------------------------------------------
     if (
-            ( params.run_merge_datasets in genomicConditionals ) &&
-            ( params.run_btk_busco in genomicConditionals )
+            ( params.run_merge_datasets in genomicConditionals() ) &&
+            ( params.run_btk_busco in genomicConditionals() )
     ) {
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
@@ -885,7 +888,7 @@ workflow ASCC_ASSEMBLY {
         //
         ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_essentials in conds && params.run_merge_datasets in conds
             }
             .map{meta, file -> [[id: meta.id], file]}
@@ -952,7 +955,7 @@ workflow ASCC_ASSEMBLY {
 
     ej_reference_tuple_filtered = ej_reference_tuple
         .filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_decontaminate_fasta in conds && params.run_autofilter_assembly in conds
         }
         .map{ meta, file -> [[id: meta.id], file] }
@@ -983,9 +986,6 @@ workflow ASCC_ASSEMBLY {
     //              in the join inside GENERATE_HTML_REPORT_WORKFLOW and receive a placeholder.
     //
 
-    // Params file
-    ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
-
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
         ch_fcsadapt,
@@ -996,12 +996,12 @@ workflow ASCC_ASSEMBLY {
         merged_phylum_count,
         ch_kmers_results,
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_html_report in conds
         },
         ej_fasta_sanitation_log,
         ej_fasta_filter_log,
-        ch_params_file,
+        [],
         ch_fcsgx_report,
         ch_fcsgx_taxonomy,
         ch_create_btk_dataset

@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/main/nextflow_schema.json",
     "title": "sanger-tol/ascc pipeline parameters",
     "description": "Assembly Screen for Cobionts and Contaminants",
     "type": "object",
@@ -119,6 +119,11 @@
                     "type": "string",
                     "description": "CSV list of lineages to use in run",
                     "fa_icon": "fas fa-input-text"
+                },
+                "busco_lineage_mapping_file": {
+                    "type": "string",
+                    "description": "Path to BUSCO lineage to taxid mapping file",
+                    "fa_icon": "fas fa-file-lines"
                 },
                 "fcs_gx_database_path": {
                     "type": "string",
@@ -421,13 +426,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "hidden": true
-                },
-                "hook_url": {
-                    "type": "string",
-                    "description": "Incoming hook URL for messaging service",
-                    "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "validate_params": {

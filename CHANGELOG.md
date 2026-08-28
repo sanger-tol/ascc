@@ -3,20 +3,37 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.1] - Red Notebook (H1) [11/05/2025]
+## [1.0.0] - Blue Bowls [28/08/2025]
 
-Release 11 of sanger-tol/ascc
+Release 12 of sanger-tol/ascc and the first full release and folds in changes made to the pre-release 0.7.0 and 0.7.1 versions.
 
 ### `Fixes`
 
+- Update the nf-core template to 4.1.0
+- Update NF-Schema to 2.7.2 to take advantage of `toBoolean()` and cli arg type casting
+- Add `busco_lineage_mapping_file` parameter to allow custom lineage mapping files
+  - These are stored in the `assets/` directory and are generated from the official busco mappings
+  - The two options are:
+    - `mapping_taxids-busco_dataset_name.eukaryota_odb10.2019-12-16.txt`
+    - `mapping_taxids-busco_dataset_name.eukaryota_odb12.2025-01-15.txt`
+- Updated `RUN_READ_COVERAGE` which utilises the `SANGER-TOL` subworkflow `FASTX_MAP_LONG_READS` for single end reads.
 - Fixes to param evaluations which control process execution
 - Fixes to correct a `[ConcurrentModificationException]` stopping the use of FCS_ADAPTOR output
 - `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency.
   - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table.
 - `FCSGX_RUNGX` has been updated to not depend on `modulecmd` instead, production profiles will instead default to a local installation of fcs_gx. Avoiding containerised options provided in the module.
 - Samtools modules have been updated to `1.23.1`.
-- `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow.
+- Updated the main workflow so that `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow.
   - This was an artifact from when the two would have been doing significantly different processes.
+- Updating `SANGER_TOL_BTK` to 0.11.1 (Bulbasaur H1)
+- Created the `functions/local/ascc_utils.nf` containing some common utility functions for ASCC workflows.
+
+
+### `Parameters`
+
+| Old Parameter        | New Parameter                 |
+| -------------------- | ----------------------------- |
+| NA                   | --busco_lineage_mapping_file  |
 
 ### `Dependencies`
 
