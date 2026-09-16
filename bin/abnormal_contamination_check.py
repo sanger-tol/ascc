@@ -75,11 +75,11 @@ def get_sequence_lengths(assembly_fasta_path):
     """
     Gets sequence lengths of a FASTA file and returns them as a dictionary
     """
-    seq_lengths_dict = dict()
+    seq_lengths_dict = {}
     fasta_data = gpf.read_fasta_in_chunks(assembly_fasta_path)
     for header, seq in fasta_data:
         seq_len = len(seq)
-        seq_lengths_dict[header] = dict()
+        seq_lengths_dict[header] = {}
         seq_lengths_dict[header]["seq_len"] = seq_len
     return seq_lengths_dict
 
@@ -115,7 +115,7 @@ def main():
     seq_dict = load_fcs_gx_results(seq_dict, args.summary_path)
 
     total_assembly_length = 0
-    lengths_removed = list()
+    lengths_removed = []
     scaffolds_removed = 0
     scaffold_count = len(seq_dict)
     review_info = 0
@@ -154,13 +154,12 @@ def main():
     pathlib.Path(args.output).unlink(missing_ok=True)
 
     alarm_list = []
-    stage1_decon_pass_flag = True
-    for param in alarm_threshold_for_parameter:
+    # stage1_decon_pass_flag = True
+    for param, alarm_threshold in alarm_threshold_for_parameter.items():
         param_value = report_dict[param]
-        alarm_threshold = alarm_threshold_for_parameter[param]
 
         # IF CONTAMINATING SEQ FOUND FILL FILE WITH ABNORMAL CONTAM
-        if param_value > alarm_threshold_for_parameter[param]:
+        if param_value > alarm_threshold:
             alarm_list.append(
                 f"YES_ABNORMAL_CONTAMINATION: Stage 1 decon for {args.assembly}: {param} == {param_value} : Alarm threshold == {alarm_threshold}\n"
             )
