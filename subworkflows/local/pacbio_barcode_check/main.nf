@@ -23,7 +23,6 @@ workflow PACBIO_BARCODE_CHECK {
         [],
         []
     )
-    ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
 
     //

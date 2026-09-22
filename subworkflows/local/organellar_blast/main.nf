@@ -45,21 +45,21 @@ workflow ORGANELLAR_BLAST {
     // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
     //
     BLAST_MAKEBLASTDB (
-        organellar_tuple
+        organellar_tuple,
+        []
     )
-    ch_versions     = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
 
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
     //
-    SED_SED.out.sed
+    ref_and_db = SED_SED.out.sed
         .combine(BLAST_MAKEBLASTDB.out.db)
         .multiMap{ meta, ref, _meta2, blast_db ->
             reference_tuple:    [meta, ref]
             blastdb_tuple:      [meta, blast_db]
         }
-        .set { ref_and_db }
+
 
     BLAST_BLASTN (
         ref_and_db.reference_tuple,
@@ -68,7 +68,6 @@ workflow ORGANELLAR_BLAST {
         [],
         []
     )
-    ch_versions     = ch_versions.mix(BLAST_BLASTN.out.versions)
 
 
     //
@@ -124,9 +123,9 @@ workflow ORGANELLAR_BLAST {
                 },
             by: 0
         )
-        .multiMap { meta, no_comment_file, reference ->
+        .multiMap { meta, no_comment_file, assembly ->
             filtered: [meta, no_comment_file]
-            reference: [meta, reference]
+            reference_ch: [meta, assembly]
 
         }
         .set { mapped }
@@ -137,7 +136,7 @@ workflow ORGANELLAR_BLAST {
     //
     EXTRACT_CONTAMINANTS (
         mapped.filtered,
-        mapped.reference
+        mapped.reference_ch
     )
     ch_versions     = ch_versions.mix(EXTRACT_CONTAMINANTS.out.versions)
 

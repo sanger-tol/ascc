@@ -53,17 +53,18 @@ process SANGER_TOL_BTK {
     """
     mv $reference ${prefix}.fasta
 
-    nextflow run /lustre/scratch124/tol/teams/tola/users/dp24/blobtoolkit/main.nf \\
-        -c $blobtoolkit_config_file \\
+    nextflow run ${pipeline} \\
+        -r ${pipeline_version} \\
+        -c ${blobtoolkit_config_file} \\
         ${trace_config} \\
         -profile ${profiles} \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta ${prefix}.fasta \\
-        --busco $busco_lineages_folder \\
-        --busco_lineages $busco_lineages \\
-        --lineage_tax_ids $lineage_mapping_file \\
-        --taxon $taxon \\
+        --busco ${busco_lineages_folder} \\
+        --busco_lineages ${busco_lineages} \\
+        --lineage_tax_ids ${lineage_mapping_file} \\
+        --taxon ${taxon} \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\
         --blastn "\$(realpath $blastn)" \\

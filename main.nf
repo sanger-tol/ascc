@@ -157,7 +157,7 @@ workflow {
         params.monochrome_logs,
     )
 
-    workflow.onComplete {
+    onComplete:
         if (workflow.success) {
             try {
                 def completionFile = file("${params.outdir}/workflow_completed.txt")
@@ -181,7 +181,7 @@ workflow {
             } catch (Exception e) {
                 log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
             }
-        }
+
     }
 }
 

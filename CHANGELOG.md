@@ -10,7 +10,7 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 ### `Fixes`
 
 - Update the nf-core template to 4.1.0
-- Update NF-Schema to 2.7.2 to take advantage of `toBoolean()` and cli arg type casting
+- Update NF-Schema to 2.7.3 to take advantage cli arg type casting
 - Add `busco_lineage_mapping_file` parameter to allow custom lineage mapping files
   - These are stored in the `assets/` directory and are generated from the official busco mappings
   - The two options are:
@@ -25,15 +25,14 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 - Samtools modules have been updated to `1.23.1`.
 - Updated the main workflow so that `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow.
   - This was an artifact from when the two would have been doing significantly different processes.
-- Updating `SANGER_TOL_BTK` to 0.11.1 (Bulbasaur H1)
+- Updating `SANGER_TOL_BTK` to 0.11.1 (Bulbasaur H1) - NOTE: WILL NEED TO BE UPDATED TO 11.2
 - Created the `functions/local/ascc_utils.nf` containing some common utility functions for ASCC workflows.
-
 
 ### `Parameters`
 
-| Old Parameter        | New Parameter                 |
-| -------------------- | ----------------------------- |
-| NA                   | --busco_lineage_mapping_file  |
+| Old Parameter | New Parameter                |
+| ------------- | ---------------------------- |
+| NA            | --busco_lineage_mapping_file |
 
 ### `Dependencies`
 
@@ -46,6 +45,9 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 | `SAMTOOLS_FAIDX`        | samtools            | 1.22.1      | 1.23.1        |
 | `SAMTOOLS_SORT`         | samtools            | 1.22.1      | 1.23.1        |
 | `MINIMAP2_ALIGN2`       | minimap2 + samtools | 2.29 + 1.21 | 2.30 + 1.23.1 |
+| `BLAST_BLASTN`          | blastn              | 2.16.0+     | 2.17.0+       |
+| `BLAST_MAKEBLASTDB`     | blastn              | 2.16.0+     | 2.17.0+       |
+| `DIAMOND_BLASTX`        | diamond             | 2.1.12      | 2.2.1         |
 
 ## [0.6.0] - Red Notebook [28/01/2025]
 

@@ -7,13 +7,13 @@
                 "nf-core": {
                     "blast/blastn": {
                         "branch": "master",
-                        "git_sha": "454504547c9d928cd374248a02ea8e137326da2c",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/blast/blastn/blast-blastn.diff"
                     },
                     "blast/makeblastdb": {
                         "branch": "master",
-                        "git_sha": "c7a7f06819adcf6f922e11b47f308b7c74484d67",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "cobiontid/kmercounter": {
@@ -28,12 +28,12 @@
                     },
                     "diamond/blastx": {
                         "branch": "master",
-                        "git_sha": "c44e4bb090eb4c9136f6d3f786285e4a9000f38f",
+                        "git_sha": "83ce9b314157a24d9a92f17a07ed5d55f30b78f9",
                         "installed_by": ["modules"]
                     },
                     "fcs/fcsadaptor": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "d0a30b674dc035e978bdd8215e4ac2ae2ea0064b",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/fcs/fcsadaptor/fcs-fcsadaptor.diff"
                     },
