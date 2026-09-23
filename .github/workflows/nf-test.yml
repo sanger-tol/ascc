@@ -23,9 +23,7 @@ env:
   NXF_ANSI_LOG: false
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
-
-  # Temporary until v26 is the minimum https://github.com/nextflow-io/nextflow/issues/5261
-  NXF_SYNTAX_PARSER: "v2"
+  NXF_SYNTAX_PARSER: "v2" # Temporary until v26 is the minimum https://github.com/nextflow-io/nextflow/issues/5261
 
 jobs:
   nf-test-changes:
