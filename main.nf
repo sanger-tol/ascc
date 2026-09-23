@@ -157,8 +157,6 @@ workflow {
         params.monochrome_logs,
     )
 
-    // onError:
-    //     log.error "[ASCC ERROR] Workflow failed: ${workflow.error}"
 
     onComplete:
         try {
@@ -183,7 +181,9 @@ workflow {
         } catch (Exception e) {
             log.error "[ASCC ] Failed to create completion file: ${e.message}"
         }
-    }
+
+    onError:
+        log.error "[ASCC ERROR] Workflow failed: ${workflow.error}"
 }
 
 
