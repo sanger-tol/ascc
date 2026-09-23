@@ -34,8 +34,6 @@ process BLAST_BLASTN {
     }
 
     """
-    reference=""
-
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
     fi

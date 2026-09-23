@@ -157,31 +157,32 @@ workflow {
         params.monochrome_logs,
     )
 
-    onComplete:
-        if (workflow.success) {
-            try {
-                def completionFile = file("${params.outdir}/workflow_completed.txt")
-                def du = ["du", "-sh", workflow.workDir.toString()].execute()
-                du.waitFor()
-                completionFile.text = """
-                    Workflow completed successfully!
-                    Completed at: ${workflow.complete}
-                    Duration: ${workflow.duration}
-                    Success: ${workflow.success}
-                    Work directory: ${workflow.workDir}
-                    Work directory size: ${du.text.trim()}
-                    Exit status: ${workflow.exitStatus}
-                    Run name: ${workflow.runName}
-                    Session ID: ${workflow.sessionId}
-                    Project directory: ${workflow.projectDir}
-                    Launch directory: ${workflow.launchDir}
-                    Command line: ${workflow.commandLine}
-                """.stripIndent()
-                log.info "[ASCC INFO] Completion file created: ${completionFile}"
-            } catch (Exception e) {
-                log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
-            }
+    // onError:
+    //     log.error "[ASCC ERROR] Workflow failed: ${workflow.error}"
 
+    onComplete:
+        try {
+            def completionFile = file("${params.outdir}/workflow_completed.txt")
+            def du = ["du", "-sh", workflow.workDir.toString()].execute()
+            du.waitFor()
+            completionFile.text = """
+                Workflow completed successfully!
+                Completed at: ${workflow.complete}
+                Duration: ${workflow.duration}
+                Success: ${workflow.success}
+                Work directory: ${workflow.workDir}
+                Work directory size: ${du.text.trim()}
+                Exit status: ${workflow.exitStatus}
+                Run name: ${workflow.runName}
+                Session ID: ${workflow.sessionId}
+                Project directory: ${workflow.projectDir}
+                Launch directory: ${workflow.launchDir}
+                Command line: ${workflow.commandLine}
+            """.stripIndent()
+            log.info "[ASCC INFO] Completion file created: ${completionFile}"
+        } catch (Exception e) {
+            log.error "[ASCC ] Failed to create completion file: ${e.message}"
+        }
     }
 }
 

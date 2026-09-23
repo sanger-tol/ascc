@@ -242,12 +242,7 @@ workflow ASCC_ASSEMBLY {
         )
 
     EXTRACT_NT_BLAST (
-        ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals() }
-            .mix(
-                valid_length_fasta
-                    .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals() }
-            ),
+        assemblies_to_blast,
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
     )

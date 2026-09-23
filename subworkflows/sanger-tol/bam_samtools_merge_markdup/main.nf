@@ -55,7 +55,8 @@ workflow BAM_SAMTOOLS_MERGE_MARKDUP {
     } else {
         SAMTOOLS_MERGE(
             ch_samtools_merge_input.bam,
-            ch_samtools_merge_input.fasta
+            ch_samtools_merge_input.fasta,
+            "csi"
         )
 
         ch_output_bam  = SAMTOOLS_MERGE.out.bam.mix(SAMTOOLS_MERGE.out.cram)

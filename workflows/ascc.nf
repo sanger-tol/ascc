@@ -111,5 +111,6 @@ workflow ASCC {
         )
 
     emit:
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    essential_reference     = ASSEMBLY.out.essential_reference
+    ch_versions             = ch_collated_versions                // channel: [ path(versions.yml) ]
 }
