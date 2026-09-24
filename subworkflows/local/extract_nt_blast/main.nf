@@ -44,7 +44,6 @@ workflow EXTRACT_NT_BLAST {
         [],
         []
     )
-    ch_versions             = ch_versions.mix(BLAST_BLASTN.out.versions)
 
     input_genome
         .map{ meta, _file ->

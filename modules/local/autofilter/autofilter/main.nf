@@ -18,32 +18,28 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tuple val(meta), path("*ABNORMAL_CHECK.csv"),                       emit: fcs_tiara_summary
     tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
     tuple val(meta), path("fcs-gx_alarm_indicator_file.txt"),           emit: alarm_file
-    tuple val(meta), path("autofiltering_done_indicator_file.txt"),     emit: indicator_file
     path("*raw_report.txt"),                                            emit: raw_report
     path "versions.yml",                                                emit: versions
 
     script:
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     def args    = task.ext.args     ?: ""
+    def args2   = task.ext.args2    ?: ""
     """
     autofilter.py \\
-        $reference \\
-        --taxid $meta.taxid \\
-        --tiara $tiara_txt \\
-        --fcsgx_sum $fcs_csv \\
-        --out_prefix $prefix \\
-        --ncbi_rankedlineage_path $ncbi_rankedlineage \\
+        ${reference} \\
+        --taxid ${meta.taxid} \\
+        --tiara ${tiara_txt} \\
+        --fcsgx_sum ${fcs_csv} \\
+        --out_prefix ${prefix} \\
+        --ncbi_rankedlineage_path ${ncbi_rankedlineage} \\
         ${args} \\
 
     abnormal_contamination_check.py \\
-        $reference \\
+        ${reference} \\
+        ${args2} \\
         ${prefix}_ABNORMAL_CHECK.csv \\
         --out_prefix ${prefix}
-
-    # The below indicator file is used in Sanger-Tol to allow for other processes
-    # to begin once generated. This allows us to speed up the overall flow of the
-    # Tol-engine
-    touch autofiltering_done_indicator_file.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -57,7 +53,6 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     touch ABNORMAL_CHECK.csv
     touch assembly_filtering_removed_sequences.txt
     touch fcs-gx_alarm_indicator_file.txt
-    touch autofiltering_done_indicator_file.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -73,8 +73,7 @@ workflow PE_MAPPING {
     SAMTOOLS_MERGE(
         collected_files_for_merge,
         [[],[]],
-        [[],[]],
-        [[],[]]
+        "csi"
     )
 
 

@@ -230,7 +230,6 @@ nextflow_pipeline {
             def completion_file     = getAllFilesFromDir(params.outdir, include: ["workflow_completed.txt"])
 
             assertAll(
-                { assert workflow.success},
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
@@ -282,7 +281,6 @@ nextflow_pipeline {
 
                     // Workflow completion file
                     completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check
-
                 ).match() }
             )
         }

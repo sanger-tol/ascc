@@ -4,15 +4,20 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// LOCAL MODULE IMPORTS
 include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
 include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
 include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
 include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
 include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
+
+// SANGER-TOLER MODULE IMPORTS
 include { BLOBTOOLKIT_GENERATECSV                       } from '../modules/sanger-tol/blobtoolkit/generatecsv/main'
 
+// NF-CORE MODULE IMPORTS
 include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
 
+// LOCAL SUBWORKFLOW IMPORTS
 include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
 include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
 include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
@@ -31,7 +36,7 @@ include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder                           } from '../functions/local/ascc_utils'
+include { getEmptyPlaceholder; isOrganellar; runConditionals; genomicConditionals; organellarConditionals } from '../functions/local/ascc_utils'
 
 
 /*
@@ -64,21 +69,12 @@ workflow ASCC_ASSEMBLY {
     reads_type
     btk_lineages
     btk_lineages_path
+    btk_lineage_mapping_file
     ch_barcodes
     val_reads_per_chunk
 
     main:
     ch_versions = channel.empty()
-
-    //
-    // LOGIC: HELPER CLOSURE AND CONDITIONAL LISTS
-    //          isOrganellar resolves the correct run_conditionals list per assembly item,
-    //          preserving the original per-workflow gating logic in a single unified workflow.
-    //
-    def genomicConditionals    = ["both", "genomic"]
-    def organellarConditionals = ["both", "organellar"]
-    def isOrganellar           = { meta -> meta.assembly_type in ["MITO", "PLASTID"] }
-
 
     //
     // LOGIC: PRETTY NOTIFICATION OF FILES AT STAGE
@@ -164,7 +160,7 @@ workflow ASCC_ASSEMBLY {
     // SUBWORKFLOW: COUNT KMERS, THEN REDUCE DIMENSIONS USING SELECTED METHODS (GENOMIC ONLY)
     //
     GET_KMERS_PROFILE (
-        ch_type_branch.genomic.filter{ _meta, _file -> params.run_kmers in genomicConditionals },
+        ch_type_branch.genomic.filter{ _meta, _file -> params.run_kmers in genomicConditionals() },
         params.kmer_length,
         params.dimensionality_reduction_methods,
         autoencoder_epochs_count
@@ -185,10 +181,10 @@ workflow ASCC_ASSEMBLY {
     //
     TIARA_TIARA (
         ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_tiara in genomicConditionals }
+            .filter{ _meta, _file -> params.run_tiara in genomicConditionals() }
             .mix(
                 ch_type_branch.organellar
-                    .filter{ _meta, _file -> params.run_tiara in organellarConditionals }
+                    .filter{ _meta, _file -> params.run_tiara in organellarConditionals() }
             )
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
@@ -211,9 +207,7 @@ workflow ASCC_ASSEMBLY {
     //
     valid_length_fasta = ej_seqkit_reference
         .filter { meta, _f -> isOrganellar(meta) }
-        //
         // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
-        //
         .map{ meta, file ->
             def total_length = 0
             file.eachLine { line ->
@@ -241,19 +235,14 @@ workflow ASCC_ASSEMBLY {
         }
 
     assemblies_to_blast = ch_type_branch.genomic
-        .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals }
+        .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals() }
         .mix(
             valid_length_fasta
-                .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals }
+                .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals() }
         )
 
     EXTRACT_NT_BLAST (
-        ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals }
-            .mix(
-                valid_length_fasta
-                    .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals }
-            ),
+        assemblies_to_blast,
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
     )
@@ -267,14 +256,15 @@ workflow ASCC_ASSEMBLY {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
+    diamond_input = ch_type_branch.genomic
+        .filter{ _meta, _file -> params.run_nr_diamond in genomicConditionals() }
+        .mix(
+            valid_length_fasta
+                .filter{ _meta, _file -> params.run_nr_diamond in organellarConditionals() }
+        )
 
     NR_DIAMOND (
-        ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_nr_diamond in genomicConditionals }
-            .mix(
-                valid_length_fasta
-                    .filter{ _meta, _file -> params.run_nr_diamond in organellarConditionals }
-            ),
+        diamond_input,
         diamond_nr_db_path.first()
     )
     ch_versions = ch_versions.mix(NR_DIAMOND.out.versions)
@@ -292,15 +282,18 @@ workflow ASCC_ASSEMBLY {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     // NOTE: HEADER FORMAT WILL BE -
-    //  qseqid sseqid pident length mismatch gapopen qstart qend sstart send
-    //  evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    //      qseqid sseqid pident length mismatch gapopen qstart qend sstart send
+    //      evalue bitscore staxids sscinames sskingdoms sphylums salltitles
+    //
+    up_diamond_input = ch_type_branch.genomic
+        .filter{ _meta, _file -> params.run_uniprot_diamond in genomicConditionals() }
+        .mix(
+            valid_length_fasta
+                .filter{ _meta, _file -> params.run_uniprot_diamond in organellarConditionals() }
+        )
+
     UP_DIAMOND (
-        ch_type_branch.genomic
-            .filter{ _meta, _file -> params.run_uniprot_diamond in genomicConditionals }
-            .mix(
-                valid_length_fasta
-                    .filter{ _meta, _file -> params.run_uniprot_diamond in organellarConditionals }
-            ),
+        up_diamond_input,
         diamond_uniprot_db_path.first()
     )
     ch_versions = ch_versions.mix(UP_DIAMOND.out.versions)
@@ -320,7 +313,7 @@ workflow ASCC_ASSEMBLY {
     //
     organellar_check = organellar_genomes
         .filter{ _meta, _file ->
-            params.run_organellar_blast in genomicConditionals
+            params.run_organellar_blast in genomicConditionals()
         }
         .branch { meta, _assembly ->
             mito:       meta.assembly_type == "MITO"
@@ -339,14 +332,14 @@ workflow ASCC_ASSEMBLY {
     ch_versions     = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
 
 
-    //
-    // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME (GENOMIC ONLY)
-    //
-    PLASTID_ORGANELLAR_BLAST (
-        ch_type_branch.genomic,
-        organellar_check.plastid
-    )
-    ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    // //
+    // // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME (GENOMIC ONLY)
+    // //
+    // PLASTID_ORGANELLAR_BLAST (
+    //     ch_type_branch.genomic,
+    //     organellar_check.plastid
+    // )
+    // ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
 
 
     //
@@ -357,17 +350,19 @@ workflow ASCC_ASSEMBLY {
                         .map { meta, file -> [[id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
-    ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report
-                        .map { meta, file -> [[id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
+    ch_chloro       = channel.of([[:],[]])
+    // ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report
+    //                     .map { meta, file -> [[id: meta.id ], file] }
+    //                     .ifEmpty { [[:],[]] }
 
     ch_mito_full    = MITO_ORGANELLAR_BLAST.out.full_organelle_report
                         .map { meta, file -> [[id: meta.id ], file] }
                         .ifEmpty { [[:],[]] }
 
-    ch_chloro_full  = PLASTID_ORGANELLAR_BLAST.out.full_organelle_report
-                        .map { meta, file -> [[id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
+    ch_chloro_full  = channel.of([[:],[]])
+    // ch_chloro_full  = PLASTID_ORGANELLAR_BLAST.out.full_organelle_report
+    //                     .map { meta, file -> [[id: meta.id ], file] }
+    //                     .ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
@@ -378,14 +373,14 @@ workflow ASCC_ASSEMBLY {
         .combine(pacbio_database)
         .multiMap{
             ref_meta, ref_data, pdb_meta, pdb_data ->
-                reference: [ref_meta, ref_data]
-                pacbio_db: [pdb_meta, pdb_data]
+                assembly: tuple(ref_meta, ref_data)
+                pacbio_db: tuple(pdb_meta, pdb_data)
         }
         .set { duplicated_db }
 
     PACBIO_BARCODE_CHECK (
-        duplicated_db.reference.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+        duplicated_db.assembly.filter{ meta, _file ->
+            def conds = runConditionals(meta)
             params.run_pacbio_barcodes in conds
         },
         ch_barcodes,
@@ -401,11 +396,9 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_FCSADAPTOR (
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
-            params.run_fcs_adaptor in conds
+            params.run_fcs_adaptor in runConditionals(meta)
         }
     )
-    ch_versions         = ch_versions.mix(RUN_FCSADAPTOR.out.versions)
     ch_fcsadapt         = RUN_FCSADAPTOR.out.ch_joint_report.ifEmpty{ [[:],[]] }
 
 
@@ -418,21 +411,20 @@ workflow ASCC_ASSEMBLY {
 
         joint_channel = ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
-                params.run_fcsgx in conds
+                params.run_fcsgx in runConditionals(meta)
             }
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
             .multiMap { meta, ref, db, _tax_id, tax_path ->
-                def new_meta = [id: meta.id, taxid: meta.taxid]
-                reference:      [new_meta, ref]
+                def new_meta =  [id: meta.id, taxid: meta.taxid]
+                assembly:       tuple(new_meta, ref)
                 fcs_db_path:    db
                 ncbi_tax_path:  tax_path
             }
 
         RUN_FCSGX (
-            joint_channel.reference,
+            joint_channel.assembly,
             joint_channel.fcs_db_path,
             joint_channel.ncbi_tax_path
         )
@@ -450,6 +442,10 @@ workflow ASCC_ASSEMBLY {
         }
         .set { ch_fcsgx }
 
+        // TODO: WE NEED TO ENSURE THAT THE FCS RESULTS ARE OUTPUT HERE
+        //       CURRENTLY THERE IS NO REASON FOR THEM TO BE CACHED SO ARE NOT
+        //       OUTPUT TO params.ourdir
+
         ch_fcsgx_report     = channel.of( [[:],[]] )
         ch_fcsgx_taxonomy   = channel.of( [[:],[]] )
 
@@ -466,8 +462,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_READ_COVERAGE (
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
-            params.run_coverage in conds
+            params.run_coverage in runConditionals(meta)
         },
         reads_path,
         reads_type, //Subworkflow uses the param, not this value... as soon as it's in a channel it can't be used for a comparator.
@@ -484,8 +479,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_VECSCREEN (
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
-            params.run_vecscreen in conds
+            params.run_vecscreen in runConditionals(meta)
         },
         vecscreen_database_path.first()
     )
@@ -499,8 +493,7 @@ workflow ASCC_ASSEMBLY {
     //
     RUN_NT_KRAKEN(
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
-            params.run_kraken in conds
+            params.run_kraken in runConditionals(meta)
         },
         nt_kraken_db_path.first(),
         ncbi_ranked_lineage_path.first()
@@ -520,12 +513,12 @@ workflow ASCC_ASSEMBLY {
         //          organellar items won't find a match here and will get null → placeholder via join remainder.
         //
         ch_fcsgx_for_btk = ch_fcsgx
-            .map { meta, f -> [[id: meta.id], f] }
+            .map { meta, file -> tuple([id: meta.id], file) }
             .join(
                 ch_type_branch.genomic
-                    .map { meta, _f -> [[id: meta.id], true] }
+                    .map { meta, _f -> tuple([id: meta.id], true) }
             )
-            .map { meta, f, _flag -> [meta, f] }
+            .map { meta, file, _flag -> tuple(meta, file) }
 
         //
         // LOGIC: FOUND RACE CONDITION EFFECTING LONG RUNNING JOBS
@@ -537,10 +530,11 @@ workflow ASCC_ASSEMBLY {
         //
         ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_create_btk_dataset in conds
             }
             .map{meta, file -> [[id: meta.id], file]}
+            // NOTE: remainder LEAVES US WITH A SPACE IN THE FINAL TUPLE
             .join(ch_nt_blast,      remainder: true)
             .join(ch_tiara,         remainder: true)
             .join(ej_dot_genome,    remainder: true)
@@ -553,14 +547,14 @@ workflow ASCC_ASSEMBLY {
             .join(ch_kraken3,       remainder: true)
             .join(nr_full,          remainder: true)
             .join(un_full,          remainder: true)
+
+            // NOTE: ENSURE THERE IS AT LEAST A VALID META HERE
             .filter { items ->
                 def meta = items[0]
-                meta != null &&
-                meta != [] &&
-                !(meta instanceof Map && (meta.id == null || meta.isEmpty()))
+                meta != null && meta != [] && !(meta instanceof Map && (meta.id == null || meta.isEmpty()))
             }
             .map { items ->
-                // Replace null values with placeholder file
+                // NOTE: REPLACE THE NULL VALUES WITH PLACEHOLDER FILES
                 items.withIndex().collect { item, index ->
                     if (item == null) {
                         getEmptyPlaceholder(index)
@@ -617,15 +611,15 @@ workflow ASCC_ASSEMBLY {
         //
         ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_tiara in conds && params.run_fcsgx in conds && params.run_autofilter_assembly in conds
             }
-            .map{ meta, file -> [[id: meta.id], file] }
+            .map{ meta, file -> tuple([id: meta.id], file) }
             .combine(
-                ch_tiara.map{ meta, file -> [[id: meta.id], file] }, by: 0
+                ch_tiara.map{ meta, file -> tuple([id: meta.id], file) }, by: 0
             )
             .combine(
-                ch_fcsgx.map{ meta, file -> [[id: meta.id], file] }, by: 0
+                ch_fcsgx.map{ meta, file -> tuple([id: meta.id], file) }, by: 0
             )
             .combine(
                 ncbi_ranked_lineage_path
@@ -636,9 +630,9 @@ workflow ASCC_ASSEMBLY {
             .multiMap{
                 meta, ref, tiara, fcs, ncbi, thetaxid ->
                     def new_meta = [id: meta.id, taxid: thetaxid]
-                    reference:  [new_meta, ref]
-                    tiara_file: [new_meta, tiara]
-                    fcs_file:   [new_meta, fcs]
+                    assembly:   tuple(new_meta, ref)
+                    tiara_file: tuple(new_meta, tiara)
+                    fcs_file:   tuple(new_meta, fcs)
                     ncbi_rank:  ncbi
             }
             .set { autofilter_input_formatted }
@@ -648,22 +642,21 @@ workflow ASCC_ASSEMBLY {
         // MODULE: AUTOFILTER ASSEMBLY BY TIARA AND FCSGX RESULTS
         //
         AUTOFILTER_AND_CHECK_ASSEMBLY (
-            autofilter_input_formatted.reference,
+            autofilter_input_formatted.assembly,
             autofilter_input_formatted.tiara_file,
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
         ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
         ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly
-        ch_autofilt_indicator   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.indicator_file
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
         ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
 
         ch_autofilt_alarm_file  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-                                    .map{ meta, _file -> [[ id: meta.id ], _file] }
+                                    .map{ meta, _file -> tuple([id: meta.id], _file) }
 
         ch_autofilt_fcs_tiara   = AUTOFILTER_AND_CHECK_ASSEMBLY.out.fcs_tiara_summary
-                                    .map{ meta, _file -> [[ id: meta.id ], _file] }
+                                    .map{ meta, _file -> tuple([id: meta.id], _file) }
 
         //
         // LOGIC: BRANCH THE ALARM FILE ON ABNORMAL CONTAMINATION FOR THE GENOMIC BTK PIPELINE.
@@ -671,13 +664,13 @@ workflow ASCC_ASSEMBLY {
         //          by joining against ch_type_branch.genomic before branching.
         //
         btk_bool = AUTOFILTER_AND_CHECK_ASSEMBLY.out.alarm_file
-            .map { meta, file -> [[id: meta.id], file] }
+            .map { meta, file -> tuple([id: meta.id], file) }
             .join(
                 ch_type_branch.genomic
-                    .map { meta, _f -> [[id: meta.id], true] }
+                    .map { meta, _f -> tuple([id: meta.id], true) }
             )
-            .map { meta, file, _flag -> [meta, file] }
-            .map { meta, file -> [meta, file.text.trim()] }
+            .map { meta, file, _flag -> tuple(meta, file) }
+            .map { meta, file -> tuple(meta, file.text.trim()) }
             .branch { meta, data ->
                 log.info("[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
 
@@ -692,7 +685,6 @@ workflow ASCC_ASSEMBLY {
         ch_autofilt_alarm_file  = channel.of( [[:],[]] )
         ch_autofilt_removed_seqs= channel.of( [[:],[]] )
         ch_autofilt_assem       = channel.of( [[:],[]] )
-        ch_autofilt_indicator   = channel.of( [[:],[]] )
         ch_autofilt_fcs_tiara   = channel.of( [[:],[]] )
         ch_autofilt_raw_report  = channel.of( [[:],[]] )
     }
@@ -704,7 +696,7 @@ workflow ASCC_ASSEMBLY {
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
 
     run_btk_conditional = ch_type_branch.genomic
-        .map { meta, file -> [[id: meta.id], file] }
+        .map { meta, file -> tuple([id: meta.id], file) }
         // below is combined into the tuple to enforce the block to only run when channel is present.
         .combine ( btk_bool_run_btk
                         .map{ meta, data ->
@@ -713,7 +705,7 @@ workflow ASCC_ASSEMBLY {
                                     .replaceAll(/\s+/, "-")          // Replace remaining spaces with "-"
                                     .replaceAll(/_+/, "_")           // Keep underscores as they are
                                     .replaceAll(/-+/, "-")           // Clean up multiple dashes
-                            [[id: meta.id], joined_content]
+                            tuple([id: meta.id], joined_content)
                         },
                 by: [0]
             )
@@ -733,7 +725,7 @@ workflow ASCC_ASSEMBLY {
             log.info "[ASCC INFO]: CONTAMINATION THRESHOLD NOT MET"
             log.info "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
             log.info "\t- You can verify here: $file"
-            return [meta, file]
+            return tuple(meta, file)
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
@@ -744,16 +736,16 @@ workflow ASCC_ASSEMBLY {
 
     // NOTE: Noticed a race condition, this should fix that.
     run_btk_conditional.run_btk
-        .map { meta, file, _data -> [meta.id, meta, file] }
+        .map { meta, file, _data -> tuple(meta.id, meta, file) }
         .join(
             ch_autofilt_alarm_file
                 .map { meta, file ->
-                    [meta.id, meta, file]
+                    tuple(meta.id, meta, file)
                 }
         )
         .map { _id, ref_meta, ref_file, alarm_meta, alarm_file ->
             def merged_meta = ref_meta + alarm_meta
-            [merged_meta, ref_file, alarm_file]
+            tuple(merged_meta, ref_file, alarm_file)
         }
         .set { combined_ch }
 
@@ -768,7 +760,7 @@ workflow ASCC_ASSEMBLY {
             .map { paths -> [paths] }
         )
         .map { meta, _ref, _alarm, path_list ->
-            [[id:meta.id], path_list]
+            tuple([id:meta.id], path_list)
         }
         .set { ch_meta_reads }
 
@@ -785,9 +777,7 @@ workflow ASCC_ASSEMBLY {
     // LOGIC: STRIP THE META DATA DOWN TO id AND COMBINE ON THAT.
     //
     btk_samplesheet = BLOBTOOLKIT_GENERATECSV.out.csv
-        .map{ meta, csv ->
-            [[id: meta.id], csv]
-        }
+        .map{ meta, csv -> tuple([id: meta.id], csv) }
 
 
     //
@@ -802,15 +792,13 @@ workflow ASCC_ASSEMBLY {
     // WITHOUT AUTOFILTER
     // an empty tuple [[id: "NA"], file]
     combined_input = run_btk_conditional.run_btk
-        .map{ meta, file, _data ->
-            [[id: meta.id], file]
-        }
+        .map{ meta, file, _data -> tuple([id: meta.id], file) }
         .combine(btk_samplesheet, by: 0)
 
 
     combined_input
         .map{ meta, ref, samplesheet ->
-            log.info("[ASCC INFO]: BTK will run for $meta\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n")
+            log.info("[ASCC INFO]: BTK will run for ${meta}\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n")
         }
 
     //
@@ -830,6 +818,7 @@ workflow ASCC_ASSEMBLY {
         file("${projectDir}/assets/btk_config_files/btk_trace.config"),
         btk_lineages_path.first(),
         btk_lineages.first(),
+        btk_lineage_mapping_file.first(),
         taxid.first(),
     )
     ch_versions     = ch_versions.mix(SANGER_TOL_BTK.out.versions)
@@ -837,8 +826,8 @@ workflow ASCC_ASSEMBLY {
 
     //-------------------------------------------------------------------------
     if (
-            ( params.run_merge_datasets in genomicConditionals ) &&
-            ( params.run_btk_busco in genomicConditionals )
+            ( params.run_merge_datasets in genomicConditionals() ) &&
+            ( params.run_btk_busco in genomicConditionals() )
     ) {
         //
         // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
@@ -885,12 +874,12 @@ workflow ASCC_ASSEMBLY {
         //
         ej_reference_tuple
             .filter { meta, _f ->
-                def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+                def conds = runConditionals(meta)
                 params.run_essentials in conds && params.run_merge_datasets in conds
             }
-            .map{meta, file -> [[id: meta.id], file]}
+            .map{meta, file -> tuple([id: meta.id], file)}
             .join(ej_gc_coverage
-                .map{meta, file -> [[id: meta.id], file]},   remainder: true)
+                .map{meta, file -> tuple([id: meta.id], file)},   remainder: true)
             .join(ch_coverage,      remainder: true)
             .join(ch_tiara,         remainder: true)
             .join(ch_kraken3,       remainder: true)
@@ -947,15 +936,15 @@ workflow ASCC_ASSEMBLY {
 
     // NOTE: We only want the EUKARYOTIC report.
     euk_fcsadapt = ch_fcsadapt.map{ meta, files ->
-        [meta, (files ?: []).find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
+        tuple(meta, (files ?: []).find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') })
     }
 
     ej_reference_tuple_filtered = ej_reference_tuple
         .filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_decontaminate_fasta in conds && params.run_autofilter_assembly in conds
         }
-        .map{ meta, file -> [[id: meta.id], file] }
+        .map{ meta, file -> tuple([id: meta.id], file) }
 
     //
     // ch_mito_full and ch_chloro_full are genomic-only; organellar items will find no match
@@ -983,9 +972,6 @@ workflow ASCC_ASSEMBLY {
     //              in the join inside GENERATE_HTML_REPORT_WORKFLOW and receive a placeholder.
     //
 
-    // Params file
-    ch_params_file      = params.params_file ? channel.fromPath(params.params_file) : channel.value([])
-
     GENERATE_HTML_REPORT_WORKFLOW (
         ch_barcode_check,
         ch_fcsadapt,
@@ -996,17 +982,17 @@ workflow ASCC_ASSEMBLY {
         merged_phylum_count,
         ch_kmers_results,
         ej_reference_tuple.filter{ meta, _file ->
-            def conds = isOrganellar(meta) ? organellarConditionals : genomicConditionals
+            def conds = runConditionals(meta)
             params.run_html_report in conds
         },
         ej_fasta_sanitation_log,
         ej_fasta_filter_log,
-        ch_params_file,
+        [],
         ch_fcsgx_report,
         ch_fcsgx_taxonomy,
         ch_create_btk_dataset
     )
-    ch_versions             = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+    ch_versions                 = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
 
     emit:
     essential_reference         = ej_reference_tuple
@@ -1058,7 +1044,6 @@ workflow ASCC_ASSEMBLY {
     autofilter_fcs_tiar_smry    = ch_autofilt_fcs_tiara
     autofilter_removed_seqs     = ch_autofilt_removed_seqs
     autofilter_alarm_file       = ch_autofilt_alarm_file
-    autofilter_indicator_file   = ch_autofilt_indicator
     autofilter_raw_report       = ch_autofilt_raw_report
 
     create_btk_ds_dataset       = ch_create_btk_dataset

@@ -62,7 +62,6 @@ workflow RUN_DIAMOND {
         blast_input.ext_ch,
         blast_input.col_ch
     )
-    ch_versions     = ch_versions.mix(DIAMOND_BLASTX.out.versions)
 
 
     //
