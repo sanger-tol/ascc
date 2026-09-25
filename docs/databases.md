@@ -41,6 +41,29 @@ Download the nr database protein FASTA files from the NCBI ftp server (`wget ftp
 
 Downloading instructions are at https://github.com/ncbi/fcs/wiki/FCS-GX-quickstart#download-the-fcs-gx-database.
 
+## Sourmash databases
+
+Sourmash searches (`sourmash scripts multisearch`, branchwater plugin) run against the databases listed in the CSV passed with `--sourmash_db_config` (production: [sourmash_databases_production.csv](../assets/sourmash_databases_production.csv)). Columns: `name,path,k_available,k_for_search,s,assembly_taxa_db`, where `path` is a RocksDB index and `assembly_taxa_db` is a CSV mapping each assembly accession to its NCBI lineage.
+
+At Sanger the databases are in `/lustre/scratch124/tol/teams/grit/users/dz11/tax_classification_db/sourmash_db/`:
+
+| Name                 | Genomes | k   | scaled | Source                                                     |
+| -------------------- | ------- | --- | ------ | ---------------------------------------------------------- |
+| vertebrate           | 1,540   | 51  | 200    | NCBI eukaryote "reference genome" assemblies (August 2025) |
+| invertebrate         | 3,081   | 51  | 200    | as above                                                   |
+| plant_fungi_protazoa | 2,560   | 51  | 200    | as above                                                   |
+| gtdb_v226            | 143,614 | 31  | 200    | GTDB r226 species representatives                          |
+| ncbi_viruses         | 230,973 | 21  | 50     | prebuilt sourmash NCBI viruses database (January 2025)     |
+
+The references were not screened for contamination when these databases were built. An inventory of every genome in them, with its lineage and its NCBI assembly status and flags (`excluded_from_refseq`), is in `/lustre/scratch124/tol/teams/grit/users/dz11/tax_classification_db/db_audit_2026-09/` (`sourmash_db_genomes.tsv`, built by `build_db_genomes_table.py` from the manifests of the signature archives the indexes were built from).
+
+[sourmash_exclude_accessions.tsv](../assets/sourmash_exclude_accessions.tsv) lists the assemblies whose hits should be ignored:
+
+- NCBI flags them as contaminated, chimeric, mixed culture, misassembled or genome length too large;
+- or they were found to contain foreign sequence during ASCC testing (the `reason` column says which).
+
+These assemblies are still in the indexes; they are removed when the search results are parsed.
+
 ## FCS-adaptor
 
 The FCS-adaptor database is included in the FCS-adaptor installation, so it doesn't need to be downloaded separately.

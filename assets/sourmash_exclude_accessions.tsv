@@ -1,0 +1,1507 @@
+assembly_accession	db	tax_name	reason
+GCF_018977255.1	vertebrate	Callorhinchus milii	ncbi:contaminated
+GCA_047652445.1	vertebrate	Symphysodon aequifasciata	ncbi:contaminated
+GCA_049863035.1	vertebrate	Schizothorax curvilabiatus	ncbi:genome length too large
+GCA_049864055.1	vertebrate	Mylopharyngodon piceus	ncbi:contaminated
+GCF_002706865.2	invertebrate	Spodoptera litura	ncbi:contaminated
+GCA_047652355.1	invertebrate	Nautilus pompilius	ncbi:contaminated
+GCF_003369915.1	invertebrate	Drosophila miranda	ncbi:genome length too large
+GCA_042246355.1	invertebrate	Hepialus xiaojinensis	ncbi:contaminated
+GCA_040285465.1	invertebrate	Menopon gallinae	ncbi:contaminated
+GCF_000475195.1	invertebrate	Diaphorina citri	ncbi:genome length too large
+GCF_001687245.2	invertebrate	Rhagoletis zephyria	ncbi:contaminated
+GCA_001984395.2	plant_fungi_protazoa	Zygosaccharomyces parabailii	ncbi:genome length too large
+GCA_030063025.1	plant_fungi_protazoa	Avena longiglumis	ncbi:contaminated
+GCA_021491655.1	plant_fungi_protazoa	Peronospora effusa	ncbi:genome length too large
+GCA_046619385.1	plant_fungi_protazoa	Skeletonema costatum	ncbi:genome length too large
+GCF_002168275.1	plant_fungi_protazoa	Herrania umbratica	ncbi:contaminated
+GCA_034093135.1	plant_fungi_protazoa	Erigeron breviscapus	ncbi:contaminated
+GCA_030407385.1	plant_fungi_protazoa	Solanum americanum	ncbi:genome length too large
+GCA_050575045.1	plant_fungi_protazoa	Melilotus officinalis	ncbi:contaminated
+GCA_024703715.1	plant_fungi_protazoa	Erysiphe necator	ncbi:genome length too large
+GCA_039654905.1	plant_fungi_protazoa	Laburnicola rhizohalophila	ncbi:genome length too large
+GCA_048128665.1	plant_fungi_protazoa	Sporobolus alterniflorus	ncbi:contaminated
+GCA_002707085.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_023426765.1	gtdb_v226	Bacillota bacterium	ncbi:contaminated
+GCA_002429965.1	gtdb_v226	Hungatella sp. UBA5982	ncbi:contaminated
+GCA_913057925.1	gtdb_v226	uncultured Colwellia sp.	ncbi:contaminated
+GCA_016191435.1	gtdb_v226	Chloroflexota bacterium	ncbi:contaminated
+GCA_001235855.1	gtdb_v226	Candidatus Burkholderia brachyanthoides	ncbi:contaminated
+GCA_963923805.1	gtdb_v226	uncultured Novosphingobium sp.	ncbi:contaminated
+GCA_035362415.1	gtdb_v226	Candidatus Pacearchaeota archaeon	ncbi:contaminated
+GCA_964014525.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_913060735.1	gtdb_v226	uncultured Cellvibrionales bacterium	ncbi:contaminated
+GCA_913009735.1	gtdb_v226	uncultured Fidelibacterota bacterium	ncbi:contaminated
+GCA_002690085.1	gtdb_v226	Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_937967765.1	gtdb_v226	uncultured Carnobacterium sp.	ncbi:contaminated
+GCA_963659085.1	gtdb_v226	Candidatus Methanomethylophilaceae archaeon	ncbi:contaminated
+GCA_000716465.1	gtdb_v226	Streptomyces bikiniensis	ncbi:misassembled
+GCF_002138415.1	gtdb_v226	Stenotrophomonas maltophilia	ncbi:contaminated
+GCA_021738245.1	gtdb_v226	Methylotenera sp.	ncbi:contaminated
+GCA_021769725.1	gtdb_v226	Oscillospiraceae bacterium	ncbi:contaminated
+GCA_001514065.1	gtdb_v226	Streptomyces antibioticus	ncbi:genome length too large
+GCA_004000515.1	gtdb_v226	Pseudomonas poae	ncbi:genome length too large
+GCA_018613055.1	gtdb_v226	Chryseobacterium sp. ISL-80	ncbi:contaminated
+GCA_011524525.1	gtdb_v226	Bacillus sp. (in: firmicutes)	ncbi:contaminated
+GCF_037414475.1	gtdb_v226	Myxococcus stipitatus	ncbi:genome length too large
+GCA_945905715.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_937899995.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_937930275.1	gtdb_v226	uncultured Ignavibacteria bacterium	ncbi:contaminated
+GCA_902760905.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_023518375.1	gtdb_v226	Candidatus Hepatincola sp. Av	ncbi:contaminated
+GCA_964225545.1	gtdb_v226	Nitrosopumilus sp.	ncbi:contaminated
+GCA_900547715.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_913042175.1	gtdb_v226	uncultured Flavobacteriales bacterium	ncbi:contaminated
+GCA_022717655.1	gtdb_v226	Bacillota bacterium	ncbi:contaminated
+GCA_022730075.1	gtdb_v226	Rhodanobacter sp.	ncbi:contaminated
+GCA_945901265.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_003287955.1	gtdb_v226	Arthrobacter sp. AQ5-06	ncbi:contaminated
+GCA_945867875.1	gtdb_v226	uncultured Ruminococcus sp.	ncbi:contaminated
+GCA_029968055.1	gtdb_v226	Xenophilus aerolatus	ncbi:contaminated
+GCA_945883495.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_937902105.1	gtdb_v226	uncultured Actinomycetes bacterium	ncbi:contaminated
+GCA_028539195.1	gtdb_v226	Blautia schinkii	ncbi:genome length too large
+GCA_001544655.2	gtdb_v226	Caballeronia turbans	ncbi:contaminated
+GCA_016841725.1	gtdb_v226	Thermincola ferriacetica	ncbi:genome length too large
+GCA_036028775.1	gtdb_v226	Spirillospora sp. NBC_00431	ncbi:contaminated
+GCA_947036475.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_905339345.1	gtdb_v226	Geobacteraceae bacterium	ncbi:contaminated
+GCA_963523075.1	gtdb_v226	uncultured Clostridium sp.	ncbi:contaminated
+GCA_946623365.1	gtdb_v226	uncultured Acinetobacter sp.	ncbi:contaminated
+GCA_019977735.1	gtdb_v226	Calothrix sp. PCC 7716	ncbi:contaminated
+GCA_015257445.1	gtdb_v226	Candidatus Nanosynbacter sp.	ncbi:contaminated
+GCF_001265075.1	gtdb_v226	Salinicoccus sp. YB14-2	ncbi:contaminated
+GCA_945861925.1	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_028736075.1	gtdb_v226	Chryseobacterium sp. KACC 21268	ncbi:contaminated
+GCA_028714895.1	gtdb_v226	Gallionella sp.	ncbi:contaminated
+GCA_913057715.1	gtdb_v226	uncultured Moraxellaceae bacterium	ncbi:contaminated
+GCA_018267435.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_945873715.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_900551185.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_937950415.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_004558205.1	gtdb_v226	Pyramidobacter piscolens	ncbi:genome length too large
+GCA_913060865.1	gtdb_v226	uncultured Cycloclasticus sp.	ncbi:contaminated
+GCA_019359435.1	gtdb_v226	Kaiparowitsia implicata GSE-PSE-MK54-09C	ncbi:contaminated
+GCA_913059205.1	gtdb_v226	uncultured Flavobacteriales bacterium	ncbi:contaminated
+GCA_937952265.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_014654615.1	gtdb_v226	Streptosporangium violaceochromogenes	ncbi:contaminated
+GCA_945980015.1	gtdb_v226	uncultured Eubacterium sp.	ncbi:contaminated
+GCA_963923765.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_035467435.1	gtdb_v226	Arthrobacter sp.	ncbi:contaminated
+GCA_003243445.1	gtdb_v226	Citrobacter freundii	ncbi:genome length too large
+GCA_000010565.1	gtdb_v226	Pelotomaculum thermopropionicum SI	ncbi:genome length too large
+GCA_024509075.1	gtdb_v226	Endozoicomonas sp.	ncbi:contaminated
+GCA_945883785.1	gtdb_v226	Helicobacter pylori PMSS1	ncbi:genome length too large
+GCA_002730655.1	gtdb_v226	Balneola sp.	ncbi:contaminated
+GCA_016841045.1	gtdb_v226	Thermincola ferriacetica	ncbi:genome length too large
+GCA_040689555.1	gtdb_v226	Actinosynnema sp. NPDC051121	ncbi:contaminated
+GCA_002356515.1	gtdb_v226	Mesorhizobium loti	ncbi:genome length too large
+GCA_035607085.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_000803105.1	gtdb_v226	Coprobacter secundus	ncbi:misassembled
+GCA_004153225.1	gtdb_v226	Sporolactobacillus sp. THM7-7	ncbi:contaminated
+GCA_023417815.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_002370555.1	gtdb_v226	Arthrobacter sp. Hiyo4	ncbi:contaminated
+GCA_016839165.1	gtdb_v226	Bradyrhizobium sp. PSBB068	ncbi:contaminated
+GCA_016650115.1	gtdb_v226	Peptostreptococcaceae bacterium	ncbi:contaminated
+GCA_947503655.1	gtdb_v226	uncultured Microbacterium sp.	ncbi:contaminated
+GCA_913009875.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_964016365.1	gtdb_v226	uncultured Bacteriovorax sp.	ncbi:contaminated
+GCA_000333815.1	gtdb_v226	[Collinsella] massiliensis	ncbi:misassembled
+GCA_902141825.1	gtdb_v226	Thalassocella blandensis	ncbi:contaminated
+GCA_040643255.1	gtdb_v226	Glycomyces sp. NPDC047369	ncbi:contaminated
+GCF_000013625.1	gtdb_v226	Janthinobacterium sp. Marseille	ncbi:contaminated
+GCA_004145795.1	gtdb_v226	Lentibacillus lipolyticus	ncbi:contaminated
+GCA_018402525.1	gtdb_v226	Crocinitomicaceae bacterium	ncbi:contaminated
+GCA_017051695.1	gtdb_v226	Algoriphagus aestuarii	ncbi:contaminated
+GCA_913061115.1	gtdb_v226	uncultured Haliea sp.	ncbi:contaminated
+GCA_014804975.1	gtdb_v226	Clostridia bacterium	ncbi:contaminated
+GCA_937965665.1	gtdb_v226	uncultured Bacteroidales bacterium	ncbi:contaminated
+GCA_017545485.1	gtdb_v226	Candidatus Saccharibacteria bacterium	ncbi:contaminated
+GCA_900548565.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_902470925.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_934373375.1	gtdb_v226	uncultured Anaerosacchariphilus sp.	ncbi:contaminated
+GCA_036676235.1	gtdb_v226	Rhizobacter sp.	ncbi:contaminated
+GCA_900551625.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_913060785.1	gtdb_v226	uncultured Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_001704765.1	gtdb_v226	Sinorhizobium shofinae	ncbi:contaminated
+GCA_014642275.1	gtdb_v226	Flavobacterium lutivivi	ncbi:contaminated
+GCA_900170005.1	gtdb_v226	Gordonibacter massiliensis (ex Traore et al. 2017)	ncbi:contaminated
+GCA_030223925.1	gtdb_v226	Brevibacterium sp. UMB10442	ncbi:contaminated
+GCA_964216065.1	gtdb_v226	Candidatus Actinomarina sp.	ncbi:contaminated
+GCA_945874505.1	gtdb_v226	Bordetella parapertussis	ncbi:contaminated
+GCA_934408725.1	gtdb_v226	uncultured Marvinbryantia sp.	ncbi:contaminated
+GCA_946042585.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_017555455.1	gtdb_v226	Lachnospiraceae bacterium	ncbi:contaminated
+GCA_014655195.1	gtdb_v226	Streptomyces cellulosae	ncbi:contaminated
+GCA_030418545.1	gtdb_v226	Xenophilus aerolatus	ncbi:contaminated
+GCA_002929375.1	gtdb_v226	Arthrobacter sp. DWC3	ncbi:contaminated
+GCA_945869965.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_916049935.1	gtdb_v226	uncultured Streptococcus sp.	ncbi:contaminated
+GCA_032005505.1	gtdb_v226	Clostridium sp.	ncbi:contaminated
+GCA_900180385.1	gtdb_v226	uncultured Candidatus Thioglobus sp.	ncbi:contaminated
+GCA_020720765.1	gtdb_v226	Borreliella garinii	ncbi:genome length too large
+GCA_036522895.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_001189345.1	gtdb_v226	Candidatus Paraburkholderia kirkii	ncbi:contaminated
+GCA_003576535.1	gtdb_v226	Nakamurella silvestris	ncbi:contaminated
+GCA_902470895.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_001596135.1	gtdb_v226	Mucilaginibacter sp. PAMC 26640	ncbi:contaminated
+GCA_027031025.1	gtdb_v226	Flavobacteriales bacterium	ncbi:contaminated
+GCA_000751595.1	gtdb_v226	Weeksella massiliensis	ncbi:contaminated
+GCA_035712145.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_027484445.1	gtdb_v226	Verrucomicrobiaceae bacterium	ncbi:contaminated
+GCA_031922475.1	gtdb_v226	Rhodococcus opacus	ncbi:genome length too large
+GCA_963545665.1	gtdb_v226	uncultured Campylobacter sp.	ncbi:contaminated
+GCA_900552095.1	gtdb_v226	uncultured Blautia sp.	ncbi:contaminated
+GCA_013361095.1	gtdb_v226	Pseudanabaena biceps	ncbi:contaminated
+GCA_945901405.1	gtdb_v226	Bordetella parapertussis	ncbi:genome length too large
+GCA_022447585.1	gtdb_v226	Crocinitomicaceae bacterium	ncbi:contaminated
+GCA_913061205.1	gtdb_v226	uncultured Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_011039175.1	gtdb_v226	Slackia sp. ZJ119	ncbi:contaminated
+GCA_028868235.1	gtdb_v226	Betaproteobacteria bacterium	ncbi:contaminated
+GCA_003112755.1	gtdb_v226	Lawsonibacter asaccharolyticus	ncbi:contaminated
+GCA_964014945.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_020720045.1	gtdb_v226	Sorangium cellulosum	ncbi:genome length too large
+GCA_023393915.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_913060775.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCF_002149965.1	gtdb_v226	Novosphingobium panipatense	ncbi:genome length too large
+GCA_014803525.1	gtdb_v226	bacterium	ncbi:contaminated
+GCA_020722705.1	gtdb_v226	Chthonomonas calidirosea	ncbi:genome length too large
+GCA_945862455.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_963614595.1	gtdb_v226	Parasutterella excrementihominis	ncbi:contaminated
+GCA_937900165.1	gtdb_v226	uncultured Acidimicrobiia bacterium	ncbi:contaminated
+GCF_021739485.1	gtdb_v226	Alicyclobacillus tolerans	ncbi:genome length too large
+GCA_945864925.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_003560495.1	gtdb_v226	Bacillus sp. (in: firmicutes)	ncbi:contaminated
+GCA_033793685.1	gtdb_v226	Streptomyces sp. ME19-03-3	ncbi:contaminated
+GCA_943333505.2	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_035360455.1	gtdb_v226	Candidatus Pacearchaeota archaeon	ncbi:contaminated
+GCA_008364785.1	gtdb_v226	Bacillus sp. BGMRC 2118	ncbi:contaminated
+GCA_014650055.1	gtdb_v226	Streptomyces malachitofuscus	ncbi:contaminated
+GCF_900169505.1	gtdb_v226	Arabiibacter massiliensis	ncbi:contaminated
+GCA_039535945.1	gtdb_v226	Rhodococcus baikonurensis	ncbi:genome length too large
+GCF_000418555.1	gtdb_v226	Pseudomonas sp. P818	ncbi:contaminated
+GCA_036768735.1	gtdb_v226	Clostridiales bacterium	ncbi:contaminated
+GCA_913060575.1	gtdb_v226	uncultured Flavobacterium sp.	ncbi:contaminated
+GCA_030653505.1	gtdb_v226	Rubrivivax sp.	ncbi:contaminated
+GCA_900550745.1	gtdb_v226	uncultured Desulfovibrio sp.	ncbi:contaminated
+GCA_900101265.1	gtdb_v226	Massilia sp. PDC64	ncbi:contaminated
+GCA_022378355.1	gtdb_v226	Brenneria bubanii	ncbi:contaminated
+GCA_024451105.1	gtdb_v226	Stutzerimonas stutzeri	ncbi:contaminated
+GCA_934359255.1	gtdb_v226	uncultured Ruminococcus sp.	ncbi:contaminated
+GCA_035999765.1	gtdb_v226	Streptomyces sp. NBC_01231	ncbi:contaminated
+GCA_035515255.1	gtdb_v226	Lysobacter sp.	ncbi:contaminated
+GCA_028869255.1	gtdb_v226	Pseudomonas poae	ncbi:genome length too large
+GCA_963974855.1	gtdb_v226	uncultured Rhodopirellula sp.	ncbi:contaminated
+GCA_000799755.1	gtdb_v226	Rhizobium tropici	ncbi:genome length too large
+GCA_963923405.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_019801415.1	gtdb_v226	Nocardioides marinus	ncbi:contaminated
+GCF_016103465.1	gtdb_v226	Streptomyces sabulosicollis	ncbi:contaminated
+GCA_946409675.1	gtdb_v226	uncultured Lactobacillus sp.	ncbi:contaminated
+GCA_937983315.1	gtdb_v226	uncultured Acholeplasmataceae bacterium	ncbi:contaminated
+GCA_002104535.1	gtdb_v226	Cognaticolwellia sediminilitoris	ncbi:contaminated
+GCA_945878515.1	gtdb_v226	Flavobacterium psychrophilum	ncbi:genome length too large
+GCA_014360945.1	gtdb_v226	Candidatus Bipolaricaulota bacterium	ncbi:contaminated
+GCA_943331105.2	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_937996605.1	gtdb_v226	uncultured Oxalobacteraceae bacterium	ncbi:contaminated
+GCA_004827385.1	gtdb_v226	Ensifer sp. MPMI2T	ncbi:contaminated
+GCA_029779695.1	gtdb_v226	Bacillota bacterium	ncbi:contaminated
+GCA_036822095.1	gtdb_v226	Limnohabitans sp.	ncbi:contaminated
+GCA_025938935.1	gtdb_v226	Novosphingobium sp. MW5	ncbi:contaminated
+GCA_001683825.1	gtdb_v226	Flavobacteriaceae bacterium CP2B	ncbi:contaminated
+GCA_945875045.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_947074165.1	gtdb_v226	uncultured Bacteroidales bacterium	ncbi:contaminated
+GCA_964226685.1	gtdb_v226	Polaribacter sp.	ncbi:contaminated
+GCA_900095875.1	gtdb_v226	Caecibacter massiliensis	ncbi:misassembled
+GCA_002300355.1	gtdb_v226	Streptomyces sp. TLI_235	ncbi:contaminated
+GCA_937900305.1	gtdb_v226	uncultured Pseudobdellovibrionaceae bacterium	ncbi:contaminated
+GCA_008668795.1	gtdb_v226	Collinsella aerofaciens	ncbi:contaminated
+GCA_029937545.1	gtdb_v226	Erythrobacter sp.	ncbi:contaminated
+GCA_028710885.1	gtdb_v226	Sulfuricurvum sp.	ncbi:contaminated
+GCA_937983495.1	gtdb_v226	uncultured Gemmobacter sp.	ncbi:contaminated
+GCA_025800105.1	gtdb_v226	Cohaesibacter sp.	ncbi:contaminated
+GCA_028680875.1	gtdb_v226	Eubacteriales bacterium	ncbi:contaminated
+GCA_947074265.1	gtdb_v226	uncultured Porphyromonadaceae bacterium	ncbi:contaminated
+GCA_018889975.1	gtdb_v226	Bacillus sp. NP157	ncbi:contaminated
+GCA_900230185.1	gtdb_v226	Burkholderia sp. OK233	ncbi:contaminated
+GCA_945866505.1	gtdb_v226	Flavobacterium psychrophilum	ncbi:genome length too large
+GCA_016712505.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_964014485.1	gtdb_v226	uncultured Deferribacteres bacterium	ncbi:contaminated
+GCA_003461955.1	gtdb_v226	Ruminococcus sp. AM36-2AA	ncbi:contaminated
+GCA_900107365.1	gtdb_v226	Flavobacterium aquidurense	ncbi:contaminated
+GCA_945861765.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_934401755.1	gtdb_v226	uncultured Oxalobacter sp.	ncbi:contaminated
+GCA_003480435.1	gtdb_v226	Clostridium sp. AM30-24	ncbi:contaminated
+GCA_963923115.1	gtdb_v226	uncultured Singulisphaera sp.	ncbi:contaminated
+GCA_018711445.1	gtdb_v226	Candidatus Coprovivens excrementavium	ncbi:contaminated
+GCA_945923475.1	gtdb_v226	uncultured Mollicutes bacterium	ncbi:contaminated
+GCA_913061335.1	gtdb_v226	uncultured Loktanella sp.	ncbi:contaminated
+GCA_020633975.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_001603415.1	gtdb_v226	Bacteroidales bacterium Bact_07	ncbi:contaminated
+GCA_937967645.1	gtdb_v226	uncultured Zoogloea sp.	ncbi:contaminated
+GCA_001708385.1	gtdb_v226	Flavobacterium psychrophilum	ncbi:contaminated|genome length too large
+GCA_000174895.1	gtdb_v226	Ruminococcus flavefaciens FD-1	ncbi:genome length too large
+GCA_946188415.1	gtdb_v226	Streptococcus mitis	ncbi:contaminated
+GCA_937924555.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_913057965.1	gtdb_v226	uncultured Marixanthomonas sp.	ncbi:contaminated
+GCA_028690365.1	gtdb_v226	Candidatus Cloacimonadota bacterium	ncbi:contaminated
+GCA_913057875.1	gtdb_v226	uncultured Flavobacteriales bacterium	ncbi:contaminated
+GCA_027483445.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_030388725.1	gtdb_v226	Prodigiosinella aquatilis	ncbi:contaminated
+GCA_903833025.1	gtdb_v226	uncultured Bacteroidota bacterium	ncbi:contaminated
+GCA_943325005.2	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_937967485.1	gtdb_v226	uncultured Bryobacterales bacterium	ncbi:contaminated
+GCA_937988695.1	gtdb_v226	uncultured Microbacterium sp.	ncbi:contaminated
+GCA_913058025.1	gtdb_v226	uncultured Myxococcales bacterium	ncbi:contaminated
+GCA_020873915.1	gtdb_v226	Streptomyces sp. DH5	ncbi:contaminated
+GCA_013693875.1	gtdb_v226	Exiguobacterium profundum	ncbi:genome length too large
+GCA_001417715.1	gtdb_v226	Candidatus Symbiothrix dinenymphae	ncbi:genome length too large
+GCA_000721275.1	gtdb_v226	Microtetraspora glauca	ncbi:contaminated
+GCA_021531315.1	gtdb_v226	Oscillibacter valericigenes	ncbi:contaminated
+GCA_023387965.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_026130045.1	gtdb_v226	Micromonospora sp. CPCC 205371	ncbi:contaminated
+GCA_900155415.1	gtdb_v226	Christensenella massiliensis	ncbi:contaminated
+GCA_023433585.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCA_000403455.2	gtdb_v226	Dorea sp. 5-2	ncbi:contaminated
+GCA_013032095.1	gtdb_v226	Ruegeria atlantica	ncbi:genome length too large
+GCA_002698665.1	gtdb_v226	Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_000719695.1	gtdb_v226	Streptomyces sp. NRRL F-6131	ncbi:contaminated
+GCA_009735695.1	gtdb_v226	Christiangramia bathymodioli	ncbi:contaminated
+GCA_902761395.1	gtdb_v226	uncultured Elusimicrobium sp.	ncbi:contaminated
+GCA_025941565.1	gtdb_v226	Legionella sp. 515359	ncbi:contaminated
+GCA_002723115.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_029310945.1	gtdb_v226	Leptospira sp. 96542	ncbi:contaminated
+GCF_000067165.1	gtdb_v226	Sorangium cellulosum So ce56	ncbi:genome length too large
+GCA_031292695.1	gtdb_v226	Mycobacterium sp.	ncbi:contaminated
+GCA_001904745.1	gtdb_v226	Calothrix sp. HK-06	ncbi:contaminated
+GCA_020193575.1	gtdb_v226	Ensifer sp. IC4062	ncbi:contaminated
+GCA_902772725.1	gtdb_v226	Erysipelothrix rhusiopathiae	ncbi:genome length too large
+GCF_004365705.1	gtdb_v226	Streptomyces sp. 846.5	ncbi:contaminated
+GCA_905209745.1	gtdb_v226	uncultured Mycoplasma sp.	ncbi:contaminated
+GCA_916050055.1	gtdb_v226	uncultured Streptococcus sp.	ncbi:contaminated
+GCA_003471165.1	gtdb_v226	Ruminococcus sp. AM22-13	ncbi:contaminated
+GCA_938004315.1	gtdb_v226	uncultured Spirochaetaceae bacterium	ncbi:contaminated
+GCA_902712845.1	gtdb_v226	Methylobacterium bullatum	ncbi:contaminated
+GCA_017745595.1	gtdb_v226	Bordetella petrii	ncbi:genome length too large
+GCA_963590775.1	gtdb_v226	Desulfovibrio piger	ncbi:contaminated
+GCA_937879845.1	gtdb_v226	uncultured Myxococcales bacterium	ncbi:contaminated
+GCA_937860175.1	gtdb_v226	uncultured Actinomycetes bacterium	ncbi:contaminated
+GCA_945982095.1	gtdb_v226	uncultured Bacteroidales bacterium	ncbi:contaminated
+GCA_021775965.1	gtdb_v226	Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_031277855.1	gtdb_v226	Acidovorax sp.	ncbi:contaminated
+GCA_027920525.1	gtdb_v226	Chryseobacterium daecheongense	ncbi:genome length too large
+GCA_036700245.1	gtdb_v226	Microcoleus sp. herbarium2	ncbi:genome length too large
+GCA_945901095.1	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_945902955.1	gtdb_v226	Porphyromonas cangingivalis	ncbi:genome length too large
+GCA_014253075.1	gtdb_v226	Ochrobactrum sp. CM-21-5	ncbi:contaminated
+GCA_041624875.1	gtdb_v226	Alcanivorax sp.	ncbi:contaminated
+GCA_946040935.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_002691045.1	gtdb_v226	Marinovum sp.	ncbi:contaminated
+GCA_947253615.1	gtdb_v226	uncultured Sutterellaceae bacterium	ncbi:contaminated
+GCA_019310195.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_945906945.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_947649205.1	gtdb_v226	uncultured Enterorhabdus sp.	ncbi:contaminated
+GCA_002724415.1	gtdb_v226	Planctomycetaceae bacterium	ncbi:contaminated
+GCA_900129595.1	gtdb_v226	Flavobacterium frigidimaris	ncbi:contaminated
+GCA_028657175.1	gtdb_v226	Actinacidiphila cocklensis	ncbi:contaminated
+GCA_964021475.1	gtdb_v226	uncultured Desulfobacteraceae bacterium	ncbi:contaminated
+GCA_003202005.1	gtdb_v226	Williamsia faeni	ncbi:contaminated
+GCA_943328795.2	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_900544105.1	gtdb_v226	uncultured Oscillibacter sp.	ncbi:contaminated
+GCA_902786365.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_900757715.1	gtdb_v226	uncultured Veillonella sp.	ncbi:contaminated
+GCA_020692215.1	gtdb_v226	Sandarakinorhabdus sp.	ncbi:contaminated
+GCA_937920245.1	gtdb_v226	uncultured Microbacteriaceae bacterium	ncbi:contaminated
+GCA_018918185.1	gtdb_v226	Eubacterium sp. MSJ-21	ncbi:contaminated
+GCA_021608145.1	gtdb_v226	Thermovorax subterraneus	ncbi:contaminated
+GCA_945878005.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_945874145.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_014698445.1	gtdb_v226	Microcystis elabens FACHB-917	ncbi:contaminated
+GCF_021191705.1	gtdb_v226	Luteimonas sp. XNQY3	ncbi:contaminated
+GCA_000471925.1	gtdb_v226	Ralstonia pickettii DTP0602	ncbi:genome length too large
+GCA_963966255.1	gtdb_v226	uncultured Salinispira sp.	ncbi:contaminated
+GCA_004211785.1	gtdb_v226	Winogradskyella sp.	ncbi:contaminated
+GCA_001592145.1	gtdb_v226	Xylanimicrobium pachnodae JCM 13526 = NBRC 107786	ncbi:contaminated
+GCA_035545135.1	gtdb_v226	Lacipirellulaceae bacterium	ncbi:contaminated
+GCA_035048325.1	gtdb_v226	Streptomyces sp. KL114A	ncbi:contaminated
+GCF_001636615.1	gtdb_v226	Mucilaginibacter sp. L294	ncbi:contaminated
+GCF_029911635.1	gtdb_v226	Sphingomonas sp. AR_OL41	ncbi:contaminated
+GCA_947385255.1	gtdb_v226	uncultured Roseburia sp.	ncbi:contaminated
+GCA_030854305.1	gtdb_v226	Candidatus Dormiibacterota bacterium	ncbi:contaminated
+GCA_945874745.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_002696345.1	gtdb_v226	Myxococcales bacterium	ncbi:contaminated
+GCA_000317245.1	gtdb_v226	Fischerella muscicola SAG 1427-1 = PCC 73103	ncbi:contaminated
+GCA_010692725.1	gtdb_v226	Flavihumibacter soli	ncbi:mixed culture
+GCA_020179385.1	gtdb_v226	Alkalihalobacillus sp. YIM B00296	ncbi:contaminated
+GCA_945828175.1	gtdb_v226	uncultured Bacteroidales bacterium	ncbi:contaminated
+GCA_001062585.1	gtdb_v226	Neisseria meningitidis	ncbi:genome length too large
+GCA_002332985.1	gtdb_v226	Acinetobacter lwoffii	ncbi:contaminated
+GCA_016218825.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_913060685.1	gtdb_v226	uncultured Verrucomicrobiales bacterium	ncbi:contaminated
+GCA_964015645.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_039594245.1	gtdb_v226	Enterobacter sp.	ncbi:contaminated
+GCA_024707145.1	gtdb_v226	Magnetospirillum sp.	ncbi:contaminated
+GCA_002007745.1	gtdb_v226	Mycolicibacterium litorale	ncbi:contaminated
+GCA_945827765.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCF_040544055.1	gtdb_v226	Paenibacillus sp. PvR008	ncbi:contaminated
+GCA_009363175.1	gtdb_v226	Citrobacter telavivensis	ncbi:contaminated
+GCA_003551425.1	gtdb_v226	Candidatus Nealsonbacteria bacterium	ncbi:contaminated
+GCA_001184395.1	gtdb_v226	Candidatus Paraburkholderia calva	ncbi:contaminated
+GCA_021811845.1	gtdb_v226	Candidatus Cyrtobacter zanobii	ncbi:contaminated
+GCA_035654455.1	gtdb_v226	Candidatus Nitrosocosmicus sp.	ncbi:contaminated
+GCA_001418405.1	gtdb_v226	Streptomyces diastatochromogenes	ncbi:contaminated
+GCA_913061325.1	gtdb_v226	uncultured Saprospirales bacterium	ncbi:contaminated
+GCA_963674605.1	gtdb_v226	uncultured Desulfobacterium sp.	ncbi:contaminated
+GCA_024539815.1	gtdb_v226	Streptomyces hayashii	ncbi:contaminated
+GCA_947065955.1	gtdb_v226	uncultured Bacillales bacterium	ncbi:contaminated
+GCA_945882065.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_002257525.1	gtdb_v226	Halomonas ventosae	ncbi:genome length too large
+GCA_003474435.1	gtdb_v226	Ruminococcus sp. AF46-10NS	ncbi:contaminated
+GCA_005473895.2	gtdb_v226	Carideicomes alvinocaridis	ncbi:contaminated
+GCA_943372655.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_903921835.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_963992225.1	gtdb_v226	uncultured Comamonadaceae bacterium	ncbi:contaminated
+GCA_031364845.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_020829665.1	gtdb_v226	Nostoc sp. CHAB 5824	ncbi:contaminated
+GCA_004153165.1	gtdb_v226	Sporolactobacillus sp. THM7-4	ncbi:contaminated
+GCA_024239075.1	gtdb_v226	Fischerella sp. CENA71	ncbi:contaminated
+GCA_017164015.1	gtdb_v226	Nostoc sp. UHCC 0702	ncbi:contaminated
+GCA_030148335.1	gtdb_v226	Allomuricauda sp.	ncbi:contaminated
+GCA_937997415.1	gtdb_v226	uncultured Phycisphaerales bacterium	ncbi:contaminated
+GCA_913009475.1	gtdb_v226	uncultured Actinomycetes bacterium	ncbi:contaminated
+GCA_900540305.1	gtdb_v226	uncultured Oscillospiraceae bacterium	ncbi:contaminated
+GCA_014697355.1	gtdb_v226	Nostoc calcicola FACHB-3891	ncbi:contaminated
+GCA_963594595.1	gtdb_v226	Oscillibacter sp.	ncbi:contaminated
+GCA_964020055.1	gtdb_v226	Alphaproteobacteria bacterium endosymbiont of Pipizella viduata	ncbi:contaminated
+GCA_913058475.1	gtdb_v226	uncultured Nitrosomonadales bacterium	ncbi:contaminated
+GCA_963935445.1	gtdb_v226	uncultured Roseibacillus sp.	ncbi:contaminated
+GCA_946414115.1	gtdb_v226	uncultured Ruminococcus sp.	ncbi:contaminated
+GCA_035556295.1	gtdb_v226	Ureibacillus sp.	ncbi:contaminated
+GCA_945883955.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_937982505.1	gtdb_v226	uncultured Desulfobacteraceae bacterium	ncbi:contaminated
+GCA_913061055.1	gtdb_v226	uncultured Pseudomonadota bacterium	ncbi:contaminated
+GCA_913009915.1	gtdb_v226	uncultured Gemmatimonadota bacterium	ncbi:contaminated
+GCF_016902345.1	gtdb_v226	Mediterraneibacter glycyrrhizinilyticus	ncbi:genome length too large
+GCA_945875975.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_913061425.1	gtdb_v226	uncultured Lutibacter sp.	ncbi:contaminated
+GCA_002189105.1	gtdb_v226	Saccharibacillus sp. O16	ncbi:contaminated
+GCA_002340265.1	gtdb_v226	Lentisphaeria bacterium UBA2565	ncbi:contaminated
+GCA_963555925.1	gtdb_v226	Frankia sp. Cr3	ncbi:contaminated
+GCA_007050995.1	gtdb_v226	Glycocaulis profundi	ncbi:contaminated
+GCF_003025035.1	gtdb_v226	Rhizobium sp. SEMIA4064	ncbi:contaminated
+GCA_900167215.1	gtdb_v226	[Eubacterium] yurii	ncbi:misassembled
+GCA_009663185.1	gtdb_v226	Isoptericola halalbus	ncbi:contaminated
+GCA_945860685.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_031264425.1	gtdb_v226	Endomicrobium sp.	ncbi:contaminated
+GCA_913060845.1	gtdb_v226	uncultured Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_003640645.1	gtdb_v226	Fredinandcohnia aciditolerans	ncbi:contaminated
+GCA_029974985.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_004168585.1	gtdb_v226	Shewanella sp. OPT22	ncbi:contaminated
+GCA_016841905.1	gtdb_v226	Desulfoscipio geothermicus	ncbi:contaminated
+GCA_947062645.1	gtdb_v226	uncultured Clostridium sp.	ncbi:contaminated
+GCA_947039785.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_000309075.1	gtdb_v226	Occidentia massiliensis	ncbi:contaminated
+GCA_016215625.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_913009575.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_963652545.1	gtdb_v226	Hallella faecis	ncbi:contaminated
+GCA_910822395.1	gtdb_v226	Pseudoclavibacter triregionum	ncbi:contaminated
+GCA_913061265.1	gtdb_v226	uncultured Halobacteriovorax sp.	ncbi:contaminated
+GCA_016428805.1	gtdb_v226	Achromobacter sp. ASV32	ncbi:contaminated
+GCA_000226255.2	gtdb_v226	Desulfovibrio sp. A2	ncbi:contaminated
+GCA_913058555.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_905209135.1	gtdb_v226	uncultured Eubacteriales bacterium	ncbi:contaminated
+GCA_002721465.1	gtdb_v226	Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_003477405.1	gtdb_v226	Ruminococcaceae bacterium AM07-15	ncbi:contaminated
+GCA_963923355.1	gtdb_v226	uncultured Gemmataceae bacterium	ncbi:contaminated
+GCA_034376805.1	gtdb_v226	Arthrobacter sp.	ncbi:contaminated
+GCA_947385505.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_946183925.1	gtdb_v226	uncultured Fibrobacter sp.	ncbi:contaminated
+GCA_937868205.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_021384925.1	gtdb_v226	Mycoplasmopsis agalactiae	ncbi:genome length too large
+GCA_001067655.1	gtdb_v226	Neisseria lactamica	ncbi:genome length too large
+GCA_900102115.1	gtdb_v226	Blastococcus fimeti	ncbi:contaminated
+GCA_913058385.1	gtdb_v226	uncultured Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_027409005.1	gtdb_v226	Ferrimicrobium sp.	ncbi:contaminated
+GCA_945861575.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_945827565.1	gtdb_v226	uncultured Prevotella sp.	ncbi:contaminated
+GCA_000421085.1	gtdb_v226	Ensifer sp. USDA 6670	ncbi:contaminated
+GCA_945874545.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_002831545.1	gtdb_v226	Streptococcus suis	ncbi:genome length too large
+GCA_945888515.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_003554185.1	gtdb_v226	Candidatus Dojkabacteria bacterium	ncbi:contaminated
+GCF_002950945.1	gtdb_v226	Sorangium cellulosum	ncbi:genome length too large
+GCA_913058405.1	gtdb_v226	uncultured Colwellia sp.	ncbi:contaminated
+GCA_016583765.1	gtdb_v226	Chromatium weissei	ncbi:contaminated
+GCA_001509335.1	gtdb_v226	Fidelibacterota bacterium 46_43	ncbi:contaminated
+GCF_011008945.1	gtdb_v226	Streptomyces harenosi	ncbi:contaminated
+GCA_031256515.1	gtdb_v226	Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_963515505.1	gtdb_v226	uncultured Streptococcus sp.	ncbi:contaminated
+GCA_902705825.1	gtdb_v226	Halioglobus japonicus	ncbi:genome length too large
+GCA_022179405.1	gtdb_v226	Methylobacterium marchantiae	ncbi:contaminated
+GCA_004296775.1	gtdb_v226	Marinilabiliaceae bacterium JC017	ncbi:contaminated
+GCF_009867135.1	gtdb_v226	Moraxella osloensis	ncbi:contaminated
+GCA_039527305.1	gtdb_v226	Gordonia sinesedis	ncbi:contaminated
+GCA_018883975.1	gtdb_v226	Candidatus Niameybacter stercoravium	ncbi:contaminated
+GCA_040631425.1	gtdb_v226	Streptomyces sp. NPDC020096	ncbi:contaminated
+GCA_913063055.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_003056425.1	gtdb_v226	Alteromonas indica	ncbi:misassembled
+GCA_945898205.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_022181005.1	gtdb_v226	Anaerolineaceae bacterium	ncbi:contaminated
+GCA_000620005.1	gtdb_v226	Metamycoplasma spumans ATCC 19526	ncbi:contaminated
+GCF_000169255.2	gtdb_v226	Pseudoflavonifractor capillosus ATCC 29799	ncbi:genome length too large
+GCA_002973575.1	gtdb_v226	Sediminibacterium magnilacihabitans	ncbi:misassembled
+GCA_945980035.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_946487795.1	gtdb_v226	uncultured Lactobacillus sp.	ncbi:contaminated
+GCA_002356455.1	gtdb_v226	Fusobacterium varium	ncbi:genome length too large
+GCA_009469585.1	gtdb_v226	Dechloromonas sp. Dech2017	ncbi:contaminated
+GCA_945873195.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_002390745.1	gtdb_v226	Bacteroidetes bacterium UBA4416	ncbi:contaminated
+GCA_902479105.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_004346725.1	gtdb_v226	Phytobacter diazotrophicus	ncbi:contaminated
+GCA_937900185.1	gtdb_v226	uncultured candidate division Zixibacteria bacterium	ncbi:contaminated
+GCA_038182865.1	gtdb_v226	Microbacterium enclense	ncbi:genome length too large
+GCA_001510645.1	gtdb_v226	Paenibacillus sp. FJAT-29882	ncbi:contaminated
+GCA_020431745.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_002730775.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_913058215.1	gtdb_v226	uncultured Verrucomicrobiales bacterium	ncbi:contaminated
+GCA_913060675.1	gtdb_v226	uncultured Rhodospirillales bacterium	ncbi:contaminated
+GCA_900634715.1	gtdb_v226	Candidatus Protofrankia californiensis	ncbi:contaminated
+GCA_937898195.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_017475045.1	gtdb_v226	Fibrobacter sp.	ncbi:contaminated
+GCA_945872855.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_019357535.2	gtdb_v226		ncbi:contaminated
+GCA_963645185.1	gtdb_v226	Coprococcus eutactus	ncbi:contaminated
+GCA_041390305.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_024743175.1	gtdb_v226	Pseudomonadaceae bacterium	ncbi:contaminated
+GCA_022361255.1	gtdb_v226	Verrucomicrobiales bacterium	ncbi:contaminated
+GCA_003343885.1	gtdb_v226	Clostridiales bacterium	ncbi:contaminated
+GCA_963992075.1	gtdb_v226	uncultured Pseudomonadales bacterium	ncbi:contaminated
+GCA_020719775.1	gtdb_v226	Desulfosporosinus sp.	ncbi:contaminated
+GCA_000331305.1	gtdb_v226	Calothrix sp. PCC 7103	ncbi:contaminated
+GCA_937967875.1	gtdb_v226	uncultured Pseudomonadota bacterium	ncbi:contaminated
+GCA_017160915.1	gtdb_v226	Aggregatibacter actinomycetemcomitans	ncbi:genome length too large
+GCA_900016235.2	gtdb_v226	Psychrobacter cibarius	ncbi:contaminated
+GCA_009765735.1	gtdb_v226	Xenophilus sp. L33	ncbi:contaminated
+GCA_009765215.1	gtdb_v226	Lysobacter prati	ncbi:contaminated
+GCA_963640995.1	gtdb_v226	Dialister hominis	ncbi:contaminated
+GCA_937983305.1	gtdb_v226	uncultured Ignavibacteriota bacterium	ncbi:contaminated
+GCA_016429015.1	gtdb_v226	Rhizobium sp. ASV20	ncbi:contaminated
+GCA_913060615.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_019359675.1	gtdb_v226	Calothrix sp. FI2-JRJ7	ncbi:contaminated
+GCA_902481965.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCF_000502395.1	gtdb_v226	Mesorhizobium sp. LNHC220B00	ncbi:contaminated
+GCA_903838095.1	gtdb_v226	uncultured Chlorobiaceae bacterium	ncbi:contaminated
+GCA_963989885.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_022837595.1	gtdb_v226	Propionibacterium sp.	ncbi:contaminated
+GCA_030538115.1	gtdb_v226	Dermatophilus congolensis	ncbi:genome length too large
+GCA_949296365.1	gtdb_v226	uncultured Akkermansia sp.	ncbi:contaminated
+GCF_015712065.1	gtdb_v226	Ectopseudomonas chengduensis	ncbi:contaminated
+GCA_000146855.1	gtdb_v226	[Eubacterium] yurii subsp. margaretiae ATCC 43715	ncbi:misassembled
+GCF_021412625.1	gtdb_v226	Myxococcus stipitatus	ncbi:genome length too large
+GCA_003339645.1	gtdb_v226	Microbacterium arborescens	ncbi:contaminated
+GCA_013373635.1	gtdb_v226	Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_014697125.1	gtdb_v226	Anabaena minutissima FACHB-250	ncbi:contaminated
+GCA_904419315.1	gtdb_v226	Candidatus Pararuminococcus gallinarum	ncbi:contaminated
+GCA_031366795.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_015686845.1	gtdb_v226	Lutibacter sp. B2	ncbi:contaminated
+GCA_002685415.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_003554465.1	gtdb_v226	Candidatus Pacearchaeota archaeon	ncbi:contaminated
+GCA_001449105.1	gtdb_v226	Caulobacter vibrioides	ncbi:genome length too large
+GCA_012842275.1	gtdb_v226	Syntrophaceticus sp.	ncbi:contaminated
+GCA_030161055.1	gtdb_v226	Paracoccus marinus	ncbi:contaminated
+GCA_009908325.1	gtdb_v226	Verrucomicrobiota bacterium	ncbi:contaminated
+GCA_001570385.1	gtdb_v226	Microtetraspora glauca	ncbi:contaminated
+GCA_945861535.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_009849585.1	gtdb_v226	Bacillus sp. ZZV12-4809	ncbi:contaminated
+GCF_021191635.1	gtdb_v226	Luteimonas sp. Y-2-2-4F	ncbi:contaminated
+GCA_018370025.1	gtdb_v226	Collinsella sp.	ncbi:contaminated
+GCA_913057675.1	gtdb_v226	uncultured Pseudomonadota bacterium	ncbi:contaminated
+GCA_020725525.1	gtdb_v226	Desulfovirgula sp.	ncbi:contaminated
+GCA_038231135.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_945890645.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_016758175.1	gtdb_v226	Leucobacter zeae	ncbi:contaminated
+GCA_002172915.1	gtdb_v226	Hyphomonas sp. TMED17	ncbi:contaminated
+GCA_901764975.1	gtdb_v226	Actinobacillus indolicus	ncbi:contaminated
+GCA_937927975.1	gtdb_v226	uncultured Phycisphaerales bacterium	ncbi:contaminated
+GCA_016744615.1	gtdb_v226	Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_028683355.1	gtdb_v226	Fermentimonas sp.	ncbi:contaminated
+GCA_031993245.1	gtdb_v226	Buttiauxella sp.	ncbi:contaminated
+GCA_945875745.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCF_004006635.1	gtdb_v226	Fusobacterium necrophorum subsp. necrophorum	ncbi:genome length too large
+GCA_023129715.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_963637225.1	gtdb_v226	Segatella hominis	ncbi:contaminated
+GCA_003978875.1	gtdb_v226	Aquifex sp.	ncbi:contaminated
+GCA_036734565.1	gtdb_v226	Candidatus Nanosynbacter sp.	ncbi:contaminated
+GCA_963653535.1	gtdb_v226	Azospirillum sp. CAG:239	ncbi:contaminated
+GCA_946410005.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_910588595.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_017538895.1	gtdb_v226	Aeriscardovia sp.	ncbi:contaminated
+GCA_964015215.1	gtdb_v226	uncultured Candidatus Poseidoniales archaeon	ncbi:contaminated
+GCA_963921275.3	gtdb_v226	uncultured Hormoscilla sp.	ncbi:contaminated
+GCA_913061165.1	gtdb_v226	uncultured Polaribacter sp.	ncbi:contaminated
+GCF_007751035.1	gtdb_v226	Lignipirellula cremea	ncbi:genome length too large
+GCA_030813035.1	gtdb_v226	Bacillus fengqiuensis	ncbi:contaminated
+GCA_947057875.1	gtdb_v226	uncultured Clostridium sp.	ncbi:contaminated
+GCA_902729415.1	gtdb_v226	Candidatus Terasakiella magnetica	ncbi:contaminated
+GCA_947385725.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_030433805.1	gtdb_v226	Sphingomonas sp. PsM26	ncbi:contaminated
+GCA_027943745.1	gtdb_v226	Neptuniibacter victor	ncbi:contaminated
+GCA_000017645.1	gtdb_v226	Xanthobacter autotrophicus Py2	ncbi:contaminated
+GCA_945874805.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_023540835.1	gtdb_v226	Marivivens geojensis	ncbi:contaminated
+GCA_900618065.1	gtdb_v226	Streptococcus thermophilus	ncbi:genome length too large
+GCA_945883335.1	gtdb_v226	Candidatus Methylopumilus universalis	ncbi:genome length too large
+GCA_943333275.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_913058135.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_032075095.1	gtdb_v226	Pseudomonas sp.	ncbi:contaminated
+GCA_913061365.1	gtdb_v226	uncultured Colwellia sp.	ncbi:contaminated
+GCA_036015235.1	gtdb_v226	Streptomyces sp. NBC_00433	ncbi:contaminated
+GCF_000721105.1	gtdb_v226	Streptomyces cellulosae	ncbi:genome length too large
+GCF_015207285.1	gtdb_v226	Tychonema sp. LEGE 07203	ncbi:contaminated
+GCF_004684085.1	gtdb_v226	Stenotrophomonas maltophilia	ncbi:contaminated
+GCF_019353055.1	gtdb_v226	Moraxella osloensis	ncbi:contaminated
+GCA_964013445.1	gtdb_v226	uncultured Bdellovibrionales bacterium	ncbi:contaminated
+GCA_030403585.1	gtdb_v226	Frankia sp. RB7	ncbi:contaminated
+GCA_001664505.1	gtdb_v226	Acidobacteria bacterium Mor1	ncbi:contaminated
+GCA_031289975.1	gtdb_v226	Methanobrevibacter sp.	ncbi:contaminated
+GCA_019459225.1	gtdb_v226	Bacillus sp. IITD106	ncbi:contaminated
+GCA_947074225.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_937978655.1	gtdb_v226	uncultured Chromatiaceae bacterium	ncbi:contaminated
+GCA_913061495.1	gtdb_v226	uncultured Winogradskyella sp.	ncbi:contaminated
+GCA_023404095.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCA_030690245.1	gtdb_v226	Gallionella sp.	ncbi:contaminated
+GCA_003530955.1	gtdb_v226	Pseudomonas sp.	ncbi:contaminated
+GCA_017989575.1	gtdb_v226	Chryseobacterium sp.	ncbi:contaminated
+GCA_006739055.1	gtdb_v226	Stella vacuolata	ncbi:contaminated
+GCA_910577885.1	gtdb_v226	uncultured Rikenella sp.	ncbi:contaminated
+GCA_004172865.1	gtdb_v226	Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_017528375.1	gtdb_v226	Clostridia bacterium	ncbi:contaminated
+GCA_913060895.1	gtdb_v226	uncultured Sphingomonadaceae bacterium	ncbi:contaminated
+GCA_002287035.1	gtdb_v226	Pseudomonas sp. WN033	ncbi:contaminated
+GCA_009779205.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_005222705.1	gtdb_v226	Paenibacillus sp. SY21-1	ncbi:contaminated
+GCA_001717015.1	gtdb_v226	Candidatus Methanosuratincola petrocarbonis	ncbi:contaminated
+GCA_002714815.1	gtdb_v226	Flavobacteriaceae bacterium	ncbi:contaminated
+GCF_016429005.1	gtdb_v226	Pedobacter sp. ASV19	ncbi:contaminated
+GCA_020720085.1	gtdb_v226	Dichelobacter nodosus	ncbi:genome length too large
+GCA_031364505.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_947165155.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_035645275.1	gtdb_v226	Anoxybacillus sp.	ncbi:contaminated
+GCF_001941865.1	gtdb_v226	Ectopseudomonas alcaliphila JAB1	ncbi:contaminated
+GCA_000173575.1	gtdb_v226	Burkholderia sp. H160	ncbi:contaminated
+GCF_900156545.1	gtdb_v226	Aquipseudomonas alcaligenes	ncbi:contaminated
+GCA_945872565.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_039725535.1	gtdb_v226	Halomonas socia	ncbi:contaminated
+GCA_019753405.1	gtdb_v226	Murdochiella sp. Marseille-P8839	ncbi:contaminated
+GCA_949295765.1	gtdb_v226	uncultured Methanomassiliicoccales archaeon	ncbi:contaminated
+GCA_913777665.1	gtdb_v226	uncultured Myroides sp.	ncbi:contaminated
+GCA_023398375.1	gtdb_v226	Bacillota bacterium	ncbi:contaminated
+GCA_014649395.1	gtdb_v226	Streptomyces aureoverticillatus	ncbi:contaminated
+GCA_004000035.1	gtdb_v226	Arthrobacter sulfonylureivorans	ncbi:contaminated
+GCA_004551485.1	gtdb_v226	Billgrantia azerbaijanica	ncbi:contaminated
+GCA_031396315.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_945865375.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_937923585.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_937998045.1	gtdb_v226	uncultured Myxococcales bacterium	ncbi:contaminated
+GCA_020024475.1	gtdb_v226	Oscillospiraceae bacterium	ncbi:contaminated
+GCA_945863205.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_003477525.1	gtdb_v226	Ruminococcus sp. AF41-9	ncbi:contaminated
+GCA_913058195.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_002725955.1	gtdb_v226	Pseudobdellovibrionaceae bacterium	ncbi:contaminated
+GCA_964226865.1	gtdb_v226	Myxococcota bacterium	ncbi:contaminated
+GCA_001750215.1	gtdb_v226	Isoptericola variabilis	ncbi:contaminated
+GCA_903844735.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_945865925.1	gtdb_v226	Dehalococcoides mccartyi	ncbi:genome length too large
+GCA_040674215.1	gtdb_v226	Nocardia sp. NPDC050193	ncbi:contaminated
+GCA_900543885.1	gtdb_v226	uncultured Clostridium sp.	ncbi:contaminated
+GCA_014637085.1	gtdb_v226	Comamonas phosphati	ncbi:contaminated
+GCA_947585065.1	gtdb_v226	uncultured Bacilli bacterium	ncbi:contaminated
+GCA_027368075.1	gtdb_v226	bacterium	ncbi:contaminated
+GCF_038561935.1	gtdb_v226	Myxococcus stipitatus	ncbi:genome length too large
+GCA_900100495.1	gtdb_v226	Pseudomonas benzenivorans	ncbi:genome length too large
+GCA_937967705.1	gtdb_v226	uncultured Spirochaetia bacterium	ncbi:contaminated
+GCA_000720845.1	gtdb_v226	Kitasatospora aureofaciens	ncbi:misassembled
+GCA_016429065.1	gtdb_v226	Pedobacter sp. ASV17	ncbi:contaminated
+GCA_000613065.1	gtdb_v226	Richelia intracellularis	ncbi:genome length too large
+GCA_963645865.1	gtdb_v226	Lachnospiraceae bacterium	ncbi:contaminated
+GCA_003243275.1	gtdb_v226	Leifsonia xyli	ncbi:contaminated
+GCA_020629575.1	gtdb_v226	Caedibacter sp.	ncbi:contaminated
+GCA_001637315.1	gtdb_v226	Phormidium willei BDU 130791	ncbi:contaminated
+GCA_963656095.1	gtdb_v226	Paratractidigestivibacter sp.	ncbi:contaminated
+GCA_003193815.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_900764725.1	gtdb_v226	uncultured Catenibacterium sp.	ncbi:contaminated
+GCA_001429255.1	gtdb_v226	Cellulomonas sp. Root930	ncbi:contaminated
+GCA_916438865.1	gtdb_v226	uncultured Mogibacterium sp.	ncbi:contaminated
+GCA_946412445.1	gtdb_v226	uncultured Eubacterium sp.	ncbi:contaminated
+GCA_900290095.1	gtdb_v226	Khoudiadiopia massiliensis	ncbi:misassembled
+GCA_945889625.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_023461115.1	gtdb_v226	Actinomycetes bacterium	ncbi:contaminated
+GCA_000717735.1	gtdb_v226	Streptomyces griseoluteus	ncbi:genome length too large
+GCA_002701545.1	gtdb_v226	Blastopirellula sp.	ncbi:contaminated
+GCA_001499735.1	gtdb_v226	Thiocapsa sp. KS1	ncbi:genome length too large
+GCA_900547915.1	gtdb_v226	uncultured Clostridium sp.	ncbi:contaminated
+GCA_938004235.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_019779905.1	gtdb_v226	Modestobacter lapidis	ncbi:contaminated
+GCA_937880545.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_035349995.1	gtdb_v226	Candidatus Pacearchaeota archaeon	ncbi:contaminated
+GCA_032615215.1	gtdb_v226	Microbulbifer sp. MKSA007	ncbi:contaminated
+GCA_014204635.1	gtdb_v226	Sporosarcina luteola	ncbi:genome length too large
+GCA_900010755.1	gtdb_v226	Paeniglutamicibacter antarcticus	ncbi:contaminated
+GCA_945828315.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_016429255.1	gtdb_v226	Rhizobium sp. ASV8	ncbi:contaminated
+GCA_023823795.1	gtdb_v226	Bacillus sp. F19	ncbi:contaminated
+GCA_001429555.1	gtdb_v226	Nocardioides sp. Soil797	ncbi:contaminated
+GCA_003464165.1	gtdb_v226	Eubacterium sp. AM49-13BH	ncbi:contaminated
+GCA_938008555.1	gtdb_v226	uncultured Pedobacter sp.	ncbi:contaminated
+GCA_913009745.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_949123685.1	gtdb_v226	uncultured Bacteroidales bacterium	ncbi:contaminated
+GCA_021648845.1	gtdb_v226	Mycobacterium sp. MBM	ncbi:contaminated
+GCA_028700115.1	gtdb_v226	Candidatus ainarchaeum sp.	ncbi:contaminated
+GCA_945870925.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_008764295.1	gtdb_v226	Bacillus methanolicus	ncbi:contaminated
+GCA_945861315.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_036227345.1	gtdb_v226	Streptomyces sp. NBC_01463	ncbi:contaminated
+GCA_934202005.1	gtdb_v226	uncultured Selenomonas sp.	ncbi:contaminated
+GCA_006738865.1	gtdb_v226	Stella sp. ATCC 35155	ncbi:contaminated
+GCA_023667845.1	gtdb_v226	Dehalobacter sp.	ncbi:contaminated
+GCF_001636695.1	gtdb_v226	Pedobacter panaciterrae	ncbi:contaminated
+GCF_016428905.1	gtdb_v226	Dyella sp. ASV24	ncbi:contaminated
+GCA_963989605.1	gtdb_v226	uncultured Roseibacillus sp.	ncbi:contaminated
+GCA_008123405.1	gtdb_v226	Nocardioides sp. BGMRC 2183	ncbi:contaminated
+GCA_018853935.1	gtdb_v226	Acidithiobacillus ferrivorans	ncbi:genome length too large
+GCA_002159185.1	gtdb_v226	Gemmiger sp. An87	ncbi:contaminated
+GCA_013200995.1	gtdb_v226	Arthrobacter citreus	ncbi:contaminated|genome length too large
+GCA_902386935.1	gtdb_v226	Varibaculum timonense	ncbi:contaminated
+GCA_000016765.1	gtdb_v226	Rhizorhabdus wittichii RW1	ncbi:contaminated
+GCA_018241205.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCA_948960675.1	gtdb_v226	uncultured Eisenbergiella sp.	ncbi:contaminated
+GCF_037861325.1	gtdb_v226	Riemerella anatipestifer	ncbi:contaminated
+GCA_023301245.1	gtdb_v226	Rickettsiales bacterium	ncbi:contaminated
+GCA_937890875.1	gtdb_v226	uncultured Anaerolineaceae bacterium	ncbi:contaminated
+GCA_035421265.1	gtdb_v226	Candidatus Pacearchaeota archaeon	ncbi:contaminated
+GCF_913775725.1	gtdb_v226	uncultured Stenotrophomonas sp.	ncbi:contaminated
+GCA_000825765.1	gtdb_v226	Ehrlichia minasensis	ncbi:contaminated
+GCA_937885075.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_001028025.1	gtdb_v226	Faecalicatena fissicatena	ncbi:genome length too large
+GCA_002968845.1	gtdb_v226	Neorhizobium tomejilense	ncbi:contaminated
+GCA_945890035.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_000143165.1	gtdb_v226	Dehalogenimonas lykanthroporepellens BL-DC-9	ncbi:contaminated
+GCA_947488515.1	gtdb_v226	uncultured Nocardioides sp.	ncbi:contaminated
+GCA_937897265.1	gtdb_v226	uncultured Alcaligenaceae bacterium	ncbi:contaminated
+GCA_002368335.1	gtdb_v226	Nostoc sp. NIES-4103	ncbi:contaminated
+GCA_003932755.1	gtdb_v226	Methylomicrobium sp. wino1	ncbi:contaminated
+GCA_947036575.1	gtdb_v226	uncultured Brevinema sp.	ncbi:contaminated
+GCA_005877885.1	gtdb_v226	Labilibacter sediminis	ncbi:contaminated
+GCA_900108205.1	gtdb_v226	Eubacterium ruminantium	ncbi:genome length too large
+GCA_023705985.1	gtdb_v226	Candidatus Heimdallarchaeota archaeon	ncbi:contaminated
+GCA_000230935.2	gtdb_v226	Mycolicibacterium rhodesiae JS60	ncbi:genome length too large
+GCA_913060515.1	gtdb_v226	uncultured Pseudomonadota bacterium	ncbi:contaminated
+GCA_900184925.1	gtdb_v226	Ruminococcaceae bacterium HV4-5-B5C	ncbi:contaminated
+GCA_026967815.1	gtdb_v226	Candidatus Bathyarchaeota archaeon	ncbi:contaminated
+GCA_947074245.1	gtdb_v226	uncultured Bacteroidales bacterium	ncbi:contaminated
+GCA_026651855.1	gtdb_v226	Pseudomonas silvicola	ncbi:contaminated
+GCA_031264105.1	gtdb_v226	Endomicrobium sp.	ncbi:contaminated
+GCA_003246295.1	gtdb_v226	Clostridia bacterium	ncbi:contaminated
+GCA_018668695.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_913009675.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_938048785.1	gtdb_v226	uncultured Archaeoglobaceae archaeon	ncbi:contaminated
+GCA_963657575.1	gtdb_v226	Sodaliphilus sp.	ncbi:contaminated
+GCA_900129675.1	gtdb_v226	Bradyrhizobium erythrophlei	ncbi:genome length too large
+GCA_945865905.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCF_001589285.1	gtdb_v226	Sorangium cellulosum	ncbi:genome length too large
+GCA_031408315.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_023458055.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCA_945882215.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_937871165.1	gtdb_v226	uncultured Actinomycetes bacterium	ncbi:contaminated
+GCA_015259235.1	gtdb_v226	Alloprevotella sp.	ncbi:contaminated
+GCA_002529455.1	gtdb_v226	Glycomyces fuscus	ncbi:contaminated
+GCF_009939295.1	gtdb_v226	Petrachloros mirabilis ULC683	ncbi:genome length too large
+GCA_900142905.1	gtdb_v226	Burkholderia sp. GAS332	ncbi:contaminated
+GCA_014764505.1	gtdb_v226	Phormidium tenue FACHB-886	ncbi:genome length too large
+GCA_001931535.1	gtdb_v226	Minicystis rosea	ncbi:genome length too large
+GCA_003343905.1	gtdb_v226	Subdoligranulum variabile	ncbi:contaminated
+GCA_022736715.1	gtdb_v226	Edaphobacter aggregans	ncbi:contaminated
+GCA_005217565.1	gtdb_v226	Puteibacter caeruleilacunae	ncbi:contaminated
+GCA_037443345.1	gtdb_v226	Rubrivivax sp.	ncbi:contaminated
+GCA_018613035.1	gtdb_v226	Pseudomonas sp. ISL-84	ncbi:contaminated
+GCA_024345855.1	gtdb_v226	Synechococcus sp. GreenBA-s	ncbi:contaminated
+GCA_023457875.1	gtdb_v226	Bacillota bacterium	ncbi:contaminated
+GCF_002289565.1	gtdb_v226	Rhodopirellula sp. SM50	ncbi:contaminated
+GCA_017622255.1	gtdb_v226	Methanocorpusculum sp.	ncbi:contaminated
+GCA_945883815.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_913056175.1	gtdb_v226	uncultured Opitutia bacterium	ncbi:contaminated
+GCA_945900455.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_937899145.1	gtdb_v226	uncultured Bacteroidota bacterium	ncbi:contaminated
+GCA_031400655.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_038009385.1	gtdb_v226	Hydrogenobacter sp. RSW1	ncbi:contaminated
+GCA_937877765.1	gtdb_v226	Candidatus Bathyarchaeota archaeon	ncbi:contaminated
+GCA_963975065.1	gtdb_v226	uncultured Halomonas sp.	ncbi:contaminated
+GCA_937991965.1	gtdb_v226	uncultured Verrucomicrobiales bacterium	ncbi:contaminated
+GCA_001190015.1	gtdb_v226	Candidatus Burkholderia crenata	ncbi:contaminated
+GCA_009921505.1	gtdb_v226	Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_001439915.1	gtdb_v226	Fredinandcohnia humi	ncbi:contaminated
+GCA_015660965.1	gtdb_v226	Methanoregulaceae archaeon	ncbi:contaminated
+GCA_014189435.1	gtdb_v226	Mesorhizobium loti	ncbi:genome length too large
+GCF_029029505.1	gtdb_v226	Ancylomarina sp. DW003	ncbi:contaminated
+GCF_000632515.1	gtdb_v226	Parageobacillus genomosp. 1	ncbi:contaminated
+GCA_913058165.1	gtdb_v226	uncultured Chromatiales bacterium	ncbi:contaminated
+GCA_963548485.1	gtdb_v226	uncultured Streptococcus sp.	ncbi:contaminated
+GCA_019799905.1	gtdb_v226	Trujillonella endophytica	ncbi:contaminated
+GCA_002733865.1	gtdb_v226	Sphingopyxis sp.	ncbi:contaminated
+GCA_913061385.1	gtdb_v226	uncultured Rhodopirellula sp.	ncbi:contaminated
+GCA_024743075.1	gtdb_v226	bacterium	ncbi:contaminated
+GCA_943331195.2	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_004154635.1	gtdb_v226	Bifidobacterium animalis subsp. animalis	ncbi:genome length too large
+GCA_943788715.1	gtdb_v226	uncultured Pseudomonadales bacterium	ncbi:contaminated
+GCF_017741815.1	gtdb_v226	Rhizobium sp. 16-488-2b	ncbi:contaminated
+GCA_035518915.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_963650055.1	gtdb_v226	Comamonas kerstersii	ncbi:contaminated
+GCA_945888895.1	gtdb_v226	Dehalococcoides mccartyi	ncbi:genome length too large
+GCF_002803095.1	gtdb_v226	Pseudomonas sp. ZH-FAD	ncbi:contaminated
+GCA_934215995.1	gtdb_v226	uncultured Bacillus sp.	ncbi:contaminated
+GCA_016278265.1	gtdb_v226	Halothiobacillus sp.	ncbi:contaminated
+GCA_025360715.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_019799925.1	gtdb_v226	Blastococcus sp. CPCC 205250	ncbi:contaminated
+GCA_014235785.1	gtdb_v226	Bacillus sp. PAMC26568	ncbi:misassembled
+GCA_004322425.1	gtdb_v226	Chitinophagaceae bacterium	ncbi:contaminated
+GCA_020854775.1	gtdb_v226	Candidatus Woesearchaeota archaeon	ncbi:contaminated
+GCA_001403755.1	gtdb_v226	Chryseobacterium senegalense	ncbi:contaminated
+GCA_900766925.1	gtdb_v226	Lachnospiraceae bacterium	ncbi:contaminated
+GCF_900459405.1	gtdb_v226	Streptococcus hyointestinalis	ncbi:genome length too large
+GCA_963600665.1	gtdb_v226	Bifidobacterium catenulatum	ncbi:contaminated|genome length too large
+GCA_039541175.1	gtdb_v226	Actinokineospora soli	ncbi:contaminated
+GCA_020193655.1	gtdb_v226	Ensifer sp. IC3342	ncbi:contaminated
+GCA_003367665.1	gtdb_v226	Leifsonia sp. ku-ls	ncbi:contaminated
+GCA_000828085.3	gtdb_v226	Scytonema tolypothrichoides VB-61278	ncbi:contaminated
+GCA_002684495.1	gtdb_v226	Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_945876405.1	gtdb_v226	uncultured Ruminococcus sp.	ncbi:contaminated
+GCA_900343135.1	gtdb_v226	Atopobium massiliense	ncbi:contaminated
+GCA_963923905.1	gtdb_v226	uncultured Methylocucumis sp.	ncbi:contaminated
+GCA_003602285.1	gtdb_v226	Arthrobacter frigidicola	ncbi:contaminated
+GCF_016429215.1	gtdb_v226	Herbaspirillum sp. ASV7	ncbi:contaminated
+GCA_030589055.1	gtdb_v226	Candidatus Bathyarchaeota archaeon	ncbi:contaminated
+GCA_900551655.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_022729705.1	gtdb_v226	Helicobacter cetorum	ncbi:genome length too large
+GCA_963923745.1	gtdb_v226	uncultured Thiotrichales bacterium	ncbi:contaminated
+GCA_001580565.1	gtdb_v226	Caballeronia megalochromosomata	ncbi:contaminated
+GCA_002173415.2	gtdb_v226	Marinomonas agarivorans	ncbi:contaminated
+GCA_035577985.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_019118935.1	gtdb_v226	Candidatus Oscillibacter pullicola	ncbi:contaminated
+GCA_003285105.1	gtdb_v226	Roseithermus sacchariphilus	ncbi:contaminated
+GCA_900545735.1	gtdb_v226	uncultured Bacillota bacterium	ncbi:contaminated
+GCA_030817875.1	gtdb_v226	Flavobacterium sp. W4I14	ncbi:contaminated
+GCA_017399555.1	gtdb_v226	Methanocorpusculum sp.	ncbi:contaminated
+GCA_018333075.1	gtdb_v226	Heyndrickxia sporothermodurans	ncbi:genome length too large
+GCA_937910255.1	gtdb_v226	uncultured Caulobacteraceae bacterium	ncbi:contaminated
+GCA_019468145.1	gtdb_v226	Rickettsia endosymbiont of Bradysia coprophila	ncbi:contaminated
+GCA_009725995.1	gtdb_v226	Zobellia laminariae	ncbi:contaminated
+GCA_937902605.1	gtdb_v226	uncultured Acidobacteriota bacterium	ncbi:contaminated
+GCA_019457945.1	gtdb_v226	Ornithinimicrobium laminariae	ncbi:contaminated
+GCA_001709035.1	gtdb_v226	Candidatus Thiodiazotropha endoloripes	ncbi:contaminated
+GCA_000955875.1	gtdb_v226	Terrabacter sp. 28	ncbi:contaminated
+GCF_001015195.1	gtdb_v226	Sphingomonas sp. Y57	ncbi:contaminated
+GCA_039534485.1	gtdb_v226	Streptomyces lactacystinicus	ncbi:contaminated
+GCA_001013295.1	gtdb_v226	Chryseobacterium indologenes	ncbi:genome length too large
+GCA_001612575.1	gtdb_v226	Streptobacillus notomytis	ncbi:contaminated
+GCA_913061105.1	gtdb_v226	uncultured Alcanivoracaceae bacterium	ncbi:contaminated
+GCA_905371865.1	gtdb_v226	uncultured Carnobacterium sp.	ncbi:contaminated
+GCA_001544595.2	gtdb_v226	Caballeronia peredens	ncbi:contaminated
+GCA_021774875.1	gtdb_v226	Emcibacter sp.	ncbi:contaminated
+GCA_014696315.1	gtdb_v226	Calothrix membranacea FACHB-236	ncbi:contaminated
+GCF_001423545.1	gtdb_v226	Leifsonia sp. Leaf325	ncbi:contaminated
+GCA_026002815.1	gtdb_v226	Candidatus Woesearchaeota archaeon	ncbi:contaminated
+GCA_002083515.1	gtdb_v226	Proteobacteria bacterium HN_bin10	ncbi:contaminated
+GCA_937935345.1	gtdb_v226	uncultured Lachnobacterium sp.	ncbi:contaminated
+GCA_913061515.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_040096245.1	gtdb_v226	Waltera hominis	ncbi:contaminated
+GCA_036226585.1	gtdb_v226	Streptomyces sp. NBC_00708	ncbi:contaminated
+GCA_945860285.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_016916535.1	gtdb_v226	Dysgonomonadaceae bacterium zrk40	ncbi:contaminated
+GCA_963545025.1	gtdb_v226	uncultured Sphingopyxis sp.	ncbi:contaminated
+GCA_019428955.1	gtdb_v226	Burkholderiaceae bacterium	ncbi:contaminated
+GCA_023008585.1	gtdb_v226	Natribaculum breve	ncbi:contaminated
+GCA_937958665.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_963586845.1	gtdb_v226	Bifidobacteriaceae bacterium	ncbi:contaminated
+GCA_945889545.1	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_029237615.1	gtdb_v226	Mucilaginibacter sp.	ncbi:contaminated
+GCA_945883695.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_001684025.1	gtdb_v226	Candidatus Glomeribacter gigasporarum	ncbi:contaminated|genome length too large
+GCA_016617495.1	gtdb_v226	Azonexaceae bacterium s22	ncbi:contaminated
+GCA_036561825.1	gtdb_v226	Pseudomonas sp.	ncbi:contaminated
+GCA_026417655.1	gtdb_v226	Syntrophobacterales bacterium	ncbi:contaminated
+GCA_947085235.1	gtdb_v226	uncultured Aquabacterium sp.	ncbi:contaminated
+GCA_943325485.2	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_038961845.1	gtdb_v226	Xylophilus sp. GW821-FHT01B05	ncbi:contaminated
+GCF_000331735.1	gtdb_v226	Myxococcus stipitatus DSM 14675	ncbi:genome length too large
+GCF_002412335.2	gtdb_v226	Tychonema bourrellyi FEM_GT703	ncbi:contaminated
+GCA_020829585.1	gtdb_v226	Nostoc sp. XA013	ncbi:contaminated
+GCA_000308255.3	gtdb_v226	Anaerococcus pacaensis 9403502	ncbi:misassembled
+GCA_900095165.1	gtdb_v226	Polynucleobacter necessarius	ncbi:contaminated
+GCA_004923195.1	gtdb_v226	Marinifilum sp. JC120	ncbi:contaminated
+GCA_963923385.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_036398815.1	gtdb_v226	Rhizobium sp.	ncbi:contaminated
+GCA_963990675.1	gtdb_v226	uncultured Synechococcus sp.	ncbi:contaminated
+GCA_012999515.1	gtdb_v226	Salifodinibacter halophilus	ncbi:contaminated
+GCA_029782335.1	gtdb_v226	Actinomycetes bacterium	ncbi:contaminated
+GCA_945868195.1	gtdb_v226	Bordetella parapertussis	ncbi:contaminated
+GCF_007280575.1	gtdb_v226	Streptomyces benahoarensis	ncbi:contaminated
+GCA_014656175.1	gtdb_v226	Streptomyces werraensis	ncbi:contaminated
+GCA_000690595.2	gtdb_v226	Natrinema mahii	ncbi:contaminated
+GCA_913009835.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_002021875.1	gtdb_v226	Streptomyces hygroscopicus	ncbi:genome length too large
+GCA_020687125.1	gtdb_v226	Hominicoprocola fusiformis	ncbi:contaminated
+GCA_018228705.1	gtdb_v226	Dysosmobacter sp. Marseille-Q4140	ncbi:contaminated
+GCA_902470905.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_027484885.1	gtdb_v226	Rubrivivax sp.	ncbi:contaminated
+GCA_039527855.1	gtdb_v226	Streptomyces sanglieri	ncbi:contaminated
+GCA_016429195.1	gtdb_v226	Brevundimonas sp. ASV9	ncbi:contaminated
+GCA_947384095.1	gtdb_v226	uncultured Roseburia sp.	ncbi:contaminated
+GCA_900548465.1	gtdb_v226	uncultured Eubacterium sp.	ncbi:contaminated
+GCA_963611065.1	gtdb_v226	Bacteroides ovatus	ncbi:contaminated
+GCA_014648495.1	gtdb_v226	Actinomadura cremea	ncbi:contaminated
+GCA_963603285.1	gtdb_v226	Ruminococcus bromii	ncbi:genome length too large
+GCA_002470185.1	gtdb_v226	Arcobacter sp. UBA7394	ncbi:contaminated
+GCA_003249165.1	gtdb_v226	Desulfobulbaceae bacterium	ncbi:contaminated
+GCA_913061145.1	gtdb_v226	uncultured Haliea sp.	ncbi:contaminated
+GCA_036960845.1	gtdb_v226	Halopseudomonas aestusnigri	ncbi:genome length too large
+GCA_018241045.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCA_002699555.1	gtdb_v226	Dehalococcoidia bacterium	ncbi:contaminated
+GCA_964007685.1	gtdb_v226	uncultured Candidatus Poseidoniales archaeon	ncbi:contaminated
+GCA_018054125.1	gtdb_v226	Candidatus Atribacteria bacterium	ncbi:contaminated
+GCF_000418325.1	gtdb_v226	Sorangium cellulosum So0157-2	ncbi:genome length too large
+GCA_000828075.3	gtdb_v226	Tolypothrix campylonemoides VB511288	ncbi:contaminated
+GCA_003028315.1	gtdb_v226	Neisseria mucosa	ncbi:contaminated
+GCA_901456055.1	gtdb_v226	Phytobacter ursingii	ncbi:contaminated
+GCA_901875635.1	gtdb_v226	Xylophilus ampelinus	ncbi:contaminated
+GCA_913060815.1	gtdb_v226	uncultured Sulfitobacter sp.	ncbi:contaminated
+GCA_014649355.1	gtdb_v226	Streptomyces althioticus	ncbi:contaminated
+GCA_040095065.1	gtdb_v226	Hominicoprocola fusiformis	ncbi:contaminated
+GCA_900766555.1	gtdb_v226	Helicobacteraceae bacterium	ncbi:contaminated
+GCA_964015995.1	gtdb_v226	uncultured Alphaproteobacteria bacterium	ncbi:contaminated
+GCF_030316605.1	gtdb_v226	Spiroplasma ixodetis Y32	ncbi:genome length too large
+GCA_963923185.1	gtdb_v226	uncultured Limnohabitans sp.	ncbi:contaminated
+GCA_945861095.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_945877545.1	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_009936035.1	gtdb_v226	Neglectibacter sp. X58	ncbi:contaminated
+GCA_905142475.1	gtdb_v226	Xanthomonas hydrangeae	ncbi:contaminated
+GCA_913061315.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_000648925.1	gtdb_v226	Caballeronia jiangsuensis	ncbi:contaminated
+GCA_009780035.1	gtdb_v226	Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_945980025.1	gtdb_v226	uncultured Lactobacillus sp.	ncbi:contaminated
+GCA_027587225.1	gtdb_v226	Solirubrobacter taibaiensis	ncbi:contaminated
+GCA_902470835.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_002900545.1	gtdb_v226	Thermoplasmata archaeon M11B2D	ncbi:contaminated
+GCA_010091925.1	gtdb_v226	Nostoc sp. B(2019)	ncbi:contaminated
+GCF_040302365.1	gtdb_v226	Nocardioides sp. NPDC126508	ncbi:contaminated
+GCA_030388825.1	gtdb_v226	Rossellomorea sp. AcN35-11	ncbi:contaminated
+GCA_026393955.1	gtdb_v226	Candidatus Aminicenantes bacterium	ncbi:contaminated
+GCA_937900695.1	gtdb_v226	uncultured Eubacterium sp.	ncbi:contaminated
+GCA_963625795.1	gtdb_v226	Anaerovoracaceae bacterium	ncbi:contaminated
+GCA_034931985.1	gtdb_v226	Halotia wernerae UHCC 0503	ncbi:contaminated
+GCA_003665935.1	gtdb_v226	Halobellus sp. Atlit-31R	ncbi:contaminated
+GCA_003335585.1	gtdb_v226	Sulfitobacter sp. DFL-14	ncbi:contaminated
+GCA_023427285.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCA_963542985.1	gtdb_v226	uncultured Campylobacter sp.	ncbi:contaminated
+GCA_900112785.1	gtdb_v226	Phytobacter palmae	ncbi:contaminated
+GCA_014649575.1	gtdb_v226	Streptomyces griseoincarnatus	ncbi:contaminated
+GCA_023554105.1	gtdb_v226	Brucella sp. 21LCYQ03	ncbi:contaminated
+GCA_002102225.1	gtdb_v226	Mycobacterium interjectum	ncbi:contaminated
+GCA_902535055.1	gtdb_v226	uncultured Candidatus Actinomarina sp.	ncbi:contaminated
+GCA_014696615.1	gtdb_v226	Nostoc linckia FACHB-104	ncbi:contaminated
+GCA_945862535.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_945897825.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_012038135.1	gtdb_v226	Salinimicrobium nanhaiense	ncbi:contaminated
+GCA_004554205.1	gtdb_v226	Clostridium sp.	ncbi:contaminated
+GCA_002723415.1	gtdb_v226	Chloroflexota bacterium	ncbi:contaminated
+GCA_003245575.1	gtdb_v226	Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_036828955.1	gtdb_v226	Candidatus Dormiibacterota bacterium	ncbi:contaminated
+GCA_002205125.1	gtdb_v226		ncbi:contaminated
+GCA_009928435.1	gtdb_v226	Bacillus sp. HF117_J1_D	ncbi:contaminated
+GCA_963990595.1	gtdb_v226	uncultured Methylobacterium sp.	ncbi:contaminated
+GCA_014381105.1	gtdb_v226	bacterium	ncbi:contaminated
+GCA_004168015.1	gtdb_v226	Methylolobus aquaticus	ncbi:contaminated
+GCA_001189335.2	gtdb_v226	Candidatus Paraburkholderia schumanniana	ncbi:contaminated
+GCA_000470535.1	gtdb_v226	Streptomyces sp. AW19M42	ncbi:contaminated
+GCA_004078665.1	gtdb_v226	Halobacillus fulvus	ncbi:contaminated
+GCA_016710095.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_000364225.2	gtdb_v226	Eubacterium plexicaudatum ASF492	ncbi:contaminated
+GCA_001184405.1	gtdb_v226	Candidatus Burkholderia humilis	ncbi:contaminated
+GCA_024409145.1	gtdb_v226	archaeon	ncbi:contaminated
+GCA_031408135.1	gtdb_v226	Bdellovibrio sp.	ncbi:contaminated
+GCA_963545855.1	gtdb_v226	uncultured Prevotella sp.	ncbi:contaminated
+GCA_032105665.1	gtdb_v226	Pseudomonas sp.	ncbi:contaminated
+GCA_016838945.1	gtdb_v226	Methanobrevibacter sp.	ncbi:contaminated
+GCA_947057405.1	gtdb_v226	uncultured Roseburia sp.	ncbi:contaminated
+GCA_963605995.1	gtdb_v226	Holdemanella biformis	ncbi:genome length too large
+GCA_963676965.1	gtdb_v226	uncultured Cohaesibacter sp.	ncbi:contaminated
+GCA_001648575.1	gtdb_v226	Sutcliffiella horikoshii DSM 8719	ncbi:contaminated
+GCA_945878865.1	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_001485605.1	gtdb_v226	Candidatus Kryptobacter tengchongensis	ncbi:genome length too large
+GCA_036742135.1	gtdb_v226	Bacillota bacterium	ncbi:contaminated
+GCA_937952145.1	gtdb_v226	uncultured Myxococcales bacterium	ncbi:contaminated
+GCA_963990215.1	gtdb_v226	uncultured Flavobacteriales bacterium	ncbi:contaminated
+GCA_002725175.2	gtdb_v226	Paracoccaceae bacterium	ncbi:contaminated
+GCA_963646785.1	gtdb_v226	Acutalibacteraceae bacterium	ncbi:contaminated
+GCA_000175855.1	gtdb_v226	Raphidiopsis brookii D9	ncbi:contaminated
+GCF_000255295.1	gtdb_v226	Corallococcus coralloides DSM 2259	ncbi:genome length too large
+GCA_945897335.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_900549455.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_019236675.1	gtdb_v226	Verrucomicrobiota bacterium	ncbi:contaminated
+GCA_024756235.1	gtdb_v226	Massilia kyonggiensis	ncbi:contaminated
+GCA_015661585.1	gtdb_v226	Methanothermococcus okinawensis	ncbi:contaminated
+GCA_023423405.1	gtdb_v226	Bacteroidota bacterium	ncbi:contaminated
+GCA_913059105.1	gtdb_v226	uncultured Flavobacteriales bacterium	ncbi:contaminated
+GCA_024399155.1	gtdb_v226	archaeon	ncbi:contaminated
+GCA_016428915.1	gtdb_v226	Pandoraea sp. ASV26	ncbi:contaminated
+GCA_029574055.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_913009695.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_964011505.1	gtdb_v226	Halomonas salina	ncbi:genome length too large
+GCA_004193205.1	gtdb_v226	Gordonia sedimidis	ncbi:contaminated
+GCA_963656905.1	gtdb_v226	Bacteroidaceae bacterium	ncbi:contaminated
+GCA_003265685.1	gtdb_v226	Piscinibacter caeni	ncbi:contaminated
+GCA_018333785.1	gtdb_v226	Methylomicrobium sp.	ncbi:contaminated
+GCA_035519555.1	gtdb_v226	Nitrosotalea sp.	ncbi:contaminated
+GCA_027019405.1	gtdb_v226	Candidatus Altimarinota bacterium	ncbi:contaminated
+GCA_934320645.1	gtdb_v226	uncultured Bariatricus sp.	ncbi:contaminated
+GCA_938004375.1	gtdb_v226	uncultured Pseudomonadota bacterium	ncbi:contaminated
+GCA_000316115.1	gtdb_v226	Leptolyngbya sp. PCC 7375	ncbi:contaminated
+GCA_017434525.1	gtdb_v226	Methanobrevibacter sp.	ncbi:contaminated
+GCA_913009285.1	gtdb_v226	uncultured Nitrospirota bacterium	ncbi:contaminated
+GCA_000340945.1	gtdb_v226	Nocardiopsis synnemataformans DSM 44143	ncbi:contaminated
+GCA_010024215.1	gtdb_v226	Pseudomonadota bacterium	ncbi:contaminated
+GCF_000336955.1	gtdb_v226	Haloferax larsenii JCM 13917	ncbi:contaminated
+GCA_001939945.1	gtdb_v226	Aerophototrophica crusticola	ncbi:contaminated
+GCA_021496925.1	gtdb_v226	Acidovorax sp. YS12	ncbi:contaminated
+GCA_002699515.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_011526265.1	gtdb_v226	Candidatus Arcticimaribacter sp.	ncbi:contaminated
+GCA_934435195.1	gtdb_v226	uncultured Schaedlerella sp.	ncbi:contaminated
+GCA_002482865.1	gtdb_v226	Porphyrobacter sp. UBA7686	ncbi:contaminated
+GCA_009712615.1	gtdb_v226	Methanobacterium sp.	ncbi:contaminated
+GCA_947254465.1	gtdb_v226	uncultured Gemella sp.	ncbi:contaminated
+GCA_913061175.1	gtdb_v226	uncultured Psychrobacter sp.	ncbi:contaminated
+GCA_002684855.1	gtdb_v226	Planctomycetaceae bacterium	ncbi:contaminated
+GCA_002701185.1	gtdb_v226	Fidelibacterota bacterium	ncbi:contaminated
+GCA_963557785.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCF_900111765.1	gtdb_v226	Myxococcus fulvus	ncbi:genome length too large
+GCA_003452475.1	gtdb_v226	Acidimicrobiaceae bacterium	ncbi:contaminated
+GCA_003651045.1	gtdb_v226	Thermoplasmata archaeon	ncbi:contaminated
+GCA_000447295.1	gtdb_v226	Fischerella sp. PCC 9431	ncbi:contaminated
+GCF_031581025.1	gtdb_v226	Salibaculum sp.	ncbi:contaminated
+GCA_002894665.1	gtdb_v226	Salinivenus iranica	ncbi:contaminated
+GCA_014649695.1	gtdb_v226	Streptomyces kurssanovii	ncbi:contaminated
+GCA_000337115.1	gtdb_v226	Natrinema thermotolerans DSM 11552	ncbi:contaminated
+GCA_963597265.1	gtdb_v226	Evtepia sp.	ncbi:contaminated
+GCA_003217095.1	gtdb_v226	Rhizobium sp. PP-CC-3A-592	ncbi:contaminated
+GCA_913060645.1	gtdb_v226	uncultured Dokdonia sp.	ncbi:contaminated
+GCA_037101405.1	gtdb_v226	Candidatus Megaera polyxenophila	ncbi:contaminated
+GCA_913060855.1	gtdb_v226	uncultured Lewinella sp.	ncbi:contaminated
+GCA_937914965.1	gtdb_v226	uncultured Thermoanaerobacteraceae bacterium	ncbi:contaminated
+GCA_963923735.1	gtdb_v226	uncultured Acidimicrobiales bacterium	ncbi:contaminated
+GCA_040403975.1	gtdb_v226	Sediminibacterium sp.	ncbi:contaminated
+GCA_001184205.1	gtdb_v226	Desulfocarbo indianensis	ncbi:contaminated
+GCA_963631655.1	gtdb_v226	Eggerthellaceae bacterium	ncbi:contaminated
+GCA_964014335.1	gtdb_v226	uncultured Campylobacterales bacterium	ncbi:contaminated
+GCA_001439635.1	gtdb_v226	Solibacillus cecembensis	ncbi:contaminated
+GCA_947623305.1	gtdb_v226	uncultured Alistipes sp.	ncbi:contaminated
+GCA_945861735.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_012841535.1	gtdb_v226	Gallicola sp.	ncbi:contaminated
+GCA_030010215.1	gtdb_v226	Tianweitania sp. UT-5YL-CI-8	ncbi:contaminated
+GCA_000283575.1	gtdb_v226	Oscillibacter valericigenes Sjm18-20	ncbi:genome length too large
+GCA_035759805.1	gtdb_v226	Lysobacter sp.	ncbi:contaminated
+GCA_019805165.1	gtdb_v226	Azospirillum sp. 412522	ncbi:contaminated
+GCA_029975155.1	gtdb_v226	Propionicimonas sp.	ncbi:contaminated
+GCF_040892545.1	gtdb_v226	Paracidovorax avenae	ncbi:contaminated
+GCA_963634045.1	gtdb_v226	Methanobrevibacter smithii	ncbi:contaminated
+GCA_030263805.2	gtdb_v226	Pseudomonas sp. FeN3W	ncbi:contaminated
+GCA_902470915.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_041483195.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_943192975.1	gtdb_v226	Senimuribacter intestinalis	ncbi:contaminated
+GCA_944391865.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_036643355.1	gtdb_v226	Myroides sp.	ncbi:contaminated
+GCA_945900795.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_900553705.1	gtdb_v226	uncultured Collinsella sp.	ncbi:contaminated
+GCA_029975625.1	gtdb_v226	Candidatus Nanosynbacter sp.	ncbi:contaminated
+GCA_023168345.1	gtdb_v226	Lysinibacillus sp. PLM2	ncbi:contaminated
+GCA_902463315.1	gtdb_v226	uncultured Methanobrevibacter sp.	ncbi:contaminated
+GCA_937889795.1	gtdb_v226	uncultured Syntrophobacteraceae bacterium	ncbi:contaminated
+GCA_943329595.2	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_963977795.1	gtdb_v226	uncultured Acidimicrobiaceae bacterium	ncbi:contaminated
+GCA_937864375.1	gtdb_v226	uncultured Spirochaetota bacterium	ncbi:contaminated
+GCA_947570505.1	gtdb_v226	uncultured Candidatus Saccharibacteria bacterium	ncbi:contaminated
+GCA_008125075.1	gtdb_v226	Acetivibrio alkalicellulosi	ncbi:contaminated
+GCA_900475325.1	gtdb_v226	Paucimonas lemoignei	ncbi:misassembled
+GCA_945867725.1	gtdb_v226	Bordetella parapertussis	ncbi:contaminated
+GCA_012522645.1	gtdb_v226	Thermoplasmatales archaeon	ncbi:contaminated
+GCA_937858165.1	gtdb_v226	uncultured Ardenticatenia bacterium	ncbi:contaminated
+GCF_000621585.1	gtdb_v226	[Eubacterium] cellulosolvens LD2006	ncbi:genome length too large
+GCA_913009925.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_011390515.1	gtdb_v226	Oscillatoria sp.	ncbi:contaminated
+GCA_913057815.1	gtdb_v226	uncultured Flavobacteriales bacterium	ncbi:contaminated
+GCA_947311605.1	gtdb_v226	uncultured Sulfurovum sp.	ncbi:contaminated
+GCA_963935315.1	gtdb_v226	uncultured Planctomycetaceae bacterium	ncbi:contaminated
+GCA_016288355.1	gtdb_v226	Synergistes sp.	ncbi:contaminated
+GCA_938045435.1	gtdb_v226	uncultured Selenomonas sp.	ncbi:contaminated
+GCA_018065935.1	gtdb_v226	Candidatus Kurthia equi	ncbi:contaminated
+GCA_946404705.1	gtdb_v226	uncultured Ruminococcus sp.	ncbi:contaminated
+GCA_028285265.1	gtdb_v226	Geminicoccaceae bacterium	ncbi:contaminated
+GCA_020844795.1	gtdb_v226	Methanothrix sp.	ncbi:contaminated
+GCA_012584445.1	gtdb_v226	Olsenella sp. KGMB02461	ncbi:contaminated
+GCA_917627385.1	gtdb_v226	Frankia sp. CIT1	ncbi:contaminated
+GCA_020724205.1	gtdb_v226	Candidatus Aenigmarchaeum sp.	ncbi:contaminated
+GCA_913060565.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCF_017741935.1	gtdb_v226	Rhizobium sp. 16-449-1b	ncbi:contaminated
+GCA_964223495.1	gtdb_v226	Nitrosopumilus sp.	ncbi:contaminated
+GCA_937982425.1	gtdb_v226	uncultured archaeon	ncbi:contaminated
+GCA_900554375.1	gtdb_v226	uncultured Sutterella sp.	ncbi:contaminated
+GCA_037034305.1	gtdb_v226	Streptomyces sp. PLK1-5	ncbi:contaminated
+GCA_910585655.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_934725835.1	gtdb_v226	uncultured Odoribacter sp.	ncbi:contaminated
+GCA_000721375.1	gtdb_v226	Streptomyces sp. NRRL B-3428	ncbi:misassembled
+GCA_014822185.1	gtdb_v226	Azoarcus sp. Aa7	ncbi:contaminated
+GCA_964194235.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_031291295.1	gtdb_v226	Rhodoferax sp.	ncbi:contaminated
+GCA_014896455.1	gtdb_v226	Thermoanaerobacter sp.	ncbi:contaminated
+GCA_963678025.1	gtdb_v226	Bacteroidales bacterium	ncbi:contaminated
+GCA_017982655.1	gtdb_v226	Brasilonema sp. CT11	ncbi:contaminated
+GCA_017458285.1	gtdb_v226	Clostridia bacterium	ncbi:contaminated
+GCA_029258955.1	gtdb_v226	Thermoplasmatota archaeon	ncbi:contaminated
+GCF_029814935.1	gtdb_v226	Pseudomonas sp. GD03919	ncbi:contaminated
+GCA_945888065.1	gtdb_v226	Rickettsia typhi	ncbi:contaminated
+GCA_943373155.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_018228665.1	gtdb_v226	Faecalicatena sp. Marseille-Q4148	ncbi:contaminated
+GCA_021811825.1	gtdb_v226	Candidatus Anadelfobacter sociabilis	ncbi:contaminated
+GCA_964015895.1	gtdb_v226	uncultured Candidatus Poseidoniales archaeon	ncbi:contaminated
+GCA_963542695.1	gtdb_v226	uncultured Eubacteriales bacterium	ncbi:contaminated
+GCA_947252915.1	gtdb_v226	uncultured Lactobacillus sp.	ncbi:contaminated
+GCA_022713905.1	gtdb_v226	Collinsella sp.	ncbi:contaminated
+GCA_013346905.1	gtdb_v226	Bombilactobacillus mellis	ncbi:genome length too large
+GCA_000719105.1	gtdb_v226	Streptomyces sclerotialus	ncbi:contaminated
+GCA_039962225.1	gtdb_v226	Microcoleus sp. AS-A8	ncbi:contaminated
+GCA_015257455.1	gtdb_v226	Candidatus Nanosynbacter sp.	ncbi:contaminated
+GCA_019703815.1	gtdb_v226	Thaumasiovibrio occultus	ncbi:contaminated
+GCA_913057765.1	gtdb_v226	uncultured Campylobacteraceae bacterium	ncbi:contaminated
+GCA_963650175.1	gtdb_v226	Ruminococcus sp. CAG:579	ncbi:contaminated
+GCA_001749745.1	gtdb_v226	Candidatus Marispirochaeta associata	ncbi:contaminated
+GCF_039523335.1	gtdb_v226	Marinobacter szutsaonensis	ncbi:contaminated
+GCA_913060555.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_964014905.1	gtdb_v226	uncultured Candidatus Poseidoniales archaeon	ncbi:contaminated
+GCA_002968015.1	gtdb_v226	Massilia phosphatilytica	ncbi:contaminated
+GCA_946190205.1	gtdb_v226	Streptococcus mitis	ncbi:contaminated
+GCA_003248775.1	gtdb_v226	Shinella sp.	ncbi:contaminated
+GCA_000719025.1	gtdb_v226	Kineosporia aurantiaca JCM 3230	ncbi:contaminated
+GCA_008692195.1	gtdb_v226	Salegentibacter sp. R32	ncbi:contaminated
+GCA_937896535.1	gtdb_v226	uncultured Pseudomonadota bacterium	ncbi:contaminated
+GCA_000685825.1	gtdb_v226	Methylocystis sp. LW5	ncbi:contaminated
+GCA_948592185.1	gtdb_v226	uncultured Acetatifactor sp.	ncbi:contaminated
+GCA_964020105.1	gtdb_v226	Rickettsiales endosymbiont of Ecdyonurus torrentis	ncbi:contaminated
+GCA_002551355.1	gtdb_v226	Streptomyces sp. man185	ncbi:misassembled
+GCA_001552515.1	gtdb_v226	Sphaerimonospora mesophila NBRC 14179 = JCM 3151	ncbi:contaminated
+GCA_030628905.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_964016345.1	gtdb_v226	uncultured Candidatus Poseidoniales archaeon	ncbi:contaminated
+GCA_020687605.1	gtdb_v226	Intestinimonas aquisgranensis	ncbi:contaminated
+GCA_000720375.1	gtdb_v226	Rhodococcus rhodnii	ncbi:genome length too large
+GCA_029262235.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_945827805.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_902496665.1	gtdb_v226	uncultured Clostridium sp.	ncbi:contaminated
+GCA_000318405.1	gtdb_v226	Brevundimonas diminuta 470-4	ncbi:contaminated
+GCA_900544515.1	gtdb_v226	uncultured Oscillospiraceae bacterium	ncbi:contaminated
+GCA_027310405.1	gtdb_v226	bacterium	ncbi:contaminated
+GCA_945861565.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_026134025.1	gtdb_v226	Candidatus Syntrophoarchaeum sp.	ncbi:contaminated
+GCA_937908275.1	gtdb_v226	uncultured Desulfarculaceae bacterium	ncbi:contaminated
+GCA_947385185.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_945861415.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_913061285.1	gtdb_v226	uncultured Verrucomicrobiota bacterium	ncbi:contaminated
+GCA_938045615.1	gtdb_v226	uncultured Clostridia bacterium	ncbi:contaminated
+GCA_963637895.1	gtdb_v226	Lachnospiraceae bacterium	ncbi:contaminated
+GCA_030150665.1	gtdb_v226	Enterococcaceae bacterium	ncbi:contaminated
+GCA_000756735.1	gtdb_v226	Candidatus Rubidus massiliensis	ncbi:genome length too large
+GCA_963635855.1	gtdb_v226	Faecalibacterium sp. CAG:74	ncbi:contaminated
+GCA_937898825.1	gtdb_v226	uncultured Elusimicrobia sp.	ncbi:contaminated
+GCA_014803435.1	gtdb_v226	Cellulosimicrobium terreum	ncbi:contaminated
+GCA_910587905.1	gtdb_v226	uncultured Lachnospiraceae bacterium	ncbi:contaminated
+GCA_002718195.1	gtdb_v226	Methanobacteriota archaeon	ncbi:contaminated
+GCA_029936315.1	gtdb_v226	Planctomycetota bacterium	ncbi:contaminated
+GCA_943329665.2	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_001665235.1	gtdb_v226	Mycobacterium sp. 1100029.7	ncbi:contaminated
+GCA_039527025.1	gtdb_v226	Microlunatus lacustris	ncbi:contaminated
+GCA_016932245.1	gtdb_v226	Thermoplasmatota archaeon	ncbi:contaminated
+GCA_021738045.1	gtdb_v226	Candidatus Methylopumilus sp.	ncbi:contaminated
+GCA_003436425.1	gtdb_v226	Eubacterium sp. TM05-53	ncbi:contaminated
+GCA_945902255.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_001724315.1	gtdb_v226	Lautropia sp. SCN 70-15	ncbi:contaminated
+GCA_934435205.1	gtdb_v226	uncultured Ruminococcus sp.	ncbi:contaminated
+GCA_937892815.1	gtdb_v226	uncultured archaeon	ncbi:contaminated
+GCA_937921735.1	gtdb_v226	uncultured archaeon	ncbi:contaminated
+GCA_031283985.1	gtdb_v226	Endomicrobium sp.	ncbi:contaminated
+GCA_000306725.1	gtdb_v226	Methanolobus psychrophilus R15	ncbi:contaminated
+GCA_900169975.1	gtdb_v226	Pseudoflavonifractor sp. Marseille-P3106	ncbi:contaminated
+GCA_005046945.1	gtdb_v226	Tissierella creatinini	ncbi:contaminated
+GCA_900163665.1	gtdb_v226	Frigoribacterium sp. JB110	ncbi:contaminated
+GCA_937898545.1	gtdb_v226	uncultured Candidatus Saccharibacteria bacterium	ncbi:contaminated
+GCA_945874115.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_003240695.1	gtdb_v226	Pseudoxanthomonas suwonensis	ncbi:contaminated
+GCA_016938695.1	gtdb_v226	Candidatus Woesearchaeota archaeon	ncbi:contaminated
+GCA_947628455.1	gtdb_v226	uncultured Methanobrevibacter sp.	ncbi:contaminated
+GCA_945874225.1	gtdb_v226	Flavobacterium psychrophilum	ncbi:genome length too large
+GCA_945888575.1	gtdb_v226	Asaia bogorensis	ncbi:genome length too large
+GCA_937960755.1	gtdb_v226	uncultured Azospirillum sp.	ncbi:contaminated
+GCA_020849095.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_015062815.1	gtdb_v226	Methanosphaera stadtmanae	ncbi:contaminated
+GCA_039593785.1	gtdb_v226	Niabella sp.	ncbi:contaminated
+GCA_000263395.1	gtdb_v226	Stutzerimonas stutzeri TS44	ncbi:contaminated
+GCA_015063195.1	gtdb_v226	Thermoplasmata archaeon	ncbi:contaminated
+GCA_963605395.1	gtdb_v226	Firmicutes bacterium CAG:194	ncbi:contaminated
+GCA_023301585.1	gtdb_v226	Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_001665295.1	gtdb_v226	Mycobacterium sp. 1554424.7	ncbi:contaminated
+GCA_028693395.1	gtdb_v226	Candidatus Nanoarchaeia archaeon	ncbi:contaminated
+GCA_020854835.1	gtdb_v226	Candidatus Micrarchaeota archaeon	ncbi:contaminated
+GCA_938004075.1	gtdb_v226	uncultured Methanomassiliicoccales archaeon	ncbi:contaminated
+GCA_000761495.1	gtdb_v226	Acinetobacter idrijaensis	ncbi:contaminated
+GCA_018831195.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_937981305.1	gtdb_v226	uncultured Selenomonas sp.	ncbi:contaminated
+GCA_014647975.1	gtdb_v226	Streptomyces fumigatiscleroticus	ncbi:contaminated
+GCA_035500795.1	gtdb_v226	Candidatus Eiseniibacteriota bacterium	ncbi:genome length too large
+GCA_937958685.1	gtdb_v226	uncultured Bacillales bacterium	ncbi:contaminated
+GCA_943328785.2	gtdb_v226	Bifidobacterium breve	ncbi:genome length too large
+GCA_006543605.1	gtdb_v226	Rhodococcus sp. WS4	ncbi:genome length too large
+GCA_913060525.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_002733575.1	gtdb_v226	Blastopirellula sp.	ncbi:contaminated
+GCA_026414265.1	gtdb_v226	Candidatus Micrarchaeota archaeon	ncbi:contaminated
+GCA_964016325.1	gtdb_v226	uncultured Candidatus Poseidoniales archaeon	ncbi:contaminated
+GCA_945862285.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_028281005.1	gtdb_v226	Pseudomonadales bacterium	ncbi:contaminated
+GCA_900100475.1	gtdb_v226	Sphingobium faniae	ncbi:contaminated
+GCA_004010835.2	gtdb_v226	Oenococcus sp. UCMA 16435	ncbi:contaminated
+GCA_000985875.1	gtdb_v226	Neorhizobium galegae bv. officinalis	ncbi:contaminated
+GCA_037898445.1	gtdb_v226	Fusobacterium nucleatum	ncbi:genome length too large
+GCA_945900785.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_016463225.1	gtdb_v226	Sphingopyxis sp.	ncbi:contaminated
+GCA_032096595.1	gtdb_v226	Flavobacterium sp.	ncbi:contaminated
+GCA_017694735.1	gtdb_v226	Candidatus Alectryobacillus merdavium	ncbi:contaminated
+GCA_937928015.1	gtdb_v226	uncultured Anaerolineales bacterium	ncbi:contaminated
+GCA_002685535.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_913009355.1	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_022360095.1	gtdb_v226	Phycisphaerales bacterium	ncbi:contaminated
+GCA_020253895.1	gtdb_v226	Rubrobacter sp.	ncbi:contaminated
+GCA_002025645.1	gtdb_v226	Curtobacterium pusillum	ncbi:genome length too large
+GCF_004135735.1	gtdb_v226	Sorangium cellulosum	ncbi:genome length too large
+GCA_029239355.1	gtdb_v226	Sphingobacterium sp.	ncbi:contaminated
+GCA_937889515.1	gtdb_v226	uncultured Myxococcales bacterium	ncbi:contaminated
+GCA_000230955.3	gtdb_v226	Halobacterium sp. DL1	ncbi:contaminated
+GCF_020171285.1	gtdb_v226	Seohaeicola saemankumensis	ncbi:genome length too large
+GCF_016008875.1	gtdb_v226	Ectopseudomonas mendocina	ncbi:contaminated
+GCA_016650045.1	gtdb_v226	Eubacteriaceae bacterium	ncbi:contaminated
+GCA_009889605.1	gtdb_v226	Candidatus Bathyarchaeota archaeon	ncbi:contaminated
+GCA_019689655.1	gtdb_v226	Microbispora sp.	ncbi:contaminated
+GCA_031274895.1	gtdb_v226	Alphaproteobacteria bacterium	ncbi:contaminated
+GCA_945905275.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_937928715.1	gtdb_v226	uncultured Actinomycetes bacterium	ncbi:contaminated
+GCA_003674045.1	gtdb_v226	Streptomyces griseocarneus	ncbi:genome length too large
+GCA_019236035.1	gtdb_v226	Verrucomicrobiota bacterium	ncbi:contaminated
+GCA_900155405.1	gtdb_v226	Negativicoccus massiliensis	ncbi:contaminated
+GCA_945898055.1	gtdb_v226	Akkermansia muciniphila	ncbi:genome length too large
+GCA_945875925.1	gtdb_v226	Rickettsia typhi	ncbi:genome length too large
+GCA_039594205.1	gtdb_v226	Pseudescherichia sp.	ncbi:contaminated
+GCA_028690575.1	gtdb_v226	Bacilli bacterium	ncbi:contaminated
+GCA_913058275.1	gtdb_v226	uncultured Gammaproteobacteria bacterium	ncbi:contaminated
+GCA_023257525.1	gtdb_v226	Candidatus Nanopelagicales bacterium	ncbi:contaminated
+GCA_009929275.1	gtdb_v226	Clostridia bacterium	ncbi:contaminated
+GCA_945862365.1	gtdb_v226	Chlamydia trachomatis	ncbi:genome length too large
+GCA_022729735.1	gtdb_v226	Helicobacter cetorum	ncbi:genome length too large
+GCA_011051925.1	gtdb_v226	Deltaproteobacteria bacterium	ncbi:contaminated
+GCA_946892665.1	gtdb_v226	Chryseobacterium sp. Marseille-Q5410	ncbi:contaminated
+GCA_942636505.2	gtdb_v226	uncultured bacterium	ncbi:contaminated
+GCA_002713705.1	gtdb_v226	Flavobacteriaceae bacterium	ncbi:contaminated
+GCA_001971685.1	gtdb_v226	Halomonas sp. 1513	ncbi:contaminated
+GCA_902646575.1	gtdb_v226	uncultured Wolbachia sp.	ncbi:contaminated
+GCA_000176735.1	gtdb_v226	Neisseria polysaccharea ATCC 43768	ncbi:contaminated
+GCA_020829595.1	gtdb_v226	Nostoc sp. CHAB 5844	ncbi:contaminated
+GCA_013133635.1	ncbi_viruses	Shigella phage 2019SD1	ncbi:misassembled
+GCA_009662935.1	ncbi_viruses	Citrobacter phage HCF1	ncbi:misassembled
+GCA_022873905.1	ncbi_viruses	Bacteriophage sp.	ncbi:contaminated
+GCA_027931425.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931445.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931435.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931475.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931465.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931455.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931485.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931525.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931505.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931515.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931565.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931495.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931545.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931535.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931555.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931575.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931585.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931595.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931605.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931625.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931615.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931645.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931655.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931635.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931685.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931705.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931695.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931725.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931665.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931715.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931735.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931765.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931755.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931745.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931675.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931775.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931785.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931795.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931815.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931805.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931835.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931855.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931825.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931865.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931845.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931885.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931875.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931915.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931895.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931945.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931975.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931965.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931955.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931935.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931905.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932005.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931985.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932015.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932035.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931925.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932045.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932025.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932055.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027931995.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932095.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932085.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932105.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932065.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932125.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932135.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932115.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932075.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932145.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932165.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932155.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932175.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932185.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932195.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932215.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932225.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932205.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932235.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932285.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932275.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932295.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932245.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932265.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932255.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932315.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932305.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932365.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932345.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932375.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932325.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932335.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932385.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932415.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932405.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932395.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932355.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932425.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932445.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932455.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932465.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932435.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932485.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932475.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932505.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932495.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932515.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932525.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932565.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932575.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932555.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932545.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932535.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932605.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932595.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932635.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932625.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932645.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932585.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932665.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932615.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932655.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932675.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932705.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932695.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932735.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932715.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932745.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932685.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932725.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932765.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932755.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932775.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932815.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932795.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932835.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932825.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932785.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932805.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932855.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932865.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932845.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932875.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932885.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932895.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932935.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932945.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932925.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932905.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932975.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932955.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932965.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932915.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933005.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933015.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933035.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933025.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932985.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027932995.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933055.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933075.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933045.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933065.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933085.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933115.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933155.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933095.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933135.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933175.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933145.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933125.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933105.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933165.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933245.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933205.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933195.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933185.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933225.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933215.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933255.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933235.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933265.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933275.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933315.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933305.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933285.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933295.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933325.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933345.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933355.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933385.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933365.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933335.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933375.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933415.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933405.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933395.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933435.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933425.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933465.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933455.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933475.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933445.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933505.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933485.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933495.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933525.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933515.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933585.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933545.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933535.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933595.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933555.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933565.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933605.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933615.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933625.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933635.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933575.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933675.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933655.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933645.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933705.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933695.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933665.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933715.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_027933685.1	ncbi_viruses	human gammaherpesvirus 4	ncbi:misassembled
+GCA_006408975.1	ncbi_viruses	Human mastadenovirus C	ncbi:misassembled
+GCA_006410165.1	ncbi_viruses	Human mastadenovirus C	ncbi:misassembled
+GCA_006410105.1	ncbi_viruses	Human mastadenovirus C	ncbi:misassembled
+GCA_037126425.1	ncbi_viruses	Human alphaherpesvirus 3	ncbi:misassembled
+GCA_012361095.1	ncbi_viruses	Vibrio phage V07	ncbi:chimeric
+GCA_037100165.1	ncbi_viruses	Klebsiella phage vB_Kpn_AM_K6	ncbi:chimeric
+GCA_027930355.1	ncbi_viruses	Cynomolgus cytomegalovirus	ncbi:misassembled
+GCA_036979435.1	ncbi_viruses	phage PH444	ncbi:genome length too large
+GCA_029239665.1	ncbi_viruses	Xanthomonas phage vB_XooS_NR08	ncbi:chimeric
+GCA_008801055.1	ncbi_viruses	Achromobacter phage vB_Ade_ART	ncbi:chimeric
+GCA_015914095.1	ncbi_viruses	Stx2a-converting phage Stx2_499	ncbi:chimeric
+GCA_015913935.1	ncbi_viruses	Stx2a-converting phage Stx2_14040	ncbi:chimeric
+GCA_015914035.1	ncbi_viruses	Stx2a-converting phage Stx2_14744	ncbi:chimeric
+GCA_015914505.1	ncbi_viruses	Stx2a-converting phage Stx2_12E129_PPompW	ncbi:chimeric
+GCA_015914435.1	ncbi_viruses	Stx2a-converting phage Stx2_EH1910	ncbi:genome length too large
+GCA_017654295.1	ncbi_viruses	Enterobacter phage N5822	ncbi:genome length too large
+GCA_002606085.1	ncbi_viruses	Moraxella phage Mcat16	ncbi:contaminated
+GCA_902985125.1	ncbi_viruses	uncultured Caudovirales phage	ncbi:contaminated
+GCA_002583455.1	ncbi_viruses	uncultured Mediterranean phage uvMED	ncbi:contaminated
+GCA_002583485.1	ncbi_viruses	uncultured Mediterranean phage uvMED	ncbi:contaminated
+GCA_003505755.1	ncbi_viruses	uncultured Mediterranean phage	ncbi:contaminated
+GCA_002580205.1	ncbi_viruses	uncultured Mediterranean phage uvMED	ncbi:contaminated
+GCA_018444445.1	ncbi_viruses	uncultured marine virus	ncbi:contaminated
+GCA_013086015.1	ncbi_viruses	uncultured human fecal virus	ncbi:contaminated
+GCA_031167765.1	ncbi_viruses	Porcine enteric alphacoronavirus	ncbi:misassembled
+GCA_003285485.1	ncbi_viruses	environmental Halophage eHP-11	ncbi:contaminated
+GCA_018443585.1	ncbi_viruses	uncultured marine virus	ncbi:contaminated
+GCA_003505595.1	ncbi_viruses	uncultured Mediterranean phage	ncbi:contaminated
+GCA_003498945.1	ncbi_viruses	uncultured virus	ncbi:contaminated
+GCA_031765915.1	ncbi_viruses	Jamaica yellow mosaic virus	ncbi:misassembled
+GCA_004875845.1	ncbi_viruses	Synechococcus phage MRHenn-2013a	ncbi:chimeric
+GCA_003328805.1	ncbi_viruses	Staphylococcus phage UPMK_1	ncbi:chimeric
+GCA_038430705.1	ncbi_viruses	Escherichia phage ECO103 4-12-1	ncbi:contaminated
+GCA_038431085.1	ncbi_viruses	Staphylococcus phage SA 1306 Kay	ncbi:contaminated
+GCA_923084885.2	ncbi_viruses	Acinetobacter phage MD-2021a	ncbi:contaminated
+GCA_038430955.1	ncbi_viruses	Salmonella phage S.Typ Adana	ncbi:contaminated
+GCA_923086165.2	ncbi_viruses	Acinetobacter phage MD-2021a	ncbi:contaminated
+GCA_038430735.1	ncbi_viruses	Escherichia phage ECO111 5-P	ncbi:contaminated
+GCA_038430685.1	ncbi_viruses	Enterococcus phage Efs 1-1-1	ncbi:contaminated
+GCA_038430695.1	ncbi_viruses	Escherichia phage EC22.5-2	ncbi:contaminated
+GCA_038430775.1	ncbi_viruses	Listeria phage LM 4-11-1	ncbi:contaminated
+GCA_038430785.1	ncbi_viruses	Listeria phage LM 4-14-1	ncbi:contaminated
+GCA_038430725.1	ncbi_viruses	Escherichia phage ECO104 4-5-2	ncbi:contaminated
+GCA_038430965.1	ncbi_viruses	Staphylococcus phage SA 1298 Kay	ncbi:contaminated
+GCA_001857825.1	ncbi_viruses	uncultured human fecal virus	ncbi:contaminated
+GCA_038430925.1	ncbi_viruses	Salmonella phage S.Kent 1-2-1	ncbi:contaminated
+GCA_038430765.1	ncbi_viruses	Escherichia phage ECO95 1-6-1	ncbi:contaminated
+GCA_001857745.1	ncbi_viruses	uncultured human fecal virus	ncbi:contaminated
+GCA_001857805.1	ncbi_viruses	uncultured human fecal virus	ncbi:contaminated
+GCA_001308695.1	ncbi_viruses	Staphylococcus phage SA1	ncbi:chimeric
+GCF_001308695.1	ncbi_viruses	Staphylococcus phage SA1	ncbi:chimeric
+GCA_949284755.1	ncbi_viruses	uncultured virus	ncbi:genome length too large
+GCA_024181985.1	ncbi_viruses	uncultured virus	ncbi:contaminated|genome length too large
+GCA_963922035.1	invertebrate	Amblyjoppa proteus	manual: Nosema-like microsporidian sequence (iyVulBima1, TODO 01)
+GCA_937936465.1	gtdb_v226	uncultured Mycoplasmatales bacterium	manual: beetle sequence (icCatNigr1, TODO 01)
+GCA_913064935.1	gtdb_v226	uncultured Mollicutes bacterium	manual: moss sequence (caAndNiva3, TODO 01; weak)
