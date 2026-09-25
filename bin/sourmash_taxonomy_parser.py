@@ -34,7 +34,7 @@ import os
 import polars as pl
 
 # Version of sourmash_taxonomy_parser
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 # Module-level logger — always available when the module is imported.
 # Handlers are added by setup_logger() at runtime (CLI) or by the caller (tests).
@@ -359,6 +359,29 @@ def get_target_genomes(assembly_df, target_taxa):
 # Scoring and classification
 # ---------------------------------------------------------------------------
 
+def resolve_target_taxon(assembly_df, target_taxa, exclude_set=None, min_genomes=1):
+    """Pick the target taxon from an ordered preference list (e.g. order, class, phylum, kingdom).
+
+    Returns ({level: value}, n_genomes) for the first level whose taxon has at least `min_genomes`
+    DB genomes left after the exclusions (own ToLID / species / exclude file), or (None, 0) if none does.
+    """
+    exclude_set = exclude_set or set()
+    for level, value in (target_taxa or {}).items():
+        if assembly_df is None or level not in assembly_df.columns:
+            logger.warning(f"Target level '{level}' not in the assembly database columns; skipped")
+            continue
+        accs = (assembly_df
+                .filter(pl.col(level).cast(pl.Utf8).str.to_lowercase().str.strip_chars() == value)
+                .filter(~exclusion_mask('assembly_accession', exclude_set) if exclude_set else pl.lit(True))
+                .height)
+        if accs >= min_genomes:
+            logger.info(f"Target taxon: {level}:{value} ({accs} DB genomes after exclusions, minimum {min_genomes})")
+            return {level: value}, accs
+        logger.warning(f"Target {level}:{value} has {accs} DB genomes after exclusions (< {min_genomes}); "
+                       f"falling back to the next level")
+    return None, 0
+
+
 def annotate_hits(hits, assembly_df=None, target_taxa=None):
     """Add taxa, db, is_target, norm_hashes, score (= containment) and per-contig rank (top_n).
 
@@ -672,10 +695,11 @@ CLASSIFICATION_COLUMNS = [
     'sourmash_seq_len', 'sourmash_top_accession', 'sourmash_top_is_target', 'sourmash_db', 'sourmash_ksize',
     'sourmash_scaled', 'sourmash_containment', 'sourmash_intersect_hashes', 'sourmash_norm_hashes',
     'sourmash_best_target_accession', 'sourmash_best_target_containment', 'sourmash_n_hits',
+    'sourmash_target_taxon',
 ]
 
 
-def build_classification_table(classified, hits, assembly_df=None, gx_divs=None, sizes=None):
+def build_classification_table(classified, hits, assembly_df=None, gx_divs=None, sizes=None, target_used=None):
     """One row per contig, FCS-GX-style (see CLASSIFICATION_COLUMNS)."""
     rep = classified.select('query_name', 'action', 'n_hits', 'best_target_accession', 'best_target_score',
                             pl.col('reported_accession').alias('match_name'))
@@ -721,6 +745,8 @@ def build_classification_table(classified, hits, assembly_df=None, gx_divs=None,
         pl.col('best_target_accession').alias('sourmash_best_target_accession'),
         pl.col('best_target_score').round(6).alias('sourmash_best_target_containment'),
         pl.col('n_hits').alias('sourmash_n_hits'),
+        # target taxon actually used (after any fallback); 'none' = no level in the DB, all hits target
+        pl.lit(target_used, dtype=pl.Utf8).alias('sourmash_target_taxon'),
     )
     return out
 
@@ -731,20 +757,26 @@ def write_classification_output(table, output_file):
     logger.info(f"Actions: {counts} → {output_file}")
 
 
-def output_basename(sourmash_files, target_taxa, prefix=None):
+def output_basename(sourmash_files, target_taxa, prefix=None, first_only=False):
     if prefix:
         base = prefix
     else:
         base = "sourmash_results" if len(sourmash_files) > 1 else os.path.splitext(os.path.basename(sourmash_files[0]))[0]
-    taxa_suffix = "".join(f"_{level}_{value}" for level, value in (target_taxa or {}).items())
+    items = list((target_taxa or {}).items())[:1] if first_only else (target_taxa or {}).items()
+    taxa_suffix = "".join(f"_{level}_{value}" for level, value in items)
     return f"{base}{taxa_suffix}"
 
 
 def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, exclude_accessions=None,
          exclude_files=None, exclude_tolid=None, exclude_species=None, min_hashes=DEFAULT_MIN_HASHES,
          min_containment=DEFAULT_MIN_CONTAINMENT, margin=DEFAULT_MARGIN, prefix=None,
-         contig_sizes=None, taxdump=None, div_mapping=None):
-    """Run the parser; returns the per-contig classification table (FCS-GX-style columns)."""
+         contig_sizes=None, taxdump=None, div_mapping=None, target_fallback=False, min_target_genomes=1):
+    """Run the parser; returns the per-contig classification table (FCS-GX-style columns).
+
+    target_fallback: target_taxa is an ordered preference list (e.g. order, class, phylum, kingdom); the
+    first taxon with >= min_target_genomes DB genomes (after exclusions) is used. Without it, several
+    target taxa are a union (parser <= 2.1 behaviour).
+    """
     logger.info("=" * 60)
     logger.info(f"sourmash_taxonomy_parser {__version__}")
     logger.info(f"  Sourmash results files: {', '.join(sourmash_files)}")
@@ -764,6 +796,18 @@ def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, 
         if only_hits:
             logger.warning(f"{len(only_hits)} contig(s) in the multisearch results are not in {contig_sizes}")
         all_queries = list(set(all_queries) | set(sizes.get_column('query_name').to_list()))
+    requested = target_taxa
+    if target_fallback and target_taxa:
+        chosen, _ = resolve_target_taxon(assembly_df, target_taxa, exclude_set, min_target_genomes)
+        # no level qualifies: keep the requested (first) taxon -> conservative 'everything is target'
+        # if it has no genomes at all
+        target_taxa = chosen or dict(list(target_taxa.items())[:1])
+        target_used = (':'.join(next(iter(chosen.items()))) if chosen else 'none')
+    else:
+        target_used = ' '.join(f"{k}:{v}" for k, v in (target_taxa or {}).items()) or None
+    if target_taxa and get_target_genomes(assembly_df, target_taxa) is None:
+        target_used = 'none'
+    logger.info(f"Target taxon used: {target_used}")
     hits = annotate_hits(hits, assembly_df, target_taxa)
     classified = classify_contigs(hits, all_queries, min_hashes, min_containment, margin)
 
@@ -773,10 +817,11 @@ def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, 
         gx_divs = load_gx_divs(taxdump, div_mapping, needed.get_column('taxa').unique().to_list())
     elif taxdump or div_mapping:
         logger.warning("sourmash_div needs both --taxdump and --div_mapping; leaving it empty")
-    table = build_classification_table(classified, hits, assembly_df, gx_divs, sizes)
+    table = build_classification_table(classified, hits, assembly_df, gx_divs, sizes, target_used)
 
     os.makedirs(outdir, exist_ok=True)
-    base = os.path.join(outdir, output_basename(sourmash_files, target_taxa, prefix))
+    # file names keep the requested taxon (first level), whatever level was used
+    base = os.path.join(outdir, output_basename(sourmash_files, requested, prefix, first_only=target_fallback))
 
     write_summary_output(hits, f"{base}.summary.csv", min_hashes, min_containment)
     write_classification_output(table, f"{base}.classification.csv")
@@ -792,6 +837,11 @@ def build_arg_parser():
     parser.add_argument('-s', '--sourmash_results', nargs='+', help='Path(s) to the sourmash multisearch results file(s)')
     parser.add_argument('-a', '--assembly_db', nargs='+', help='Path(s) to assembly database file(s) with taxonomic information')
     parser.add_argument('--target_taxa', nargs='+', help='Target taxa in format taxon:value (e.g., order:coleoptera)')
+    parser.add_argument('--target_fallback', action='store_true',
+                        help='Treat --target_taxa as an ordered list (e.g. order:x class:y phylum:z kingdom:w) and use the first '
+                             'taxon with at least --min_target_genomes DB genomes after exclusions')
+    parser.add_argument('--min_target_genomes', type=int, default=1,
+                        help='With --target_fallback: minimum DB genomes of the target taxon')
     parser.add_argument('--accessions_to_exclude', nargs='+', default=None,
                         help='Assembly accessions to drop from the hits (comma-separated or multiple values). '
                              'An accession without version matches every version.')
@@ -844,4 +894,5 @@ if __name__ == "__main__":
          exclude_files=args.exclude_accessions_file, exclude_tolid=args.exclude_tolid,
          exclude_species=args.exclude_species, min_hashes=args.min_hashes, min_containment=args.min_containment,
          margin=args.margin, prefix=args.prefix, contig_sizes=args.contig_sizes, taxdump=args.taxdump,
-         div_mapping=args.div_mapping)
+         div_mapping=args.div_mapping, target_fallback=args.target_fallback,
+         min_target_genomes=args.min_target_genomes)

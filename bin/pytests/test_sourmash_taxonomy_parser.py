@@ -637,3 +637,72 @@ def test_exclude_species_in_main():
         assert 'GCA_000001' not in s_df['assembly_accession'].values
         # the other Primates genome is still a target hit
         assert cls(c_df, 'contig_1') == 'target'
+
+
+# ---------------------------------------------------------------------------
+# Target-taxon fallback (order > class > phylum > kingdom)
+# ---------------------------------------------------------------------------
+
+FALLBACK_SM = ("query_name,match_name,containment,jaccard,intersect_hashes\n"
+               "contig_1,GCA_000001,0.6,0.5,300\n"     # Primates (same class Mammalia as the sample)
+               "contig_2,GCA_000003,0.6,0.5,300\n")    # Diptera
+# sample: order Rodentia (absent from this DB), class Mammalia, phylum Chordata
+FALLBACK_TARGET = {'order': 'rodentia', 'class': 'mammalia', 'phylum': 'chordata', 'kingdom': 'animalia'}
+
+
+def test_resolve_target_taxon_first_level_with_genomes():
+    df = stp.parse_assembly_database([_tmp(ASM_HEADER + HOMO + DRO)])
+    assert stp.resolve_target_taxon(df, FALLBACK_TARGET) == ({'class': 'mammalia'}, 1)
+    assert stp.resolve_target_taxon(df, FALLBACK_TARGET, min_genomes=2) == ({'kingdom': 'animalia'}, 2)
+    # exclusions count: the only Mammalia genome excluded -> next level
+    assert stp.resolve_target_taxon(df, FALLBACK_TARGET, exclude_set={'GCA_000001'})[0] == {'kingdom': 'animalia'}
+    assert stp.resolve_target_taxon(df, {'order': 'rodentia'}) == (None, 0)
+
+
+def test_target_fallback_in_main_records_level():
+    with tempfile.TemporaryDirectory() as tmp:
+        s_df, _, c_df = run(tmp, FALLBACK_SM, ASM_HEADER + HOMO + DRO, FALLBACK_TARGET, target_fallback=True)
+        assert set(c_df['sourmash_target_taxon']) == {'class:mammalia'}
+        assert cls(c_df, 'contig_1') == 'target'
+        assert cls(c_df, 'contig_2') == 'non_target'
+        # file names keep the requested (first) taxon
+        assert any(f.endswith('_order_rodentia.classification.csv') for f in os.listdir(os.path.join(tmp, 'out')))
+
+
+def test_no_fallback_keeps_conservative_behaviour():
+    with tempfile.TemporaryDirectory() as tmp:
+        _, nt_df, c_df = run(tmp, FALLBACK_SM, ASM_HEADER + HOMO + DRO, {'order': 'rodentia'})
+        assert set(c_df['sourmash_target_taxon']) == {'none'}
+        assert set(c_df['sourmash_action']) == {'NA'}
+        assert nt_df.empty
+
+
+def test_fallback_without_any_level_in_db_is_conservative():
+    with tempfile.TemporaryDirectory() as tmp:
+        _, _, c_df = run(tmp, FALLBACK_SM, ASM_HEADER + HOMO + DRO, {'order': 'rodentia', 'class': 'aves'},
+                         target_fallback=True)
+        assert set(c_df['sourmash_target_taxon']) == {'none'}
+        assert set(c_df['sourmash_action']) == {'NA'}
+
+
+def test_get_target_taxa_fallback_levels(tmp_path):
+    import subprocess
+    rl = tmp_path / 'rankedlineage.dmp'
+    rl.write_text("64624\t|\tAndreaea nivalis\t|\t\t|\tAndreaea\t|\tAndreaeaceae\t|\tAndreaeales\t|\tAndreaeopsida\t|\t"
+                  "Streptophyta\t|\tViridiplantae\t|\tEukaryota\t|\n"
+                  "99\t|\tNo order sp.\t|\t\t|\tX\t|\tXaceae\t|\t\t|\tXopsida\t|\tXphyta\t|\tViridiplantae\t|\tEukaryota\t|\n")
+    script = os.path.join(os.path.dirname(__file__), '..', 'get_target_taxa_from_taxid.py')
+
+    def get(taxid, level, fb=None):
+        out = tmp_path / 'out.txt'
+        cmd = [sys.executable, script, '--taxid', taxid, '--rankedlineage', str(rl), '--level', level, '--output', str(out)]
+        if fb:
+            cmd += ['--fallback_levels', fb]
+        subprocess.run(cmd, check=True, capture_output=True)
+        return out.read_text().strip()
+
+    assert get('64624', 'order') == 'order:Andreaeales'
+    assert get('64624', 'order', 'class,phylum,kingdom') == 'order:Andreaeales class:Andreaeopsida phylum:Streptophyta kingdom:Viridiplantae'
+    assert get('64624', 'phylum', 'class,phylum,kingdom') == 'phylum:Streptophyta kingdom:Viridiplantae'
+    assert get('99', 'order', 'class,phylum,kingdom') == 'class:Xopsida phylum:Xphyta kingdom:Viridiplantae'
+    assert get('99', 'order') == ''

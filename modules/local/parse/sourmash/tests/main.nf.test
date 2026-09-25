@@ -235,7 +235,8 @@ nextflow_process {
                 {
                     def rows = path(process.out.multisearch_classification[0][1]).readLines().drop(1).collectEntries { [(it.split(',')[0]): it.split(',')[4]] }
                     assert rows == [contig_1: 'NA', contig_2: 'NA', contig_3: 'NA']
-                    assert path(process.out.multisearch_classification[0][1]).readLines().last().endsWith(',0') // sourmash_n_hits
+                    def lines = path(process.out.multisearch_classification[0][1]).readLines()
+                    assert lines.last().split(',', -1)[lines[0].split(',').toList().indexOf('sourmash_n_hits')] == '0'
                 },
                 // Check versions
                 {
@@ -331,6 +332,46 @@ nextflow_process {
                     assert rows[3][13] == '1000'
                 },
                 { assert snapshot(process.out.multisearch_classification).match() }
+            )
+        }
+    }
+
+    test("Parse sourmash results with target fallback to class") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome_fallback' ],
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
+                    'order:vibrionales class:gammaproteobacteria phylum:pseudomonadota',
+                    []
+                ]
+                input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = []
+                input[3] = []
+                input[4] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                {
+                    // Vibrionales is absent from the test DB: the parser (--target_fallback from conf/modules.config)
+                    // uses the class, every hit is then a target hit
+                    def lines = path(process.out.multisearch_classification[0][1]).readLines()
+                    assert lines[0].endsWith(',sourmash_target_taxon')
+                    def rows = lines.drop(1).collect { it.split(',', -1) }
+                    assert rows.every { it[-1] == 'class:gammaproteobacteria' }
+                    assert rows.every { it[4] == 'NA' }
+                },
+                // file names keep the requested order
+                { assert path(process.out.multisearch_summary[0][1]).exists() }
             )
         }
     }

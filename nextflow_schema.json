@@ -216,6 +216,20 @@
                     "maximum": 1,
                     "help_text": "Fraction of the contig's hashes shared with the database genome. The default (0.1%) stops chromosome-scale scaffolds being called non-target on a few dozen shared hashes."
                 },
+                "sourmash_target_fallback": {
+                    "type": "boolean",
+                    "description": "Fall back to class, then phylum, then kingdom when the sample's taxon at sourmash_taxonomy_level has too few genomes in the Sourmash databases.",
+                    "fa_icon": "fas fa-level-up-alt",
+                    "default": true,
+                    "help_text": "Without a target genome every hit looks non-target, so parser <= 2.1 treated every hit as target and flagged nothing (e.g. an order absent from the databases). With the fallback the first higher taxon with at least sourmash_min_target_genomes genomes (after the exclusions) is used; the level actually used is recorded in classification.csv (sourmash_target_taxon) and the parser log."
+                },
+                "sourmash_min_target_genomes": {
+                    "type": "integer",
+                    "description": "Minimum number of database genomes (after exclusions) the target taxon must have before the fallback stops going up.",
+                    "fa_icon": "fas fa-sliders-h",
+                    "default": 1,
+                    "minimum": 1
+                },
                 "sourmash_margin": {
                     "type": "number",
                     "description": "A contig is non-target only if its best non-target containment exceeds margin x its best target containment.",

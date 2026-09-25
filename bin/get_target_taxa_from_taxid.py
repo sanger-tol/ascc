@@ -3,12 +3,16 @@
 """
 Script to extract target taxa from a taxid using NCBI rankedlineage.dmp file.
 Returns target_taxa in format 'level:taxa_name' (e.g., 'order:Artiodactyla').
+With --fallback_levels, the higher levels follow on the same line, space-separated, in order
+(e.g. 'order:Andreaeales class:Andreaeopsida phylum:Streptophyta kingdom:Viridiplantae'); empty
+levels are skipped. sourmash_taxonomy_parser.py --target_fallback uses the first one present in its DB.
 
 Usage:
     get_target_taxa_from_taxid.py --taxid <taxid> --rankedlineage <path> --level <level> --output <output_file>
+                                  [--fallback_levels class,phylum,kingdom]
 
 Author: Danil Zilov (@zilov)
-Version: 1.0.0
+Version: 1.1.0
 """
 
 import argparse
@@ -16,7 +20,7 @@ import sys
 import os
 
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 # Mapping of taxonomy levels to their column indices in rankedlineage.dmp
 # Format: taxid | name | species | genus | family | order | class | phylum | kingdom | domain
@@ -135,6 +139,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--fallback_levels',
+        default='',
+        help='Comma-separated higher levels to append, in order (e.g. class,phylum,kingdom)'
+    )
+
+    parser.add_argument(
         '--output',
         required=True,
         help='Output file path for target_taxa'
@@ -167,6 +177,16 @@ def main():
 
     # Extract target taxa at specified level
     target_taxa = get_target_taxa(lineage_dict, args.level)
+    # only levels above the requested one (e.g. --level phylum ignores class)
+    fallback_levels = [lv.strip() for lv in args.fallback_levels.split(',')
+                       if lv.strip() in TAXONOMY_LEVELS and TAXONOMY_LEVELS[lv.strip()] > TAXONOMY_LEVELS[args.level]]
+    if target_taxa is None and fallback_levels:
+        # e.g. no order assigned in NCBI: start from the first non-empty fallback level
+        for level in fallback_levels:
+            target_taxa = get_target_taxa(lineage_dict, level)
+            if target_taxa:
+                sys.stderr.write(f"WARNING: level '{args.level}' is empty for taxid '{args.taxid}'; starting at {target_taxa}\n")
+                break
 
     if target_taxa is None:
         sys.stderr.write(
@@ -178,6 +198,14 @@ def main():
         with open(args.output, 'w') as f:
             pass  # Create empty file
         sys.exit(0)
+
+    # Append higher levels for the parser's fallback (skipping empty or repeated levels)
+    taxa_list = [target_taxa]
+    for level in fallback_levels:
+        extra = get_target_taxa(lineage_dict, level)
+        if extra and extra not in taxa_list:
+            taxa_list.append(extra)
+    target_taxa = " ".join(taxa_list)
 
     # Write successful result
     with open(args.output, 'w') as f:
