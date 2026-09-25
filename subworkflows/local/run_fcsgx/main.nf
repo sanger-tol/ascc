@@ -21,7 +21,6 @@ workflow RUN_FCSGX {
     SAMTOOLS_DICT(
         reference
     )
-    ch_versions     = ch_versions.mix( SAMTOOLS_DICT.out.versions )
 
 
     //
@@ -40,7 +39,6 @@ workflow RUN_FCSGX {
         [],
         "production" in workflow.profile.tokenize(',')
     )
-    ch_versions         = ch_versions.mix( FCSGX_RUNGX.out.versions )
 
     fcsgx_report_txt    = FCSGX_RUNGX.out.fcsgx_report
                             .map { meta, file ->

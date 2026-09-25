@@ -2,8 +2,6 @@
 
 ## :warning: Please read this documentation on the sanger-tol website: [https://pipelines.tol.sanger.ac.uk/ascc/](https://pipelines.tol.sanger.ac.uk/ascc/)
 
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
-
 ## Introduction
 
 > [!WARNING]

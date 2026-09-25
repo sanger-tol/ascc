@@ -1,7 +1,11 @@
 //
-// MODULE IMPORT BLOCK
+// NF-CORE MODULE IMPORT BLOCK
 //
-include { GET_KMER_COUNTS                       } from '../../../modules/local/get/kmer_counts/main'
+include { COBIONTID_KMERCOUNTER                 } from '../../../modules/nf-core/cobiontid/kmercounter/main'
+
+//
+// LOCAL MODULE IMPORT BLOCK
+//
 include { REFORMAT_NPY_2_CSV                    } from '../../../modules/local/reformat/npy_2_csv/main'
 include { KMER_COUNT_DIM_REDUCTION              } from '../../../modules/local/kmer_count/dim_reduction/main'
 include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../../modules/local/kmer_count/dim_reduction_combine_csv/main'
@@ -30,18 +34,22 @@ workflow GET_KMERS_PROFILE {
     //
     // MODULE: PRODUCE KMER COUNTS (USING KMER-COUNTER)
     //
-    GET_KMER_COUNTS (
+    COBIONTID_KMERCOUNTER (
         modified_input,      // val(meta), path(reads)
         kmer_size            // val kmer_size
     )
-    ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
+
+    modified_input
+        .combine(COBIONTID_KMERCOUNTER.out.npy, by: 0)
+        .map { meta, fasta, npy -> [meta, fasta, npy] }
+        .set { reformat_npy_input }
 
 
     //
     // MODULE: CONVERT NPY TO CSV FORMAT
     //
     REFORMAT_NPY_2_CSV (
-        GET_KMER_COUNTS.out.npy,  // val(meta), path(fasta), path(npy)
+        reformat_npy_input,  // val(meta), path(fasta), path(npy)
         kmer_size                  // val kmer_size
     )
     ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)

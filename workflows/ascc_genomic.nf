@@ -795,16 +795,18 @@ workflow ASCC_GENOMIC {
             //
             // MODULE: MERGE THE TWO BTK FORMATTED DATASETS INTO ONE DATASET FOR EASIER USE
             //
+
             merged_channel = ch_create_btk_dataset
-                .map { meta, file -> [meta.id, [meta, file]] }
-                .join(
+                .map { meta, file -> [meta.id, meta, file] }
+                .combine(
                     SANGER_TOL_BTK.out.dataset
                         .map { meta, file ->
-                            [meta.id, [meta, file]]
-                    })
+                            [meta.id, meta, file]
+                    }, by: 0)
                 .map { _id, ref_meta, ref_file, _btk_meta, btk_file ->
                     [ref_meta, ref_file, btk_file]
                 }
+
 
             MERGE_BTK_DATASETS (
                 merged_channel
@@ -890,19 +892,27 @@ workflow ASCC_GENOMIC {
     // SUBWORKFLOW: GENERATE DECONTAMINATION FILES AND POTENTIALLY A DECONTAMINATED FASTA
     //              THIS SHOULD ONLY RUN IF STANDARD CONDITIONALS ARE MET
     //              AND ABNORMAL CONTAMINATION IS FOUND
+    //
+
+    // We only want the EUKARYOTIC report
+    // Not using the collection will result in a `Unexpected error [ConcurrentModificationException]`
+    // `ch_fcsadapt` because it is a mix channel, is technically still mutable
+    euk_fcsadapt = ch_fcsadapt.map{ meta, files ->
+        def filesCopy = (files ?: []).collect()    // defensive copy
+        [meta, filesCopy.find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') }]
+    }
+
+    ej_reference_tuple_filtered = ej_reference_tuple
+        .filter{ meta, file ->
+            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly in run_conditionals
+        }
+        .map{ meta, file -> [[id: meta.id], file] }
+
     RUN_DECONTAMINATE_FASTA(
-        ej_reference_tuple.filter{ meta, file ->
-            params.run_decontaminate_fasta in run_conditionals && params.run_autofilter_assembly == "both"
-            return [[id: meta.id], file]
-        },
+        ej_reference_tuple_filtered,
         ch_fcsgx,
         ch_autofilt_fcs_tiara,
-        // got ERROR ~ Unexpected error [ConcurrentModificationException] at this line
-        // changed it to work with copy of files list
-        ch_fcsadapt.map { meta, files ->
-            def copy = new ArrayList(files)
-            [meta, copy.find { file -> file.name ==~ /.*_euk\.fcs_adaptor_report\.txt/ }]
-        }, // We only want the EUKARYOTIC report
+        euk_fcsadapt,
         ej_trailing_ns,
         ch_barcode_check,
         ch_sourmash_non_target,
