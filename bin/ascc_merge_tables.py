@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument("-btk", "--blobtoolkit", type=str, help="Blobtoolkit file")
     parser.add_argument("-bb", "--btk_busco", type=str, help="Busco Blobtoolkit file")
     parser.add_argument("-fg", "--fcs_gx", type=str, help="FCS_GX file")
-    parser.add_argument("-sm", "--sourmash", type=str, help="Sourmash summary file")
+    parser.add_argument("-sm", "--sourmash", type=str, help="Sourmash per-contig classification CSV (scaff, sourmash_* columns)")
     parser.add_argument("-n", "--sample_name", type=str, help="Name for the sample")
     parser.add_argument("-m", "--markerscan", type=str, help="MarkerScan file")
     parser.add_argument("-v", "--version", action="version", version=VERSION)
@@ -235,6 +235,8 @@ def load_and_merge_dataframes(paths_dict):
     sourmash_df = None
     if paths_dict["sourmash"] is not None:
         sourmash_df = parse_or_pass(paths_dict["sourmash"], "SOURMASH")
+        # classification.csv (parser >= 2.1) already has 'scaff' and one row per contig; older per-hit
+        # summaries used 'header' and many rows per contig (which multiplied rows in the outer merge)
         if sourmash_df is not None and 'header' in sourmash_df.columns:
             # Rename 'header' column to 'scaff' for merging
             sourmash_df = sourmash_df.rename(columns={'header': 'scaff'})

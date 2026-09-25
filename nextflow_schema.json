@@ -177,6 +177,53 @@
                     "fa_icon": "fas fa-ban",
                     "help_text": "Provide a comma-separated list of assembly accessions (e.g. 'GCF_000001405.40,GCF_000001635.27') that should be ignored when parsing Sourmash multisearch results."
                 },
+                "sourmash_exclude_accessions_file": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "File of assembly accessions whose Sourmash hits are ignored.",
+                    "fa_icon": "fas fa-ban",
+                    "help_text": "TSV/CSV with an 'assembly_accession' column, or one accession per line. The default lists NCBI-flagged (contaminated, chimeric, misassembled, ...) and known contaminated references in the Sourmash databases. Set to null to disable."
+                },
+                "sourmash_exclude_own_tolid": {
+                    "type": "boolean",
+                    "description": "Ignore Sourmash hits to any database assembly of the sample's own specimen.",
+                    "fa_icon": "fas fa-ban",
+                    "default": true,
+                    "help_text": "The sample name (samplesheet 'sample') is taken as the ToLID and every database assembly whose assembly_name starts with '<ToLID>.' or '<ToLID>_' (e.g. icCatNigr1.hap1.1) is excluded. Skipped if the sample name does not look like a ToLID."
+                },
+                "sourmash_exclude_own_species": {
+                    "type": "boolean",
+                    "description": "Also ignore Sourmash hits to database assemblies of the sample's own species (from --taxid).",
+                    "fa_icon": "fas fa-ban",
+                    "default": false,
+                    "help_text": "For benchmarking on already-published assemblies, where another assembly of the same species in the database makes the screen look better than it is on a new species. Leave off in production: a same-species reference is legitimately target."
+                },
+                "sourmash_min_hashes": {
+                    "type": "number",
+                    "description": "Minimum shared hashes (normalised to scaled=200) for a non-target Sourmash hit to count as evidence.",
+                    "fa_icon": "fas fa-sliders-h",
+                    "default": 2,
+                    "minimum": 0,
+                    "help_text": "intersect_hashes * scaled / 200 must be at least this value. Contigs whose only non-target hits are weaker are reported as 'unclassified' and kept."
+                },
+                "sourmash_min_containment": {
+                    "type": "number",
+                    "description": "Minimum containment for a non-target Sourmash hit to count as evidence.",
+                    "fa_icon": "fas fa-sliders-h",
+                    "default": 0.001,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "help_text": "Fraction of the contig's hashes shared with the database genome. The default (0.1%) stops chromosome-scale scaffolds being called non-target on a few dozen shared hashes."
+                },
+                "sourmash_margin": {
+                    "type": "number",
+                    "description": "A contig is non-target only if its best non-target containment exceeds margin x its best target containment.",
+                    "fa_icon": "fas fa-sliders-h",
+                    "default": 2,
+                    "minimum": 0,
+                    "help_text": "Contigs with no target hit only need a non-target hit that passes the evidence thresholds. Use a very large value to reproduce parser 1.x (any target hit keeps the contig)."
+                },
                 "tiara_action_mode": {
                     "type": "string",
                     "description": "Action mode for Tiara contamination filtering in AUTOFILTER",

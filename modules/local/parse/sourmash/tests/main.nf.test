@@ -51,9 +51,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'test_genome' ],
                     [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
-                    'order:enterobacterales'
+                    'order:enterobacterales',
+                    []
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = []
+                input[3] = []
+                input[4] = []
                 """
             }
         }
@@ -66,13 +70,13 @@ nextflow_process {
                 {
                     def lines = path(process.out.multisearch_summary[0][1]).readLines()
 
-                    // Check CSV header (first line, no comment lines anymore)
-                    assert lines[0].contains('header,assembly_accession,taxa,top_n,containment,jaccard,intersect_hashes,is_target')
+                    // First 8 columns unchanged from parser 1.x; db/ksize/scaled/norm_hashes/passes_thresholds appended
+                    assert lines[0] == 'header,assembly_accession,taxa,top_n,containment,jaccard,intersect_hashes,is_target,db,ksize,scaled,norm_hashes,passes_thresholds'
 
                     // Check data rows exist and have correct columns (7 lines = 1 header + 6 data rows)
                     assert lines.size() == 7 : "Should have 1 header + 6 data rows"
-                    def dataRow = lines[1].split(',')
-                    assert dataRow.size() == 8 : "Should have 8 columns"
+                    def dataRow = lines[1].split(',', -1)
+                    assert dataRow.size() == 13 : "Should have 13 columns"
                 },
                 // Check non_target file exists (but may be empty if all queries have target matches)
                 { assert path(process.out.multisearch_non_target[0][1]).exists() },
@@ -80,10 +84,18 @@ nextflow_process {
                     def lines = path(process.out.multisearch_non_target[0][1]).readLines()
 
                     // Check CSV header exists (first line, no comment lines anymore)
-                    assert lines[0].contains('header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom')
+                    assert lines[0].startsWith('header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom')
 
                     // In this test, all queries have target matches, so non_target file should only have header
                     assert lines.size() == 1 : "Should only have header line (no non-target queries)"
+                },
+                // One row per contig in the classification file
+                {
+                    def lines = path(process.out.multisearch_classification[0][1]).readLines()
+                    // FCS-GX-style layout (cf. *_parsed_fcsgx.csv), then sourmash evidence columns
+                    assert lines[0].startsWith('scaff,sourmash_top_tax_name,sourmash_top_taxid,sourmash_div,sourmash_action,sourmash_species,sourmash_genus,sourmash_family,sourmash_order,sourmash_class,sourmash_phylum,sourmash_kingdom,sourmash_domain,sourmash_seq_len')
+                    assert lines.size() == 4
+                    assert lines[1..3].every { it.split(',')[4] == 'NA' }
                 },
                 // Check versions - split line to avoid timestamp/path issues
                 {
@@ -107,9 +119,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'test_genome_nomatch' ],
                     [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
-                    'phylum:chordata'
+                    'phylum:chordata',
+                    []
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = []
+                input[3] = []
+                input[4] = []
                 """
             }
         }
@@ -125,16 +141,15 @@ nextflow_process {
                     // Check CSV structure (7 lines = 1 header + 6 data rows)
                     assert lines.size() == 7 : "Should have 1 header + 6 data rows"
 
-                    // Check that is_target column shows None (no target_taxa matches found in DB)
+                    // Target taxon absent from the DB: conservative fallback, every hit is treated as target
                     def dataRow = lines[1].split(',')
-                    assert dataRow[7] == 'None' : "is_target should be None when target_taxa doesn't match any genome in DB"
+                    assert dataRow[7] == 'True' : "is_target should be True when target_taxa doesn't match any genome in DB"
                 },
-                // Check non_target file - all contigs should be non-target
+                // Nothing is called non-target
                 { assert path(process.out.multisearch_non_target[0][1]).exists() },
                 {
                     def lines = path(process.out.multisearch_non_target[0][1]).readLines()
-                    // Should have header + 3 non-target queries (4 lines total)
-                    assert lines.size() == 4 : "Should have 1 header + 3 non-target queries when target_taxa doesn't match"
+                    assert lines.size() == 1 : "Should only have the header when target_taxa doesn't match any genome in DB"
                 },
                 // Check versions - split line to avoid timestamp/path issues
                 {
@@ -157,9 +172,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'test_genome' ],
                     file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true),
-                    'order:enterobacterales'
+                    'order:enterobacterales',
+                    []
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = []
+                input[3] = []
+                input[4] = []
                 """
             }
         }
@@ -169,6 +188,7 @@ nextflow_process {
                 { assert process.success },
                 { assert path(process.out.multisearch_summary[0][1]).exists() },
                 { assert path(process.out.multisearch_non_target[0][1]).exists() },
+                { assert path(process.out.multisearch_classification[0][1]).exists() },
                 { assert path(process.out.versions[0]).exists() }
             )
         }
@@ -187,9 +207,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'test_genome_exclude' ],
                     [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
-                    'order:enterobacterales'
+                    'order:enterobacterales',
+                    []
                 ]
                 input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = []
+                input[3] = []
+                input[4] = []
                 """
             }
         }
@@ -207,6 +231,12 @@ nextflow_process {
                 },
                 // Check non_target file exists
                 { assert path(process.out.multisearch_non_target[0][1]).exists() },
+                // contig_3's only hit was excluded: it is still reported (NA, 0 hits)
+                {
+                    def rows = path(process.out.multisearch_classification[0][1]).readLines().drop(1).collectEntries { [(it.split(',')[0]): it.split(',')[4]] }
+                    assert rows == [contig_1: 'NA', contig_2: 'NA', contig_3: 'NA']
+                    assert path(process.out.multisearch_classification[0][1]).readLines().last().endsWith(',0') // sourmash_n_hits
+                },
                 // Check versions
                 {
                     def versionContent = path(process.out.versions[0]).text
@@ -214,6 +244,93 @@ nextflow_process {
                     assert versionLines[0] == '"PARSE_SOURMASH":'
                     assert versionLines[1].contains('sourmash_taxonomy_parser:')
                 }
+            )
+        }
+    }
+
+    test("Parse sourmash results with exclude_accessions_file") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome_exclude_file' ],
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
+                    'order:enterobacterales',
+                    []
+                ]
+                input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = file('${moduleDir}/tests/exclude_accessions.tsv', checkIfExists: true)
+                input[3] = []
+                input[4] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                {
+                    // both Enterobacterales accessions are excluded: contig_1 is left with a strong
+                    // Pseudomonadales hit (non-target), contig_2 and contig_3 have no hits left
+                    def rows = path(process.out.multisearch_classification[0][1]).readLines().drop(1).collectEntries { [(it.split(',')[0]): it.split(',')[4]] }
+                    assert rows == [contig_1: 'EXCLUDE', contig_2: 'NA', contig_3: 'NA']
+                },
+                {
+                    def lines = path(process.out.multisearch_non_target[0][1]).readLines()
+                    assert lines.size() == 2
+                    assert lines[1].startsWith('contig_1,GCF_000013265.1,')
+                },
+                { assert snapshot(
+                    process.out.multisearch_summary,
+                    process.out.multisearch_non_target,
+                    process.out.multisearch_classification
+                ).match() }
+            )
+        }
+    }
+
+    test("Parse sourmash results with contig sizes and gx-div") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test_genome_sizes' ],
+                    [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_multisearch_results.csv', checkIfExists: true)],
+                    'order:pseudomonadales',
+                    file('${moduleDir}/tests/test_genome.genome', checkIfExists: true)
+                ]
+                input[1] = [file('${projectDir}/TEST_DATA/sourmash_testfiles/nf-tests/parse_sourmash/test_assembly_taxa_db.csv', checkIfExists: true)]
+                input[2] = []
+                input[3] = file('${moduleDir}/tests/taxdump', checkIfExists: true)
+                input[4] = file('${projectDir}/assets/fcs_gx_blast_div_mapping.tsv', checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                {
+                    def rows = path(process.out.multisearch_classification[0][1]).readLines().drop(1).collect { it.split(',', -1) }
+                    // every contig of the sizes file, including contig_4 without hits
+                    assert rows.collect { it[0] } == ['contig_1', 'contig_2', 'contig_3', 'contig_4']
+                    // target = Pseudomonadales. contig_1: E. coli (0.95) beats the Pseudomonas target hit (0.75)
+                    // but by less than the margin (2x) -> REVIEW; contig_2/contig_3 have no target hit -> EXCLUDE
+                    assert rows.collect { it[4] } == ['REVIEW', 'EXCLUDE', 'EXCLUDE', 'NA']
+                    // gx-div from the NCBI BLAST name (enterobacteria -> prok:g-proteobacteria)
+                    assert rows[1][3] == 'prok:g-proteobacteria'
+                    assert rows[1][13] == '4000000'
+                    assert rows[3][13] == '1000'
+                },
+                { assert snapshot(process.out.multisearch_classification).match() }
             )
         }
     }

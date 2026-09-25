@@ -72,6 +72,23 @@
         },
         "timestamp": "2025-11-14T15:38:46.133289"
     },
+    "Parse sourmash results with contig sizes and gx-div": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_genome_sizes"
+                    },
+                    "test_genome_sizes.multisearch_results.multisearch_results.classification.csv:md5,5ff0af7854bc6b528ee7910c1997a38e"
+                ]
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.10.4"
+        },
+        "timestamp": "2026-09-25T15:04:13.649786213"
+    },
     "Parse sourmash results with non-matching target_taxa": {
         "content": [
             [
@@ -83,5 +100,38 @@
             "nextflow": "25.04.3"
         },
         "timestamp": "2025-11-14T15:38:25.818234"
+    },
+    "Parse sourmash results with exclude_accessions_file": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test_genome_exclude_file"
+                    },
+                    "test_genome_exclude_file.multisearch_results.multisearch_results.summary.csv:md5,bac04b647bdc49b3ebd974e0eaf5867a"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test_genome_exclude_file"
+                    },
+                    "test_genome_exclude_file.multisearch_results.multisearch_results.non_target.csv:md5,8f200249d4729808071821f89feef710"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test_genome_exclude_file"
+                    },
+                    "test_genome_exclude_file.multisearch_results.multisearch_results.classification.csv:md5,6b9aa44ae5568504a3bd6e85224eaa80"
+                ]
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.10.4"
+        },
+        "timestamp": "2026-09-25T15:03:59.976554352"
     }
 }

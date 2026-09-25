@@ -21,7 +21,7 @@ process ASCC_MERGE_TABLES {
         path (btk),
         path (btk_busco),
         path (fcs_gx),
-        path (sourmash_summary,         stageAs: "sourmash_summary.csv")
+        path (sourmash_summary,         stageAs: "sourmash_classification.csv")
 
     output:
     tuple val(meta), path("*_contamination_check_merged_table.csv")         , emit: merged_table

@@ -11,7 +11,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     tuple val(meta),            path(reference)
     tuple val(tiara_meta),      path(tiara_txt)
     tuple val(fcs_meta),        path(fcs_csv)
-    tuple val(sourmash_meta),   path(sourmash_nontarget, stageAs: 'sourmash_nontarget.csv')
+    tuple val(sourmash_meta),   path(sourmash_calls, stageAs: 'sourmash_classification.csv')
     path ncbi_rankedlineage
 
     output:
@@ -32,7 +32,7 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         $reference \\
         --taxid $meta.taxid \\
         --tiara $tiara_txt \\
-        --sourmash ${sourmash_nontarget} \\
+        --sourmash ${sourmash_calls} \\
         --fcsgx_sum $fcs_csv \\
         --out_prefix $prefix \\
         --ncbi_rankedlineage_path $ncbi_rankedlineage \\

@@ -144,11 +144,17 @@ workflow ASCC_GENOMIC {
                 ej_reference_tuple,
                 ch_sourmash_databases,
                 ncbi_ranked_lineage_path,
-                params.sourmash_taxonomy_level
+                params.sourmash_taxonomy_level,
+                params.sourmash_exclude_accessions_file ? file(params.sourmash_exclude_accessions_file, checkIfExists: true) : [],
+                ej_dot_genome,                          // every contig gets a row in classification.csv
+                ncbi_taxonomy_path.first(),             // taxdump dir: FCS-GX-style sourmash_div, own-species exclusion
+                file("${projectDir}/assets/fcs_gx_blast_div_mapping.tsv", checkIfExists: true)
             )
 
         // Output channels for downstream use
-        ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+        // Per-contig table (one row per scaffold, FCS-GX-style columns) for ASCC_MERGE_TABLES and AUTOFILTER.
+        // The per-hit *.summary.csv is still published but not joined anywhere (it has many rows per contig).
+        ch_sourmash_classification     = RUN_SOURMASH.out.sourmash_classification
                                     .ifEmpty { [[:],[]] }
                                     .map { meta, file ->
                                         [[id: meta.id], file]
@@ -561,7 +567,8 @@ workflow ASCC_GENOMIC {
                 remainder: true
             )
             .join(
-                ch_sourmash_non_target
+                // classification.csv: AUTOFILTER reads sourmash_action (EXCLUDE -> WARN/EXCLUDE per mode, REVIEW -> REVIEW)
+                ch_sourmash_classification
                     .map{ meta, file -> [[id: meta.id], file]},
                 remainder: true
             )
@@ -840,7 +847,7 @@ workflow ASCC_GENOMIC {
             .join(ch_create_summary,remainder: true)
             .join(busco_merge_btk,  remainder: true)
             .join(ch_fcsgx,         remainder: true)
-            .join(ch_sourmash_summary, remainder: true)
+            .join(ch_sourmash_classification, remainder: true)
             .filter { items ->
                 def meta = items[0]
                 meta != null &&

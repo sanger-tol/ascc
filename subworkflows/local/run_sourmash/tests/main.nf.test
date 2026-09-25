@@ -85,10 +85,14 @@ nextflow_workflow {
                 ])
 
                 // NCBI ranked lineage file
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.of(file(params.rankedlineage, checkIfExists: true)) // a channel, as in the pipeline (RUN_SOURMASH calls .first() on it)
 
                 // Taxonomy level
                 input[3] = 'order'
+                input[4] = []
+                input[5] = Channel.empty()   // contig sizes
+                input[6] = []
+                input[7] = []
                 """
             }
         }
@@ -153,10 +157,14 @@ nextflow_workflow {
                 )
 
                 // NCBI ranked lineage file
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.of(file(params.rankedlineage, checkIfExists: true)) // a channel, as in the pipeline (RUN_SOURMASH calls .first() on it)
 
                 // Taxonomy level
                 input[3] = 'order'
+                input[4] = []
+                input[5] = Channel.empty()   // contig sizes
+                input[6] = []
+                input[7] = []
                 """
             }
         }
@@ -232,10 +240,15 @@ nextflow_workflow {
                 )
 
                 // NCBI ranked lineage file
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.of(file(params.rankedlineage, checkIfExists: true)) // a channel, as in the pipeline (RUN_SOURMASH calls .first() on it)
 
                 // Taxonomy level
                 input[3] = 'order'
+                input[4] = []
+                // contig sizes for sample A only (exercises the remainder join): A gets a row per listed contig
+                input[5] = Channel.of([[id: 'test_sample_A'], file("${projectDir}/subworkflows/local/run_sourmash/tests/ecoli_plus_one.genome", checkIfExists: true)])
+                input[6] = []
+                input[7] = file("${projectDir}/assets/fcs_gx_blast_div_mapping.tsv", checkIfExists: true)
                 """
             }
         }
@@ -257,6 +270,14 @@ nextflow_workflow {
 
                 // Each summary file must exist and have content
                 { assert workflow.out.sourmash_summary.every { meta, f -> path(f).exists() } },
+                // classification.csv: one row per contig; sample A also lists a contig without hits
+                {
+                    def rows = workflow.out.sourmash_classification.collectEntries { meta, f -> [(meta.id): path(f).readLines()] }
+                    assert rows['test_sample_A'][0].startsWith('scaff,sourmash_top_tax_name,sourmash_top_taxid,sourmash_div,sourmash_action')
+                    assert rows['test_sample_A'].drop(1).collect { it.split(',')[0] } == ['NC_000913.3', 'extra_contig']
+                    assert rows['test_sample_A'][2].split(',', -1)[4] == 'NA'
+                    assert rows['test_sample_B'].drop(1).collect { it.split(',')[0] } == ['NC_000913.3']
+                },
                 { assert workflow.out.sourmash_non_target.every { meta, f -> path(f).exists() } }
             )
         }
@@ -286,10 +307,14 @@ nextflow_workflow {
                 ])
 
                 // NCBI ranked lineage
-                input[2] = file(params.rankedlineage, checkIfExists: true)
+                input[2] = Channel.of(file(params.rankedlineage, checkIfExists: true)) // a channel, as in the pipeline (RUN_SOURMASH calls .first() on it)
 
                 // Taxonomy level
                 input[3] = 'order'
+                input[4] = []
+                input[5] = Channel.empty()   // contig sizes
+                input[6] = []
+                input[7] = []
                 """
             }
         }

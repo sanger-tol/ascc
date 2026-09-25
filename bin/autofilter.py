@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import general_purpose_functions as gpf
+import csv
 import os
 import sys
 import argparse
@@ -41,7 +42,7 @@ def parse_args():
         "-s", "--fcsgx_summary", type=str, help="Path to the fcs-gx_summary.csv file"
     )
     parser.add_argument(
-        "--sourmash", type=str, help="Path to Sourmash non-target contigs CSV file"
+        "--sourmash", type=str, help="Path to the Sourmash classification CSV (sourmash_action column) or the older non-target CSV"
     )
     parser.add_argument(
         "--out_prefix", type=str, help="Prefix for output files", default="assembly"
@@ -188,34 +189,43 @@ def get_fcs_gx_action_dict(fcs_gx_summary_path):
     return fcs_gx_action_dict
 
 
-def get_sourmash_action_dict(sourmash_nontarget_path, sourmash_mode="remove"):
+def get_sourmash_action_dict(sourmash_path, sourmash_mode="remove"):
     """
-    Input: path to Sourmash non-target contigs CSV file
-    Format: CSV with header line (no comments)
-    header,assembly_accession,taxa,containment,jaccard,intersect_hashes,species,genus,family,order,class,phylum,kingdom
-    contig_1,GCF_000001,562,0.95,0.85,1000,...
+    Input: path to the Sourmash per-contig classification CSV (sourmash_taxonomy_parser.py >= 2.1,
+    FCS-GX-style columns: scaff,...,sourmash_action,...) or, for older runs, the non-target CSV
+    (first column = contig name, every row is a non-target contig).
 
-    Output: dictionary where the keys are scaffold names (from 'header' column) and the values are
-    'EXCLUDE' when `sourmash_mode` == 'remove' or 'WARN' when `sourmash_mode` == 'warn'.
+    Output: dictionary scaffold -> action.
+      sourmash_action EXCLUDE (or any row of a non-target CSV) -> 'EXCLUDE' when `sourmash_mode` == 'remove',
+                                                                 'WARN' when `sourmash_mode` == 'warn'
+      sourmash_action REVIEW -> 'REVIEW' (ambiguous; never removes)
+      sourmash_action NA     -> not in the dictionary
     """
     sourmash_action_dict = dict()
-    if sourmash_nontarget_path is None or not os.path.isfile(sourmash_nontarget_path):
+    if sourmash_path is None or not os.path.isfile(sourmash_path):
         return sourmash_action_dict
 
-    sourmash_data = gpf.ll(sourmash_nontarget_path)
-    for counter, line in enumerate(sourmash_data):
-        line = line.strip()
-
-        # Skip header
-        if counter == 0:
+    action_col = None
+    with open(sourmash_path, newline="") as fh:
+        rows = list(csv.reader(fh))  # csv module: tax names may contain quoted commas
+    for counter, split_line in enumerate(rows):
+        if not split_line or not "".join(split_line).strip():
             continue
 
-        contig_name = line.split(',')[0].strip()
-        if contig_name:
-            if sourmash_mode == "warn":
-                sourmash_action_dict[contig_name] = "WARN"
-            else:
-                sourmash_action_dict[contig_name] = "EXCLUDE"
+        # Header: detect the classification format
+        if counter == 0:
+            if "sourmash_action" in split_line:
+                action_col = split_line.index("sourmash_action")
+            continue
+
+        contig_name = split_line[0].strip()
+        if not contig_name:
+            continue
+        action = split_line[action_col].strip() if action_col is not None else "EXCLUDE"
+        if action == "EXCLUDE":
+            sourmash_action_dict[contig_name] = "WARN" if sourmash_mode == "warn" else "EXCLUDE"
+        elif action == "REVIEW":
+            sourmash_action_dict[contig_name] = "REVIEW"
 
     return sourmash_action_dict
 
@@ -322,6 +332,11 @@ def main():
         if combined_action == "NA" and fcs_gx_action != "NA" and fcs_gx_action != "EXCLUDE":
             combined_action = fcs_gx_action
             combined_action_source = "FCS-GX"
+
+        # Sourmash REVIEW (non-target beats target, but not by the margin) only fills an otherwise NA call
+        if combined_action == "NA" and sourmash_action == "REVIEW":
+            combined_action = "REVIEW"
+            combined_action_source = "Sourmash"
 
         # Tiara only works if both FCS-GX and Sourmash are silent (NA)
         if fcs_gx_action == "NA" and sourmash_action == "NA" and tiara_action == "EXCLUDE":

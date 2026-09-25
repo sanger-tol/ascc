@@ -12,6 +12,10 @@ workflow RUN_SOURMASH {
     sourmash_databases      // channel: [name, path, k_available, k_for_search, s, assembly_taxa_db]
     ncbi_ranked_lineage     // path
     taxonomy_level          // val
+    exclude_accessions_file // path or [] - accessions whose hits are ignored (assembly_accession column)
+    contig_sizes            // channel: [meta, sizes] (name<TAB>length, e.g. ESSENTIAL_JOBS dot_genome); joined on meta.id
+    taxdump                 // path or [] - NCBI new_taxdump dir (sourmash_div, own-species exclusion)
+    div_mapping             // path or [] - BLAST-div -> FCS-GX div table
 
     main:
     ch_versions     = Channel.empty()
@@ -94,19 +98,28 @@ workflow RUN_SOURMASH {
     ch_versions = ch_versions.mix(GET_TARGET_TAXA.out.versions)
 
 
+    // contig sizes are keyed on meta.id only (dot_genome carries [id:] meta); missing -> []
     ch_multisearch_results_grouped
         .join(GET_TARGET_TAXA.out.target_taxa.map { meta, tf -> [meta, tf.text.trim()] })
+        .map { meta, results, target_taxa -> [meta.id, meta, results, target_taxa] }
+        .join(contig_sizes.map { meta, sizes -> [meta.id, sizes] }, remainder: true)
+        .filter { it.size() == 5 && it[1] != null }   // drop sizes-only entries (samples without results)
+        .map { it -> [it[1], it[2], it[3], it[4] ?: []] }
         .set { ch_parse_input }
 
     // Parse results and taxonomy database
     PARSE_SOURMASH (
         ch_parse_input,
-        ch_taxa_db_files
+        ch_taxa_db_files,
+        exclude_accessions_file,
+        taxdump,
+        div_mapping
     )
     ch_versions = ch_versions.mix(PARSE_SOURMASH.out.versions)
 
     emit:
     sourmash_summary            = PARSE_SOURMASH.out.multisearch_summary
     sourmash_non_target         = PARSE_SOURMASH.out.multisearch_non_target
+    sourmash_classification     = PARSE_SOURMASH.out.multisearch_classification
     versions                    = ch_versions
 }
