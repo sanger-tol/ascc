@@ -135,11 +135,16 @@ workflow ASCC_ORGANELLAR {
                 ej_reference_tuple,
                 ch_sourmash_databases,
                 ncbi_ranked_lineage_path,
-                params.sourmash_taxonomy_level
+                params.sourmash_taxonomy_level,
+                params.sourmash_exclude_accessions_file ? file(params.sourmash_exclude_accessions_file, checkIfExists: true) : [],
+                ej_dot_genome,                          // every contig gets a row in classification.csv
+                ncbi_taxonomy_path.first(),             // taxdump dir: FCS-GX-style sourmash_div, own-species exclusion
+                file("${projectDir}/assets/fcs_gx_blast_div_mapping.tsv", checkIfExists: true)
             )
 
         // Output channels for downstream use
-        ch_sourmash_summary     = RUN_SOURMASH.out.sourmash_summary
+        // Per-contig table (FCS-GX-style columns) for ASCC_MERGE_TABLES and AUTOFILTER
+        ch_sourmash_classification = RUN_SOURMASH.out.sourmash_classification
                                     .map { meta, file ->
                                         [[id: meta.id], file]
                                     }
@@ -491,7 +496,7 @@ workflow ASCC_ORGANELLAR {
                 ch_fcsgx.map{ meta, file -> [[id: meta.id], file] }, by: 0
             )
             .combine(
-                ch_sourmash_non_target,
+                ch_sourmash_classification,
                 by: 0
             )
             .combine(
@@ -572,7 +577,7 @@ workflow ASCC_ORGANELLAR {
             .join(ch_create_summary,remainder: true)
             .join(channel.of([[:],[]]), remainder: true) //busco_merge_btk - not in organellar
             .join(ch_fcsgx,         remainder: true)
-            .join(ch_sourmash_summary, remainder: true)
+            .join(ch_sourmash_classification, remainder: true)
             .filter { items ->
                 def meta = items[0]
                 meta != null &&
