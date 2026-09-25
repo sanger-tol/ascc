@@ -1,0 +1,261 @@
+# BLAST name (NCBI taxonomy names.dmp "blast name") -> FCS-GX taxonomic division (gx-div). Used by bin/sourmash_taxonomy_parser.py for sourmash_div.
+# Source: NCBI FCS-GX make_gxdb/blast_names_mapping.tsv (public domain, v0.5.5) plus additions for newer BLAST names (github.com/zilov/fcs-gx 198a64f).
+#BLAST-div	GX-div
+unknown	unkn:unknown
+unclassified sequences	unkn:unknown
+other sequences	unkn:unknown
+metagenomes	unkn:metagenomes
+brown algae	prst:algae
+diatoms	prst:algae
+golden algae	prst:algae
+rhizarians	prst:protists
+green algae	plnt:green algae
+haptophytes	prst:algae
+oomycetes	prst:algae
+downy mildews	prst:algae
+pelagophytes	prst:algae
+red algae	prst:algae
+yellow-green algae	prst:algae
+apicomplexans	prst:alveolates
+ciliates	prst:alveolates
+dinoflagellates	prst:alveolates
+amphibians	anml:amphibians
+caecilians	anml:amphibians
+frogs & toads	anml:amphibians
+salamanders	anml:amphibians
+animals	anml:animals
+ascomycete fungi	fung:ascomycetes
+powdery mildews	fung:ascomycetes
+anthozoans	anml:basal metazoans
+black corals	anml:basal metazoans
+blue corals	anml:basal metazoans
+bryozoans	anml:basal metazoans
+cnidarians	anml:basal metazoans
+coral anemones	anml:basal metazoans
+comb jellies	anml:basal metazoans
+hydrozoans	anml:basal metazoans
+jellyfishes	anml:basal metazoans
+mat anemones	anml:basal metazoans
+myxozoans	anml:basal metazoans
+placozoans	anml:basal metazoans
+sea anemones	anml:basal metazoans
+sea pens	anml:basal metazoans
+sea wasps	anml:basal metazoans
+soft corals	anml:basal metazoans
+sponges	anml:basal metazoans
+stony corals	anml:basal metazoans
+tube anemones	anml:basal metazoans
+tunicates	anml:basal metazoans
+basidiomycete fungi	fung:basidiomycetes
+rust fungi	fung:basidiomycetes
+smut fungi	fung:basidiomycetes
+birds	anml:birds
+hawks & eagles	anml:birds
+brachiopods	anml:brachiopods
+budding yeasts	fung:budding yeasts
+budding yeasts & others	fung:budding yeasts
+budding yeasts & allies	fung:budding yeasts
+rust fungi & allies	fung:fungi
+smut fungi & allies	fung:fungi
+cellular slime molds	prst:cellular slime molds
+cercozoans	prst:cercozoans
+choanoflagellates	prst:choanoflagellates
+chytrids	fung:chytrids
+chytrids & allies	fung:chytrids
+crocodiles	anml:reptiles
+amphipods	anml:crustaceans
+crustaceans	anml:crustaceans
+isopods	anml:crustaceans
+brittle stars	anml:echinoderms
+crinoids	anml:echinoderms
+hemichordates	anml:echinoderms
+sea cucumbers	anml:echinoderms
+sea urchins	anml:echinoderms
+starfish	anml:echinoderms
+echinoderms	anml:echinoderms
+euglenoids	prst:euglenoids
+kinetoplastids	prst:euglenoids
+eukaryotes	prst:protists
+heterokonts	prst:protists
+bony fishes	anml:fishes
+chimaeras	anml:fishes
+hagfishes	anml:fishes
+lampreys	anml:fishes
+lancelets	anml:fishes
+lungfishes	anml:fishes
+sharks & rays	anml:fishes
+sharks and rays	anml:fishes
+ray-finned fishes	anml:fishes
+cartilaginous fishes	anml:fishes
+forams	prst:forams
+AM fungi	fung:fungi
+blastocladiomycetes	fung:fungi
+blastocladiomycotan fungi	fung:fungi
+blastocladiomycete fungi	fung:fungi
+fungi	fung:fungi
+glomeromycetes	fung:fungi
+mucoromycotan fungi	fung:fungi
+zoopagomycotan fungi	fung:fungi
+monoblepharidomycetes	fung:chytrids
+ants	anml:insects
+aphids	anml:insects
+bees	anml:insects
+beetles	anml:insects
+booklice	anml:insects
+booklice, barklice & lice	anml:insects
+bugs	anml:insects
+butterflies	anml:insects
+caddisflies	anml:insects
+centipedes	anml:insects
+crickets	anml:insects
+cockroaches & termites	anml:insects
+cycads	plnt:plants
+grasshoppers, crickets, & katydids	anml:insects
+grasshoppers, crickets, and katydids	anml:insects
+grasshoppers, crickets & katydids	anml:insects
+daddy longlegs	anml:insects
+damselflies	anml:insects
+dragonflies & damselflies	anml:insects
+earwigs	anml:insects
+false scorpions	anml:insects
+fleas	anml:insects
+flies	anml:insects
+grasshoppers	anml:insects
+hexapods	anml:insects
+horseshoe crabs	anml:insects
+hymenopterans	anml:insects
+insects	anml:insects
+lice	anml:insects
+mantids	anml:insects
+mayflies	anml:insects
+millipedes	anml:insects
+mites & ticks	anml:insects
+mosquitos	anml:insects
+moths	anml:insects
+moths & butterflies	anml:insects
+psyllids	anml:insects
+roaches	anml:insects
+scale insects	anml:insects
+scorpionflies	anml:insects
+scorpions	anml:insects
+microwhip scorpions	anml:insects
+sea spiders	anml:insects
+spiders	anml:insects
+springtails	anml:insects
+stoneflies	anml:insects
+termites	anml:insects
+true bugs	anml:insects
+thrips	anml:insects
+twisted-wing parasites	anml:insects
+walking sticks	anml:insects
+wasps, ants & bees	anml:insects
+whiteflies	anml:insects
+arthropods	anml:insects
+arachnids	anml:insects
+hooded tickspiders	anml:insects
+harvestmen	anml:insects
+sun spiders	anml:insects
+whip spiders	anml:insects
+web-spinners	anml:insects
+whip scorpions	anml:insects
+bats	anml:mammals
+carnivores	anml:mammals
+even-toed ungulates	anml:mammals
+even-toed ungulates & whales	anml:mammals
+insectivores	anml:mammals
+monotremes	anml:mammals
+odd-toed ungulates	anml:mammals
+placentals	anml:mammals
+whales & dolphins	anml:mammals
+mammals	anml:mammals
+marsupials	anml:marsupials
+microsporidians	fung:microsporidians
+solenogasters	anml:molluscs
+bivalves	anml:molluscs
+cephalopods	anml:molluscs
+chitons	anml:molluscs
+gastropods	anml:molluscs
+molluscs	anml:molluscs
+tusk shells	anml:molluscs
+deep-sea limpets	anml:molluscs
+cryptomonads	prst:monads
+diplomonads	prst:monads
+trichomonads	prst:monads
+club-mosses	plnt:mosses
+hornworts	plnt:mosses
+liverworts	plnt:mosses
+clubmosses	plnt:mosses
+mosses	plnt:mosses
+nematodes	anml:nematodes
+eudicots	plnt:plants
+ferns	plnt:plants
+flowering plants	plnt:plants
+green plants	plnt:plants
+monocots	plnt:plants
+seed plants	plnt:plants
+conifers	plnt:plants
+vascular plants	plnt:plants
+whisk-ferns	plnt:plants
+land plants	plnt:plants
+horsetails	plnt:plants
+plasmodial slime molds	prst:plasmodial slime molds
+primates	anml:primates
+snakes	anml:reptiles
+lizards & snakes	anml:reptiles
+lizards	anml:reptiles
+turtles	anml:reptiles
+coelacanths	anml:reptiles
+rabbits & hares	anml:rodents
+rodents	anml:rodents
+micrognathozoans	anml:rotifers
+rotifers	anml:rotifers
+slime nets	prst:slime nets
+synthetic	synt:synthetic
+tardigrades	anml:tardigrades
+vertebrates	anml:vertebrates
+chordates	anml:vertebrates
+viruses	virs:viruses
+flatworms	anml:worms
+horsehair worms	anml:worms
+peanut worms	anml:worms
+phoronid worms	anml:worms
+ribbon worms	anml:worms
+segmented worms	anml:worms
+thorny-headed worms	anml:worms
+tube worms	anml:worms
+velvet worms	anml:worms
+arrow worms	anml:worms
+goblet worms	anml:worms
+jaw worms	anml:worms
+spoonworms	anml:worms
+gastrotrichs	anml:worms
+mud dragons	anml:scalidophorans
+loriciferans	anml:scalidophorans
+priapulids	anml:scalidophorans
+
+CFB group bacteria	prok:CFB group bacteria
+GNS bacteria	prok:GNS bacteria
+a-proteobacteria	prok:a-proteobacteria
+actinobacteria	prok:actinobacteria
+aquificales	prok:aquificales
+archaea	arch:archaea
+crenarchaeotes	arch:archaea
+euryarchaeotes	arch:archaea
+b-proteobacteria	prok:b-proteobacteria
+bacteria	prok:bacteria
+chlamydias	prok:chlamydias
+cyanobacteria	prok:cyanobacteria
+d-proteobacteria	prok:d-proteobacteria
+e-proteobacteria	prok:proteobacteria
+firmicutes	prok:firmicutes
+fusobacteria	prok:fusobacteria
+enterobacteria	prok:g-proteobacteria
+g-proteobacteria	prok:g-proteobacteria
+green sulfur bacteria	prok:green sulfur bacteria
+high G+C Gram-positive bacteria	prok:high GC Gram+
+mycoplasmas	prok:mycoplasmas
+planctomycetes	prok:planctomycetes
+proteobacteria	prok:proteobacteria
+spirochetes	prok:spirochetes
+thermotogales	prok:thermotogales
+verrucomicrobia	prok:verrucomicrobia
