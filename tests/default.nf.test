@@ -298,6 +298,9 @@ nextflow_pipeline {
                     trailingns,
                     trailingns.size() == (1 * 3),
 
+                    sourmash_summary_files.size() == 3,
+                    sourmash_non_target_files.size() == 3,
+
                     // Workflow completion file
                     completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check
 
