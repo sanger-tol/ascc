@@ -227,7 +227,7 @@
                     "type": "integer",
                     "description": "Minimum number of database genomes (after exclusions) the target taxon must have before the fallback stops going up.",
                     "fa_icon": "fas fa-sliders-h",
-                    "default": 1,
+                    "default": 5,
                     "minimum": 1
                 },
                 "sourmash_margin": {

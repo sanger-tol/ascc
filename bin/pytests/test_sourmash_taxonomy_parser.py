@@ -661,12 +661,16 @@ def test_resolve_target_taxon_first_level_with_genomes():
 
 def test_target_fallback_in_main_records_level():
     with tempfile.TemporaryDirectory() as tmp:
-        s_df, _, c_df = run(tmp, FALLBACK_SM, ASM_HEADER + HOMO + DRO, FALLBACK_TARGET, target_fallback=True)
+        s_df, _, c_df = run(tmp, FALLBACK_SM, ASM_HEADER + HOMO + DRO, FALLBACK_TARGET, target_fallback=True,
+                            min_target_genomes=1)
         assert set(c_df['sourmash_target_taxon']) == {'class:mammalia'}
         assert cls(c_df, 'contig_1') == 'target'
         assert cls(c_df, 'contig_2') == 'non_target'
         # file names keep the requested (first) taxon
         assert any(f.endswith('_order_rodentia.classification.csv') for f in os.listdir(os.path.join(tmp, 'out')))
+        # default minimum (5): the 2-genome DB has no qualifying level -> conservative
+        _, _, c_df = run(tmp, FALLBACK_SM, ASM_HEADER + HOMO + DRO, FALLBACK_TARGET, target_fallback=True)
+        assert set(c_df['sourmash_target_taxon']) == {'none'}
 
 
 def test_no_fallback_keeps_conservative_behaviour():

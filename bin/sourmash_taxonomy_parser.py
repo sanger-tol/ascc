@@ -34,7 +34,7 @@ import os
 import polars as pl
 
 # Version of sourmash_taxonomy_parser
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 # Module-level logger — always available when the module is imported.
 # Handlers are added by setup_logger() at runtime (CLI) or by the caller (tests).
@@ -770,7 +770,7 @@ def output_basename(sourmash_files, target_taxa, prefix=None, first_only=False):
 def main(sourmash_files=None, assembly_dbs=None, target_taxa=None, outdir=None, exclude_accessions=None,
          exclude_files=None, exclude_tolid=None, exclude_species=None, min_hashes=DEFAULT_MIN_HASHES,
          min_containment=DEFAULT_MIN_CONTAINMENT, margin=DEFAULT_MARGIN, prefix=None,
-         contig_sizes=None, taxdump=None, div_mapping=None, target_fallback=False, min_target_genomes=1):
+         contig_sizes=None, taxdump=None, div_mapping=None, target_fallback=False, min_target_genomes=5):
     """Run the parser; returns the per-contig classification table (FCS-GX-style columns).
 
     target_fallback: target_taxa is an ordered preference list (e.g. order, class, phylum, kingdom); the
@@ -840,7 +840,7 @@ def build_arg_parser():
     parser.add_argument('--target_fallback', action='store_true',
                         help='Treat --target_taxa as an ordered list (e.g. order:x class:y phylum:z kingdom:w) and use the first '
                              'taxon with at least --min_target_genomes DB genomes after exclusions')
-    parser.add_argument('--min_target_genomes', type=int, default=1,
+    parser.add_argument('--min_target_genomes', type=int, default=5,
                         help='With --target_fallback: minimum DB genomes of the target taxon')
     parser.add_argument('--accessions_to_exclude', nargs='+', default=None,
                         help='Assembly accessions to drop from the hits (comma-separated or multiple values). '

@@ -341,6 +341,7 @@ nextflow_process {
         when {
             params {
                 outdir = "$outputDir"
+                sourmash_min_target_genomes = 1 // the tiny test DB has few genomes per class
             }
             process {
                 """
