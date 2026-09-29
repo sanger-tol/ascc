@@ -540,7 +540,9 @@ workflow ASCC {
             // NOTE: remainder LEAVES US WITH A SPACE IN THE FINAL TUPLE
             .join(ch_nt_blast,      remainder: true)
             .join(ch_tiara,         remainder: true)
-            .join(ej_dot_genome,    remainder: true)
+            .join(ej_dot_genome
+                .map{meta, file -> tuple([id: meta.id], file)},
+                remainder: true)
             .join(ch_fcsgx_for_btk, remainder: true)
             .join(ch_bam,           remainder: true)
             .join(ch_coverage,      remainder: true)
