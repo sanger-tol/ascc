@@ -1,3 +1,8 @@
+// NOTE: These are a pair of conditional checks
+def allRunnableConditions() {
+    return genomicConditionals() + organellarConditionals()
+}
+
 def genomicConditionals() {
     return ["both", "genomic"]
 }
@@ -6,8 +11,8 @@ def organellarConditionals() {
     return ["both", "organellar"]
 }
 
+// NOTE: ORGANELLAR ASSEMBLIES ARE FLAGGED VIA meta.assembly_type
 def isOrganellar(meta) {
-    // ORGANELLAR ASSEMBLIES ARE FLAGGED VIA meta.assembly_type
     return meta.assembly_type in ["MITO", "PLASTID"]
 }
 
