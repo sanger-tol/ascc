@@ -36,7 +36,7 @@ include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
-include { getEmptyPlaceholder; isOrganellar; runConditionals; genomicConditionals; organellarConditionals } from '../functions/local/ascc_utils'
+include { getEmptyPlaceholder; isOrganellar; allRunnableConditions; runConditionals; genomicConditionals; organellarConditionals } from '../functions/local/ascc_utils'
 
 include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
@@ -410,7 +410,7 @@ workflow ASCC {
     // SUBWORKFLOW: RUN FCS-GX TO IDENTIFY CONTAMINATION IN THE ASSEMBLY
     //
 
-    if ( params.run_fcsgx != "off" && !params.fcs_override ) {
+    if ( params.run_fcsgx in allRunnableConditions() && !params.fcs_override ) {
 
         joint_channel = ch_reference_tuple
             .filter { meta, _f ->
@@ -508,7 +508,7 @@ workflow ASCC {
 
 
     //-------------------------------------------------------------------------
-    if ( params.run_create_btk_dataset != "off" ) {
+    if ( params.run_create_btk_dataset in allRunnableConditions() ) {
 
         //
         // LOGIC: FILTER fcsgx TO GENOMIC ITEMS ONLY FOR BTK DATASET INPUT
@@ -602,9 +602,9 @@ workflow ASCC {
     //          OR BY include_steps CONTAINING ALL AND EXCLUDE NOT CONTAINING autofilter_assembly.
     //
     if (
-        params.run_tiara               != "off" &&
-        params.run_fcsgx               != "off" &&
-        params.run_autofilter_assembly != "off"
+        params.run_tiara               in allRunnableConditions() &&
+        params.run_fcsgx               in allRunnableConditions() &&
+        params.run_autofilter_assembly in allRunnableConditions()
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP PER ASSEMBLY TYPE
@@ -715,8 +715,8 @@ workflow ASCC {
                 by: [0]
             )
         .branch { _meta, _assembly, data ->
-            def btk_requested           = params.run_btk_busco == "both" || params.run_btk_busco == "genomic"
-            def autofilter_requested    = params.run_autofilter_assembly == "both" || params.run_autofilter_assembly == "genomic"
+            def btk_requested           = params.run_btk_busco in genomicConditionals()
+            def autofilter_requested    = params.run_autofilter_assembly in genomicConditionals()
 
             def ignore_autofilter       = params.btk_busco_run_mode == "mandatory" && btk_requested
             def not_mandatory_btk       = params.btk_busco_run_mode == "conditional" && autofilter_requested && btk_requested && data.contains("YES_ABNORMAL_CONTAMINATION")
@@ -733,7 +733,7 @@ workflow ASCC {
             return tuple(meta, file)
         }
 
-    if (params.run_autofilter_assembly == "off" && params.run_btk_busco != "off") {
+    if (params.run_autofilter_assembly == "off" && params.run_btk_busco in allRunnableConditions()) {
         log.warn "[ASCC WARN]: run_autofilter_assembly is off, but run_btk_busco != off"
         log.warn "This will stop blobtoolkit from running unless you restart with:"
         log.warn "    `--btk_busco_run_mode mandatory`"
@@ -870,8 +870,8 @@ workflow ASCC {
     //          in the join and receive null → replaced by placeholder via getEmptyPlaceholder.
     //
     if (
-        params.run_essentials      != "off" &&
-        params.run_merge_datasets  != "off"
+        params.run_essentials      in allRunnableConditions() &&
+        params.run_merge_datasets  in allRunnableConditions()
     ) {
 
         //
