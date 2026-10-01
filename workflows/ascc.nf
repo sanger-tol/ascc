@@ -439,7 +439,7 @@ workflow ASCC {
     } else if ( params.fcs_override ) {
 
         fcs_samplesheet.map{ meta, file ->
-            log.info("[ASCC INFO]: Overriding Internal FCSGX with ${file}")
+            log.info("\n[ASCC INFO]: Overriding Internal FCSGX with ${file}")
             [[id: meta.id], file]
 
         }
@@ -677,7 +677,7 @@ workflow ASCC {
             .map { meta, file, _flag -> tuple(meta, file) }
             .map { meta, file -> tuple(meta, file.text.trim()) }
             .branch { meta, data ->
-                log.info("[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
+                log.info("\n[ASCC INFO]: Run for ${meta.id} has:\n${data}\n")
 
                 run_btk     : data.contains("YES_ABNORMAL_CONTAMINATION")
                 dont_run    : true // only other lines to be produced are "NO_ABNORMAL_CONTAMINATION"
@@ -727,14 +727,14 @@ workflow ASCC {
 
     run_btk_conditional.skip_btk
         .map { meta, file, _data ->
-            log.info "[ASCC INFO]: CONTAMINATION THRESHOLD NOT MET"
+            log.info "\n[ASCC INFO]: CONTAMINATION THRESHOLD NOT MET"
             log.info "\t- SKIPPING BLOBTOOLKIT FOR: $meta.id"
             log.info "\t- You can verify here: $file"
             return tuple(meta, file)
         }
 
     if (params.run_autofilter_assembly == "off" && params.run_btk_busco in allRunnableConditions()) {
-        log.warn "[ASCC WARN]: run_autofilter_assembly is off, but run_btk_busco != off"
+        log.warn "\n[ASCC WARN]: run_autofilter_assembly is off, but run_btk_busco != off"
         log.warn "This will stop blobtoolkit from running unless you restart with:"
         log.warn "    `--btk_busco_run_mode mandatory`"
     }
@@ -803,7 +803,7 @@ workflow ASCC {
 
     combined_input
         .map{ meta, ref, samplesheet ->
-            log.info("[ASCC INFO]: BTK will run for ${meta}\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n")
+            log.info("\n[ASCC INFO]: BTK will run for ${meta}\n\t| REF: ${ref}\n\t| SST: ${samplesheet}\n")
         }
 
     //

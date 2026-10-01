@@ -11,7 +11,7 @@
                     "python": "3.9.1"
                 },
                 "BLAST_BLASTN": {
-                    "blast": "2.16.0+"
+                    "blastn": "2.17.0+"
                 },
                 "BLAST_CHUNK_TO_FULL": {
                     "python": "3.9.1",
@@ -22,7 +22,7 @@
                     "blast_get_top_hits": "1.0.0"
                 },
                 "BLAST_MAKEBLASTDB": {
-                    "blast": "2.16.0+"
+                    "makeblastdb": "2.17.0+"
                 },
                 "CHUNK_ASSEMBLY_FOR_VECSCREEN": {
                     "python": "3.12.0",
@@ -47,7 +47,7 @@
                     "generate_contamination_bed.py": "1.1.0"
                 },
                 "DIAMOND_BLASTX": {
-                    "diamond": "2.1.12"
+                    "diamond": "2.2.1"
                 },
                 "DIAMOND_BLAST_CHUNK_TO_FULL": {
                     "python": "3.9.1",
@@ -61,14 +61,18 @@
                 "FASTXALIGN_PYFASTXINDEX": {
                     "slice_fasta.py": "1.0.0"
                 },
+                "FCSGX_PARSERESULTS": {
+                    "parse_fcsgx_result": "1.1.0",
+                    "python": "3.14.3"
+                },
                 "FCSGX_RUNGX": {
                     "fcsgx": "0.5.5"
                 },
                 "FCS_FCSADAPTOR_EUK": {
-                    "FCS-adaptor": "0.5.0"
+                    "fcsadaptor": "0.5.0"
                 },
                 "FCS_FCSADAPTOR_PROK": {
-                    "FCS-adaptor": "0.5.0"
+                    "fcsadaptor": "0.5.0"
                 },
                 "FILTER_BARCODE": {
                     "python": "3.12.0",
@@ -137,9 +141,6 @@
                 "NCBITOOLS_VECSCREEN": {
                     "vecscreen": 1.0
                 },
-                "PARSE_FCSGX_RESULT": {
-                    "parse_fcsgx_result": "1.0.1"
-                },
                 "REFORMAT_DIAMOND_OUTFMT6": {
                     "python": "3.9.1",
                     "reformat_diamond_outfmt6": 1.0
@@ -163,7 +164,7 @@
                     "samtools": "1.23.1"
                 },
                 "SAMTOOLS_MERGE": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SED_SED": {
                     "coreutils": 9.1
@@ -183,7 +184,7 @@
                     "trim_Ns.py": 1.0
                 },
                 "Workflow": {
-                    "sanger-tol/ascc": "v0.6.0"
+                    "sanger-tol/ascc": "v1.0.0"
                 }
             },
             [
@@ -203,9 +204,9 @@
                 "asccTinyTest_V2_HAPLO/autofilter",
                 "asccTinyTest_V2_HAPLO/autofilter/asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv",
                 "asccTinyTest_V2_HAPLO/autofilter/asccTinyTest_V2_HAPLO_autofiltered.fasta",
+                "asccTinyTest_V2_HAPLO/autofilter/asccTinyTest_V2_HAPLO_raw_report.txt",
                 "asccTinyTest_V2_HAPLO/autofilter/assembly_filtering_removed_sequences.txt",
                 "asccTinyTest_V2_HAPLO/autofilter/fcs-gx_alarm_indicator_file.txt",
-                "asccTinyTest_V2_HAPLO/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_HAPLOBTK_DS.yaml",
@@ -339,9 +340,9 @@
                 "asccTinyTest_V2_MITO/autofilter",
                 "asccTinyTest_V2_MITO/autofilter/asccTinyTest_V2_MITO_ABNORMAL_CHECK.csv",
                 "asccTinyTest_V2_MITO/autofilter/asccTinyTest_V2_MITO_autofiltered.fasta",
+                "asccTinyTest_V2_MITO/autofilter/asccTinyTest_V2_MITO_raw_report.txt",
                 "asccTinyTest_V2_MITO/autofilter/assembly_filtering_removed_sequences.txt",
                 "asccTinyTest_V2_MITO/autofilter/fcs-gx_alarm_indicator_file.txt",
-                "asccTinyTest_V2_MITO/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_MITO/average_coverage",
                 "asccTinyTest_V2_MITO/average_coverage/asccTinyTest_V2_MITO.depth.txt",
                 "asccTinyTest_V2_MITO/create_btk_dataset",
@@ -431,9 +432,9 @@
                 "asccTinyTest_V2_PRIMARY/autofilter",
                 "asccTinyTest_V2_PRIMARY/autofilter/asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv",
                 "asccTinyTest_V2_PRIMARY/autofilter/asccTinyTest_V2_PRIMARY_autofiltered.fasta",
+                "asccTinyTest_V2_PRIMARY/autofilter/asccTinyTest_V2_PRIMARY_raw_report.txt",
                 "asccTinyTest_V2_PRIMARY/autofilter/assembly_filtering_removed_sequences.txt",
                 "asccTinyTest_V2_PRIMARY/autofilter/fcs-gx_alarm_indicator_file.txt",
-                "asccTinyTest_V2_PRIMARY/autofiltering_done_indicator_file.txt",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_PRIMARYBTK_DS.yaml",
@@ -559,24 +560,19 @@
             true,
             true,
             [
-                "autofiltering_done_indicator_file.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "autofiltering_done_indicator_file.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
-            ],
-            true,
-            [
                 "asccTinyTest_V2_HAPLO_autofiltered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3",
                 "asccTinyTest_V2_PRIMARY_autofiltered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
+                "asccTinyTest_V2_HAPLO_raw_report.txt:md5,e8c5bff033511cdbafc5dccc238b3ab0",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "fcs-gx_alarm_indicator_file.txt:md5,912dc11ad86f82d2020f152411fec508",
+                "fcs-gx_alarm_indicator_file.txt:md5,7150a1a88b02b7580b582cda6d66ce30",
                 "asccTinyTest_V2_PRIMARY_ABNORMAL_CHECK.csv:md5,e434d63b0cffbc530a2dbf79758b95d6",
+                "asccTinyTest_V2_PRIMARY_raw_report.txt:md5,e8c5bff033511cdbafc5dccc238b3ab0",
                 "assembly_filtering_removed_sequences.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "fcs-gx_alarm_indicator_file.txt:md5,4e51ff92a0dd9a35d81b02e5d2b8b627"
+                "fcs-gx_alarm_indicator_file.txt:md5,0c710ae305f7832216a2113da2339ad0"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLOBTK_DS.yaml:md5,d5e5c9fe71f5e68395d0f5b9201c3d62",
                 "bestsum_class.json:md5,26a1c0d48c700a6de894e965ba377b7f",
@@ -705,7 +701,6 @@
                 "btk_summary_table_full.tsv:md5,26af5cb898cb7b21776239394d1564fc",
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_euk.cleaned_sequences.fa.gz:md5,20877d6b104598de175a3fc42e3b1f8f",
                 "asccTinyTest_V2_HAPLO_euk.fcs_adaptor_report.txt:md5,5b680f558420be42cae6a68a009d0999",
@@ -719,7 +714,6 @@
                 "asccTinyTest_V2_PRIMARY_euk.pipeline_args.yaml:md5,9ce26ec31a9bbbfa8f581e9781380d54",
                 "asccTinyTest_V2_PRIMARY_euk.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_prok.cleaned_sequences.fa.gz:md5,20877d6b104598de175a3fc42e3b1f8f",
                 "asccTinyTest_V2_HAPLO_prok.fcs_adaptor_report.txt:md5,5b680f558420be42cae6a68a009d0999",
@@ -733,37 +727,31 @@
                 "asccTinyTest_V2_PRIMARY_prok.pipeline_args.yaml:md5,fc8a06a94f223dd86e5ca0a4f08e9f8e",
                 "asccTinyTest_V2_PRIMARY_prok.skipped_trims.jsonl:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_parsed_fcsgx.csv:md5,eb69fdddfb1922cb5a2a5384867220ff",
                 "asccTinyTest_V2_MITO_parsed_fcsgx.csv:md5,ee43b4f252ddc5bb0372a68e210c5d9c",
                 "asccTinyTest_V2_PRIMARY_parsed_fcsgx.csv:md5,eb69fdddfb1922cb5a2a5384867220ff"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_bc2001_filtered.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_MITO_bc2001_filtered.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_PRIMARY_bc2001_filtered.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_bc2009_filtered.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_MITO_bc2009_filtered.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_PRIMARY_bc2009_filtered.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_filtered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3",
                 "asccTinyTest_V2_MITO_filtered.fasta:md5,8cbf1493af1e2e8e4f2664d652c99e69",
                 "asccTinyTest_V2_PRIMARY_filtered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO-GC_CONTENT.txt:md5,321c77a86b36ea14cfd03d0ed8c96495",
                 "asccTinyTest_V2_MITO-GC_CONTENT.txt:md5,08d8605fa4f4bb7685a0b71284bc1880",
                 "asccTinyTest_V2_PRIMARY-GC_CONTENT.txt:md5,321c77a86b36ea14cfd03d0ed8c96495"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO.kraken2.classifiedreads.txt:md5,1ce5b7f3a05fceb7d64a3d61d03a06fa",
                 "asccTinyTest_V2_HAPLO.kraken2.report.txt:md5,c2d891afd24333179f401d61ad518923",
@@ -775,13 +763,11 @@
                 "asccTinyTest_V2_PRIMARY.kraken2.report.txt:md5,c2d891afd24333179f401d61ad518923",
                 "asccTinyTest_V2_PRIMARY_nt_kraken_lineage_file.txt:md5,341d5169b39292fe2244407c521c7342"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO.vecscreen_contamination:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_MITO.vecscreen_contamination:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_PRIMARY.vecscreen_contamination:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO.txt:md5,ead39a6fc65a96890b7674b3962621e6",
                 "log_asccTinyTest_V2_HAPLO.txt:md5,21f6ce1f477f06c78d6784323d11243f",
@@ -790,19 +776,17 @@
                 "asccTinyTest_V2_PRIMARY.txt:md5,ead39a6fc65a96890b7674b3962621e6",
                 "log_asccTinyTest_V2_PRIMARY.txt:md5,21f6ce1f477f06c78d6784323d11243f"
             ],
-            true,
             [
                 "asccTinyTest_V2_HAPLO_trim_Ns:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_MITO_trim_Ns:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "asccTinyTest_V2_PRIMARY_trim_Ns:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
-            true,
             true
         ],
+        "timestamp": "2026-10-01T17:51:04.974923875",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-01-29T15:05:55.139592"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
     }
 }
