@@ -1,13 +1,17 @@
-include { FILTER_FASTA                                  } from '../../../modules/local/filter/fasta/main'
-include { GC_CONTENT                                    } from '../../../modules/local/gc/content/main'
+// LOCAL IMPORTS
+include { FILTER_FASTA      } from '../../../modules/local/filter/fasta/main'
+include { GC_CONTENT        } from '../../../modules/local/gc/content/main'
+include { TRAILINGNS        } from '../../../modules/local/trailingns/trailingns/main'
 
-include { GENERATE_GENOME                               } from '../../../subworkflows/local/generate_genomes/main'
-include { TRAILINGNS_CHECK                              } from '../../../subworkflows/local/trailingns_check/main'
+// NF-CORE IMPORTS
+include { GNU_SORT          } from '../../../modules/nf-core/gnu/sort/main'
+include { SAMTOOLS_FAIDX    } from '../../../modules/nf-core/samtools/faidx/main'
+
 
 workflow ESSENTIAL_JOBS {
 
     take:
-    input_ref   // channel.[ val(meta), path(file) ]
+    input_ref   // channel [ val(meta), path(file) ]
 
     main:
     ch_versions             = channel.empty()
@@ -55,32 +59,38 @@ workflow ESSENTIAL_JOBS {
 
 
     //
-    // SUBWORKFLOW: GENERATE GENOME FILE - NA
+    // MODULE: GENERATE INDEX OF REFERENCE
+    //          EMITS REFERENCE INDEX FILE MODIFIED FOR SCAFF SIZES
     //
-    GENERATE_GENOME (
-        FILTER_FASTA.out.fasta,
-        params.pacbio_barcode_names
+    SAMTOOLS_FAIDX (
+        FILTER_FASTA.out.fasta.map { meta, fasta -> [meta, fasta, []] },
+        true
     )
-    ch_versions             = ch_versions.mix(GENERATE_GENOME.out.versions)
-    reference_tuple_from_GG = GENERATE_GENOME.out.reference_tuple
-    dot_genome              = GENERATE_GENOME.out.dot_genome
-                                .map{ meta, _file -> [[id: meta.id ], _file] }
 
 
     //
-    // SUBWORKFLOW: GENERATE A REPORT ON LENGTHS OF N's IN THE INPUT GENOME
+    // MODULE: SORT CHROM SIZES BY CHOM SIZE NOT NAME
     //
-    TRAILINGNS_CHECK (
+    GNU_SORT (
+        SAMTOOLS_FAIDX.out.sizes.map { meta, _file -> [meta, _file, "sizes"] }
+    )
+
+
+    //
+    // MODULE: TRIM LENGTHS OF N'S FROM THE INPUT GENOME AND GENERATE A REPORT ON LENGTH
+    //          AND LOCATION
+    //
+    TRAILINGNS(
         FILTER_FASTA.out.fasta
     )
-    ch_versions             = ch_versions.mix(TRAILINGNS_CHECK.out.versions)
-    trailing_ns_report      = TRAILINGNS_CHECK.out.trailing_ns_report
+    ch_versions         = ch_versions.mix( TRAILINGNS.out.versions )
+    trailing_ns_report  = TRAILINGNS.out.trailing_ns_report
                                 .map { meta, _file -> [[ id: meta.id ], _file] }
 
     emit:
-    reference_tuple_from_GG
+    reference_tuple                     = FILTER_FASTA.out.fasta
     reference_with_seqkit               = new_input_fasta
-    dot_genome
+    dot_genome                          = GNU_SORT.out.sorted
     gc_content_txt                      = GC_CONTENT.out.txt
     trailing_ns_report
     filter_fasta_sanitation_log

@@ -13,15 +13,15 @@ Modified by Damon-Lee Pointon (@dp24/@DLBPointon)
 
 """
 
-import general_purpose_functions as gpf
 import argparse
-from pathlib import Path
-import textwrap
-import sys
 import os.path
 import re
+import sys
+import textwrap
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from pathlib import Path
+
+import general_purpose_functions as gpf
 
 
 def parse_args(argv=None):
@@ -44,9 +44,7 @@ def parse_args(argv=None):
         type=str,
         help="The Taxon name of the assembly (Scientific name of the species + subspecies if applicable)",
     )
-    parser.add_argument(
-        "-id", "--taxid", required=True, type=int, help="Taxon ID of the assembly"
-    )
+    parser.add_argument("-id", "--taxid", required=True, type=int, help="Taxon ID of the assembly")
     parser.add_argument(
         "-td",
         "--taxdump",
@@ -96,9 +94,7 @@ def parse_args(argv=None):
         type=str,
         help="Path to mapped reads BAM for coverage estimation",
     )
-    parser.add_argument(
-        "-t", "--tiara", default="N", type=str, help="Path to the tiara_out.txt file"
-    )
+    parser.add_argument("-t", "--tiara", default="N", type=str, help="Path to the tiara_out.txt file")
     parser.add_argument(
         "-p",
         "--pca",
@@ -134,12 +130,8 @@ def parse_args(argv=None):
         type=str,
         help="Path to the contigviz_results.csv file",
     )
-    parser.add_argument(
-        "-o", "--output", default="btk_datasets", type=str, help="Output directory"
-    )
-    parser.add_argument(
-        "--threads", type=int, default=1, help="Number of threads to utilise"
-    )
+    parser.add_argument("-o", "--output", default="btk_datasets", type=str, help="Output directory")
+    parser.add_argument("--threads", type=int, default=1, help="Number of threads to utilise")
     parser.add_argument("--alias", type=str, default="", help="Assembly alias")
     parser.add_argument(
         "--dry_run",
@@ -159,9 +151,9 @@ def create_assembly_yaml(assembly_yaml_path, assembly_alias, taxon_name):
     """
     if ".gz" in assembly_alias:
         assembly_alias = assembly_alias.replace(".gz", "_gz")
-    out_string = "assembly:\n  accession: NA\n  alias: {}\n  record_type: scaffold\n  bioproject: NA\n  biosample: NA\ntaxon:\n  name: {}".format(
-        assembly_alias, taxon_name
-    )
+
+    out_string = f"assembly:\n  accession: NA\n  alias: {assembly_alias}\n  record_type: scaffold\n  bioproject: NA\n  biosample: NA\ntaxon:\n  name: {taxon_name}"
+
     with open(assembly_yaml_path, "w") as f:
         f.write(out_string)
 
@@ -178,11 +170,7 @@ def tiara_results_to_btk_format(tiara_results_path, outfile_path):
         for line in tiara_data:
             split_line = line.split()
             if len(split_line) != 3:
-                sys.stderr.write(
-                    "Failed to parse the Tiara results file {}\n".format(
-                        tiara_results_path
-                    )
-                )
+                sys.stderr.write(f"Failed to parse the Tiara results file {tiara_results_path}\n")
                 sys.exit(1)
             first_pass_result = split_line[1]
             second_pass_result = split_line[2]
@@ -191,9 +179,7 @@ def tiara_results_to_btk_format(tiara_results_path, outfile_path):
             f.write(split_line[0] + "\t" + first_pass_result + "\n")
 
 
-def detect_dim_reduction_methods(
-    kmers_dim_reduction_output_path, debug=False
-) -> Dict[str, Tuple[int, List[str], str]]:
+def detect_dim_reduction_methods(kmers_dim_reduction_output_path, debug=False) -> dict[str, tuple[int, list[str], str]]:
     """
     Parses the header of the kmers dimensionality reduction report file to detect
     which dimensionality reduction methods were used and how many dimensions each has.
@@ -224,9 +210,7 @@ def detect_dim_reduction_methods(
 
     # Sort columns for each method to ensure correct order
     for method in method_columns:
-        method_columns[method].sort(
-            key=lambda x: int(re.search(r"embedding_dim_(\d+)_", x).group(1))
-        )
+        method_columns[method].sort(key=lambda x: int(re.search(r"embedding_dim_(\d+)_", x).group(1)))
 
     # Create result dictionary with dimensions, sorted columns, and original method name
     result = {}
@@ -251,16 +235,11 @@ def shorten_method_name(method, debug=False):
     if method.startswith("Autoencoder"):
         # Replace "Autoencoder" with "AE"
         method = method.replace("Autoencoder", "AE")
-    elif (
-        method == "Non-Negative Matrix Factorization"
-        or method == "Non_Negative_Matrix_Factorization"
-    ):
+    elif method == "Non-Negative Matrix Factorization" or method == "Non_Negative_Matrix_Factorization":
         method = "NNMF"
 
     if debug and method != original:
-        sys.stderr.write(
-            f"[DEBUG] Shortened method name from '{original}' to '{method}'\n"
-        )
+        sys.stderr.write(f"[DEBUG] Shortened method name from '{original}' to '{method}'\n")
     return method
 
 
@@ -279,9 +258,7 @@ def sanitise_btk_variable(name, used_names=None, debug=False):
     if not used_names or name[:34] not in [n[:34] for n in used_names]:
         name = name[:34]
         if debug and name != original:
-            sys.stderr.write(
-                f"[DEBUG] Sanitised name from '{original}' to '{name}' (no suffix needed)\n"
-            )
+            sys.stderr.write(f"[DEBUG] Sanitised name from '{original}' to '{name}' (no suffix needed)\n")
         return name
 
     # If we need to add a suffix, find the next available number
@@ -295,9 +272,7 @@ def sanitise_btk_variable(name, used_names=None, debug=False):
 
     name = f"{base_name}_{suffix}"
     if debug:
-        sys.stderr.write(
-            f"[DEBUG] Sanitised name from '{original}' to '{name}' (with suffix)\n"
-        )
+        sys.stderr.write(f"[DEBUG] Sanitised name from '{original}' to '{name}' (with suffix)\n")
     return name
 
 
@@ -307,28 +282,12 @@ def set_default_plot_variables(args, command_list):
     """
     # Track available variables
     has_coverage = (
-        args.mapped_reads != "N"
-        and os.path.isfile(args.mapped_reads)
-        and os.stat(args.mapped_reads).st_size > 0
+        args.mapped_reads != "N" and os.path.isfile(args.mapped_reads) and os.stat(args.mapped_reads).st_size > 0
     )
-    has_kmers = (
-        args.pca != "N" and os.path.isfile(args.pca) and os.stat(args.pca).st_size > 0
-    )
-    has_fcs_gx = (
-        args.fcs_gx != "N"
-        and os.path.isfile(args.fcs_gx)
-        and os.stat(args.fcs_gx).st_size > 0
-    )
-    has_tiara = (
-        args.tiara != "N"
-        and os.path.isfile(args.tiara)
-        and os.stat(args.tiara).st_size > 0
-    )
-    has_kraken = (
-        args.kraken != "N"
-        and os.path.isfile(args.kraken)
-        and os.stat(args.kraken).st_size > 0
-    )
+    has_kmers = args.pca != "N" and os.path.isfile(args.pca) and os.stat(args.pca).st_size > 0
+    has_fcs_gx = args.fcs_gx != "N" and os.path.isfile(args.fcs_gx) and os.stat(args.fcs_gx).st_size > 0
+    has_tiara = args.tiara != "N" and os.path.isfile(args.tiara) and os.stat(args.tiara).st_size > 0
+    has_kraken = args.kraken != "N" and os.path.isfile(args.kraken) and os.stat(args.kraken).st_size > 0
     has_blast = any(
         n != "N" and os.path.isfile(n) and os.stat(n).st_size > 0
         for n in [args.blastn_hits, args.uniprot_diamond_hits, args.nr_diamond_hits]
@@ -368,7 +327,7 @@ def set_default_plot_variables(args, command_list):
         cat_var = "bestsum_phylum"
 
     # Build the blobtools replace command
-    replace_cmd = f"blobtools replace"
+    replace_cmd = "blobtools replace"
     if x_var:
         replace_cmd += f" --key plot.x={x_var}"
     if y_var:
@@ -391,9 +350,7 @@ def preprocess_fcsgx_csv(input_path, output_path, debug=False):
     This helps BlobToolKit infer the correct data types for these columns.
     """
     if debug:
-        sys.stderr.write(
-            f"[DEBUG] Preprocessing FCS-GX CSV file: {input_path} -> {output_path}\n"
-        )
+        sys.stderr.write(f"[DEBUG] Preprocessing FCS-GX CSV file: {input_path} -> {output_path}\n")
 
     # Read the input CSV file
     with open(input_path, "r") as f:
@@ -418,13 +375,9 @@ def preprocess_fcsgx_csv(input_path, output_path, debug=False):
         if col in header:
             numerical_indices.append(header.index(col))
             if debug:
-                sys.stderr.write(
-                    f"[DEBUG] Found numerical column '{col}' at index {header.index(col)}\n"
-                )
+                sys.stderr.write(f"[DEBUG] Found numerical column '{col}' at index {header.index(col)}\n")
         else:
-            sys.stderr.write(
-                f"[WARNING] Column '{col}' not found in FCS-GX file header\n"
-            )
+            sys.stderr.write(f"[WARNING] Column '{col}' not found in FCS-GX file header\n")
 
     # Process each line
     processed_lines = [lines[0]]  # Keep the header unchanged
@@ -434,9 +387,7 @@ def preprocess_fcsgx_csv(input_path, output_path, debug=False):
 
         # Ensure the line has enough fields
         if len(fields) < max(numerical_indices, default=-1) + 1:
-            sys.stderr.write(
-                f"[WARNING] Line {line_num} has fewer fields than expected, skipping\n"
-            )
+            sys.stderr.write(f"[WARNING] Line {line_num} has fewer fields than expected, skipping\n")
             processed_lines.append(line)
             continue
 
@@ -482,11 +433,7 @@ def main(args):
         args.nr_diamond_hits,
     ]
 
-    hits_file = [
-        n
-        for n in hits_file_paths
-        if n != "N" and os.path.isfile(n) is True and os.stat(n).st_size > 0
-    ]
+    hits_file = [n for n in hits_file_paths if n != "N" and os.path.isfile(n) is True and os.stat(n).st_size > 0]
 
     if len(hits_file) > 0:
         add_hits_command = "blobtools add"
@@ -505,11 +452,7 @@ def main(args):
         command_list.append(add_cov_command)
 
     # ADDING TIARA
-    if (
-        args.tiara != "N"
-        and os.path.isfile(args.tiara)
-        and os.stat(args.tiara).st_size > 0
-    ):
+    if args.tiara != "N" and os.path.isfile(args.tiara) and os.stat(args.tiara).st_size > 0:
         tiara_reformatted_output_path = args.dataset + "/tiara_out_btk_format.tsv"
         tiara_results_to_btk_format(args.tiara, tiara_reformatted_output_path)
         add_tiara_command = f"blobtools add --text {tiara_reformatted_output_path} --text-delimiter '\t' --text-cols 'identifier=identifiers,tiara=tiara' --text-header {args.output}"
@@ -522,9 +465,7 @@ def main(args):
         for sanitised_method, (_, columns, _) in method_info.items():
             # Get the sanitised name for BlobToolKit variables
             shortened_method = shorten_method_name(sanitised_method, args.debug)
-            sanitised_method = sanitise_btk_variable(
-                shortened_method, used_names, args.debug
-            )
+            sanitised_method = sanitise_btk_variable(shortened_method, used_names, args.debug)
             used_names.add(sanitised_method)
 
             # Create the text-cols string dynamically based on number of dimensions
@@ -532,9 +473,7 @@ def main(args):
             # Use original column name from CSV (left side) and sanitised name for BTK variable (right side)
             for i, col in enumerate(columns, 1):
                 btk_var = f"embedding_dim_{i}_{sanitised_method}"  # BTK variable name
-                cols_list.append(
-                    f"{col}={btk_var}"
-                )  # Map original column to BTK variable
+                cols_list.append(f"{col}={btk_var}")  # Map original column to BTK variable
                 if args.debug:
                     sys.stderr.write(f"[DEBUG] Column mapping: {col} -> {btk_var}\n")
 
@@ -547,17 +486,11 @@ def main(args):
                 f"--text-header {args.output}"
             )
             if args.debug:
-                sys.stderr.write(
-                    f"[DEBUG] Generated blobtools command:\n{add_embedding_command}\n"
-                )
+                sys.stderr.write(f"[DEBUG] Generated blobtools command:\n{add_embedding_command}\n")
             command_list.append(add_embedding_command)
 
     # ADDING KRAKEN DATA
-    if (
-        args.kraken != "N"
-        and os.path.isfile(args.kraken)
-        and os.stat(args.kraken).st_size > 0
-    ):
+    if args.kraken != "N" and os.path.isfile(args.kraken) and os.stat(args.kraken).st_size > 0:
         for taxonomy_level in (
             "species",
             "genus",
@@ -572,11 +505,7 @@ def main(args):
             command_list.append(add_kraken_command)
 
     # ADDING FCS_GX DATA
-    if (
-        args.fcs_gx != "N"
-        and os.path.isfile(args.fcs_gx)
-        and os.stat(args.fcs_gx).st_size > 0
-    ):
+    if args.fcs_gx != "N" and os.path.isfile(args.fcs_gx) and os.stat(args.fcs_gx).st_size > 0:
         # Preprocess the FCS-GX CSV file to ensure numerical columns are recognized as such
         fcsgx_preprocessed_path = args.dataset + "/fcs-gx_summary_preprocessed.csv"
         preprocess_fcsgx_csv(args.fcs_gx, fcsgx_preprocessed_path, args.debug)
@@ -589,9 +518,7 @@ def main(args):
             f"--text-header {args.output}"
         )
         if args.debug:
-            sys.stderr.write(
-                f"[DEBUG] Generated FCS-GX categorical command:\n{add_fcs_gx_categorical_command}\n"
-            )
+            sys.stderr.write(f"[DEBUG] Generated FCS-GX categorical command:\n{add_fcs_gx_categorical_command}\n")
         command_list.append(add_fcs_gx_categorical_command)
 
         # Add numerical columns separately
@@ -603,14 +530,10 @@ def main(args):
             f"--text-header {args.output}"
         )
         if args.debug:
-            sys.stderr.write(
-                f"[DEBUG] Generated FCS-GX numerical command:\n{add_fcs_gx_numerical_command}\n"
-            )
+            sys.stderr.write(f"[DEBUG] Generated FCS-GX numerical command:\n{add_fcs_gx_numerical_command}\n")
         command_list.append(add_fcs_gx_numerical_command)
 
-    export_table_command = (
-        f"blobtools filter --table btk_summary_table_full.tsv {args.output}"
-    )
+    export_table_command = f"blobtools filter --table btk_summary_table_full.tsv {args.output}"
     command_list.append(export_table_command)
 
     # EXECUTE ALL BTK COMMANDS

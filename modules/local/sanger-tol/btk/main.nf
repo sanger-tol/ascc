@@ -21,7 +21,7 @@ process SANGER_TOL_BTK {
     path("${prefix}_btk_out/blobtoolkit/plots"),                            emit: plots
     path("${prefix}_btk_out/blobtoolkit/${prefix}*/summary.json.gz"),       emit: summary_json
     path("${prefix}_btk_out/busco"),                                        emit: busco_data
-    path("${prefix}_btk_out/multiqc"),                                      emit: multiqc_report
+    path("${prefix}_btk_out/multiqc_report.html"),                          emit: multiqc_report
     path("blobtoolkit_pipeline_info"),                                      emit: pipeline_info
     path "versions.yml",                                                    emit: versions
 
