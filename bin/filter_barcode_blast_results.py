@@ -8,10 +8,11 @@ Originally written James Torrance (@jt8)
 Modified by Damon-Lee Pointon (@dp24 / @DLBPointon)
 """
 
-import re
-import gzip
-from Bio import SeqIO
 import argparse
+import gzip
+import re
+
+from Bio import SeqIO
 
 
 def main():
@@ -36,6 +37,7 @@ def main():
     if re.search(r"\.gz$", args.input):
         fasta_input_handle = gzip.open(args.input, "rt")
     else:
+        # OPENS WHOLE FASTA FILE INTO MEMORY!
         fasta_input_handle = open(args.input, "rt")
 
     for record in SeqIO.parse(fasta_input_handle, "fasta"):
@@ -45,9 +47,7 @@ def main():
         n_iterator = re.finditer("[Nn]+", str(record.seq))
         for n_instance in n_iterator:
             # barcode_location_handle.write(record.id + '\t' + str(n_instance.start(0)+1) + '\t' + str(n_instance.end(0)) + '\n')
-            n_regions_for_record[record.id].append(
-                [n_instance.start(0) + 1, n_instance.end(0)]
-            )
+            n_regions_for_record[record.id].append([n_instance.start(0) + 1, n_instance.end(0)])
 
     fasta_input_handle.close()
 
@@ -82,9 +82,7 @@ def main():
                         if blast_end <= end and end - blast_end <= threshold:
                             terminal_flag = True
                             blast_end = end
-                    if terminal_flag or (
-                        blast_length >= 17 and blast_percentage >= 100
-                    ):
+                    if terminal_flag or (blast_length >= 17 and blast_percentage >= 100):
                         barcode_location_handle.write(
                             "\t".join(
                                 [

@@ -13,8 +13,8 @@ Usage:
 VSlistTo1HitPerLine.py [options] vecscreen_output_file
 """
 
-import re
 import argparse
+import re
 
 
 def main(args):
@@ -51,9 +51,7 @@ def main(args):
                 hits_to_report = "Strong"
                 continue
 
-            if args.skip_reporting_moderate_hits is False and line.startswith(
-                "Moderate"
-            ):
+            if args.skip_reporting_moderate_hits is False and line.startswith("Moderate"):
                 hits_to_report = "Moderate"
                 continue
 
@@ -104,12 +102,8 @@ if __name__ == "__main__":
         action="store_true",
         help="Skip reporting hits of suspect origin",
     )
-    parser.add_argument(
-        "--skip_reporting_no_hits", action="store_true", help="Skip reporting no-hits"
-    )
-    parser.add_argument(
-        "--skip_reporting_errors", action="store_true", help="Skip reporting errors"
-    )
+    parser.add_argument("--skip_reporting_no_hits", action="store_true", help="Skip reporting no-hits")
+    parser.add_argument("--skip_reporting_errors", action="store_true", help="Skip reporting errors")
     parser.add_argument("-v", "--version", action="version", version="1.0")
     args = parser.parse_args()
     main(args)

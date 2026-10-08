@@ -10,7 +10,6 @@ keywords:
 components:
   - filter/fasta
   - gc/content
-  - generate_genomes
   - trailingns/trailingns
 input:
   - input_ref:
@@ -20,7 +19,7 @@ input:
 
         Structure: [meta, reads]
 output:
-  - reference_tuple_from_GG:
+  - reference_tuple:
       type: file
       description: |
         The reference assembly.
@@ -32,7 +31,13 @@ output:
         The reference processed by seqkit.
 
         Structure: [meta, fasta]
-  - trailingns_report:
+  - dot_genome:
+      type: file
+      description: |
+        Text file describing scaffolds and their lengths.
+
+        Structure: [meta, sizes]
+  - trailing_ns_report:
       type: file
       description: |
         Text file describing locations and lengths of N.
@@ -41,15 +46,17 @@ output:
   - dot_genome:
       type: file
       description: |
-        Text file describing scaffolds and their lengths.
-
-        Structure: [meta, sizes]
-  - dot_genome:
-      type: file
-      description: |
         Text file describing scaffolds and their gc content.
 
         Structure: [meta, report]
+  - filter_fasta_sanitation_log:
+      type: file
+      description: |
+        Text file describing the sanitization of the fasta file.
+  - filter_fasta_length_filtering_log:
+      type: file
+      description: |
+        Text file describing the length filtering of the fasta file.
   - versions:
       type: file
       description: File containing software versions

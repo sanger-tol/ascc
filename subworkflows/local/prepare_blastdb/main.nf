@@ -21,7 +21,7 @@ workflow PREPARE_BLASTDB {
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
     CHECK_BARCODE (
-        [[id: sample_id], pacbio_data],
+        tuple([id: sample_id], pacbio_data),
         barcodes_file,
         barcode_names
     )
@@ -37,7 +37,10 @@ workflow PREPARE_BLASTDB {
         .filter { text -> text.contains('barcodes') } // Indicates it is a valid barcode
         .combine(barcodes_file)
         .map { str_info, file ->
-            [[id: 'BARCODE_TO_MAKEDB', info: str_info], file]
+            tuple(
+                [id: 'BARCODE_TO_MAKEDB', info: str_info],
+                file
+            )
         }
         .set { ch_new_barcodes }
 
