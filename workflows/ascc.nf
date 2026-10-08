@@ -5,42 +5,41 @@
 */
 
 // LOCAL MODULE IMPORTS
-include { CREATE_BTK_DATASET                            } from '../modules/local/blobtoolkit/create_dataset/main'
-include { MERGE_BTK_DATASETS                            } from '../modules/local/blobtoolkit/merge_dataset/main'
-include { ASCC_MERGE_TABLES                             } from '../modules/local/ascc/merge_tables/main'
-include { AUTOFILTER_AND_CHECK_ASSEMBLY                 } from '../modules/local/autofilter/autofilter/main'
-include { SANGER_TOL_BTK                                } from '../modules/local/sanger-tol/btk/main'
+include { CREATE_BTK_DATASET                } from '../modules/local/blobtoolkit/create_dataset/main'
+include { MERGE_BTK_DATASETS                } from '../modules/local/blobtoolkit/merge_dataset/main'
+include { ASCC_MERGE_TABLES                 } from '../modules/local/ascc/merge_tables/main'
+include { AUTOFILTER_AND_CHECK_ASSEMBLY     } from '../modules/local/autofilter/autofilter/main'
+include { SANGER_TOL_BTK                    } from '../modules/local/sanger-tol/btk/main'
 
 // SANGER-TOLER MODULE IMPORTS
-include { BLOBTOOLKIT_GENERATECSV                       } from '../modules/sanger-tol/blobtoolkit/generatecsv/main'
+include { BLOBTOOLKIT_GENERATECSV           } from '../modules/sanger-tol/blobtoolkit/generatecsv/main'
 
 // NF-CORE MODULE IMPORTS
-include { TIARA_TIARA                                   } from '../modules/nf-core/tiara/tiara/main'
+include { TIARA_TIARA                       } from '../modules/nf-core/tiara/tiara/main'
 
 // LOCAL SUBWORKFLOW IMPORTS
-include { ESSENTIAL_JOBS                                } from '../subworkflows/local/essential_jobs/main'
-include { GET_KMERS_PROFILE                             } from '../subworkflows/local/get_kmers_profile/main'
-include { EXTRACT_NT_BLAST                              } from '../subworkflows/local/extract_nt_blast/main'
-include { ORGANELLAR_BLAST as PLASTID_ORGANELLAR_BLAST  } from '../subworkflows/local/organellar_blast/main'
-include { ORGANELLAR_BLAST as MITO_ORGANELLAR_BLAST     } from '../subworkflows/local/organellar_blast/main'
-include { PACBIO_BARCODE_CHECK                          } from '../subworkflows/local/pacbio_barcode_check/main'
-include { RUN_READ_COVERAGE                             } from '../subworkflows/local/run_read_coverage/main'
-include { RUN_VECSCREEN                                 } from '../subworkflows/local/run_vecscreen/main'
-include { RUN_NT_KRAKEN                                 } from '../subworkflows/local/run_nt_kraken/main'
-include { FCSGX_PARSECSV as RUN_FCSGX                   } from '../subworkflows/local/run_fcsgx/main'
-include { RUN_FCSADAPTOR                                } from '../subworkflows/local/run_fcsadaptor/main'
-include { RUN_DIAMOND as NR_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
-include { RUN_DIAMOND as UP_DIAMOND                     } from '../subworkflows/local/run_diamond/main'
-include { RUN_DECONTAMINATE_FASTA                       } from '../subworkflows/local/run_decontaminate_fasta'
-include { GENERATE_HTML_REPORT_WORKFLOW                 } from '../subworkflows/local/generate_html_report/main'
+include { ESSENTIAL_JOBS                    } from '../subworkflows/local/essential_jobs/main'
+include { GET_KMERS_PROFILE                 } from '../subworkflows/local/get_kmers_profile/main'
+include { EXTRACT_NT_BLAST                  } from '../subworkflows/local/extract_nt_blast/main'
+include { ORGANELLAR_BLAST                  } from '../subworkflows/local/organellar_blast/main'
+include { PACBIO_BARCODE_CHECK              } from '../subworkflows/local/pacbio_barcode_check/main'
+include { RUN_READ_COVERAGE                 } from '../subworkflows/local/run_read_coverage/main'
+include { RUN_VECSCREEN                     } from '../subworkflows/local/run_vecscreen/main'
+include { RUN_NT_KRAKEN                     } from '../subworkflows/local/run_nt_kraken/main'
+include { FCSGX_PARSECSV as RUN_FCSGX       } from '../subworkflows/local/run_fcsgx/main'
+include { RUN_FCSADAPTOR                    } from '../subworkflows/local/run_fcsadaptor/main'
+include { RUN_DIAMOND as NR_DIAMOND         } from '../subworkflows/local/run_diamond/main'
+include { RUN_DIAMOND as UP_DIAMOND         } from '../subworkflows/local/run_diamond/main'
+include { RUN_DECONTAMINATE_FASTA           } from '../subworkflows/local/run_decontaminate_fasta'
+include { GENERATE_HTML_REPORT_WORKFLOW     } from '../subworkflows/local/generate_html_report/main'
 
 // FUNCTION IMPORTS
 // NOTE: IN FUTURE SHOULD ALSO CONTAIN DATA-MAPPER FUNCTIONS
 include { getEmptyPlaceholder; isOrganellar; allRunnableConditions; runConditionals; genomicConditionals; organellarConditionals } from '../functions/local/ascc_utils'
 
-include { softwareVersionsToYAML                        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                        } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
-include { paramsSummaryMap                              } from 'plugin/nf-schema'
+include { softwareVersionsToYAML            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText            } from '../subworkflows/local/utils_nfcore_ascc_pipeline'
+include { paramsSummaryMap                  } from 'plugin/nf-schema'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,13 +95,12 @@ workflow ASCC {
     //          so that all isOrganellar() checks and the type branch works correctly.
     //
     ch_assembly_type_lookup = genomic_genomes
-        .map { meta, _file -> [[id: meta.id], meta.assembly_type] }
+        .map { meta, _file -> tuple([id: meta.id], meta.assembly_type) }
 
 
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: RUNS FILTER_FASTA, GENERATE .GENOME, CALCS GC_CONTENT AND FINDS RUNS OF N's
-    //                  THIS SHOULD NOT RUN ONLY WHEN SPECIFICALLY REQUESTED
     //
     ESSENTIAL_JOBS(
         genomic_genomes
@@ -122,17 +120,17 @@ workflow ASCC {
     //          isOrganellar() and the type branch below correctly route each assembly.
     //
     ch_reference_tuple = ESSENTIAL_JOBS.out.reference_tuple
-        .map { meta, file -> [[id: meta.id], meta, file] }
+        .map { meta, file -> tuple([id: meta.id], meta, file) }
         .join(ch_assembly_type_lookup)
         .map { _id_meta, meta, file, assembly_type ->
-            [meta + [assembly_type: assembly_type], file]
+            tuple(meta + [assembly_type: assembly_type], file)
         }
 
     ej_seqkit_reference = ESSENTIAL_JOBS.out.reference_with_seqkit
-        .map { meta, file -> [[id: meta.id], meta, file] }
+        .map { meta, file -> tuple([id: meta.id], meta, file) }
         .join(ch_assembly_type_lookup)
         .map { _id_meta, meta, file, assembly_type ->
-            [meta + [assembly_type: assembly_type], file]
+            tuple(meta + [assembly_type: assembly_type], file)
         }
 
 
@@ -140,23 +138,21 @@ workflow ASCC {
     //
     // LOGIC: BRANCH THE REFERENCE CHANNEL BY ASSEMBLY TYPE FOR TYPE-SPECIFIC PROCESS GATING
     //
-    ch_reference_tuple
+    ch_type_branch = ch_reference_tuple
         .branch { meta, _f ->
             genomic:    !isOrganellar(meta)
             organellar: true
         }
-        .set { ch_type_branch }
 
 
     //-------------------------------------------------------------------------
     //
     // LOGIC: CONVERT THE CHANNEL INTO AN EPOCH COUNT FOR GET_KMER_PROFILE (GENOMIC ONLY)
     //
-    ch_type_branch.genomic
+    autoencoder_epochs_count = ch_type_branch.genomic
         .map { _meta, file ->
             file.countFasta() * 3
         }
-        .set { autoencoder_epochs_count }
 
 
     //
@@ -169,6 +165,7 @@ workflow ASCC {
         autoencoder_epochs_count
     )
     ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
+
 
     //
     // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
@@ -183,16 +180,12 @@ workflow ASCC {
     // SUBWORKFLOW: EXTRACT RESULTS HITS FROM TIARA
     //
     TIARA_TIARA (
-        ch_type_branch.genomic
+        ch_reference_tuple
             .filter{ _meta, _file -> params.run_tiara in genomicConditionals() }
-            .mix(
-                ch_type_branch.organellar
-                    .filter{ _meta, _file -> params.run_tiara in organellarConditionals() }
-            )
     )
     ch_versions         = ch_versions.mix( TIARA_TIARA.out.versions )
     ch_tiara            = TIARA_TIARA.out.classifications
-                            .map { meta, file -> [[id: meta.id ], file] }
+                            .map { meta, file -> tuple([id: meta.id ], file) }
                             .ifEmpty { [[:],[]] }
 
 
@@ -226,16 +219,12 @@ workflow ASCC {
                     seq_count: total_length
                 ]
 
-            [meta2, file]
+            tuple(meta2, file)
         }
         .filter { meta, _file ->
                     meta.seq_count >= params.seqkit_window
         }
 
-    valid_length_fasta
-        .map{ meta, _file ->
-            log.info "[ASCC INFO]: Running BLAST (NT, DIAMOND, NR) on VALID ORGANELLE: \n\t-- ${meta.id}'s sequence ($meta.seq_count bases) is >= seqkit_window $params.seqkit_window\n"
-        }
 
     assemblies_to_blast = ch_type_branch.genomic
         .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals() }
@@ -312,74 +301,42 @@ workflow ASCC {
 
     //-------------------------------------------------------------------------
     //
-    // LOGIC: CHECK WHETHER THERE IS A MITO AND BRANCH (GENOMIC ONLY)
-    //
-    organellar_check = organellar_genomes
-        .filter{ _meta, _file ->
-            params.run_organellar_blast in genomicConditionals()
-        }
-        .branch { meta, _assembly ->
-            mito:       meta.assembly_type == "MITO"
-            plastid:    meta.assembly_type == "PLASTID"
-            invalid:    true    // if value but not of the above conditions
-        }
-
-
-    //
     // SUBWORKFLOW: BLASTING FOR MITO ASSEMBLIES IN GENOME (GENOMIC ONLY)
     //
-    MITO_ORGANELLAR_BLAST (
+
+    ORGANELLAR_BLAST (
         ch_type_branch.genomic,
-        organellar_check.mito
+        organellar_genomes.filter{ _meta, _file ->
+            params.run_organellar_blast in genomicConditionals()
+        }
     )
-    ch_versions     = ch_versions.mix(MITO_ORGANELLAR_BLAST.out.versions)
+    ch_versions     = ch_versions.mix(ORGANELLAR_BLAST.out.versions)
 
+    ch_organellar_rprt = ORGANELLAR_BLAST.out.organelle_report
+        .branch { meta, file ->
+            mito:       meta.organelle.endsWith("MITO")
+            plastid:    meta.organelle.endsWith("PLASTID")
+        }
 
-    // //
-    // // SUBWORKFLOW: BLASTING FOR PLASTID ASSEMBLIES IN GENOME (GENOMIC ONLY)
-    // //
-    // PLASTID_ORGANELLAR_BLAST (
-    //     ch_type_branch.genomic,
-    //     organellar_check.plastid
-    // )
-    // ch_versions     = ch_versions.mix(PLASTID_ORGANELLAR_BLAST.out.versions)
+    ch_organellar_full = ORGANELLAR_BLAST.out.full_organelle_report
+        .branch { meta, file ->
+            mito:       meta.organelle.endsWith("MITO")
+            plastid:    meta.organelle.endsWith("PLASTID")
+        }
 
-
-    //
-    // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
-    //          SO STRIP IT DOWN AND ADD PROCESS_NAME BEFORE USE
-    //
-    ch_mito         = MITO_ORGANELLAR_BLAST.out.organelle_report
-                        .map { meta, file -> [[id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
-
-    ch_chloro       = channel.of([[:],[]])
-    // ch_chloro       = PLASTID_ORGANELLAR_BLAST.out.organelle_report
-    //                     .map { meta, file -> [[id: meta.id ], file] }
-    //                     .ifEmpty { [[:],[]] }
-
-    ch_mito_full    = MITO_ORGANELLAR_BLAST.out.full_organelle_report
-                        .map { meta, file -> [[id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
-
-    ch_chloro_full  = channel.of([[:],[]])
-    // ch_chloro_full  = PLASTID_ORGANELLAR_BLAST.out.full_organelle_report
-    //                     .map { meta, file -> [[id: meta.id ], file] }
-    //                     .ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
     //
-    ch_reference_tuple
+    duplicated_db = ch_reference_tuple
         .combine(pacbio_database)
         .multiMap{
             ref_meta, ref_data, pdb_meta, pdb_data ->
                 assembly: tuple(ref_meta, ref_data)
                 pacbio_db: tuple(pdb_meta, pdb_data)
         }
-        .set { duplicated_db }
 
     PACBIO_BARCODE_CHECK (
         duplicated_db.assembly.filter{ meta, _file ->
@@ -438,12 +395,10 @@ workflow ASCC {
 
     } else if ( params.fcs_override ) {
 
-        fcs_samplesheet.map{ meta, file ->
+        ch_fcsgx = fcs_samplesheet.map{ meta, file ->
             log.info("\n[ASCC INFO]: Overriding Internal FCSGX with ${file}")
-            [[id: meta.id], file]
-
+            tuple([id: meta.id], file)
         }
-        .set { ch_fcsgx }
 
         // TODO: WE NEED TO ENSURE THAT THE FCS RESULTS ARE OUTPUT HERE
         //       CURRENTLY THERE IS NO REASON FOR THEM TO BE CACHED SO ARE NOT
@@ -531,18 +486,17 @@ workflow ASCC {
         //          ch_fcsgx_for_btk : genomic items only  → organellar items → null → placeholder
         //          ch_kmers         : genomic items only  → organellar items → null → placeholder
         //
-        ch_reference_tuple
+        create_input_channel = ch_reference_tuple
             .filter { meta, _f ->
                 def conds = runConditionals(meta)
                 params.run_create_btk_dataset in conds
             }
-            .map{meta, file -> [[id: meta.id], file]}
+            .map{meta, file -> tuple([id: meta.id], file)}
             // NOTE: remainder LEAVES US WITH A SPACE IN THE FINAL TUPLE
             .join(ch_nt_blast,      remainder: true)
             .join(ch_tiara,         remainder: true)
             .join(ej_dot_genome
-                .map{meta, file -> tuple([id: meta.id], file)},
-                remainder: true)
+                .map{meta, file -> tuple([id: meta.id], file)}, remainder: true)
             .join(ch_fcsgx_for_btk, remainder: true)
             .join(ch_bam,           remainder: true)
             .join(ch_coverage,      remainder: true)
@@ -570,7 +524,6 @@ workflow ASCC {
                     }
                 }
             }
-            .set{ create_input_channel}
 
 
         //
@@ -604,7 +557,7 @@ workflow ASCC {
     if (
         params.run_tiara               in allRunnableConditions() &&
         params.run_fcsgx               in allRunnableConditions() &&
-        params.run_autofilter_assembly in allRunnableConditions()
+        params.run_autofilter_assembly in genomicConditionals()
     ) {
         //
         // LOGIC: FILTER THE INPUT FOR THE AUTOFILTER STEP PER ASSEMBLY TYPE
@@ -614,7 +567,7 @@ workflow ASCC {
         //              Thankfully taxid is a param so easy enough to add back in.
         //                  Actually, it just makes more sense to passs in as its own channel.
         //
-        ch_reference_tuple
+        autofilter_input_formatted = ch_reference_tuple
             .filter { meta, _f ->
                 def conds = runConditionals(meta)
                 params.run_tiara in conds && params.run_fcsgx in conds && params.run_autofilter_assembly in conds
@@ -640,7 +593,6 @@ workflow ASCC {
                     fcs_file:   tuple(new_meta, fcs)
                     ncbi_rank:  ncbi
             }
-            .set { autofilter_input_formatted }
 
 
         //
@@ -686,7 +638,7 @@ workflow ASCC {
         btk_bool_run_btk        = btk_bool.run_btk
 
     } else {
-        btk_bool_run_btk        = channel.of([[id: "NA"], "false"])
+        btk_bool_run_btk        = channel.of(tuple([id: "NA"], "false"))
         ch_autofilt_alarm_file  = channel.of( [[:],[]] )
         ch_autofilt_removed_seqs= channel.of( [[:],[]] )
         ch_autofilt_assem       = channel.of( [[:],[]] )
@@ -740,7 +692,7 @@ workflow ASCC {
     }
 
     // NOTE: Noticed a race condition, this should fix that.
-    run_btk_conditional.run_btk
+    combined_ch = run_btk_conditional.run_btk
         .map { meta, file, _data -> tuple(meta.id, meta, file) }
         .join(
             ch_autofilt_alarm_file
@@ -752,7 +704,6 @@ workflow ASCC {
             def merged_meta = ref_meta + alarm_meta
             tuple(merged_meta, ref_file, alarm_file)
         }
-        .set { combined_ch }
 
 
     //
@@ -760,14 +711,13 @@ workflow ASCC {
     //          USE IN THE BTK PIPELINE
     //          EXEC MODULE PRODUCES NO VERSIONS
     //
-    combined_ch
+    ch_meta_reads = combined_ch
         .combine( reads_path.collect()
             .map { paths -> [paths] }
         )
         .map { meta, _ref, _alarm, path_list ->
             tuple([id:meta.id], path_list)
         }
-        .set { ch_meta_reads }
 
 
     BLOBTOOLKIT_GENERATECSV (
@@ -852,7 +802,7 @@ workflow ASCC {
         )
         ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
-                                    .map{ meta, _tsv -> [[id: meta.id], _tsv] }
+                                    .map{ meta, _tsv -> tuple([id: meta.id], _tsv) }
         merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
     } else {
         busco_merge_btk         = channel.of( [[:],[]] )
@@ -869,19 +819,12 @@ workflow ASCC {
     //          ch_kmers and busco_merge_btk are genomic-only; organellar items will find no match
     //          in the join and receive null → replaced by placeholder via getEmptyPlaceholder.
     //
-    if (
-        params.run_essentials      in allRunnableConditions() &&
-        params.run_merge_datasets  in allRunnableConditions()
-    ) {
+    if ( params.run_merge_datasets  in allRunnableConditions() ) {
 
         //
         // LOGIC: JOIN CHANNELS INTO ONE BASED ON META.ID WHILST RETAINING EMPTY CHANNELS
         //
-        ch_reference_tuple
-            .filter { meta, _f ->
-                def conds = runConditionals(meta)
-                params.run_essentials in conds && params.run_merge_datasets in conds
-            }
+        merge_input_channel = ch_reference_tuple
             .map{meta, file -> tuple([id: meta.id], file)}
             .join(ej_gc_coverage
                 .map{meta, file -> tuple([id: meta.id], file)},   remainder: true)
@@ -913,7 +856,6 @@ workflow ASCC {
                     }
                 }
             }
-            .set{ merge_input_channel}
 
         ASCC_MERGE_TABLES (
             merge_input_channel
@@ -921,11 +863,11 @@ workflow ASCC {
         ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
         merged_table            = ASCC_MERGE_TABLES.out.merged_table
-                                    .map{ meta, _file -> [[id: meta.id ], _file] }
+                                    .map{ meta, _file -> tuple([id: meta.id], _file) }
 
         merged_extended_table   = ASCC_MERGE_TABLES.out.extended_table
         merged_phylum_count     = ASCC_MERGE_TABLES.out.phylum_counts
-                                    .map{ meta, _file -> [[id: meta.id], _file] }
+                                    .map{ meta, _file -> tuple([id: meta.id], _file) }
     } else {
         merged_table            = channel.of( [[:],[]] )
         merged_extended_table   = channel.empty()
@@ -944,28 +886,24 @@ workflow ASCC {
         tuple(meta, (files ?: []).find{ file -> file.name.endsWith('_euk.fcs_adaptor_report.txt') })
     }
 
-    ch_reference_tuple_filtered = ch_reference_tuple
-        .filter{ meta, _file ->
-            def conds = runConditionals(meta)
-            params.run_decontaminate_fasta in conds && params.run_autofilter_assembly in conds
-        }
-        .map{ meta, file -> tuple([id: meta.id], file) }
 
     //
     // ch_mito_full and ch_chloro_full are genomic-only; organellar items will find no match
     // in the join inside RUN_DECONTAMINATE_FASTA and receive null → replaced by placeholder.
     //
-    RUN_DECONTAMINATE_FASTA(
-        ch_reference_tuple_filtered,
-        ch_fcsgx,
-        ch_autofilt_fcs_tiara,
-        euk_fcsadapt,
-        ej_trailing_ns,
-        ch_barcode_check,
-        ch_mito_full,
-        ch_chloro_full
-    )
-    ch_versions = ch_versions.mix(RUN_DECONTAMINATE_FASTA.out.versions)
+    if (params.run_decontaminate_fasta in allRunnableConditions() && params.run_autofilter_assembly in allRunnableConditions()) {
+        RUN_DECONTAMINATE_FASTA(
+            ch_reference_tuple,
+            ch_fcsgx,
+            ch_autofilt_fcs_tiara,
+            euk_fcsadapt,
+            ej_trailing_ns,
+            ch_barcode_check,
+            ch_organellar_full.mito,
+            ch_organellar_full.plastid
+        )
+        ch_versions = ch_versions.mix(RUN_DECONTAMINATE_FASTA.out.versions)
+    }
 
 
     //-------------------------------------------------------------------------
@@ -976,28 +914,26 @@ workflow ASCC {
     //              ch_kmers_results is genomic-only; organellar items will find no match
     //              in the join inside GENERATE_HTML_REPORT_WORKFLOW and receive a placeholder.
     //
-
-    GENERATE_HTML_REPORT_WORKFLOW (
-        ch_barcode_check,
-        ch_fcsadapt,
-        ej_trailing_ns,
-        ch_vecscreen,
-        ch_autofilt_fcs_tiara,
-        merged_table,
-        merged_phylum_count,
-        ch_kmers_results,
-        ch_reference_tuple.filter{ meta, _file ->
-            def conds = runConditionals(meta)
-            params.run_html_report in conds
-        },
-        ej_fasta_sanitation_log,
-        ej_fasta_filter_log,
-        [],
-        ch_fcsgx_report,
-        ch_fcsgx_taxonomy,
-        ch_create_btk_dataset
-    )
-    ch_versions                 = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+    if (params.run_html_report in allRunnableConditions()) {
+        GENERATE_HTML_REPORT_WORKFLOW (
+            ch_barcode_check,
+            ch_fcsadapt,
+            ej_trailing_ns,
+            ch_vecscreen,
+            ch_autofilt_fcs_tiara,
+            merged_table,
+            merged_phylum_count,
+            ch_kmers_results,
+            ch_reference_tuple,
+            ej_fasta_sanitation_log,
+            ej_fasta_filter_log,
+            [],
+            ch_fcsgx_report,
+            ch_fcsgx_taxonomy,
+            ch_create_btk_dataset
+        )
+        ch_versions                 = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
+    }
 
     //
     // Collate and save software versions
@@ -1051,8 +987,10 @@ workflow ASCC {
     fcsadaptor_prok_euk         = ch_fcsadapt
     fcsgx_output                = ch_fcsgx
 
-    organellar_blast_mito       = ch_mito
-    organellar_blast_chloro     = ch_chloro
+    organellar_blast_mito       = ch_organellar_rprt.mito
+    organellar_blast_chloro     = ch_organellar_rprt.plastid
+    organellar_blast_mito_full  = ch_organellar_full.mito
+    organellar_blast_chloro_full= ch_organellar_full.plastid
 
     pacbio_barcode_files        = ch_barcode_check // This is a collection of (params.barcode * [meta, file])
 

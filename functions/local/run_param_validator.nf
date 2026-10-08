@@ -33,8 +33,7 @@ def validateRunParams(params) {
     //       These mirror the enum values in nextflow_schema.json.
     //       An annoying requirement, but we can't access these inside the pipeline.
     def Map RUN_ALLOWED_MODES = [
-        run_essentials            : ['genomic', 'organellar', 'both', 'off'],
-        run_kmers                 : ['genomic', 'both', 'off'],
+        run_kmers                 : ['genomic', 'off'],
         run_tiara                 : ['genomic', 'organellar', 'both', 'off'],
         run_coverage              : ['genomic', 'organellar', 'both', 'off'],
         run_nt_blast              : ['genomic', 'organellar', 'both', 'off'],
@@ -45,10 +44,10 @@ def validateRunParams(params) {
         run_fcsgx                 : ['genomic', 'organellar', 'both', 'off'],
         run_fcs_adaptor           : ['genomic', 'organellar', 'both', 'off'],
         run_vecscreen             : ['genomic', 'organellar', 'both', 'off'],
-        run_btk_busco             : ['genomic', 'both', 'off'],
+        run_btk_busco             : ['genomic', 'off'],
         run_pacbio_barcodes       : ['genomic', 'organellar', 'both', 'off'],
-        run_organellar_blast      : ['genomic', 'both', 'off'],
-        run_autofilter_assembly   : ['genomic', 'both', 'off'],
+        run_organellar_blast      : ['genomic', 'off'],
+        run_autofilter_assembly   : ['genomic', 'off'],
         run_create_btk_dataset    : ['genomic', 'organellar', 'both', 'off'],
         run_merge_datasets        : ['genomic', 'both', 'off'],
         run_decontaminate_fasta   : ['genomic', 'both', 'off']

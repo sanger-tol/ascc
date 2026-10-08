@@ -27,16 +27,11 @@ workflow RUN_READ_COVERAGE {
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH
     //
     collection_of_reads = reads.flatten()
-
-    ref_and_data        =   reference_tuple
-                                .combine(collection_of_reads)
+    ref_and_data        = reference_tuple.combine(collection_of_reads)
 
     //
     // LOGIC: CHECK IF THE INPUT READ FILE IS PAIRED END OR SINGLE END BASED ON THE READ PLATFORM
-    // THEN RUN MINIMAP
-    // - Removed the mix function from this as it is not needed, there shouldn't be multiple read
-    // types
-    //
+    //        THEN RUN MINIMAP
     //
 
     if ( platform in ["hifi", "clr", "ont"] ) {
@@ -48,8 +43,8 @@ workflow RUN_READ_COVERAGE {
             .groupTuple(by: [0, 1]) // the reads are not a list so we get multiple input channels otherwise
             .multiMap { meta, reference, read_files ->
                 def meta_new = meta + [readtype: platform]
-                reference: [ meta_new, reference ]
-                read_ch: [ meta_new, read_files ]
+                reference: tuple(meta_new, reference)
+                read_ch: tuple(meta_new, read_files)
             }
 
         SE_MAPPING(
@@ -92,18 +87,18 @@ workflow RUN_READ_COVERAGE {
         true,
         false
     )
-    ch_versions = ch_versions.mix(COVERM_CONTIG.out.versions)
+    ch_versions     = ch_versions.mix(COVERM_CONTIG.out.versions)
 
-    tsv_ch              = COVERM_CONTIG.out.coverage
-                            .map { meta, file -> [ [id: meta.id] , file ] }
-                            .ifEmpty { [[:],[]] }
+    tsv_ch          = COVERM_CONTIG.out.coverage
+                        .map { meta, file -> [ [id: meta.id] , file ] }
+                        .ifEmpty { [[:],[]] }
 
-    bam_ch              = ch_out_bam
-                            .map { meta, file -> [ [id: meta.id] , file ] }
-                            .ifEmpty { [[:],[]] }
+    bam_ch          = ch_out_bam
+                        .map { meta, file -> [ [id: meta.id] , file ] }
+                        .ifEmpty { [[:],[]] }
 
     emit:
     tsv_ch
     bam_ch
-    versions            = ch_versions
+    versions        = ch_versions
 }
