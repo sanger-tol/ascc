@@ -27,10 +27,10 @@ workflow RUN_FCSADAPTOR {
 
 
     FCS_FCSADAPTOR_EUK.out.adaptor_report
-        .map{ meta, file -> [meta.id, file] }
+        .map{ meta, file -> tuple(meta.id, file) }
         .mix(
             FCS_FCSADAPTOR_PROK.out.adaptor_report
-                .map{ meta, file -> [meta.id, file] }
+                .map{ meta, file -> tuple(meta.id, file) }
         )
         .groupTuple()
         // NOTE: `groupTuple()` emits its internal ArrayBag, and that SAME instance is
@@ -38,7 +38,7 @@ workflow RUN_FCSADAPTOR {
         //       (sort/unique/add) by one consumer corrupts it for the others, which
         //       surfaces as `Unexpected error [ConcurrentModificationException]`.
         //       Emit a defensive copy so each downstream branch owns its own list.
-        .map { id, files -> [[id: id], new ArrayList(files)] }
+        .map { id, files -> tuple([id: id], new ArrayList(files)) }
         .set { ch_fcsadapt }
 
     emit:

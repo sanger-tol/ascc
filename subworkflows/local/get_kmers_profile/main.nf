@@ -26,7 +26,7 @@ workflow GET_KMERS_PROFILE {
     //
     assembly_fasta
         .map{ meta, file ->
-            [[id: meta.id, single_end: true], file]
+            tuple([id: meta.id, single_end: true], file)
         }
         .set { modified_input }
 
@@ -41,7 +41,7 @@ workflow GET_KMERS_PROFILE {
 
     modified_input
         .combine(COBIONTID_KMERCOUNTER.out.npy, by: 0)
-        .map { meta, fasta, npy -> [meta, fasta, npy] }
+        .map { meta, fasta, npy -> tuple(meta, fasta, npy) }
         .set { reformat_npy_input }
 
 
@@ -58,24 +58,21 @@ workflow GET_KMERS_PROFILE {
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
     //
-    channel.fromList(params.dimensionality_reduction_methods)
-        .set{dim_methods}
+    dim_methods     = channel.fromList(params.dimensionality_reduction_methods)
 
-    channel.from(params.n_neighbours)
-        .set{hey_neighbour}
+    hey_neighbour   = channel.from(params.n_neighbours)
 
-    dim_methods
+    dim_reduction   = dim_methods
         .combine(REFORMAT_NPY_2_CSV.out.csv)
         .combine(autoencoder_epochs_count.first())
         .combine(hey_neighbour)
         .multiMap { dr_method, csv_meta, csv_file, epochs, n_neighbours ->
             method_name: dr_method
-            kmer_csv: [csv_meta, csv_file]
+            kmer_csv: tuple(csv_meta, csv_file)
             epoch_count: epochs
             n_neighbors_setting: n_neighbours
 
         }
-        .set{ dim_reduction }
 
 
     //
@@ -99,8 +96,8 @@ workflow GET_KMERS_PROFILE {
         .set { collected_files_for_combine }
 
     kmers_results = collected_files_for_combine
-        .map { meta, file -> [[ id: meta.id ], file]  }
-        .ifEmpty { [[:],[]] }
+        .map { meta, file -> tuple([ id: meta.id ], file) }
+        .ifEmpty { tuple([:], []) }
 
 
     //
@@ -121,12 +118,12 @@ workflow GET_KMERS_PROFILE {
     )
     ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-                        .map { meta, file -> [[ id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
+                        .map { meta, file -> tuple([ id: meta.id ], file) }
+                        .ifEmpty { tuple([:], []) }
 
     emit:
     combined_csv
-    collected_dirs = collected_results_dirs
+    collected_dirs  = collected_results_dirs
     kmers_results
-    versions      = ch_versions
+    versions        = ch_versions
 }

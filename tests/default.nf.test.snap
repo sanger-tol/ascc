@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            140,
+            138,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -165,9 +165,6 @@
                 },
                 "SAMTOOLS_MERGE": {
                     "samtools": 1.24
-                },
-                "SED_SED": {
-                    "coreutils": 9.1
                 },
                 "SEQKIT_SLIDING": {
                     "seqkit": "2.8.0"
@@ -783,7 +780,7 @@
             ],
             true
         ],
-        "timestamp": "2026-10-01T17:51:04.974923875",
+        "timestamp": "2026-10-08T15:00:00.000000000",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"

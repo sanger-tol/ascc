@@ -22,11 +22,14 @@ workflow ESSENTIAL_JOBS {
     //
     input_ref
         .map { meta, _ref ->
-            [[  id      : meta.id,
-                sliding : params.seqkit_sliding,
-                window  : params.seqkit_window,
-                taxid   : params.taxid
-            ], _ref ]
+            tuple(
+                [  id      : meta.id,
+                    sliding : params.seqkit_sliding,
+                    window  : params.seqkit_window,
+                    taxid   : params.taxid
+                ],
+                _ref
+            )
         }
         .set { new_input_fasta }
 
@@ -45,9 +48,9 @@ workflow ESSENTIAL_JOBS {
     )
     ch_versions                         = ch_versions.mix(FILTER_FASTA.out.versions)
     filter_fasta_sanitation_log         = FILTER_FASTA.out.sanitation_log
-                                             .map{ meta, _file -> [[id: meta.id ], _file] }
+                                             .map{ meta, _file -> tuple([id: meta.id], _file) }
     filter_fasta_length_filtering_log   = FILTER_FASTA.out.length_filtering_log
-                                             .map{ meta, _file -> [[id: meta.id ], _file] }
+                                             .map{ meta, _file -> tuple([id: meta.id], _file) }
 
     //
     // MODULE: CALCULATE GC CONTENT PER SCAFFOLD IN INPUT FASTA
@@ -63,7 +66,7 @@ workflow ESSENTIAL_JOBS {
     //          EMITS REFERENCE INDEX FILE MODIFIED FOR SCAFF SIZES
     //
     SAMTOOLS_FAIDX (
-        FILTER_FASTA.out.fasta.map { meta, fasta -> [meta, fasta, []] },
+        FILTER_FASTA.out.fasta.map { meta, fasta -> tuple(meta, fasta, []) },
         true
     )
 
@@ -72,7 +75,7 @@ workflow ESSENTIAL_JOBS {
     // MODULE: SORT CHROM SIZES BY CHOM SIZE NOT NAME
     //
     GNU_SORT (
-        SAMTOOLS_FAIDX.out.sizes.map { meta, _file -> [meta, _file, "sizes"] }
+        SAMTOOLS_FAIDX.out.sizes.map { meta, _file -> tuple(meta, _file, "sizes") }
     )
 
 
@@ -85,7 +88,7 @@ workflow ESSENTIAL_JOBS {
     )
     ch_versions         = ch_versions.mix( TRAILINGNS.out.versions )
     trailing_ns_report  = TRAILINGNS.out.trailing_ns_report
-                                .map { meta, _file -> [[ id: meta.id ], _file] }
+                                .map { meta, _file -> tuple([id: meta.id], _file) }
 
     emit:
     reference_tuple                     = FILTER_FASTA.out.fasta

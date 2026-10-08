@@ -32,7 +32,7 @@ workflow PACBIO_BARCODE_CHECK {
         .map { barcode -> barcode.split(',') }
         .flatten()
         .unique()
-        .set {barcode_list}
+        .set { barcode_list }
 
 
     //
@@ -52,9 +52,9 @@ workflow PACBIO_BARCODE_CHECK {
     // LOGIC: WE WANT [SAMPLE1], [FILE_PER_{BARCODE}]
     //
     filtered        = FILTER_BARCODE.out.debarcoded
-        .map { meta, file -> [meta.id, file] }
+        .map { meta, file -> tuple(meta.id, file) }
         .groupTuple()
-        .map { id, files -> [[ id: id ], files] }
+        .map { id, files -> tuple([ id: id ], files) }
 
     emit:
     filtered

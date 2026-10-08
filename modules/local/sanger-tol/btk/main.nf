@@ -99,10 +99,7 @@ process SANGER_TOL_BTK {
     touch ${prefix}_btk_out/busco/test.fasta.txt
     touch ${prefix}_btk_out/busco/test.json
 
-    mkdir ${prefix}_btk_out/multiqc
-    mkdir ${prefix}_btk_out/multiqc/multiqc_data
-    mkdir ${prefix}_btk_out/multiqc/multiqc_plots
-    touch ${prefix}_btk_out/multiqc/multiqc_report.html
+    touch ${prefix}_btk_out/multiqc_report.html
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
 
