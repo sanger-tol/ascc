@@ -18,23 +18,6 @@ workflow ESSENTIAL_JOBS {
 
 
     //
-    // LOGIC: INJECT SLIDING WINDOW VALUES INTO REFERENCE
-    //
-    input_ref
-        .map { meta, _ref ->
-            tuple(
-                [  id      : meta.id,
-                    sliding : params.seqkit_sliding,
-                    window  : params.seqkit_window,
-                    taxid   : params.taxid
-                ],
-                _ref
-            )
-        }
-        .set { new_input_fasta }
-
-
-    //
     // MODULE: FILTER/BREAK THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A 1.9Gb THRESHOLD, MORE THAN THIS WILL BREAK SOME TOOLS
     //
     // Determine if FCS-adaptor will be run based on run_fcs_adaptor parameter
@@ -43,7 +26,7 @@ workflow ESSENTIAL_JOBS {
                         (params.run_fcs_adaptor == "organellar" && !params.genomic_only))
 
     FILTER_FASTA(
-        new_input_fasta,
+        input_ref,
         run_fcs_adaptor
     )
     ch_versions                         = ch_versions.mix(FILTER_FASTA.out.versions)
@@ -92,7 +75,6 @@ workflow ESSENTIAL_JOBS {
 
     emit:
     reference_tuple                     = FILTER_FASTA.out.fasta
-    reference_with_seqkit               = new_input_fasta
     dot_genome                          = GNU_SORT.out.sorted
     gc_content_txt                      = GC_CONTENT.out.txt
     trailing_ns_report

@@ -111,27 +111,7 @@ workflow ASCC {
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
     ej_fasta_sanitation_log = ESSENTIAL_JOBS.out.filter_fasta_sanitation_log
     ej_fasta_filter_log     = ESSENTIAL_JOBS.out.filter_fasta_length_filtering_log
-
-
-    //
-    // LOGIC: RESTORE assembly_type TO ESSENTIAL_JOBS OUTPUT CHANNELS.
-    //          ESSENTIAL_JOBS strips assembly_type when it rebuilds meta to inject seqkit
-    //          sliding/window params. Rejoin against ch_assembly_type_lookup so that
-    //          isOrganellar() and the type branch below correctly route each assembly.
-    //
-    ch_reference_tuple = ESSENTIAL_JOBS.out.reference_tuple
-        .map { meta, file -> tuple([id: meta.id], meta, file) }
-        .join(ch_assembly_type_lookup)
-        .map { _id_meta, meta, file, assembly_type ->
-            tuple(meta + [assembly_type: assembly_type], file)
-        }
-
-    ej_seqkit_reference = ESSENTIAL_JOBS.out.reference_with_seqkit
-        .map { meta, file -> tuple([id: meta.id], meta, file) }
-        .join(ch_assembly_type_lookup)
-        .map { _id_meta, meta, file, assembly_type ->
-            tuple(meta + [assembly_type: assembly_type], file)
-        }
+    ch_reference_tuple      = ESSENTIAL_JOBS.out.reference_tuple
 
 
     //-------------------------------------------------------------------------
@@ -201,7 +181,7 @@ workflow ASCC {
     // LOGIC: FOR ORGANELLAR ASSEMBLIES, WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE
     //        IS OF AT LEAST LENGTH OF params.seqkit_window BEFORE RUNNING BLAST/DIAMOND
     //
-    valid_length_fasta = ej_seqkit_reference
+    valid_length_fasta = ch_reference_tuple
         .filter { meta, _f -> isOrganellar(meta) }
         // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         .map{ meta, file ->
@@ -212,12 +192,7 @@ workflow ASCC {
                 }
             }
 
-            def meta2 = [
-                    id: meta.id,
-                    sliding: meta.sliding,
-                    window: meta.window,
-                    seq_count: total_length
-                ]
+            def meta2 = meta + [ seq_count: total_length ]
 
             tuple(meta2, file)
         }
@@ -328,7 +303,7 @@ workflow ASCC {
 
     //-------------------------------------------------------------------------
     //
-    // SUBWORKFLOW: IDENTITY PACBIO BARCODES IN INPUT DATA
+    // SUBWORKFLOW: IDENTIFY PACBIO BARCODES IN INPUT DATA
     //
     duplicated_db = ch_reference_tuple
         .combine(pacbio_database)
@@ -651,7 +626,7 @@ workflow ASCC {
     //
     // LOGIC: DETERMINE WHETHER BLOBTOOLKIT SHOULD RUN BASED ON CONDITIONALS (GENOMIC ONLY)
     //         - ALWAYS RUN IF params.btk_busco_run_mode == "mandatory" AND BTK
-
+    //
     run_btk_conditional = ch_type_branch.genomic
         .map { meta, file -> tuple([id: meta.id], file) }
         // below is combined into the tuple to enforce the block to only run when channel is present.
