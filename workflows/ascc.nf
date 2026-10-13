@@ -345,12 +345,14 @@ workflow ASCC {
     if ( params.run_fcsgx in allRunnableConditions() && !params.fcs_override ) {
 
         joint_channel = ch_reference_tuple
+            .view{"joint_channel: $it"}
             .filter { meta, _f ->
                 params.run_fcsgx in runConditionals(meta)
             }
             .combine(fcs_db)
             .combine(taxid)
             .combine(ncbi_ranked_lineage_path)
+            .view{"joint_channel merged: $it"}
             .multiMap { meta, ref, db, _tax_id, tax_path ->
                 def new_meta =  [id: meta.id, taxid: meta.taxid]
                 assembly:       tuple(new_meta, ref)
