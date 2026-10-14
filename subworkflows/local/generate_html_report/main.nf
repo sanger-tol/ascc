@@ -32,8 +32,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     // LOGIC: COMBINE ALL INPUT CHANNELS AND ANNOTATE THEM WITH PROCESS TAGS
     //
     reference_fasta
-        .map{ meta, file -> [[id: meta.id], file] }
-
+        .map{ meta, file -> tuple([id: meta.id], file) }
         // REMAINDER means that if there isn't a matching
         // meta.id, it adds a [] in it's place therefore
         // retaining the empty channel

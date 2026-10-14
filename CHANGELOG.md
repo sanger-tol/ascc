@@ -16,17 +16,19 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
   - The two options are:
     - `mapping_taxids-busco_dataset_name.eukaryota_odb10.2019-12-16.txt`
     - `mapping_taxids-busco_dataset_name.eukaryota_odb12.2025-01-15.txt`
-- Updated `RUN_READ_COVERAGE` which utilises the `SANGER-TOL` subworkflow `FASTX_MAP_LONG_READS` for single end reads.
+- Updated `RUN_READ_COVERAGE` which utilises the `SANGER-TOL` subworkflow `FASTX_MAP_LONG_READS` for single end reads
 - Fixes to param evaluations which control process execution
 - Fixes to correct a `[ConcurrentModificationException]` stopping the use of FCS_ADAPTOR output
-- `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency.
-  - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table.
-- `FCSGX_RUNGX` has been updated to not depend on `modulecmd` instead, production profiles will instead default to a local installation of fcs_gx. Avoiding containerised options provided in the module.
-- Samtools modules have been updated to `1.23.1`.
-- Updated the main workflow so that `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow.
-  - This was an artifact from when the two would have been doing significantly different processes.
+- `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency
+  - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table
+- `FCSGX_RUNGX` has been updated to not depend on `modulecmd` instead, production profiles will instead default to a local installation of fcs_gx. Avoiding containerised options provided in the module
+- Samtools modules have been updated to `1.23.1`
+- Updated the main workflow so that `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow [#216](https://github.com/sanger-tol/ascc/issues/216)
+  - This was an artifact from when the two would have been doing significantly different processes
 - Updating `SANGER_TOL_BTK` to 0.11.1 (Bulbasaur H1) - NOTE: WILL NEED TO BE UPDATED TO 11.2
-- Created the `functions/local/ascc_utils.nf` containing some common utility functions for ASCC workflows.
+- Created the `functions/local/ascc_utils.nf` containing some common utility functions for ASCC workflows
+- `run_*` params are now validated for any of the user input mix [#239](https://github.com/sanger-tol/ascc/issues/239)
+- Output from `AUTOFILTER` module has been further divided so that `REVIEW` and `INFO` lines in the `FCSGX` output are counted separately [#235](https://github.com/sanger-tol/ascc/issues/235)
 
 ### `Parameters`
 

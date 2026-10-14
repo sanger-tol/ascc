@@ -23,6 +23,7 @@ include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main
 include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
 include { CHECK_NT_BLAST_TAXONOMY   } from '../../../modules/local/check/nt_blast_taxonomy/main'
 
+include { validateRunParams        } from '../../../functions/local/run_param_validator'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,10 +108,15 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
+
+    //
+    // FUNC: CHECK THE PARAMS
+    //
+    validateRunParams(params)
+
     //
     // Create channel from input file provided through params.input
     //
-
     channel
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
