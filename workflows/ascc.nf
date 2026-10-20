@@ -190,7 +190,6 @@ workflow ASCC {
     //
     valid_length_fasta = ch_reference_tuple
         .combine(stats_json, by: 0)
-        .filter { meta, _f, _stats -> isOrganellar(meta) }
         // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
         .map{ meta, file, stats ->
             def total_length    = new groovy.json.JsonSlurper().parseText(stats.text)
@@ -199,16 +198,22 @@ workflow ASCC {
             tuple(meta2, file)
         }
         .filter { meta, _file ->
-                    meta.seq_count >= params.seqkit_window
+            if (isOrganellar(meta)) {
+                meta.seq_count >= params.seqkit_window
+            } else {
+                true
+            }
         }
 
 
-    assemblies_to_blast = ch_type_branch.genomic
-        .filter{ _meta, _file -> params.run_nt_blast in genomicConditionals() }
-        .mix(
-            valid_length_fasta
-                .filter{ _meta, _file -> params.run_nt_blast in organellarConditionals() }
-        )
+    assemblies_to_blast = valid_length_fasta
+        .filter { _meta, _file ->
+            if (isOrganellar(_meta)) {
+                params.run_nt_blast in organellarConditionals()
+            } else {
+                params.run_nt_blast in genomicConditionals()
+            }
+        }
 
     EXTRACT_NT_BLAST (
         assemblies_to_blast,
@@ -216,21 +221,29 @@ workflow ASCC {
         ncbi_ranked_lineage_path.first()
     )
     ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
-    ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits.ifEmpty { [[:],[]] }
-    ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages.ifEmpty { [[:],[]] }
-    ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format.ifEmpty { [[:],[]] }
+    ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
+                            .map { meta, file -> [[id: meta.id ], file] }
+                            .ifEmpty { [[:],[]] }
+    ch_blast_lineage    = EXTRACT_NT_BLAST.out.ch_top_lineages
+                            .map { meta, file -> [[id: meta.id ], file] }
+                            .ifEmpty { [[:],[]] }
+    ch_btk_format       = EXTRACT_NT_BLAST.out.ch_btk_format
+                            .map { meta, file -> [[id: meta.id ], file] }
+                            .ifEmpty { [[:],[]] }
 
 
     //-------------------------------------------------------------------------
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    diamond_input = ch_type_branch.genomic
-        .filter{ _meta, _file -> params.run_nr_diamond in genomicConditionals() }
-        .mix(
-            valid_length_fasta
-                .filter{ _meta, _file -> params.run_nr_diamond in organellarConditionals() }
-        )
+    diamond_input = valid_length_fasta
+        .filter { _meta, _file ->
+            if (isOrganellar(_meta)) {
+                params.run_nr_diamond in organellarConditionals()
+            } else {
+                params.run_nr_diamond in genomicConditionals()
+            }
+        }
 
     NR_DIAMOND (
         diamond_input,
@@ -254,12 +267,15 @@ workflow ASCC {
     //      qseqid sseqid pident length mismatch gapopen qstart qend sstart send
     //      evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     //
-    up_diamond_input = ch_type_branch.genomic
-        .filter{ _meta, _file -> params.run_uniprot_diamond in genomicConditionals() }
-        .mix(
-            valid_length_fasta
-                .filter{ _meta, _file -> params.run_uniprot_diamond in organellarConditionals() }
-        )
+    up_diamond_input = valid_length_fasta
+        .filter { _meta, _file ->
+            if (isOrganellar(_meta)) {
+                params.run_uniprot_diamond in organellarConditionals()
+            } else {
+                params.run_uniprot_diamond in genomicConditionals()
+            }
+        }
+
 
     UP_DIAMOND (
         up_diamond_input,

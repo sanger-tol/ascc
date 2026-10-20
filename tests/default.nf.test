@@ -226,6 +226,7 @@ nextflow_pipeline {
             def tiara_raw_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/tiara_raw_output/*.txt"])
             def trailingns          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/trailingns/*_trim_Ns"])
             def cleaned_input       = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/cleaned_input/*"])
+                .findAll { !it.name.endsWith('.dict') }
 
             // Pipeline completion file, needed for Sanger internal processes
             def completion_file     = getAllFilesFromDir(params.outdir, include: ["workflow_completed.txt"])
