@@ -52,6 +52,10 @@ workflow ASCC {
     take:
     genomic_genomes         // channel: combined genomic + organellar assemblies; meta.assembly_type identifies each
     organellar_genomes      // channel: tuple(meta, reference) – organellar only, for ORGANELLAR_BLAST against genomic
+    fai_file                // FASTA index file
+    sizes_file              // FASTA sizes file
+    samtools_dict           // samtools dictionary
+    stats_json              // sequence description json file
     _fcs_ov                 // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet (combined genomic + organellar entries)
     fcs_db                  // [path(path)]
@@ -130,8 +134,11 @@ workflow ASCC {
     // LOGIC: CONVERT THE CHANNEL INTO AN EPOCH COUNT FOR GET_KMER_PROFILE (GENOMIC ONLY)
     //
     autoencoder_epochs_count = ch_type_branch.genomic
-        .map { _meta, file ->
-            file.countFasta() * 3
+        .combine(stats_json, by: 0)
+        .map { _meta, file, stats ->
+            def stats_data = new groovy.json.JsonSlurper().parseText(stats.text)
+            def fasta_counts = stats_data["n_sequences"]
+            fasta_counts * 3
         }
 
 
