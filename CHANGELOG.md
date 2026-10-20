@@ -29,6 +29,8 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 - Created the `functions/local/ascc_utils.nf` containing some common utility functions for ASCC workflows
 - `run_*` params are now validated for any of the user input mix [#239](https://github.com/sanger-tol/ascc/issues/239)
 - Output from `AUTOFILTER` module has been further divided so that `REVIEW` and `INFO` lines in the `FCSGX` output are counted separately [#235](https://github.com/sanger-tol/ascc/issues/235)
+- Added `FASTA_CLEAN_FAIDX` nf-core subworkflow and added the output to tests
+- `countFasta` has been changed to, instead, use the `GENOME_STATS` json output which avoids some compute on the head
 
 ### `Parameters`
 
