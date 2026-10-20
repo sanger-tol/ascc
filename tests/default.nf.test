@@ -225,6 +225,7 @@ nextflow_pipeline {
             def summarise_vecscreen = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/summarise_vecscreen_output/*vecscreen_contamination"])
             def tiara_raw_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/tiara_raw_output/*.txt"])
             def trailingns          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/trailingns/*_trim_Ns"])
+            def cleaned_input       = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/cleaned_input/*"])
 
             // Pipeline completion file, needed for Sanger internal processes
             def completion_file     = getAllFilesFromDir(params.outdir, include: ["workflow_completed.txt"])
@@ -263,6 +264,7 @@ nextflow_pipeline {
                     summarise_vecscreen,
                     tiara_raw_files,
                     trailingns,
+                    cleaned_input,
 
                     // Workflow completion file
                     completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check

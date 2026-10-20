@@ -189,17 +189,12 @@ workflow ASCC {
     //        IS OF AT LEAST LENGTH OF params.seqkit_window BEFORE RUNNING BLAST/DIAMOND
     //
     valid_length_fasta = ch_reference_tuple
-        .filter { meta, _f -> isOrganellar(meta) }
+        .combine(stats_json, by: 0)
+        .filter { meta, _f, _stats -> isOrganellar(meta) }
         // NOTE: Here we are using the un-filtered genome, any filtering may (accidently) cause an empty fasta
-        .map{ meta, file ->
-            def total_length = 0
-            file.eachLine { line ->
-                if (line && !line.startsWith('>')) {
-                    total_length += line.length()
-                }
-            }
-
-            def meta2 = meta + [ seq_count: total_length ]
+        .map{ meta, file, stats ->
+            def total_length    = new groovy.json.JsonSlurper().parseText(stats.text)
+            def meta2           = meta + [ seq_count: total_length["total_length"] ]
 
             tuple(meta2, file)
         }
