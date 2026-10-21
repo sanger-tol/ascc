@@ -31,6 +31,10 @@ workflow SANGERTOL_ASCC {
     take:
     genomic                     // Genomic fasta tuples
     organelles                  // Organellar fasta tuples
+    fai_file                    // FASTA index file
+    sizes_file                  // FASTA sizes file
+    samtools_dict               // samtools dictionary
+    stats_json                  // sequence description json file
     fcs_override                // bool
     genomic_fcs_samplesheet     // genomic data tuple from fcs_override samplesheet generated from external fcs process
     organellar_fcs_samplesheet  // organellar data tuple from fcs_override samplesheet generated from external fcs process
@@ -65,6 +69,10 @@ workflow SANGERTOL_ASCC {
             ? genomic
             : genomic.mix(organelles),
         organelles,
+        fai_file,
+        sizes_file,
+        samtools_dict,
+        stats_json,
         fcs_override,
         genomic_fcs_samplesheet.mix(organellar_fcs_samplesheet),
         fcs_db,
@@ -121,6 +129,10 @@ workflow {
     SANGERTOL_ASCC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
+        PIPELINE_INITIALISATION.out.fai_file,
+        PIPELINE_INITIALISATION.out.sizes_file,
+        PIPELINE_INITIALISATION.out.samtools_dict,
+        PIPELINE_INITIALISATION.out.stats_json,
         params.fcs_override,
         PIPELINE_INITIALISATION.out.geno_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.orga_fcs_samplesheet,
