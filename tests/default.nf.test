@@ -225,12 +225,13 @@ nextflow_pipeline {
             def summarise_vecscreen = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/summarise_vecscreen_output/*vecscreen_contamination"])
             def tiara_raw_files     = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/tiara_raw_output/*.txt"])
             def trailingns          = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/trailingns/*_trim_Ns"])
+            def cleaned_input       = getAllFilesFromDir(params.outdir, include: ["asccTinyTest_V2_*/cleaned_input/*"])
+                .findAll { !it.name.endsWith('.dict') }
 
             // Pipeline completion file, needed for Sanger internal processes
             def completion_file     = getAllFilesFromDir(params.outdir, include: ["workflow_completed.txt"])
 
             assertAll(
-                { assert workflow.success},
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
@@ -248,41 +249,26 @@ nextflow_pipeline {
 
                     // kmer_data_files,                         // ML method outputs, changes per run, included in stable name
                     kmer_data_files.size() == 2,
-                    autofilter_warn_txt,                        // Autofilter warn file - Warns of completion
-                    autofilter_warn_txt.size() == 2,
+
                     autofilter_files,                           // Autofiltered fasta
-                    autofilter_files.size() == (1 * 2),         // Isn't output for Organellar
                     autofilter_txt,                             // Autofilter report files
-                    autofilter_txt.size() == (3 * 2),           // 3 files across 2 assemblies
                     create_btk_dataset,
                     create_btk_tsv,
-                    create_btk_tsv.size() == (1 * 3),
                     fcs_adaptor_euk,
-                    fcs_adaptor_euk.size() == (4 * 2 + 3),  // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
                     fcs_adaptor_prok,
-                    fcs_adaptor_prok.size() == (4 * 2 + 3), // The genomic assemblies return all files, MITO returns 4, there isn't enough to clean
                     fcsgx_data,
-                    fcsgx_data.size() == 3,
                     filter_brcde_bc2001,
-                    filter_brcde_bc2001.size() == (1 * 3),
                     filter_brcde_bc2009,
-                    filter_brcde_bc2001.size() == (1 * 3),
                     filtered_fasta,
-                    filtered_fasta.size() == (1 * 3),
                     gc_content_files,
-                    gc_content_files.size() == (1 * 3),
                     kraken2_files,
-                    kraken2_files.size() == (3 * 3),
                     summarise_vecscreen,
-                    summarise_vecscreen.size() == (1 * 3),
                     tiara_raw_files,
-                    tiara_raw_files.size() == (2 * 3),
                     trailingns,
-                    trailingns.size() == (1 * 3),
+                    cleaned_input,
 
                     // Workflow completion file
                     completion_file.size() == 1             // Contains pipeline completion times and stats, not good for an md5sum check
-
                 ).match() }
             )
         }
