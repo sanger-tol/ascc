@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            153,
+            150,
             {
                 "ASCC_MERGE_TABLES": {
                     "python": "3.11.0",
@@ -166,9 +166,6 @@
                 "SAMTOOLS_MERGE": {
                     "samtools": 1.24
                 },
-                "SEQKIT_DOTS": {
-                    "seqkit": "2.13.0"
-                },
                 "SEQKIT_SEQ": {
                     "seqkit": "2.13.0"
                 },
@@ -212,11 +209,9 @@
                 "asccTinyTest_V2_HAPLO/autofilter/fcs-gx_alarm_indicator_file.txt",
                 "asccTinyTest_V2_HAPLO/cleaned_input",
                 "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO.fasta",
+                "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO.fasta.dict",
+                "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO.fasta.fai",
                 "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO.json",
-                "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO_dots.fasta",
-                "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO_dots.fasta.dict",
-                "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO_dots.fasta.fai",
-                "asccTinyTest_V2_HAPLO/cleaned_input/asccTinyTest_V2_HAPLO_dots.fasta.sizes",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_HAPLOBTK_DS.yaml",
@@ -357,11 +352,9 @@
                 "asccTinyTest_V2_MITO/average_coverage/asccTinyTest_V2_MITO.depth.txt",
                 "asccTinyTest_V2_MITO/cleaned_input",
                 "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO.fasta",
+                "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO.fasta.dict",
+                "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO.fasta.fai",
                 "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO.json",
-                "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO_dots.fasta",
-                "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO_dots.fasta.dict",
-                "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO_dots.fasta.fai",
-                "asccTinyTest_V2_MITO/cleaned_input/asccTinyTest_V2_MITO_dots.fasta.sizes",
                 "asccTinyTest_V2_MITO/create_btk_dataset",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_MITO/create_btk_dataset/btk_datasets_CBD/MAPPED_cov.json",
@@ -454,11 +447,9 @@
                 "asccTinyTest_V2_PRIMARY/autofilter/fcs-gx_alarm_indicator_file.txt",
                 "asccTinyTest_V2_PRIMARY/cleaned_input",
                 "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY.fasta",
+                "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY.fasta.dict",
+                "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY.fasta.fai",
                 "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY.json",
-                "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY_dots.fasta",
-                "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY_dots.fasta.dict",
-                "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY_dots.fasta.fai",
-                "asccTinyTest_V2_PRIMARY/cleaned_input/asccTinyTest_V2_PRIMARY_dots.fasta.sizes",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_PRIMARY/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_PRIMARYBTK_DS.yaml",
@@ -654,7 +645,7 @@
                 "MAPPED_cov.json:md5,07b13dcd4378693c807183ab3216b68b",
                 "asccTinyTest_V2_MITOBTK_DS.yaml:md5,c8aed8504706e846843590115b947239",
                 "gc.json:md5,5e9eaa862517a4fafada54e4f8fa109b",
-                "identifiers.json:md5,006e21c1de9624dfff91f6c55e142903",
+                "identifiers.json:md5,a8fa6468ed53c0a3fe7ec689f524b8bf",
                 "length.json:md5,ee9819c30d44eb747a17e22a52ee0192",
                 "ncount.json:md5,db3bfe371d6198e64cade978c5094222",
                 "nt_kraken_class.json:md5,f6aaad03d4929f8d7e24a5449ef88d08",
@@ -722,7 +713,7 @@
             ],
             [
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479",
-                "btk_summary_table_full.tsv:md5,18582aaad445ce328b4be2df27894a5e",
+                "btk_summary_table_full.tsv:md5,26af5cb898cb7b21776239394d1564fc",
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479"
             ],
             [
@@ -753,7 +744,7 @@
             ],
             [
                 "asccTinyTest_V2_HAPLO_parsed_fcsgx.csv:md5,eb69fdddfb1922cb5a2a5384867220ff",
-                "asccTinyTest_V2_MITO_parsed_fcsgx.csv:md5,8f5a8151930283aa28dc8f3832892c26",
+                "asccTinyTest_V2_MITO_parsed_fcsgx.csv:md5,ee43b4f252ddc5bb0372a68e210c5d9c",
                 "asccTinyTest_V2_PRIMARY_parsed_fcsgx.csv:md5,eb69fdddfb1922cb5a2a5384867220ff"
             ],
             [
@@ -768,21 +759,21 @@
             ],
             [
                 "asccTinyTest_V2_HAPLO_filtered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3",
-                "asccTinyTest_V2_MITO_filtered.fasta:md5,a841507540fb1219d60b741ca9e20a17",
+                "asccTinyTest_V2_MITO_filtered.fasta:md5,8cbf1493af1e2e8e4f2664d652c99e69",
                 "asccTinyTest_V2_PRIMARY_filtered.fasta:md5,839828aa5f7a3db4cc4a9e4c92809fb3"
             ],
             [
                 "asccTinyTest_V2_HAPLO-GC_CONTENT.txt:md5,321c77a86b36ea14cfd03d0ed8c96495",
-                "asccTinyTest_V2_MITO-GC_CONTENT.txt:md5,44f7bd4f4810d0213449de30c466071a",
+                "asccTinyTest_V2_MITO-GC_CONTENT.txt:md5,08d8605fa4f4bb7685a0b71284bc1880",
                 "asccTinyTest_V2_PRIMARY-GC_CONTENT.txt:md5,321c77a86b36ea14cfd03d0ed8c96495"
             ],
             [
                 "asccTinyTest_V2_HAPLO.kraken2.classifiedreads.txt:md5,1ce5b7f3a05fceb7d64a3d61d03a06fa",
                 "asccTinyTest_V2_HAPLO.kraken2.report.txt:md5,c2d891afd24333179f401d61ad518923",
                 "asccTinyTest_V2_HAPLO_nt_kraken_lineage_file.txt:md5,341d5169b39292fe2244407c521c7342",
-                "asccTinyTest_V2_MITO.kraken2.classifiedreads.txt:md5,d4b3c06d60454848cff0ee1bae6152d3",
+                "asccTinyTest_V2_MITO.kraken2.classifiedreads.txt:md5,d40bc88f314a926a4530f3ab905ffcfd",
                 "asccTinyTest_V2_MITO.kraken2.report.txt:md5,0b41e9a369f2dcdaaf0b286b963e68d6",
-                "asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt:md5,8eac69201c86744901d61b36c4f7dcfc",
+                "asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt:md5,5ab8e70750e7d9261d4047f818b99006",
                 "asccTinyTest_V2_PRIMARY.kraken2.classifiedreads.txt:md5,1ce5b7f3a05fceb7d64a3d61d03a06fa",
                 "asccTinyTest_V2_PRIMARY.kraken2.report.txt:md5,c2d891afd24333179f401d61ad518923",
                 "asccTinyTest_V2_PRIMARY_nt_kraken_lineage_file.txt:md5,341d5169b39292fe2244407c521c7342"
@@ -795,7 +786,7 @@
             [
                 "asccTinyTest_V2_HAPLO.txt:md5,ead39a6fc65a96890b7674b3962621e6",
                 "log_asccTinyTest_V2_HAPLO.txt:md5,21f6ce1f477f06c78d6784323d11243f",
-                "asccTinyTest_V2_MITO.txt:md5,b211ba1b30110fc402db0f8b42cc9f8e",
+                "asccTinyTest_V2_MITO.txt:md5,af160762acca0cd2c863ae46081e2351",
                 "log_asccTinyTest_V2_MITO.txt:md5,c48fd77a87a31c5b66807c9623174781",
                 "asccTinyTest_V2_PRIMARY.txt:md5,ead39a6fc65a96890b7674b3962621e6",
                 "log_asccTinyTest_V2_PRIMARY.txt:md5,21f6ce1f477f06c78d6784323d11243f"
@@ -807,24 +798,18 @@
             ],
             [
                 "asccTinyTest_V2_HAPLO.fasta:md5,dbec6377db6681a4b68821248163f15f",
+                "asccTinyTest_V2_HAPLO.fasta.fai:md5,d2042202c2580c792c177429e6ef0254",
                 "asccTinyTest_V2_HAPLO.json:md5,46dd3dcf4f3262ad13411f6acb667474",
-                "asccTinyTest_V2_HAPLO_dots.fasta:md5,dbec6377db6681a4b68821248163f15f",
-                "asccTinyTest_V2_HAPLO_dots.fasta.fai:md5,d2042202c2580c792c177429e6ef0254",
-                "asccTinyTest_V2_HAPLO_dots.fasta.sizes:md5,2253e8b144486ede962717f9124b770b",
                 "asccTinyTest_V2_MITO.fasta:md5,0789c1dc72d3b673b98b448e2e98c895",
+                "asccTinyTest_V2_MITO.fasta.fai:md5,814458648b1209d2cf0d9ab45c3fca9f",
                 "asccTinyTest_V2_MITO.json:md5,afc4cb6c9aacc613c048a7600fa95003",
-                "asccTinyTest_V2_MITO_dots.fasta:md5,84fd76281c6b5c97a3d0b0fe5d144063",
-                "asccTinyTest_V2_MITO_dots.fasta.fai:md5,065013811c0719935b2afd3ba63ea9b1",
-                "asccTinyTest_V2_MITO_dots.fasta.sizes:md5,48b050578d2299096117c6979f6270d7",
                 "asccTinyTest_V2_PRIMARY.fasta:md5,dbec6377db6681a4b68821248163f15f",
-                "asccTinyTest_V2_PRIMARY.json:md5,46dd3dcf4f3262ad13411f6acb667474",
-                "asccTinyTest_V2_PRIMARY_dots.fasta:md5,dbec6377db6681a4b68821248163f15f",
-                "asccTinyTest_V2_PRIMARY_dots.fasta.fai:md5,d2042202c2580c792c177429e6ef0254",
-                "asccTinyTest_V2_PRIMARY_dots.fasta.sizes:md5,2253e8b144486ede962717f9124b770b"
+                "asccTinyTest_V2_PRIMARY.fasta.fai:md5,d2042202c2580c792c177429e6ef0254",
+                "asccTinyTest_V2_PRIMARY.json:md5,46dd3dcf4f3262ad13411f6acb667474"
             ],
             true
         ],
-        "timestamp": "2026-10-20T13:15:49.407438115",
+        "timestamp": "2026-10-22T14:43:36.66977104",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
