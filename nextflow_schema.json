@@ -183,6 +183,18 @@
                     "fa_icon": "fas fa-calculator",
                     "description": "Number of reads to map to a reference in a single chunk."
                 },
+                "get_dictionary": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fas fa-hashtag",
+                    "description": "Whether to get the samtools dictionary for the input FASTA file."
+                },
+                "replace_dots": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-dot-circle",
+                    "description": "Whether to replace dots in the input FASTA file with underscores."
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

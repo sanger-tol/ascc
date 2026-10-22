@@ -19,7 +19,6 @@ include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipelin
 
 // ASCC Custom param pre-processing
 include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
-include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main'
 include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
 include { CHECK_NT_BLAST_TAXONOMY   } from '../../../modules/local/check/nt_blast_taxonomy/main'
 include { FASTA_CLEAN_FAIDX         } from '../../nf-core/fasta_clean_faidx/main'
@@ -155,9 +154,9 @@ workflow PIPELINE_INITIALISATION {
     //
     FASTA_CLEAN_FAIDX(
         ch_samplesheet,
-        true, // replace with param
-        true,
-        true
+        params.replace_dots,
+        false, // We do not need the sizes file, we generation one later on after second step of filtering.
+        params.get_dictionary
     )
 
 
@@ -279,8 +278,6 @@ workflow PIPELINE_INITIALISATION {
     sample_id               = params.sample_id
     main_genomes            = branched_assemblies.genomic_genome
     organellar_genomes      = branched_assemblies.organellar_genome
-    fai_file                = FASTA_CLEAN_FAIDX.out.fai
-    sizes_file              = FASTA_CLEAN_FAIDX.out.sizes
     samtools_dict           = FASTA_CLEAN_FAIDX.out.dict
     stats_json              = FASTA_CLEAN_FAIDX.out.sequence_description
     barcodes_file           = barcode_data_file

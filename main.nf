@@ -31,15 +31,12 @@ workflow SANGERTOL_ASCC {
     take:
     genomic                     // Genomic fasta tuples
     organelles                  // Organellar fasta tuples
-    fai_file                    // FASTA index file
-    sizes_file                  // FASTA sizes file
     samtools_dict               // samtools dictionary
     stats_json                  // sequence description json file
     fcs_override                // bool
     genomic_fcs_samplesheet     // genomic data tuple from fcs_override samplesheet generated from external fcs process
     organellar_fcs_samplesheet  // organellar data tuple from fcs_override samplesheet generated from external fcs process
     fcs_db                      // [path(path)]
-    read_files                  // Read files
     scientific_name             // Scientific name
     pacbio_db                   // Pacbio database
     ncbi_taxonomy_path          // NCBI taxonomy path
@@ -51,7 +48,6 @@ workflow SANGERTOL_ASCC {
     nt_kraken_db_path           // path to custom kraken database
     vecscreen_database_path     // Path to custom VECSCREEN database
     reads_path                  // tuple of paths to input read files
-    reads_layout                // Layout of input reads [SINGLE, PAIRED]
     reads_type                  // Type of input reads [HIFI, CLR, ILLUMINA, etc...]
     btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
     btk_lineages_path           // Path to the ODB* lineages
@@ -69,14 +65,11 @@ workflow SANGERTOL_ASCC {
             ? genomic
             : genomic.mix(organelles),
         organelles,
-        fai_file,
-        sizes_file,
         samtools_dict,
         stats_json,
         fcs_override,
         genomic_fcs_samplesheet.mix(organellar_fcs_samplesheet),
         fcs_db,
-        read_files,
         scientific_name,
         pacbio_db,
         ncbi_taxonomy_path,
@@ -88,7 +81,6 @@ workflow SANGERTOL_ASCC {
         nt_kraken_db_path,
         vecscreen_database_path,
         reads_path,
-        reads_layout,
         reads_type,
         btk_lineages,
         btk_lineages_path,
@@ -129,15 +121,12 @@ workflow {
     SANGERTOL_ASCC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
-        PIPELINE_INITIALISATION.out.fai_file,
-        PIPELINE_INITIALISATION.out.sizes_file,
         PIPELINE_INITIALISATION.out.samtools_dict,
         PIPELINE_INITIALISATION.out.stats_json,
         params.fcs_override,
         PIPELINE_INITIALISATION.out.geno_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.orga_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
-        PIPELINE_INITIALISATION.out.collected_reads,
         params.scientific_name,
         PIPELINE_INITIALISATION.out.pacbio_db,
         channel.fromPath(params.ncbi_taxonomy_path),
@@ -149,7 +138,6 @@ workflow {
         channel.fromPath(params.nt_kraken_database_path),
         channel.fromPath(params.vecscreen_database_path),
         channel.from(params.reads_path),
-        channel.of(params.reads_layout),
         params.reads_type,
         channel.of(params.busco_lineages),
         channel.fromPath(params.busco_lineages_folder),
