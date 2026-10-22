@@ -52,14 +52,11 @@ workflow ASCC {
     take:
     genomic_genomes         // channel: combined genomic + organellar assemblies; meta.assembly_type identifies each
     organellar_genomes      // channel: tuple(meta, reference) – organellar only, for ORGANELLAR_BLAST against genomic
-    fai_file                // FASTA index file
-    sizes_file              // FASTA sizes file
     samtools_dict           // samtools dictionary
     stats_json              // sequence description json file
     _fcs_ov                 // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet (combined genomic + organellar entries)
     fcs_db                  // [path(path)]
-    _reads
     scientific_name         // val(name)
     pacbio_database         // tuple [[meta.id], pacbio_database]
     ncbi_taxonomy_path
@@ -71,7 +68,6 @@ workflow ASCC {
     nt_kraken_db_path
     vecscreen_database_path
     reads_path
-    _reads_layout
     reads_type
     btk_lineages
     btk_lineages_path
