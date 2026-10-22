@@ -23,29 +23,24 @@ workflow ORGANELLAR_BLAST {
     main:
     ch_versions     = channel.empty()
 
-    reference_tuple
+    combined_refs = reference_tuple
         .combine(organellar_tuple)
-        .map { ref_meta, ref_file, org_meta, _org_file ->
-            def meta = ref_meta + [ og: org_meta.id]
-            [meta, ref_file]
+        .multiMap { ref_meta, ref_file, org_meta, org_file ->
+            def meta = ref_meta + [og: org_meta.id]
+            refs: [meta, ref_file]
+            orgs: [meta, org_file]
         }
-        .set{ new_ref_tuple }
 
 
-    //
-    // MODULE: STRIP SPACES OUT OF GENOMIC FASTA
-    //
-    SED_SED (
-        new_ref_tuple
-    )
-    ch_versions     = ch_versions.mix(SED_SED.out.versions)
-
+    organellar_dbs_input = combined_refs.orgs
+        .map { meta, org_file -> [[id: meta.og], org_file] }
+        .unique { meta, file -> meta.id }
 
     //
     // MODULE: GENERATE BLAST DB ON ORGANELLAR GENOME
     //
     BLAST_MAKEBLASTDB (
-        organellar_tuple,
+        organellar_dbs_input,
         []
     )
 
@@ -53,9 +48,15 @@ workflow ORGANELLAR_BLAST {
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
     //
-    ref_and_db = SED_SED.out.sed
-        .combine(BLAST_MAKEBLASTDB.out.db)
-        .multiMap{ meta, ref, _meta2, blast_db ->
+    ref_and_db = combined_refs.refs
+        .map { meta, ref -> [meta.og, meta, ref] }
+        .combine(
+            BLAST_MAKEBLASTDB.out.db
+                .map { meta, db -> [meta.id, db] },
+            by: 0
+        )
+        .map { og, meta, ref, db -> [meta, ref, db] }
+        .multiMap{ meta, ref, blast_db ->
             reference_tuple:    [meta, ref]
             blastdb_tuple:      [meta, blast_db]
         }
@@ -74,10 +75,9 @@ workflow ORGANELLAR_BLAST {
     // LOGIC: REORGANISE CHANNEL FOR DOWNSTREAM PROCESS
     //
     BLAST_BLASTN.out.txt
-        .combine ( organellar_tuple )
-        .map { meta, file, org_meta, _org_file ->
+        .map { meta, file ->
             [[  id: meta.id,                // Assembly Name
-                og: org_meta.id,            // Organellar Name
+                og: meta.og,                // Organellar Name (already in meta)
                 sz: file.size()             // Size of assembly
             ], file ]
         }
@@ -114,18 +114,18 @@ workflow ORGANELLAR_BLAST {
     no_comments
         .valid
         .map{ meta, file ->
-            [[id: meta.id, og: meta.og], file ]
+            tuple([id: meta.id, og: meta.og], file)
         }
         .combine(
-            new_ref_tuple
+            combined_refs.refs
                 .map{ meta, file ->
-                    [[id: meta.id, og: meta.og], file ]
+                    tuple([id: meta.id, og: meta.og], file)
                 },
             by: 0
         )
         .multiMap { meta, no_comment_file, assembly ->
-            filtered: [meta, no_comment_file]
-            reference_ch: [meta, assembly]
+            filtered: tuple(meta, no_comment_file)
+            reference_ch: tuple(meta, assembly)
 
         }
         .set { mapped }
@@ -142,16 +142,18 @@ workflow ORGANELLAR_BLAST {
 
 
     //
-    // LOGIC: COMBINE CHANNELS INTO FORMAT OF ID, ORGANELLE ID AND FILES
+    // LOGIC: REFORMAT OUTPUT WITH ID AND ORGANELLE ID
+    // NOTE: og is already in metadata from the initial combine flow.
     //
-    EXTRACT_CONTAMINANTS.out.contamination_bed
-        .combine ( organellar_tuple)
-        .map { blast_meta, blast_txt, organelle_meta, _organelle_fasta ->
-            [[  id:         blast_meta.id,
-                organelle:  organelle_meta.id
-            ], blast_txt ]
+    reformatted_recommendations = EXTRACT_CONTAMINANTS.out.contamination_bed
+        .map { meta, blast_txt ->
+            tuple(
+                [   id:         meta.id,
+                    organelle:  meta.og
+                ],
+                blast_txt
+            )
         }
-        .set { reformatted_recommendations }
 
 
     //

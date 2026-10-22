@@ -31,6 +31,10 @@ workflow SANGERTOL_ASCC {
     take:
     genomic                     // Genomic fasta tuples
     organelles                  // Organellar fasta tuples
+    fai_file                    // FASTA index file
+    sizes_file                  // FASTA sizes file
+    samtools_dict               // samtools dictionary
+    stats_json                  // sequence description json file
     fcs_override                // bool
     genomic_fcs_samplesheet     // genomic data tuple from fcs_override samplesheet generated from external fcs process
     organellar_fcs_samplesheet  // organellar data tuple from fcs_override samplesheet generated from external fcs process
@@ -61,11 +65,16 @@ workflow SANGERTOL_ASCC {
     // WORKFLOW: Run pipeline
     //
     ASCC (
-        genomic,
+        params.genomic_only
+            ? genomic
+            : genomic.mix(organelles),
         organelles,
+        fai_file,
+        sizes_file,
+        samtools_dict,
+        stats_json,
         fcs_override,
-        genomic_fcs_samplesheet,
-        organellar_fcs_samplesheet,
+        genomic_fcs_samplesheet.mix(organellar_fcs_samplesheet),
         fcs_db,
         read_files,
         scientific_name,
@@ -120,6 +129,10 @@ workflow {
     SANGERTOL_ASCC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
+        PIPELINE_INITIALISATION.out.fai_file,
+        PIPELINE_INITIALISATION.out.sizes_file,
+        PIPELINE_INITIALISATION.out.samtools_dict,
+        PIPELINE_INITIALISATION.out.stats_json,
         params.fcs_override,
         PIPELINE_INITIALISATION.out.geno_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.orga_fcs_samplesheet,
@@ -159,27 +172,29 @@ workflow {
 
 
     onComplete:
-        try {
-            def completionFile = file("${params.outdir}/workflow_completed.txt")
-            def du = ["du", "-sh", workflow.workDir.toString()].execute()
-            du.waitFor()
-            completionFile.text = """
-                Workflow completed successfully!
-                Completed at: ${workflow.complete}
-                Duration: ${workflow.duration}
-                Success: ${workflow.success}
-                Work directory: ${workflow.workDir}
-                Work directory size: ${du.text.trim()}
-                Exit status: ${workflow.exitStatus}
-                Run name: ${workflow.runName}
-                Session ID: ${workflow.sessionId}
-                Project directory: ${workflow.projectDir}
-                Launch directory: ${workflow.launchDir}
-                Command line: ${workflow.commandLine}
-            """.stripIndent()
-            log.info "[ASCC INFO] Completion file created: ${completionFile}"
-        } catch (Exception e) {
-            log.error "[ASCC ] Failed to create completion file: ${e.message}"
+        if (workflow.success) {
+            try {
+                def completionFile = file("${params.outdir}/workflow_completed.txt")
+                def du = ["du", "-sh", workflow.workDir.toString()].execute()
+                du.waitFor()
+                completionFile.text = """
+                    Workflow completed successfully!
+                    Completed at: ${workflow.complete}
+                    Duration: ${workflow.duration}
+                    Success: ${workflow.success}
+                    Work directory: ${workflow.workDir}
+                    Work directory size: ${du.text.trim()}
+                    Exit status: ${workflow.exitStatus}
+                    Run name: ${workflow.runName}
+                    Session ID: ${workflow.sessionId}
+                    Project directory: ${workflow.projectDir}
+                    Launch directory: ${workflow.launchDir}
+                    Command line: ${workflow.commandLine}
+                """.stripIndent()
+                log.info "[ASCC INFO] Completion file created: ${completionFile}"
+            } catch (Exception e) {
+                log.error "[ASCC ] Failed to create completion file: ${e.message}"
+            }
         }
 
     onError:

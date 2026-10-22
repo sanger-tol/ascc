@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import general_purpose_functions as gpf
-from collections import OrderedDict
-import textwrap
 import argparse
+import textwrap
+from collections import OrderedDict
+
+import general_purpose_functions as gpf
 
 VERSION = "2.0.0"
 

@@ -1,10 +1,10 @@
-import sys
-import re
 import os
-import pybedtools
+import re
+import sys
 from collections import defaultdict
 from itertools import groupby
 
+import pybedtools
 
 """
 Script from James Torrance (jt8) and Eerik Aunin (ea10)
@@ -19,9 +19,7 @@ class BedTools:
     def sort_and_merge_bed_file(self, input_bed_file):
         bed = pybedtools.BedTool(input_bed_file)
         # Get the output merged BED file name without the file extension
-        output_merged_bed_file = (
-            os.path.splitext(os.path.basename(input_bed_file))[0] + ".merged.bed"
-        )
+        output_merged_bed_file = os.path.splitext(os.path.basename(input_bed_file))[0] + ".merged.bed"
         # Sort the BED file
         sorted_bed = bed.sort()
         # Merge the sorted BED file
@@ -40,9 +38,7 @@ class BedTools:
     def subtract_b_from_a(self, bed_file_1, bed_file_2):
         if not os.path.exists(bed_file_1) or not os.path.exists(bed_file_2):
             raise FileNotFoundError("One or both of the input BED files do not exist.")
-        output_file_name = (
-            os.path.splitext(os.path.basename(bed_file_1))[0] + ".subtracted.bed"
-        )
+        output_file_name = os.path.splitext(os.path.basename(bed_file_1))[0] + ".subtracted.bed"
 
         # Load the BED files
         bed1 = pybedtools.BedTool(bed_file_1)
@@ -55,11 +51,7 @@ class BedTools:
     def coverage_for_bed_file(self, bed_file):
         with open(bed_file, "r") as bed_handle:
             lines = [line.strip() for line in bed_handle]
-            coverage = sum(
-                int(fields[2]) - int(fields[1])
-                for line in lines
-                for fields in [re.split("\s+", line)]
-            )
+            coverage = sum(int(fields[2]) - int(fields[1]) for line in lines for fields in [re.split("\s+", line)])
         return coverage
 
     def coverage_for_bed_file_by_scaffold(self, bed_file):

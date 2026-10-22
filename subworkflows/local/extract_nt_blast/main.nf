@@ -23,7 +23,7 @@ workflow EXTRACT_NT_BLAST {
 
     blastn_db_path
         .map { db ->
-            [ [id: "db"], db ]
+            tuple([id: "db"], db)
         }
         .set { ch_blast }
 
@@ -65,8 +65,8 @@ workflow EXTRACT_NT_BLAST {
         )
         .combine( id )
         .map { file, identity ->
-            [[ id: identity ], file ]
-            }
+            tuple([id: identity], file)
+        }
         .set { blast_results }
 
 
@@ -76,10 +76,10 @@ workflow EXTRACT_NT_BLAST {
     BLAST_CHUNK_TO_FULL ( blast_results )
     ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
     ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full
-                                .map { meta, file -> [[ id: meta.id ], file] }
+                                .map { meta, file -> tuple([id: meta.id], file) }
 
     ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
-                                .map { meta, file -> [[ id: meta.id ], file] }
+                                .map { meta, file -> tuple([id: meta.id], file) }
 
 
     //
@@ -118,7 +118,7 @@ workflow EXTRACT_NT_BLAST {
     )
     ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
     ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
-                                .map { meta, file -> [[ id: meta.id ], file] }
+                                .map { meta, file -> tuple([id: meta.id], file) }
 
     // No conversion needed - BLAST results are already in the format expected by BlobToolKit
 
