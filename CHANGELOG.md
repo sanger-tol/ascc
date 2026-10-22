@@ -38,6 +38,8 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 | Old Parameter | New Parameter                |
 | ------------- | ---------------------------- |
 | NA            | --busco_lineage_mapping_file |
+| NA            | --get_dictionary             |
+| NA            | --replace_dots               |
 
 ### `Dependencies`
 

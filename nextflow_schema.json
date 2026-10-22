@@ -185,7 +185,7 @@
                 },
                 "get_dictionary": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "fa_icon": "fas fa-hashtag",
                     "description": "Whether to get the samtools dictionary for the input FASTA file."
                 },
