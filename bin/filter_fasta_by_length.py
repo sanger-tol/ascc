@@ -13,12 +13,13 @@ Further modified to add JSON logging
 
 """
 
-import general_purpose_functions as gpf
-import textwrap
 import argparse
-import sys
-import os
 import json
+import os
+import sys
+import textwrap
+
+import general_purpose_functions as gpf
 
 
 def parse_args(argv=None):
@@ -70,9 +71,7 @@ def main(args):
     if (
         args.cutoff == -1
     ):  # When this script is used as a part of a pipeline, -1 can be assigned as a value for the cutoff to indicate that no filtering should be done
-        sys.stderr.write(
-            f"The input FASTA sequences ({fasta_path}) will not be filtered by length\n"
-        )
+        sys.stderr.write(f"The input FASTA sequences ({fasta_path}) will not be filtered by length\n")
         log_stats["filter_mode"] = "none"
 
     retained_seq_count = 0

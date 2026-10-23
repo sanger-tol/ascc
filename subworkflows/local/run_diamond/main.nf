@@ -34,23 +34,20 @@ workflow RUN_DIAMOND {
     //
     // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
     //
-    diamond_db
-        .map{ file ->
-            [[id: "db"], file]
-        }
-        .set{diamond_db_path}
+    diamond_db_path = diamond_db
+        .map{ file -> tuple([id: "db"], file) }
 
     SEQKIT_SLIDING.out.fastx
         .combine(ch_ext)
         .combine(ch_columns)
         .combine(diamond_db_path)
         .multiMap{ meta, reference, extensions, columns, meta2, db_path ->
-            reference: [meta, reference]
-            db_path: [meta2, db_path]
+            reference: tuple(meta, reference)
+            db_path: tuple(meta2, db_path)
             ext_ch: extensions
             col_ch: columns
         }
-        .set {blast_input}
+        .set { blast_input }
 
 
     //
@@ -62,7 +59,6 @@ workflow RUN_DIAMOND {
         blast_input.ext_ch,
         blast_input.col_ch
     )
-    ch_versions     = ch_versions.mix(DIAMOND_BLASTX.out.versions)
 
 
     //

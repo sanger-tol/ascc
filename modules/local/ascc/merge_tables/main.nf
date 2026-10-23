@@ -34,7 +34,7 @@ process ASCC_MERGE_TABLES {
     script:
     def args                             = task.ext.args                    ?: ""
 
-    def empty_file_size                  = 80
+    def empty_file_size                  = 50
     def coverage_data                    = coverage.size()                   > empty_file_size   ? "-c ${coverage}"                  : ""
     def tiara_data                       = tiara.size()                      > empty_file_size   ? "-t ${tiara}"                     : ""
     def nt_kraken_data                   = nt_kraken.size()                  > empty_file_size   ? "-nk ${nt_kraken}"                : ""

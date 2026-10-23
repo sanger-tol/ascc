@@ -25,7 +25,7 @@ workflow RUN_VECSCREEN {
     ch_versions         = ch_versions.mix( CHUNK_ASSEMBLY_FOR_VECSCREEN.out.versions )
 
     vecscreen_database.map{ file ->
-        [[id: "db"], file]
+        tuple([id: "db"], file)
     }
     .set { vecscreen_database_tuple }
 
@@ -37,7 +37,6 @@ workflow RUN_VECSCREEN {
         CHUNK_ASSEMBLY_FOR_VECSCREEN.out.chunked_assembly,
         vecscreen_database_tuple
     )
-    ch_versions         = ch_versions.mix( NCBITOOLS_VECSCREEN.out.versions )
 
 
     //
@@ -59,8 +58,8 @@ workflow RUN_VECSCREEN {
     )
     ch_versions         = ch_versions.mix( SUMMARISE_VECSCREEN_OUTPUT.out.versions )
     vecscreen_contam    = SUMMARISE_VECSCREEN_OUTPUT.out.vecscreen_contamination
-                            .map { meta, file -> [[ id: meta.id ], file] }
-                            .ifEmpty { [[:],[]] }
+                            .map { meta, file -> tuple([id: meta.id], file) }
+                            .ifEmpty { tuple([:], []) }
 
     emit:
     vecscreen_contam

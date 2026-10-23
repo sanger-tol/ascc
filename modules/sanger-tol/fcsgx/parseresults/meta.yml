@@ -1,0 +1,102 @@
+name: fcsgx_parseresults
+description: |
+  Parses FCS-GX (Fungal Contamination Screening - GX) result files and augments them
+  with NCBI taxonomy lineage information to produce a comprehensive CSV output containing
+  contamination screening results with taxonomic classification.
+
+keywords:
+  - fcs-gx
+  - contamination
+  - taxonomy
+  - parsing
+tools:
+  - parse_fcsgx_result:
+      description: Parse FCS-GX result files and augment with NCBI taxonomy lineage information
+      homepage: https://github.com/sanger-tol/treeval
+      documentation: https://github.com/sanger-tol/treeval
+      tool_dev_url: https://github.com/sanger-tol/treeval
+      doi: no DOI available
+      licence:
+        - MIT
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'sample1' ]
+    - taxonomy_report:
+        type: file
+        description: FCS-GX taxonomy report file
+        pattern: "*.taxonomy.rpt"
+        ontologies: []
+  - - meta2:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'sample1' ]
+    - fcs_report:
+        type: file
+        description: FCS-GX report file
+        pattern: "*.fcs_gx_report.txt"
+        ontologies:
+          - edam: http://edamontology.org/format_2330 # TXT
+  - ncbi_rankedlineage_path:
+      type: file
+      description: NCBI rankedlineage.dmp file
+      pattern: "*rankedlineage*"
+      ontologies: []
+output:
+  fcsgxresult:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*_parsed_fcsgx.csv":
+          type: file
+          description: Parsed FCS-GX results with NCBI taxonomy lineage information in CSV format
+          ontologies:
+            - edam: http://edamontology.org/format_3752 # CSV
+  versions_python:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The name of the tool
+      - python --version | sed "s/Python //":
+          type: eval
+          description: The expression to obtain the version of the tool
+  versions_parsefcsgx:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - parse_fcsgx_result:
+          type: string
+          description: The name of the tool
+      - parse_fcsgx_result.py --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The name of the tool
+      - python --version | sed "s/Python //":
+          type: eval
+          description: The expression to obtain the version of the tool
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - parse_fcsgx_result:
+          type: string
+          description: The name of the tool
+      - parse_fcsgx_result.py --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@DLBPointon"
