@@ -4,8 +4,8 @@
             150,
             {
                 "ASCC_MERGE_TABLES": {
-                    "python": "3.11.0",
-                    "ascc_merge_tables": "2.0.2"
+                    "ascc_merge_tables": "2.0.2",
+                    "python": "3.11.0"
                 },
                 "AUTOFILTER_AND_CHECK_ASSEMBLY": {
                     "python": "3.9.1"
@@ -14,19 +14,19 @@
                     "blastn": "2.17.0+"
                 },
                 "BLAST_CHUNK_TO_FULL": {
-                    "python": "3.9.1",
-                    "blast_hit_chunk_coords_to_full_coords": 1.0
+                    "blast_hit_chunk_coords_to_full_coords": 1.0,
+                    "python": "3.9.1"
                 },
                 "BLAST_GET_TOP_HITS": {
-                    "python": "3.11.0",
-                    "blast_get_top_hits": "1.0.0"
+                    "blast_get_top_hits": "1.0.0",
+                    "python": "3.11.0"
                 },
                 "BLAST_MAKEBLASTDB": {
                     "makeblastdb": "2.17.0+"
                 },
                 "CHUNK_ASSEMBLY_FOR_VECSCREEN": {
-                    "python": "3.12.0",
-                    "chunk_assembly_for_vecscreen.py": 1.0
+                    "chunk_assembly_for_vecscreen.py": 1.0,
+                    "python": "3.12.0"
                 },
                 "COBIONTID_KMERCOUNTER": {
                     "kmer-counter": "0.1.2"
@@ -35,28 +35,28 @@
                     "coverm": "0.7.0"
                 },
                 "CREATE_BTK_DATASET": {
-                    "python": "3.9.13",
-                    "create_btk_dataset": "3.0.0"
+                    "create_btk_dataset": "3.0.0",
+                    "python": "3.9.13"
                 },
                 "DECONTAMINATE_CLIP_REGIONS_FASTA": {
-                    "python": "3.12.0",
-                    "clip_regions_bed.py": "1.1.0"
+                    "clip_regions_bed.py": "1.1.0",
+                    "python": "3.12.0"
                 },
                 "DECONTAMINATE_GENERATE_BED": {
-                    "python": "3.12.0",
-                    "generate_contamination_bed.py": "1.1.0"
+                    "generate_contamination_bed.py": "1.1.0",
+                    "python": "3.12.0"
                 },
                 "DIAMOND_BLASTX": {
                     "diamond": "2.2.1"
                 },
                 "DIAMOND_BLAST_CHUNK_TO_FULL": {
-                    "python": "3.9.1",
-                    "blast_hit_chunk_coords_to_full_coords": 1.0
+                    "blast_hit_chunk_coords_to_full_coords": 1.0,
+                    "python": "3.9.1"
                 },
                 "FASTXALIGN_MINIMAP2ALIGN": {
-                    "slice_fasta.py": "1.0.0",
+                    "minimap2": "2.30-r1287",
                     "samtools": "1.22.1",
-                    "minimap2": "2.30-r1287"
+                    "slice_fasta.py": "1.0.0"
                 },
                 "FASTXALIGN_PYFASTXINDEX": {
                     "slice_fasta.py": "1.0.0"
@@ -75,41 +75,41 @@
                     "fcsadaptor": "0.5.0"
                 },
                 "FILTER_BARCODE": {
-                    "python": "3.12.0",
                     "biopython": 1.81,
-                    "filter_barcode_blast_results": 1.0
+                    "filter_barcode_blast_results": 1.0,
+                    "python": "3.12.0"
                 },
                 "FILTER_COMMENTS": {
                     "coreutils": 9.1
                 },
                 "FILTER_FASTA": {
+                    "filter_fasta_by_length": "1.2.0",
                     "python": "3.9.1",
-                    "sanitise_input_fasta_file": "1.3.0",
-                    "filter_fasta_by_length": "1.2.0"
+                    "sanitise_input_fasta_file": "1.3.0"
                 },
                 "FILTER_VECSCREEN_RESULTS": {
-                    "python": "3.9.1",
-                    "VSlistTo1HitPerLine": 1.0
+                    "VSlistTo1HitPerLine": 1.0,
+                    "python": "3.9.1"
                 },
                 "GC_CONTENT": {
-                    "python": "3.9.1",
-                    "gc_content": 1.0
+                    "gc_content": 1.0,
+                    "python": "3.9.1"
                 },
                 "GENERATE_HTML_REPORT": {
-                    "python": "3.8.6",
+                    "generate_html_report": 1.0,
                     "jinja2": "2.11.2",
                     "pandas": "1.0.5",
-                    "generate_html_report": 1.0
+                    "python": "3.8.6"
                 },
                 "GET_LINEAGE_FOR_KRAKEN": {
-                    "python": "3.11.0",
-                    "pandas": "1.5.2",
                     "general_purpose_functions.py": "1.0.0",
-                    "get_lineage_for_kraken_results.py": 1.0
+                    "get_lineage_for_kraken_results.py": 1.0,
+                    "pandas": "1.5.2",
+                    "python": "3.11.0"
                 },
                 "GET_LINEAGE_FOR_TOP": {
-                    "python": "3.9.1",
-                    "get_lineage_for_top": "1.0.0"
+                    "get_lineage_for_top": "1.0.0",
+                    "python": "3.9.1"
                 },
                 "GNU_SORT": {
                     "coreutils": 9.5
@@ -118,18 +118,18 @@
                     "gunzip": 1.13
                 },
                 "KMER_COUNT_DIM_REDUCTION": {
-                    "python": "3.11.8",
-                    "pandas": "2.2.1",
-                    "tensorflow": "2.15.0",
-                    "scikit-learn": "1.4.1.post1",
-                    "umap-learn": "0.5.5",
+                    "kmer_count_dim_reduction.py": 1.0,
                     "matplotlib": "3.8.0",
-                    "kmer_count_dim_reduction.py": 1.0
+                    "pandas": "2.2.1",
+                    "python": "3.11.8",
+                    "scikit-learn": "1.4.1.post1",
+                    "tensorflow": "2.15.0",
+                    "umap-learn": "0.5.5"
                 },
                 "KMER_COUNT_DIM_REDUCTION_COMBINE_CSV": {
-                    "python": "3.11.0",
+                    "kmer_count_dim_reduction_combine_csv.py": null,
                     "pandas": "1.5.2",
-                    "kmer_count_dim_reduction_combine_csv.py": null
+                    "python": "3.11.0"
                 },
                 "KRAKEN2_KRAKEN2": {
                     "kraken2": "2.1.6",
@@ -150,12 +150,12 @@
                     "reformat_blast_outfmt6": "1.0.0"
                 },
                 "REFORMAT_NPY_2_CSV": {
-                    "python": "3.10.12",
-                    "npy_2_csv.py": "1.0.0"
+                    "npy_2_csv.py": "1.0.0",
+                    "python": "3.10.12"
                 },
                 "REFORMAT_TO_HITS_FILE": {
-                    "python": "3.9.1",
-                    "convert_to_hits": "2.0.0"
+                    "convert_to_hits": "2.0.0",
+                    "python": "3.9.1"
                 },
                 "SAMTOOLS_DICT": {
                     "samtools": "1.23.1"
@@ -215,39 +215,6 @@
                 "asccTinyTest_V2_HAPLO/create_btk_dataset",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/asccTinyTest_V2_HAPLOBTK_DS.yaml",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_class.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_class_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_class_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_class_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_family.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_family_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_family_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_family_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_genus.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_genus_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_genus_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_genus_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_kingdom.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_kingdom_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_kingdom_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_kingdom_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_order.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_order_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_order_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_order_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_phylum.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_phylum_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_phylum_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_phylum_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_species.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_species_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_species_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_species_score.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_superkingdom.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_superkingdom_cindex.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_superkingdom_positions.json",
-                "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/bestsum_superkingdom_score.json",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/embedding_dim_1_PCA.json",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/embedding_dim_1_random_trees.json",
                 "asccTinyTest_V2_HAPLO/create_btk_dataset/btk_datasets_CBD/embedding_dim_2_PCA.json",
@@ -590,39 +557,6 @@
             ],
             [
                 "asccTinyTest_V2_HAPLOBTK_DS.yaml:md5,d5e5c9fe71f5e68395d0f5b9201c3d62",
-                "bestsum_class.json:md5,26a1c0d48c700a6de894e965ba377b7f",
-                "bestsum_class_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_class_positions.json:md5,76bed5fb55ece0f63acd5ed8f2de736a",
-                "bestsum_class_score.json:md5,12c32683cdf5ff8ac9f3316236379f01",
-                "bestsum_family.json:md5,d8c82f68f8045c11bc9c4a2c6dfabfd1",
-                "bestsum_family_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_family_positions.json:md5,8761fc8dad4cb62b704c4c5c047774af",
-                "bestsum_family_score.json:md5,12c32683cdf5ff8ac9f3316236379f01",
-                "bestsum_genus.json:md5,e99f7a879d6fe7df0f8f641ca24fb287",
-                "bestsum_genus_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_genus_positions.json:md5,0c46818373756a0b8ae9b43c42d52e11",
-                "bestsum_genus_score.json:md5,5be4214343d0f1b0466ea0165a6b5e34",
-                "bestsum_kingdom.json:md5,ec5570411cf0fb42d69192401e2fe15b",
-                "bestsum_kingdom_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_kingdom_positions.json:md5,b64d7edafd13647ac54a28401dd8ae8b",
-                "bestsum_kingdom_score.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_order.json:md5,bd078e2c6da142924702eb1da6e842bf",
-                "bestsum_order_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_order_positions.json:md5,3d8d82566739839271828a4bac1e4948",
-                "bestsum_order_score.json:md5,12c32683cdf5ff8ac9f3316236379f01",
-                "bestsum_phylum.json:md5,1568082e5833ca21323745186dc8dae6",
-                "bestsum_phylum_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_phylum_positions.json:md5,25efc9dd2aec25adcccf4b195a1aa265",
-                "bestsum_phylum_score.json:md5,12c32683cdf5ff8ac9f3316236379f01",
-                "bestsum_positions.json:md5,f7dc80bf72997f81bd889d77e005c06e",
-                "bestsum_species.json:md5,930215526dbf8c3f4af89efe29dcf36a",
-                "bestsum_species_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_species_positions.json:md5,e786af1d99f99eee7b73248ad71ec521",
-                "bestsum_species_score.json:md5,5be4214343d0f1b0466ea0165a6b5e34",
-                "bestsum_superkingdom.json:md5,ec5570411cf0fb42d69192401e2fe15b",
-                "bestsum_superkingdom_cindex.json:md5,e29edfb7604484146598087e63377e15",
-                "bestsum_superkingdom_positions.json:md5,b64d7edafd13647ac54a28401dd8ae8b",
-                "bestsum_superkingdom_score.json:md5,e29edfb7604484146598087e63377e15",
                 "fcs_gx_action.json:md5,daf4d777154e3e964daca72a26bb41d5",
                 "fcs_gx_coverage_by_div.json:md5,10d36275383f9d563b3ff22947f3b020",
                 "fcs_gx_coverage_by_tax.json:md5,cb1763fdc1d353d62b6dad64cef75d01",
@@ -712,7 +646,7 @@
                 "tiara.json:md5,e886e56e2af86a0f434d92919578a96f"
             ],
             [
-                "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479",
+                "btk_summary_table_full.tsv:md5,6033ade9138165838ddd35787e8a6204",
                 "btk_summary_table_full.tsv:md5,26af5cb898cb7b21776239394d1564fc",
                 "btk_summary_table_full.tsv:md5,b8f5b434a3d93eb72fe0efb58497f479"
             ],
@@ -809,7 +743,7 @@
             ],
             true
         ],
-        "timestamp": "2026-10-22T14:43:36.66977104",
+        "timestamp": "2026-10-23T15:30:51.529016499",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
