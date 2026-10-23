@@ -22,7 +22,9 @@
 
 The only required input file for ASCC is the assembly FASTA file, with the addition of the TaxID of the target species. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species, and comprehensive runs with assemblies with complex composition, such as those from metagenomic or symbiotic studies.
 
-![sanger-tol/ascc overview diagram](./docs/images/ASCC-diagram.png)
+<img src="./docs/images/ASCC-diagram.png"
+     alt="sanger-tol/ascc overview diagram"
+     width="800">
 
 1. Below is a list of the tools contained within the workflow. A combination of any, all or none can be selected as part of the pipeline:
 
@@ -48,7 +50,9 @@ The only required input file for ASCC is the assembly FASTA file, with the addit
 
 Watch a more in-depth introduction to the ASCC pipeline from this session at the [Biodiversity Genomics Academy](https://www.thebgacademy.org/)
 
-[![ASCC](./docs/images/youtube_thumbnail.png)](https://www.youtube.com/watch?v=jrqjbwrg9-c)
+<a href="https://www.youtube.com/watch?v=jrqjbwrg9-c">
+  <img src="./docs/images/youtube_thumbnail.png" width="640" alt="ASCC">
+</a>
 
 ## Installation of the databases
 
