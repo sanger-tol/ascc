@@ -9,54 +9,28 @@
 
 ## Input files
 
-### Full YAML
+### Run configuration YAML
 
-At this time, the _full_ yaml can look quite daunting, for example:
+A typical input yaml file would include the following:
 
-```yaml
-scientific_name: scientific name of the assembled organism
-taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
+```
+scientific_name: Homo sapiens
+taxid: 9606
 reads_path:
-  - List of file paths
-reads_layout: Layout of the reads included in this run (SINGLE or PAIRED) this value should represent all input reads.
-reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
-pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
-pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
-kmer_length: kmer length for kmer counting (which is done using kcounter). Default: 7
-dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following: ["pca","umap","t-sne","isomap","lle_standard","lle_hessian","lle_modified","mds","se","random_trees","kernel_pca","pca_svd","autoencoder_sigmoid","autoencoder_linear","autoencoder_selu","autoencoder_relu","nmf"]. The default method is "pca". This field should be formatted as a YAML list, e.g. ["pca","random_trees"]
-nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database MUST have built-in taxonomy (this is a requirement since the pipeline no longer uses accession2taxid files). Should end with a trailing slash
-nt_database_prefix: prefix for the NCBI nt database. Default: "nt"
-nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
-ncbi_ranked_lineage_path: path to NCBI ranked lineage file (e.g. "/taxdump/rankedlineage.dmp")
-busco_lineages_folder: path to BUSCO 5 lineages directory. Should end with a trailing slash
-busco_lineages: a comma separated list of BUSCO lineages that will be used in the sanger-tol/blobtoolkit pipeline run. For example: "diptera_odb10,insecta_odb10". Available lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/
-fcs_gx_database_path: path to the directory containing the FCS-GX database. Should end with a trailing slash
-vecscreen_database_path: path to the FASTA file with adapter sequences for VecScreen ("/ascc/assets/vecscreen_adaptors_for_screening_euks.fa")
-diamond_uniprot_database_path: path to a Diamond database made from Uniprot protein sequences ("uniprot_reference_proteomes_with_taxonnames.dmnd"). The database needs to have built-in taxonomy
-diamond_nr_database_path: path to a Diamond database made from NCBI nr protein sequences ("nr.dmnd"). The database needs to have built-in taxonomy
-seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
-seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
-n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
-
-// The below params can have values of ['both','genomic','organellar','off'] unless the default value here is 'genomic', in that case their values are ONLY ['genomic','off']
-// These flags control which proccesses are run in any particular run of the pipeline.
-run_essentials: "both"
-run_kmers: "genomic"
-run_tiara: "both"
-run_coverage: "both"
-run_nt_blast: "both"
-run_nr_diamond: "both"
-run_uniprot_diamond: "both"
-run_kraken: "both"
-run_fcsgx: "both"
-run_fcs_adaptor: "both"
-run_vecscreen: "both"
-run_btk_busco: "genomic"
-run_pacbio_barcodes: "both"
-run_organellar_blast: "genomic"
-run_autofilter_assembly: "genomic"
-run_create_btk_dataset: "both"
-run_merge_datasets: "genomic"
+  - /path/to/reads.bam
+reads_layout: SINGLE
+reads_type: hifi
+pacbio_barcode_file: /path/to/pacbio_adaptors.fa
+pacbio_barcode_names: bc2028
+nt_database_path: /path/to/database/
+nt_kraken_database_path: /path/to/database
+ncbi_ranked_lineage_path: /path/to/taxdump/rankedlineage.dmp
+busco_lineages_folder: /path/to/lineages/
+busco_lineages: diptera_odb12
+fcs_gx_database_path: /path/to/database
+vecscreen_database_path: /path/to/vecscreen_adaptors_for_screening_euks.fa
+diamond_uniprot_database_path: /path/to/uniprot_reference_proteomes_with_taxonnames.dmnd
+diamond_nr_database_path: /path/to/database
 ```
 
 When running the pipeline in a production environment, consider addopting a profile like system such as shown in `assets/production/*` and `conf/production.config`. This will mean adding a profile to the nextflowl.config file of the pipeline, if you have questions please open an issue on GitHub.
@@ -184,6 +158,56 @@ work                # Directory containing the nextflow working files
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
+### Full YAML
+
+At this time, the _full_ yaml can configure all possible outputs.
+
+```yaml
+scientific_name: scientific name of the assembled organism
+taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
+reads_path:
+  - List of file paths
+reads_layout: Layout of the reads included in this run (SINGLE or PAIRED) this value should represent all input reads.
+reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
+pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
+pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
+kmer_length: kmer length for kmer counting (which is done using kcounter). Default: 7
+dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following: ["pca","umap","t-sne","isomap","lle_standard","lle_hessian","lle_modified","mds","se","random_trees","kernel_pca","pca_svd","autoencoder_sigmoid","autoencoder_linear","autoencoder_selu","autoencoder_relu","nmf"]. The default method is "pca". This field should be formatted as a YAML list, e.g. ["pca","random_trees"]
+nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database MUST have built-in taxonomy (this is a requirement since the pipeline no longer uses accession2taxid files). Should end with a trailing slash
+nt_database_prefix: prefix for the NCBI nt database. Default: "nt"
+nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
+ncbi_ranked_lineage_path: path to NCBI ranked lineage file (e.g. "/taxdump/rankedlineage.dmp")
+busco_lineages_folder: path to BUSCO 6 lineages directory. Should end with a trailing slash
+busco_lineages: a comma separated list of BUSCO lineages that will be used in the sanger-tol/blobtoolkit pipeline run. For example: "diptera_odb12,insecta_odb12". Available lineages can be found at https://busco-data.ezlab.org/v6/data/lineages/
+fcs_gx_database_path: path to the directory containing the FCS-GX database. Should end with a trailing slash
+vecscreen_database_path: path to the FASTA file with adapter sequences for VecScreen ("/ascc/assets/vecscreen_adaptors_for_screening_euks.fa")
+diamond_uniprot_database_path: path to a Diamond database made from Uniprot protein sequences ("uniprot_reference_proteomes_with_taxonnames.dmnd"). The database needs to have built-in taxonomy
+diamond_nr_database_path: path to a Diamond database made from NCBI nr protein sequences ("nr.dmnd"). The database needs to have built-in taxonomy
+seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
+seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
+n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
+
+// The below params can have values of ['both','genomic','organellar','off'] unless the default value here is 'genomic', in that case their values are ONLY ['genomic','off']
+// These flags control which proccesses are run in any particular run of the pipeline.
+run_essentials: "both"
+run_kmers: "genomic"
+run_tiara: "both"
+run_coverage: "both"
+run_nt_blast: "both"
+run_nr_diamond: "both"
+run_uniprot_diamond: "both"
+run_kraken: "both"
+run_fcsgx: "both"
+run_fcs_adaptor: "both"
+run_vecscreen: "both"
+run_btk_busco: "genomic"
+run_pacbio_barcodes: "both"
+run_organellar_blast: "genomic"
+run_autofilter_assembly: "genomic"
+run_create_btk_dataset: "both"
+run_merge_datasets: "genomic"
+```
+
 ### Updating the pipeline
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version.
@@ -274,7 +298,7 @@ To use a different container from the default container or conda environment spe
 
 ### Custom Tool Arguments
 
-A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
+A pipeline might not always support every possible argument or option of a particular tool used in the pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
 To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#modifying-tool-arguments) section of the nf-core website.
 
