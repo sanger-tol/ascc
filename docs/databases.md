@@ -59,4 +59,4 @@ To use this database, point the `vecscreen_database_path` variable in the input 
 
 ## PacBio barcodes
 
-A FASTA file with the sequences of PacBio multiplexing barcodes is included in the ASCC repository. It is the `pacbio_adaptors.fa` file in the `assets` directory of this pipeline ([pacbio_adaptors.fa](../assets/pacbio_adaptors.fa)).
+A FASTA file with the sequences of PacBio multiplexing barcodes is included in the ASCC repository. It is the `SMRTbell_HiFi_adapter_DB.fasta` file in the `assets/ascc_database_fasta` directory of this pipeline ([SMRTbell_HiFi_adapter_DB.fasta](../assets/ascc_database_fasta/SMRTbell_HiFi_adapter_DB.fasta)).
