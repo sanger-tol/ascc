@@ -13,6 +13,7 @@ workflow ESSENTIAL_JOBS {
     input_ref // channel [ val(meta), path(file) ]
 
     main:
+    ch_versions = channel.empty()
     //
     // MODULE: FILTER/BREAK THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A 1.9Gb THRESHOLD, MORE THAN THIS WILL BREAK SOME TOOLS
     //
