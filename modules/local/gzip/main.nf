@@ -20,9 +20,9 @@ process GZIP {
     script:
     def args = task.ext.args ?: ''
     """
-    gzip \
-        --force \
-        ${args} \
+    gzip \\
+        --force \\
+        ${args} \\
         ${file}
     """
 
