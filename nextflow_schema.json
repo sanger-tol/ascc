@@ -62,7 +62,7 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/fasta",
-                    "pattern": "^\\S+\\.fa$",
+                    "pattern": "^\\S+\\.(fa|fasta)$",
                     "description": "Fasta format file containing barcode data",
                     "fa_icon": "fas fa-file-lines"
                 },
