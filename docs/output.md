@@ -114,7 +114,7 @@ FCS-adaptor (https://github.com/ncbi/fcs) is NCBI software for detecting adapter
 
 </details>
 
-Uses BlastN to identify retained PacBio multiplexing barcode contamination in the assembly. The PacBio multiplexing barcode sequences are stored as the pacbio_adaptors.fa file in the assets directory of this pipeline.
+Uses BlastN to identify retained PacBio multiplexing barcode contamination in the assembly. The PacBio multiplexing barcode sequences are stored as the SMRTbell_HiFi_adapter_DB.fasta file in the assets/ascc_database_fasta directory of this pipeline.
 
 ![pacbiocheck](./images/ascc-1.0.0-pacbiocheck.png)
 
