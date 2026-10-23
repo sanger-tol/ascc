@@ -13,9 +13,6 @@ workflow ESSENTIAL_JOBS {
     input_ref // channel [ val(meta), path(file) ]
 
     main:
-    ch_versions = channel.empty()
-
-
     //
     // MODULE: FILTER/BREAK THE INPUT FASTA FOR LENGTHS OF SEQUENCE BELOW A 1.9Gb THRESHOLD, MORE THAN THIS WILL BREAK SOME TOOLS
     //
@@ -74,5 +71,4 @@ workflow ESSENTIAL_JOBS {
     trailing_ns_report
     filter_fasta_sanitation_log
     filter_fasta_length_filtering_log
-    versions                          = ch_versions
 }

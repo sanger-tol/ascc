@@ -20,8 +20,6 @@ workflow ORGANELLAR_BLAST {
     organellar_tuple // channel [organelle], organellar_fasta
 
     main:
-    ch_versions = channel.empty()
-
     combined_refs = reference_tuple
         .combine(organellar_tuple)
         .multiMap { ref_meta, ref_file, org_meta, org_file ->
@@ -43,7 +41,6 @@ workflow ORGANELLAR_BLAST {
         [],
     )
 
-
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST ORGANELLAR GENOME
     //
@@ -59,7 +56,6 @@ workflow ORGANELLAR_BLAST {
             blastdb_tuple: [meta, blast_db]
         }
 
-
     BLAST_BLASTN(
         ref_and_db.reference_tuple,
         ref_and_db.blastdb_tuple,
@@ -67,7 +63,6 @@ workflow ORGANELLAR_BLAST {
         [],
         [],
     )
-
 
     //
     // LOGIC: REORGANISE CHANNEL FOR DOWNSTREAM PROCESS
@@ -78,14 +73,12 @@ workflow ORGANELLAR_BLAST {
         }
         .set { blast_check }
 
-
     //
     // MODULE: FILTER COMMENTS OUT OF THE BLAST OUTPUT, ALSO BLAST result
     //
     FILTER_COMMENTS(
         blast_check
     )
-
 
     //
     // LOGIC: IF FILTER_COMMENTS RETURNS FILE WITH NO LINES THEN SUBWORKFLOWS STOPS
@@ -100,7 +93,6 @@ workflow ORGANELLAR_BLAST {
             log.info("\t--${meta.id} & ${meta.og} ")
         }
         .set { no_comments }
-
 
     //
     // NOTE: Strip out a ton of junk meta so we can join the tuples together
@@ -117,7 +109,6 @@ workflow ORGANELLAR_BLAST {
         reference_ch: tuple(meta, assembly)
     }.set { mapped }
 
-
     //
     // MODULE: EXTRACT CONTAMINANTS FROM THE BLAST REPORT
     //
@@ -125,7 +116,6 @@ workflow ORGANELLAR_BLAST {
         mapped.filtered,
         mapped.reference_ch,
     )
-
 
     //
     // LOGIC: REFORMAT OUTPUT WITH ID AND ORGANELLE ID
@@ -138,7 +128,6 @@ workflow ORGANELLAR_BLAST {
         )
     }
 
-
     //
     // MODULE: GENERATE BED FILE OF ORGANELLAR SITES RECOMENDED TO BE REMOVED
     //
@@ -149,5 +138,4 @@ workflow ORGANELLAR_BLAST {
     emit:
     organelle_report      = ORGANELLE_CONTAMINATION_RECOMMENDATIONS.out.recommendations
     full_organelle_report = reformatted_recommendations
-    versions              = ch_versions
 }

@@ -19,8 +19,6 @@ workflow EXTRACT_NT_BLAST {
     ncbi_lineage_path // channel.fromPath( lineage_path )
 
     main:
-    ch_versions = channel.empty()
-
     blastn_db_path
         .map { db ->
             tuple([id: "db"], db)
@@ -50,7 +48,6 @@ workflow EXTRACT_NT_BLAST {
             meta.id
         }
         .set { id }
-
 
     //
     // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
@@ -119,5 +116,4 @@ workflow EXTRACT_NT_BLAST {
     ch_top_lineages
     ch_blast_hits
     ch_btk_format // Format for BTK - full coordinates file
-    versions             = ch_versions
 }

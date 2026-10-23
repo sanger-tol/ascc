@@ -11,9 +11,6 @@ workflow RUN_NT_KRAKEN {
     ncbi_rankedlineage_path
 
     main:
-    ch_versions     = channel.empty()
-
-
     //
     // LOGIC: MODIFY THE INPUT TUPLE TO INCLUDE THE single_end VALUE
     //
@@ -21,7 +18,6 @@ workflow RUN_NT_KRAKEN {
         .map{ meta, file ->
             tuple([ id: meta.id, single_end: true ], file)
         }
-
 
     //
     // MODULE: RUN KRAKEN2 ON THE INPUT GENOME - GENERATES TAXONOMIC CLASSIFICATION.
@@ -40,7 +36,6 @@ workflow RUN_NT_KRAKEN {
                         .map { meta, file -> tuple([ id: meta.id ], file) }
                         .ifEmpty { tuple([:], []) }
 
-
     //
     // MODULE: GET LINEAGE FOR THE KRAKEN OUTPUT.
     //
@@ -52,10 +47,8 @@ workflow RUN_NT_KRAKEN {
                         .map { meta, file -> tuple([ id: meta.id ], file) }
                         .ifEmpty { tuple([:], []) }
 
-
     emit:
     classified
     report
     lineage
-    versions        = ch_versions
 }

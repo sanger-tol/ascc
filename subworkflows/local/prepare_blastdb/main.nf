@@ -14,9 +14,6 @@ workflow PREPARE_BLASTDB {
     barcode_names           // val      (csv-list-string)
 
     main:
-    ch_versions             = channel.empty()
-
-
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
@@ -25,7 +22,6 @@ workflow PREPARE_BLASTDB {
         barcodes_file,
         barcode_names
     )
-
 
     //
     // LOGIC: ENSURE THE VALID CHANNEL IS MIXED WITH THE BARCODES CHANNEL
@@ -43,7 +39,6 @@ workflow PREPARE_BLASTDB {
         }
         .set { ch_new_barcodes }
 
-
     //
     // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
@@ -52,9 +47,6 @@ workflow PREPARE_BLASTDB {
         []
     )
 
-
     emit:
     barcodes_blast_db       = BLAST_MAKEBLASTDB.out.db
-    versions                = ch_versions
-
 }

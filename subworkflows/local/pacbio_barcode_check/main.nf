@@ -11,8 +11,6 @@ workflow PACBIO_BARCODE_CHECK {
     barcode_database // tupe     [[meta.id], barcode_database]
 
     main:
-    ch_versions = channel.empty()
-
     //
     // MODULE: RUN BLAST WITH GENOME AGAINST BARCODE DB
     //
@@ -24,7 +22,6 @@ workflow PACBIO_BARCODE_CHECK {
         [],
     )
 
-
     //
     // LOGIC: FOR I (MAPPED TO OTHER CHANNELS) IN CSV LIST RUN FILTER BLAST
     //
@@ -33,7 +30,6 @@ workflow PACBIO_BARCODE_CHECK {
         .flatten()
         .unique()
         .set { barcode_list }
-
 
     //
     // MODULE: CREATE A FILTERED BLAST OUTPUT PER BARCODE
@@ -57,5 +53,4 @@ workflow PACBIO_BARCODE_CHECK {
 
     emit:
     filtered
-    versions = ch_versions
 }

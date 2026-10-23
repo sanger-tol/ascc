@@ -13,9 +13,6 @@ workflow RUN_VECSCREEN {
     vecscreen_database // val(db_path)
 
     main:
-    ch_versions = channel.empty()
-
-
     //
     // MODULE: CHUNKS THE ASSEMBLY INTO PIECES WITH FIXED LENGTH
     //
@@ -29,7 +26,6 @@ workflow RUN_VECSCREEN {
         }
         .set { vecscreen_database_tuple }
 
-
     //
     // MODULE: RUNS NCBI VECSCREEN
     //
@@ -38,7 +34,6 @@ workflow RUN_VECSCREEN {
         vecscreen_database_tuple,
     )
 
-
     //
     // MODULE: REFORMATS VECSCREEN OUTPUT AND FILTERS IT TO REMOVE NO-HIT RESULTS AND KEEP
     //          ONLY HITS
@@ -46,7 +41,6 @@ workflow RUN_VECSCREEN {
     FILTER_VECSCREEN_RESULTS(
         NCBITOOLS_VECSCREEN.out.vecscreen_output
     )
-
 
     //
     // MODULE: CONVERTS COORDINATES IN ASSEMBLY CHUNKS BACK TO COORDINATES IN THE WHOLE
@@ -61,5 +55,4 @@ workflow RUN_VECSCREEN {
 
     emit:
     vecscreen_contam
-    versions         = ch_versions
 }

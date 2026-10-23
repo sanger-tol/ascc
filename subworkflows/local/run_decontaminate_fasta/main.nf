@@ -21,8 +21,6 @@ workflow RUN_DECONTAMINATE_FASTA {
     plastid_recommendations
 
     main:
-    ch_versions = channel.empty()
-
     //
     // LOGIC: DATAMAPPER FOR DECONTAMINATE_GENERATE_BED
     //
@@ -59,7 +57,6 @@ workflow RUN_DECONTAMINATE_FASTA {
         }
         .set { merge_input_channel }
 
-
     //
     // MODULE: GENERATES CONTAMINATION .BED
     //
@@ -68,14 +65,12 @@ workflow RUN_DECONTAMINATE_FASTA {
         tuple([:], []),
     )
 
-
     //
     // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
     //
     DECONTAMINATE_CLIP_REGIONS_FASTA(
         DECONTAMINATE_GENERATE_BED.out.contamination_bed
     )
-
 
     //
     // MODULE: ZIP THE DECONTAMINATED FASTA
@@ -90,5 +85,4 @@ workflow RUN_DECONTAMINATE_FASTA {
     abnormal_contamination_report = DECONTAMINATE_GENERATE_BED.out.abnormal_report
     contamination_bed             = DECONTAMINATE_GENERATE_BED.out.contamination_bed
     decontaminated_fasta          = GZIP.out.gzipped
-    versions                      = ch_versions
 }

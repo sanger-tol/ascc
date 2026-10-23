@@ -23,8 +23,6 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     btk_dataset                // channel: [ val(meta), [ btk_dataset ] ]
 
     main:
-    ch_versions = channel.empty()
-
     // Convert params to JSON for passing to the HTML report
     def paramsJson = groovy.json.JsonOutput.toJson(params)
 
@@ -101,5 +99,4 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
 
     emit:
     report    = GENERATE_HTML_REPORT.out.report
-    versions  = ch_versions
 }

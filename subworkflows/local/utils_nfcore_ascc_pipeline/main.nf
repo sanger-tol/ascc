@@ -45,9 +45,6 @@ workflow PIPELINE_INITIALISATION {
     show_hidden       // boolean: Show hidden parameters in the help message
 
     main:
-
-    ch_versions = channel.empty()
-
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
     //
@@ -196,8 +193,6 @@ workflow PIPELINE_INITIALISATION {
         barcode_data_file,
         ch_barcodes
     )
-    versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
-
 
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
@@ -207,7 +202,6 @@ workflow PIPELINE_INITIALISATION {
     } else {
         ch_grabbed_reads_path       = []
     }
-
 
     //
     // MODULE: CHECK IF NT BLAST DATABASE HAS TAXONOMY INCLUDED (ONLY IF NT BLAST IS INCLUDED)
@@ -229,7 +223,6 @@ workflow PIPELINE_INITIALISATION {
                 }
             }
     }
-
 
     //
     // NOTE: FCS OVERRIDE - THIS SHOULD BE TEMPORARY

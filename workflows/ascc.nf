@@ -105,7 +105,6 @@ workflow ASCC {
     ESSENTIAL_JOBS(
         genomic_genomes
     )
-    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
     ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
     ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
@@ -147,8 +146,6 @@ workflow ASCC {
         params.dimensionality_reduction_methods,
         autoencoder_epochs_count
     )
-    ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
-
 
     //
     // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
@@ -216,7 +213,6 @@ workflow ASCC {
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
     )
-    ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
                             .map { meta, file -> [[id: meta.id ], file] }
                             .ifEmpty { [[:],[]] }
@@ -299,7 +295,6 @@ workflow ASCC {
             params.run_organellar_blast in genomicConditionals()
         }
     )
-    ch_versions     = ch_versions.mix(ORGANELLAR_BLAST.out.versions)
 
     ch_organellar_rprt = ORGANELLAR_BLAST.out.organelle_report
         .branch { meta, file ->
@@ -335,7 +330,6 @@ workflow ASCC {
         ch_barcodes,
         duplicated_db.pacbio_db
     )
-    ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
     ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.ifEmpty{ [[:],[]] }
 
 
@@ -430,7 +424,6 @@ workflow ASCC {
         },
         vecscreen_database_path.first()
     )
-    ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
     ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.ifEmpty{ [[:],[]] }
 
 
@@ -445,7 +438,6 @@ workflow ASCC {
         nt_kraken_db_path.first(),
         ncbi_ranked_lineage_path.first()
     )
-    ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
     ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[:], []] }
     ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[:], []] }
     ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[:], []] }
