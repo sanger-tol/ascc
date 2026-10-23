@@ -4,8 +4,8 @@
             150,
             {
                 "ASCC_MERGE_TABLES": {
-                    "python": "3.11.0",
-                    "ascc_merge_tables": "2.0.2"
+                    "ascc_merge_tables.py": "2.0.2",
+                    "python": "3.11.0"
                 },
                 "AUTOFILTER_AND_CHECK_ASSEMBLY": {
                     "python": "3.9.1"
@@ -14,19 +14,27 @@
                     "blastn": "2.17.0+"
                 },
                 "BLAST_CHUNK_TO_FULL": {
-                    "python": "3.9.1",
-                    "blast_hit_chunk_coords_to_full_coords": 1.0
+                    "blast_hit_chunk_coords_to_full_coords.py": 1.0,
+                    "python": "3.9.1"
                 },
                 "BLAST_GET_TOP_HITS": {
-                    "python": "3.11.0",
-                    "blast_get_top_hits": "1.0.0"
+                    "blast_get_top_hits.py": "1.0.0",
+                    "python": "3.11.0"
                 },
                 "BLAST_MAKEBLASTDB": {
                     "makeblastdb": "2.17.0+"
                 },
+                "CHECK_BARCODE": {
+                    "pacbio_barcode_check.py": "1.0.1",
+                    "python": "3.9.1"
+                },
+                "CHECK_NT_BLAST_TAXONOMY": {
+                    "check_nt_blast_taxonomy.py": "1.0.0",
+                    "python": "3.9.1"
+                },
                 "CHUNK_ASSEMBLY_FOR_VECSCREEN": {
-                    "python": "3.12.0",
-                    "chunk_assembly_for_vecscreen.py": 1.0
+                    "chunk_assembly_for_vecscreen.py": 1.0,
+                    "python": "3.12.0"
                 },
                 "COBIONTID_KMERCOUNTER": {
                     "kmer-counter": "0.1.2"
@@ -35,23 +43,23 @@
                     "coverm": "0.7.0"
                 },
                 "CREATE_BTK_DATASET": {
-                    "python": "3.9.13",
-                    "create_btk_dataset": "3.0.0"
+                    "create_btk_dataset.py": "3.0.0",
+                    "python": "3.9.13"
                 },
                 "DECONTAMINATE_CLIP_REGIONS_FASTA": {
-                    "python": "3.12.0",
-                    "clip_regions_bed.py": "1.1.0"
+                    "clip_regions_bed.py": "1.1.0",
+                    "python": "3.12.0"
                 },
                 "DECONTAMINATE_GENERATE_BED": {
-                    "python": "3.12.0",
-                    "generate_contamination_bed.py": "1.1.0"
+                    "generate_contamination_bed.py": "1.1.0",
+                    "python": "3.12.0"
                 },
                 "DIAMOND_BLASTX": {
                     "diamond": "2.2.1"
                 },
                 "DIAMOND_BLAST_CHUNK_TO_FULL": {
-                    "python": "3.9.1",
-                    "blast_hit_chunk_coords_to_full_coords": 1.0
+                    "blast_hit_chunk_coords_to_full_coords.py": 1.0,
+                    "python": "3.9.1"
                 },
                 "FASTXALIGN_MINIMAP2ALIGN": {
                     "slice_fasta.py": "1.0.0",
@@ -75,61 +83,61 @@
                     "fcsadaptor": "0.5.0"
                 },
                 "FILTER_BARCODE": {
-                    "python": "3.12.0",
                     "biopython": 1.81,
-                    "filter_barcode_blast_results": 1.0
+                    "filter_barcode_blast_results.py": 1.0,
+                    "python": "3.12.0"
                 },
                 "FILTER_COMMENTS": {
                     "coreutils": 9.1
                 },
                 "FILTER_FASTA": {
+                    "filter_fasta_by_length.py": "1.2.0",
                     "python": "3.9.1",
-                    "sanitise_input_fasta_file": "1.3.0",
-                    "filter_fasta_by_length": "1.2.0"
+                    "sanitise_input_fasta_file.py": "1.3.0"
                 },
                 "FILTER_VECSCREEN_RESULTS": {
-                    "python": "3.9.1",
-                    "VSlistTo1HitPerLine": 1.0
+                    "VSlistTo1HitPerLine.py": 1.0,
+                    "python": "3.9.1"
                 },
                 "GC_CONTENT": {
-                    "python": "3.9.1",
-                    "gc_content": 1.0
+                    "gc_content.py": 1.0,
+                    "python": "3.9.1"
                 },
                 "GENERATE_HTML_REPORT": {
-                    "python": "3.8.6",
+                    "generate_html_report.py": 1.0,
                     "jinja2": "2.11.2",
                     "pandas": "1.0.5",
-                    "generate_html_report": 1.0
+                    "python": "3.8.6"
                 },
                 "GET_LINEAGE_FOR_KRAKEN": {
-                    "python": "3.11.0",
-                    "pandas": "1.5.2",
                     "general_purpose_functions.py": "1.0.0",
-                    "get_lineage_for_kraken_results.py": 1.0
+                    "get_lineage_for_kraken_results.py": 1.0,
+                    "pandas": "1.5.2",
+                    "python": "3.11.0"
                 },
                 "GET_LINEAGE_FOR_TOP": {
-                    "python": "3.9.1",
-                    "get_lineage_for_top": "1.0.0"
+                    "get_lineage_for_top.py": "1.0.0",
+                    "python": "3.9.1"
                 },
                 "GNU_SORT": {
                     "coreutils": 9.5
                 },
                 "GZIP": {
-                    "gunzip": 1.13
+                    "gzip": 1.13
                 },
                 "KMER_COUNT_DIM_REDUCTION": {
-                    "python": "3.11.8",
-                    "pandas": "2.2.1",
-                    "tensorflow": "2.15.0",
-                    "scikit-learn": "1.4.1.post1",
-                    "umap-learn": "0.5.5",
+                    "kmer_count_dim_reduction.py": 1.0,
                     "matplotlib": "3.8.0",
-                    "kmer_count_dim_reduction.py": 1.0
+                    "pandas": "2.2.1",
+                    "python": "3.11.8",
+                    "scikit-learn": "1.4.1.post1",
+                    "tensorflow": "2.15.0",
+                    "umap-learn": "0.5.5"
                 },
                 "KMER_COUNT_DIM_REDUCTION_COMBINE_CSV": {
-                    "python": "3.11.0",
+                    "kmer_count_dim_reduction_combine_csv.py": 1.0,
                     "pandas": "1.5.2",
-                    "kmer_count_dim_reduction_combine_csv.py": null
+                    "python": "3.11.0"
                 },
                 "KRAKEN2_KRAKEN2": {
                     "kraken2": "2.1.6",
@@ -143,19 +151,19 @@
                 },
                 "REFORMAT_DIAMOND_OUTFMT6": {
                     "python": "3.9.1",
-                    "reformat_diamond_outfmt6": 1.0
+                    "reformat_diamond_outfmt6.py": 1.0
                 },
                 "REFORMAT_FULL_OUTFMT6": {
                     "python": "3.9.1",
-                    "reformat_blast_outfmt6": "1.0.0"
+                    "reformat_blast_outfmt6.py": "1.0.0"
                 },
                 "REFORMAT_NPY_2_CSV": {
-                    "python": "3.10.12",
-                    "npy_2_csv.py": "1.0.0"
+                    "npy_2_csv.py": "1.0.0",
+                    "python": "3.10.12"
                 },
                 "REFORMAT_TO_HITS_FILE": {
-                    "python": "3.9.1",
-                    "convert_to_hits": "2.0.0"
+                    "convert_to_hits.py": "2.0.0",
+                    "python": "3.9.1"
                 },
                 "SAMTOOLS_DICT": {
                     "samtools": "1.23.1"
@@ -183,6 +191,10 @@
                     "python": "3.12.0",
                     "trim_Ns.py": 1.0
                 },
+                "VALIDATE_TAXID": {
+                    "find_taxid_in_taxdump.py": "1.1.1",
+                    "python": "3.9.1"
+                },
                 "Workflow": {
                     "sanger-tol/ascc": "v1.0.0"
                 }
@@ -193,7 +205,6 @@
                 "asccTinyTest_V2_HAPLO/KRAKEN2/asccTinyTest_V2_HAPLO.kraken2.classifiedreads.txt",
                 "asccTinyTest_V2_HAPLO/KRAKEN2/asccTinyTest_V2_HAPLO.kraken2.report.txt",
                 "asccTinyTest_V2_HAPLO/KRAKEN2/asccTinyTest_V2_HAPLO_nt_kraken_lineage_file.txt",
-                "asccTinyTest_V2_HAPLO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_HAPLO/ascc_main_output",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_HAPLO/ascc_main_output/asccTinyTest_V2_HAPLO_filtered.fasta",
@@ -334,7 +345,6 @@
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO.kraken2.classifiedreads.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO.kraken2.report.txt",
                 "asccTinyTest_V2_MITO/KRAKEN2/asccTinyTest_V2_MITO_nt_kraken_lineage_file.txt",
-                "asccTinyTest_V2_MITO/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_MITO/ascc_main_output",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_MITO/ascc_main_output/asccTinyTest_V2_MITO_filtered.fasta",
@@ -431,7 +441,6 @@
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/asccTinyTest_V2_PRIMARY.kraken2.classifiedreads.txt",
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/asccTinyTest_V2_PRIMARY.kraken2.report.txt",
                 "asccTinyTest_V2_PRIMARY/KRAKEN2/asccTinyTest_V2_PRIMARY_nt_kraken_lineage_file.txt",
-                "asccTinyTest_V2_PRIMARY/KRAKEN2/versions.yml",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_contamination_check_merged_table.csv",
                 "asccTinyTest_V2_PRIMARY/ascc_main_output/asccTinyTest_V2_PRIMARY_filtered.fasta",
@@ -809,10 +818,10 @@
             ],
             true
         ],
-        "timestamp": "2026-10-22T14:43:36.66977104",
+        "timestamp": "2026-10-23T14:20:12.629240908",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.0"
+            "nextflow": "26.04.6"
         }
     }
 }

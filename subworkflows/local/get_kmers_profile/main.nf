@@ -18,9 +18,6 @@ workflow GET_KMERS_PROFILE {
     autoencoder_epochs_count            // channel [ val(integer) ]
 
     main:
-    ch_versions     = channel.empty()
-
-
     //
     // LOGIC: REFACTORING REFERENCE TUPLE
     //
@@ -29,7 +26,6 @@ workflow GET_KMERS_PROFILE {
             tuple([id: meta.id, single_end: true], file)
         }
         .set { modified_input }
-
 
     //
     // MODULE: PRODUCE KMER COUNTS (USING KMER-COUNTER)
@@ -44,7 +40,6 @@ workflow GET_KMERS_PROFILE {
         .map { meta, fasta, npy -> tuple(meta, fasta, npy) }
         .set { reformat_npy_input }
 
-
     //
     // MODULE: CONVERT NPY TO CSV FORMAT
     //
@@ -52,8 +47,6 @@ workflow GET_KMERS_PROFILE {
         reformat_npy_input,  // val(meta), path(fasta), path(npy)
         kmer_size                  // val kmer_size
     )
-    ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)
-
 
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
@@ -74,7 +67,6 @@ workflow GET_KMERS_PROFILE {
 
         }
 
-
     //
     // MODULE: DIMENSIONALITY REDUCTION OF KMER COUNTS, USING SPECIFIED METHODS
     //
@@ -84,8 +76,6 @@ workflow GET_KMERS_PROFILE {
         dim_reduction.n_neighbors_setting,  // val n_neighbors_setting
         dim_reduction.epoch_count           // val autoencoder_epochs_count
     )
-    ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION.out.versions)
-
 
     //
     // LOGIC: PREPARING INPUT TO COMBINE OUTPUT CSV FOR EACH METHOD
@@ -99,7 +89,6 @@ workflow GET_KMERS_PROFILE {
         .map { meta, file -> tuple([ id: meta.id ], file) }
         .ifEmpty { tuple([:], []) }
 
-
     //
     // LOGIC: Collect the results directories from KMER_COUNT_DIM_REDUCTION
     //
@@ -109,14 +98,12 @@ workflow GET_KMERS_PROFILE {
         .groupTuple(by: [0])
         .set { collected_results_dirs }
 
-
     //
     // MODULE: COMBINE OUTPUTS OF MULTIPLE METHODS
     //
     KMER_COUNT_DIM_REDUCTION_COMBINE_CSV (
         collected_files_for_combine
     )
-    ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
                         .map { meta, file -> tuple([ id: meta.id ], file) }
                         .ifEmpty { tuple([:], []) }
@@ -125,5 +112,4 @@ workflow GET_KMERS_PROFILE {
     combined_csv
     collected_dirs  = collected_results_dirs
     kmers_results
-    versions        = ch_versions
 }

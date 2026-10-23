@@ -105,7 +105,6 @@ workflow ASCC {
     ESSENTIAL_JOBS(
         genomic_genomes
     )
-    ch_versions             = ch_versions.mix(ESSENTIAL_JOBS.out.versions)
     ej_dot_genome           = ESSENTIAL_JOBS.out.dot_genome
     ej_gc_coverage          = ESSENTIAL_JOBS.out.gc_content_txt
     ej_trailing_ns          = ESSENTIAL_JOBS.out.trailing_ns_report
@@ -147,8 +146,6 @@ workflow ASCC {
         params.dimensionality_reduction_methods,
         autoencoder_epochs_count
     )
-    ch_versions         = ch_versions.mix(GET_KMERS_PROFILE.out.versions)
-
 
     //
     // LOGIC: AT THIS POINT THE META CONTAINS JUNK THAT CAN 'CONTAMINATE' MATCHES,
@@ -216,7 +213,6 @@ workflow ASCC {
         nt_database_path.first(),
         ncbi_ranked_lineage_path.first()
     )
-    ch_versions         = ch_versions.mix(EXTRACT_NT_BLAST.out.versions)
     ch_nt_blast         = EXTRACT_NT_BLAST.out.ch_blast_hits
                             .map { meta, file -> [[id: meta.id ], file] }
                             .ifEmpty { [[:],[]] }
@@ -299,7 +295,6 @@ workflow ASCC {
             params.run_organellar_blast in genomicConditionals()
         }
     )
-    ch_versions     = ch_versions.mix(ORGANELLAR_BLAST.out.versions)
 
     ch_organellar_rprt = ORGANELLAR_BLAST.out.organelle_report
         .branch { meta, file ->
@@ -335,7 +330,6 @@ workflow ASCC {
         ch_barcodes,
         duplicated_db.pacbio_db
     )
-    ch_versions         = ch_versions.mix(PACBIO_BARCODE_CHECK.out.versions)
     ch_barcode_check    = PACBIO_BARCODE_CHECK.out.filtered.ifEmpty{ [[:],[]] }
 
 
@@ -430,7 +424,6 @@ workflow ASCC {
         },
         vecscreen_database_path.first()
     )
-    ch_versions         = ch_versions.mix(RUN_VECSCREEN.out.versions)
     ch_vecscreen        = RUN_VECSCREEN.out.vecscreen_contam.ifEmpty{ [[:],[]] }
 
 
@@ -445,7 +438,6 @@ workflow ASCC {
         nt_kraken_db_path.first(),
         ncbi_ranked_lineage_path.first()
     )
-    ch_versions         = ch_versions.mix(RUN_NT_KRAKEN.out.versions)
     ch_kraken1          = RUN_NT_KRAKEN.out.classified.ifEmpty{ [[:], []] }
     ch_kraken2          = RUN_NT_KRAKEN.out.report.ifEmpty{ [[:], []] }
     ch_kraken3          = RUN_NT_KRAKEN.out.lineage.ifEmpty{ [[:], []] }
@@ -525,7 +517,6 @@ workflow ASCC {
             scientific_name
 
         )
-        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
         ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
                                     .map{ meta, _file -> [[ id: meta.id ], _file] }
@@ -593,7 +584,6 @@ workflow ASCC {
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
-        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
         ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
         ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
@@ -765,7 +755,6 @@ workflow ASCC {
         btk_lineage_mapping_file.first(),
         taxid.first(),
     )
-    ch_versions     = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
     //-------------------------------------------------------------------------
@@ -789,7 +778,6 @@ workflow ASCC {
         MERGE_BTK_DATASETS (
             merged_channel
         )
-        ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
                                     .map{ meta, _tsv -> tuple([id: meta.id], _tsv) }
         merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
@@ -849,7 +837,6 @@ workflow ASCC {
         ASCC_MERGE_TABLES (
             merge_input_channel
         )
-        ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
         merged_table            = ASCC_MERGE_TABLES.out.merged_table
                                     .map{ meta, _file -> tuple([id: meta.id], _file) }
