@@ -48,7 +48,6 @@ workflow RUN_NT_KRAKEN {
         KRAKEN2_KRAKEN2.out.classified_reads_assignment,
         ncbi_rankedlineage_path
     )
-    ch_versions     = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
     lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
                         .map { meta, file -> tuple([ id: meta.id ], file) }
                         .ifEmpty { tuple([:], []) }

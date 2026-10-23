@@ -525,7 +525,6 @@ workflow ASCC {
             scientific_name
 
         )
-        ch_versions             = ch_versions.mix(CREATE_BTK_DATASET.out.versions)
 
         ch_create_summary       = CREATE_BTK_DATASET.out.create_summary
                                     .map{ meta, _file -> [[ id: meta.id ], _file] }
@@ -593,7 +592,6 @@ workflow ASCC {
             autofilter_input_formatted.fcs_file,
             autofilter_input_formatted.ncbi_rank
         )
-        ch_versions             = ch_versions.mix(AUTOFILTER_AND_CHECK_ASSEMBLY.out.versions)
         ch_autofilt_assem       = AUTOFILTER_AND_CHECK_ASSEMBLY.out.decontaminated_assembly
         ch_autofilt_removed_seqs= AUTOFILTER_AND_CHECK_ASSEMBLY.out.removed_seqs
         ch_autofilt_raw_report  = AUTOFILTER_AND_CHECK_ASSEMBLY.out.raw_report
@@ -765,7 +763,6 @@ workflow ASCC {
         btk_lineage_mapping_file.first(),
         taxid.first(),
     )
-    ch_versions     = ch_versions.mix(SANGER_TOL_BTK.out.versions)
 
 
     //-------------------------------------------------------------------------
@@ -789,7 +786,6 @@ workflow ASCC {
         MERGE_BTK_DATASETS (
             merged_channel
         )
-        ch_versions             = ch_versions.mix(MERGE_BTK_DATASETS.out.versions)
         busco_merge_btk         = MERGE_BTK_DATASETS.out.busco_summary_tsv
                                     .map{ meta, _tsv -> tuple([id: meta.id], _tsv) }
         merged_ds               = MERGE_BTK_DATASETS.out.merged_datasets
@@ -849,7 +845,6 @@ workflow ASCC {
         ASCC_MERGE_TABLES (
             merge_input_channel
         )
-        ch_versions             = ch_versions.mix(ASCC_MERGE_TABLES.out.versions)
 
         merged_table            = ASCC_MERGE_TABLES.out.merged_table
                                     .map{ meta, _file -> tuple([id: meta.id], _file) }

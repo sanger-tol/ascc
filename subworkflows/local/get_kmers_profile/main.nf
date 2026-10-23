@@ -52,7 +52,6 @@ workflow GET_KMERS_PROFILE {
         reformat_npy_input,  // val(meta), path(fasta), path(npy)
         kmer_size                  // val kmer_size
     )
-    ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)
 
 
     //
@@ -84,7 +83,6 @@ workflow GET_KMERS_PROFILE {
         dim_reduction.n_neighbors_setting,  // val n_neighbors_setting
         dim_reduction.epoch_count           // val autoencoder_epochs_count
     )
-    ch_versions = ch_versions.mix(KMER_COUNT_DIM_REDUCTION.out.versions)
 
 
     //
@@ -116,7 +114,6 @@ workflow GET_KMERS_PROFILE {
     KMER_COUNT_DIM_REDUCTION_COMBINE_CSV (
         collected_files_for_combine
     )
-    ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
                         .map { meta, file -> tuple([ id: meta.id ], file) }
                         .ifEmpty { tuple([:], []) }

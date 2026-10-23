@@ -25,7 +25,6 @@ workflow PREPARE_BLASTDB {
         barcodes_file,
         barcode_names
     )
-    ch_versions             = ch_versions.mix(CHECK_BARCODE.out.versions)
 
 
     //

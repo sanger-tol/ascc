@@ -98,7 +98,6 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         channel.value(paramsJson),                                             // JSON string can be used multiple times
         channel.fromPath("${projectDir}/assets/css/*.css").collect()           // channel.of one (CSS files)
     )
-    ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 
     emit:
     report    = GENERATE_HTML_REPORT.out.report

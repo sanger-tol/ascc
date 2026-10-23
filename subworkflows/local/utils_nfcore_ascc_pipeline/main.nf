@@ -146,7 +146,6 @@ workflow PIPELINE_INITIALISATION {
         channel.of(params.taxid),
         channel.of(params.ncbi_taxonomy_path)
     )
-    ch_versions = ch_versions.mix(VALIDATE_TAXID.out.versions)
 
 
     //
@@ -219,7 +218,6 @@ workflow PIPELINE_INITIALISATION {
         CHECK_NT_BLAST_TAXONOMY(
             params.nt_database_path
         )
-        ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
 
         // Check the result and fail if needed
         CHECK_NT_BLAST_TAXONOMY.out.status
