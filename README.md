@@ -26,28 +26,6 @@ The only required input file for ASCC is the assembly FASTA file, with the addit
      alt="sanger-tol/ascc overview diagram"
      width="800">
 
-1. Below is a list of the tools contained within the workflow. A combination of any, all or none can be selected as part of the pipeline:
-
-- FCS-GX
-- FCS-adaptor
-- VecScreen
-- Tiara
-- BlobToolKit Pipeline
-- nt BLAST
-- nr and Uniprot Diamond BLASTX
-- GC and coverage calculation
-- PacBio barcodes screen
-- Organellar BLAST
-- nt Kraken2
-- kmer counting + dimensionality reduction
-
-2. Postprocessing of the results is then performed based on the selection of the above tools. The possible outputs are:
-
-- CSV table of sequence classification results
-- - CSV table of average coverage per phylum
-- BlobToolKit dataset
-- Adapter and organellar contamination report files
-
 Watch a more in-depth introduction to the ASCC pipeline from this session at the [Biodiversity Genomics Academy](https://www.thebgacademy.org/)
 
 <a href="https://www.youtube.com/watch?v=jrqjbwrg9-c">
@@ -82,15 +60,15 @@ test_sample1,PLASTID,/path/to/plastid_assembly.fa
 Each row represents an assembled haplotype or organelle of the sample. The sample ID (the first column) is defined by the user. `assembly_type` should be one of either `PRIMARY` (for primary assembly), `HAPLO` (for haplotigs assembly), `MITO` (for mitochondrial assembly) and `PLASTID` for plastid assembly.
 This setup assumes that you have an assembly where the primary contigs or scaffolds are in a separate file from the haplotype scaffolds or contigs. It also assumes that you have separated the organellar sequences out of the main assembly into separate files.
 
-It is okay to leave out assembly components from the run. E.g. if your assembly does not have a mitochondrial sequence, you can leave the row with the `MITO` tag out. If your assembly does not have a plastid sequence, you can leave the row with the `PLASTID` tag out.
-The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md).
+Assembly components are optional, e.g. if the assembly does not have a mitochondrial sequence, the row with the `MITO` tag can be omitted. The same is true of the `PLASTID` tag if the assembly does not contain any plastid sequences.
+The params-input yaml will need to contain the following data detailed [here](./docs/usage.md).
 
-The documentation of the kmers dimensionality reduction is covered in separate markdown files dedicated to this topic:
+The documentation of the kmers dimensionality reduction is covered in separate documents dedicated to this topic:
 
 - [Kmers Dimensionality Reduction](./docs/kmers_dim_reduction.md)
 - [Kmers Autoencoder](./docs/kmers_autoencoder.md)
 
-Now, you can run the pipeline using:
+Run the pipeline using the following command:
 
 ```bash
 nextflow run sanger-tol/ascc \
@@ -112,7 +90,7 @@ A description of the output files of the pipeline can be found [here](./docs/out
 
 ## Credits
 
-sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims), [Will Eagles](https://github.com/weaglesBio) and and [Jim Downie](https://github.com/prototaxites).
+sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims), [Will Eagles](https://github.com/weaglesBio), [Tom Walters-Brown](https://github.com/tbrown91) and [Jim Downie](https://github.com/prototaxites).
 
 Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato).
 
