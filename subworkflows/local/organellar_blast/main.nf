@@ -55,7 +55,7 @@ workflow ORGANELLAR_BLAST {
                 .map { meta, db -> [meta.id, db] },
             by: 0
         )
-        .map { og, meta, ref, db -> [meta, ref, db] }
+        .map { _og, meta, ref, db -> [meta, ref, db] }
         .multiMap{ meta, ref, blast_db ->
             reference_tuple:    [meta, ref]
             blastdb_tuple:      [meta, blast_db]
