@@ -14,10 +14,10 @@
 
 ## Introduction
 
-**sanger-tol/ascc** is a bioinformatics pipeline developed to detect sequences from non-target species (cobionts and/or contaminants) in _de-novo_ genome assembly datasets. ASCC stands for Assembly Screen for Cobionts and Contaminants and was initially developed as part of the ![Aquatic Symbiosis Genomics Project](https://www.aquaticsymbiosisgenomics.org/) but is now run routinely as part of the standard genome engine within the ![Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/). ASCC aggregates key outputs such as taxonomic identification using BLAST, FCS-GX, Tiara, Diamond BLASTX and KRAKEN, adapter and barcode screening via FCS adapter and VecScreen, GC and coverage calculation, kmer composition, and visualisation via the BlobToolKit pipeline. The main outputs are:
+**sanger-tol/ascc** is a bioinformatics pipeline developed to detect sequences from non-target species (cobionts and/or contaminants) in _de-novo_ genome assembly datasets. ASCC stands for Assembly Screen for Cobionts and Contaminants and was initially developed as part of the [Aquatic Symbiosis Genomics Project](https://www.aquaticsymbiosisgenomics.org/) but is now run routinely as part of the standard genome engine within the [Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/). ASCC aggregates key outputs such as taxonomic identification using BLAST, FCS-GX, Tiara, Diamond BLASTX and KRAKEN, adapter and barcode screening via FCS adapter and VecScreen, GC and coverage calculation, kmer composition, and visualisation via the BlobToolKit pipeline. The main outputs are:
 
 - A CSV table with taxonomic classifications of the sequences from the constituent tools.
-- An augmented BlobToolKit dataset, containing the standard outputs from the ![BlobToolKit](https://github.com/sanger-tol/blobtoolkit) alongside further taxonomic information, such as those identified by FCS-GX.
+- An augmented BlobToolKit dataset, containing the standard outputs from the [BlobToolKit](https://github.com/sanger-tol/blobtoolkit) alongside further taxonomic information, such as those identified by FCS-GX.
 - Individual report files for adapter, PacBio barcode and organellar contaminants.
 
 The only required input file for ASCC is the assembly FASTA file, with the addition of the TaxID of the target species. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species, and comprehensive runs with assemblies with complex composition, such as those from metagenomic or symbiotic studies.
@@ -46,15 +46,9 @@ The only required input file for ASCC is the assembly FASTA file, with the addit
 - BlobToolKit dataset
 - Adapter and organellar contamination report files
 
-Watch a more in-depth introduction to the ASCC pipeline from this session at the ![Biodiversity Genomics Academy]()
+Watch a more in-depth introduction to the ASCC pipeline from this session at the [Biodiversity Genomics Academy](https://www.thebgacademy.org/)
 
-<iframe width="560" height="315"
-  src="https://www.youtube.com/embed/jrqjbwrg9-c"
-  title="YouTube video player"
-  frameborder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowfullscreen>
-</iframe>
+[![ASCC](./docs/images/youtube_thumbnail.png)](https://www.youtube.com/watch?v=jrqjbwrg9-c)
 
 ## Installation of the databases
 
