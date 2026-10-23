@@ -53,6 +53,8 @@ There is a Biodiversity Genomics Academy video that introduces the ASCC pipeline
 
 Instructions for installing the databases can be found [here](./docs/databases.md).
 
+The PacBio barcode screen uses the bundled file [`assets/ascc_database_fasta/SMRTbell_HiFi_adapter_DB.fasta`](./assets/ascc_database_fasta/SMRTbell_HiFi_adapter_DB.fasta). It is the [PacBio SMRTbell adapter indexes FASTA](https://www.pacb.com/wp-content/uploads/SMRTbell_adapter_indexes.fasta_.zip) from the [PacBio multiplexing page](https://www.pacb.com/multiplexing/), plus the extra HiFi and TruSeq adapter sequences from the [HiFi adapter database](https://github.com/sanger-tol/hifi-trimmer/blob/main/examples/HiFi_adapter_DB.fasta) in sanger-tol/hifi-trimmer. Barcodes that are identical in both sources are kept once. For `bc1001`–`bc1022`, where the two sources disagree, the file keeps the PacBio SMRTbell sequence.
+
 For testing the pipeline with tiny files, there is a script that downloads a small assembly FASTA file (a fragment of a Plasmodium genome) and small database files. The script can be found [here](./assets/download_tiny_database_test_files.sh). This is just for testing if running the pipeline works without a crash. These database files a database files are just small fragments of real databases, so they are not meant for production runs.
 
 ## Usage
