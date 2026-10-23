@@ -1,0 +1,12 @@
+name: kmer_count_dim_reduction
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.9
+  - pandas=2.2.1
+  - tensorflow=2.15.0
+  - scikit-learn=1.4.1
+  - umap-learn=0.5.5
+  - matplotlib=3.8.0

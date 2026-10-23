@@ -1,100 +1,194 @@
 # sanger-tol/ascc: Usage
 
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
+## :warning: Please read this documentation on the sanger-tol website: [https://pipelines.tol.sanger.ac.uk/ascc/](https://pipelines.tol.sanger.ac.uk/ascc/)
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+> [!WARNING]
+> If certain steps such as FCS-GX fail multiple times, especially when using Singularity containers then please use `export NXF_SINGULARITY_NEW_PID_NAMESPACE=false`. This is a known issue when some tools in singularity containers will have PID namespace conflicts and crash when anything else it attempting to access the same files. In our case the database files.
 
-## Samplesheet input
+## Input files
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+### Full YAML
 
-```bash
---input '[path to samplesheet file]'
+At this time, the _full_ yaml can look quite daunting, for example:
+
+```yaml
+scientific_name: scientific name of the assembled organism
+taxid: NCBI taxonomy ID of the assembled species (or genus). Should be a numerical value, e.g. 352914. You can look up the TaxID for your species at https://ncbi.nlm.nih.gov/taxonomy
+reads_path:
+  - List of file paths
+reads_layout: Layout of the reads included in this run (SINGLE or PAIRED) this value should represent all input reads.
+reads_type: determines which minimap2 preset will be used for read mapping. While minimap2 supports various read types (Illumina paired-end, PacBio CLR, PacBio HiFi, Oxford Nanopore), currently only "hifi" is implemented in this pipeline
+pacbio_barcode_file: full path to the PacBio multiplexing barcode sequences database file. A FASTA file with known PacBio multiplexing barcode sequences is bundled with this pipeline, at "/ascc/assets/pacbio_adaptors.fa")
+pacbio_barcode_names: comma separated list of names of PacBio multiplexing barcodes that were used in the sequencing of this sample. For example: "bc2008,bc2009". The barcode names exist in the barcode sequences database file ("/ascc/assets/pacbio_adaptors.fa")
+kmer_length: kmer length for kmer counting (which is done using kcounter). Default: 7
+dimensionality_reduction_methods: a comma separated list of methods for the dimensionality reduction of kmer counts. The available methods are the following: ["pca","umap","t-sne","isomap","lle_standard","lle_hessian","lle_modified","mds","se","random_trees","kernel_pca","pca_svd","autoencoder_sigmoid","autoencoder_linear","autoencoder_selu","autoencoder_relu","nmf"]. The default method is "pca". This field should be formatted as a YAML list, e.g. ["pca","random_trees"]
+nt_database_path: path to the directory that contains the NCBI nt BLAST database. The database MUST have built-in taxonomy (this is a requirement since the pipeline no longer uses accession2taxid files). Should end with a trailing slash
+nt_database_prefix: prefix for the NCBI nt database. Default: "nt"
+nt_kraken_database_path: path + prefix to the Kraken database made from NCBI nt database sequences
+ncbi_ranked_lineage_path: path to NCBI ranked lineage file (e.g. "/taxdump/rankedlineage.dmp")
+busco_lineages_folder: path to BUSCO 5 lineages directory. Should end with a trailing slash
+busco_lineages: a comma separated list of BUSCO lineages that will be used in the sanger-tol/blobtoolkit pipeline run. For example: "diptera_odb10,insecta_odb10". Available lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/
+fcs_gx_database_path: path to the directory containing the FCS-GX database. Should end with a trailing slash
+vecscreen_database_path: path to the FASTA file with adapter sequences for VecScreen ("/ascc/assets/vecscreen_adaptors_for_screening_euks.fa")
+diamond_uniprot_database_path: path to a Diamond database made from Uniprot protein sequences ("uniprot_reference_proteomes_with_taxonnames.dmnd"). The database needs to have built-in taxonomy
+diamond_nr_database_path: path to a Diamond database made from NCBI nr protein sequences ("nr.dmnd"). The database needs to have built-in taxonomy
+seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
+seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
+n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
+
+// The below params can have values of ['both','genomic','organellar','off'] unless the default value here is 'genomic', in that case their values are ONLY ['genomic','off']
+// These flags control which proccesses are run in any particular run of the pipeline.
+run_essentials: "both"
+run_kmers: "genomic"
+run_tiara: "both"
+run_coverage: "both"
+run_nt_blast: "both"
+run_nr_diamond: "both"
+run_uniprot_diamond: "both"
+run_kraken: "both"
+run_fcsgx: "both"
+run_fcs_adaptor: "both"
+run_vecscreen: "both"
+run_btk_busco: "genomic"
+run_pacbio_barcodes: "both"
+run_organellar_blast: "genomic"
+run_autofilter_assembly: "genomic"
+run_create_btk_dataset: "both"
+run_merge_datasets: "genomic"
 ```
 
-### Multiple runs of the same sample
+When running the pipeline in a production environment, consider addopting a profile like system such as shown in `assets/production/*` and `conf/production.config`. This will mean adding a profile to the nextflowl.config file of the pipeline, if you have questions please open an issue on GitHub.
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+### Samplesheet
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+```
+sample,assembly_type,assembly_file
+asccTinyTest_V2,PRIMARY,/path/to/primary.fa{.gz} - essential
+asccTinyTest_V2,HAPLO,/path/to/haplo.fa{.gz} - if available
+asccTinyTest_V2,MITO,/path/to/mitochondrion.fa{.gz} - if available
+asccTinyTest_V2,PLASTID,/path/to/plastid.fa{.gz} - if available
+
 ```
 
-### Full samplesheet
+If you don't want to run any organellar jobs at all, rather than change all run\_{process} flags, you can use `--genomic_only`.
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+### FCS samplesheet <ADVANCED USE ONLY>
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+This only needs to be generated when running fcs-gx externally to ASCC and in conjuction with the flgs `--fcs_override` and `--fcs_override_samplesheet` parameters.
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+The fcs_files denoted in the below example are the parsed fcs output which is a format required for processes post-fcs in ASCC.
+
+This samplesheet can be generated by the supplied script `bin/ascc_fcsgx_wrapper.py` which will filter the fasta, run fcs-gx and parse the output into the correct format. Failure to shortcut either of the python steps with lead to the pipeline failing or reporting incorrect contamination levels across the genome.
+
 ```
+sample,assembly_type,fcs_file
+asccTinyTest_V2,PRIMARY,/path/to/primary/ - essential
+asccTinyTest_V2,HAPLO,/path/to/haplo/ - if available
+asccTinyTest_V2,MITO,/path/to/mitochondrion/ - if available
+asccTinyTest_V2,PLASTID,/path/to/plastid/ - if available
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+```
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run sanger-tol/ascc --input ./samplesheet.csv --outdir ./results  -profile docker
+nextflow run sanger-tol/ascc \
+    -params-file {INPUT YAML} \
+    --outdir {OUTDIR} \
+    -profile singularity
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
+
+Main pipeline components:
+
+- `kmers` : K-mer counting and dimensionality reduction analysis using kcounter, scikit-learn, and TensorFlow
+- `tiara` : Deep learning-based classification of sequences into prokaryotic and eukaryotic origin using Tiara
+- `coverage` : Analysis of sequence coverage using minimap2-based read mapping
+- `nt_blast` : Nucleotide BLAST search against NCBI nt database for taxonomic classification
+- `nr_diamond` : DIAMOND BLASTX search against NCBI non-redundant protein database
+- `uniprot_diamond` : DIAMOND BLASTX search against UniProt database
+- `kraken` : Taxonomic classification using Kraken2 against NCBI nt database
+- `fcs-gx` : NCBI's FCS-GX (foreign contamination screen with cross-species aligner)
+- `fcs-adaptor` : NCBI's FCS-Adaptor (foreign contamination screen for adapter sequences)
+- `vecscreen` : NCBI's vector and adapter contamination screening (older tool than FCS-Adaptor but allows using a custom database)
+- `btk_busco` : BlobToolKit Pipeline (sequence classification using BUSCO, Diamond and BLAST)
+- `pacbio_barcodes` : Detection of PacBio barcode contamination using BLAST
+- `organellar_blast` : BLAST-based detection of organellar sequences
+- `autofilter_assembly`: Automated assembly filtering (requires `tiara` and `fcs-gx`)
+- `ALL` : Run all available components
+- `NONE` : Run no components
+
+Dependencies:
+
+- `autofilter_assembly` requires both `tiara` and `fcs-gx` to be run first
+
+Outputs:
+
+- Results are collected as BlobToolKit datasets and CSV tables
+- Adapter and organellar contamination reports are provided as text files
+
+### Example usage
+
+#### Comprehensive analysis
+
+```
+nextflow run sanger-tol/ascc -params-file config.yaml --outdir results --run_kmers genomic --run_tiara genomic --run_nr_diamond genomic --run_kraken genomic --run_fcsgx genomic --run_btk_busco genomic --run_nt_blast both --run_coverage both -profile singularity
+```
+
+These flags can be used in the config.yaml to simplify the CLI, by default all analyses are run.
+
+#### Run everything except specific components
+
+```
+nextflow run sanger-tol/ascc --input config.yaml --outdir results --run_vecscreen off --run_pacbio_barcodes off -profile singularity
+```
+
+These flags can be used in the config.yaml to simplify the CLI.
+For advanced users, that understand the process of either adding a new config or modifyig an existing config, you can add a custom config file such as `-profile production` to minimise the CLI command.
+In a case of using the `production.config`, your input data should look like the contents of the `./assets/production_testing/*` folder.
+
+### Simple output
 
 Note that the pipeline will create the following files in your working directory:
 
 ```bash
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
-.nextflow_log       # Log file from Nextflow
+  - {SAMPLE}_{ASSEMBLY_TYPE}
+    - ascc_main_output/
+    - autofilter/
+    - average_coverage/
+    - create_btk_dataset/
+    - fcs_adaptor/
+    - fcsgx_data/
+    - filter-barcode/
+    - filtered_fasta/
+    - gc_content/
+    - generate_samplesheet/
+    - merged_tables/
+    - kraken2/
+    - organellar_contamination_recomendations/
+    - organellar_contamination_recomendations_{SAMPLE}_{ASSEMBLY_TYPE}/
+    - sanger-tol-btk/
+    - summarise_vecscreen_output/
+    - tiara_raw_output/
+    - trailingns/
+    - autofiltering_done_indicator.txt # Autofilter completion file (Indicates whether or not sanger-tol-btk should be run)
+  - workflow_completed.txt # Successful pipeline completion file
+  - .nextflow_log # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
-
-Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
-
-> [!WARNING]
-> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/running/run-pipelines#configuring-pipelines), other infrastructural tweaks (such as output directories), or module arguments (args).
-
-The above pipeline run specified with a params file in yaml format:
-
-```bash
-nextflow run sanger-tol/ascc -profile docker -params-file params.yaml
-```
-
-with:
-
-```yaml title="params.yaml"
-input: './samplesheet.csv'
-outdir: './results/'
-<...>
-```
-
-You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
-
 ### Updating the pipeline
 
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
+When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version.
+When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since.
+To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
 nextflow pull sanger-tol/ascc

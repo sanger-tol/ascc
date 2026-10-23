@@ -13,21 +13,18 @@
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "assembly_type": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "enum": ["PRIMARY", "HAPLO", "HAP1", "HAP2", "MITO", "PLASTID"]
             },
-            "fastq_2": {
+            "assembly_file": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.(fa|fa.gz|fna|fna.gz|fasta|fasta.gz)$",
+                "errorMessage": "Fasta file representing the genome assembly to be cleaned."
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "assembly_type", "assembly_file"]
     }
 }

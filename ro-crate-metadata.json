@@ -23,6 +23,9 @@
                     "@id": "assets/"
                 },
                 {
+                    "@id": "bin/"
+                },
+                {
                     "@id": "conf/"
                 },
                 {
@@ -107,17 +110,28 @@
             "dateCreated": "",
             "dateModified": "2026-10-22T09:38:13Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
-            "keywords": ["nf-core", "nextflow"],
-            "license": ["MIT"],
-            "name": ["sanger-tol/ascc"],
+            "keywords": [
+                "nf-core",
+                "nextflow"
+            ],
+            "license": [
+                "MIT"
+            ],
+            "name": [
+                "sanger-tol/ascc"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
             "sdPublisher": {
                 "@id": "https://nf-co.re/"
             },
-            "url": ["https://github.com/sanger-tol/ascc", "https://nf-co.re/sanger-tol/ascc/0.6.0/"],
-            "version": ["0.6.0"]
+            "url": [
+                "https://github.com/sanger-tol/ascc"
+            ],
+            "version": [
+                "0.6.0"
+            ]
         },
         {
             "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow",
@@ -178,6 +192,11 @@
             "@id": "assets/",
             "@type": "Dataset",
             "description": "Additional files"
+        },
+        {
+            "@id": "bin/",
+            "@type": "Dataset",
+            "description": "Scripts that must be callable from a pipeline process"
         },
         {
             "@id": "conf/",

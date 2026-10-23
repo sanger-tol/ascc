@@ -1,0 +1,69 @@
+{% extends "_base.html.jinja" %}
+
+{% block title %}ASCC run report - {{ sample_name if sample_name else "Unknown" }}{% endblock %}
+
+{% block page_header %}
+    {# Extract assembly component from meta.id if available #}
+    {% if meta is defined and meta.id is defined and sample_name is defined %}
+        {% set assembly_component = meta.id|replace(sample_name ~ '_', '') %}
+    {% else %}
+        {% set assembly_component = '' %}
+    {% endif %}
+
+    <h1>ASCC run report</h1>
+    {% if sample_name %}
+    <h2 class="subtitle">{{ sample_name }}{% if assembly_component %}, {{ assembly_component }}{% endif %}</h2>
+    {% endif %}
+{% endblock %}
+
+{% block tab_list %}
+    <ul>
+        <li><a href="#overview-tab">Overview</a></li>
+        <li><a href="#input-tab">Input</a></li>
+        <li><a href="#barcodes-tab">PacBio Barcodes</a></li>
+        <li><a href="#fcs-adaptor-tab">FCS-adaptor</a></li>
+        <li><a href="#fcs-gx-tab">FCS-GX</a></li> {# New FCS-GX Tab Link #}
+        <li><a href="#trim-ns-tab">Trailing Ns</a></li>
+        <li><a href="#vecscreen-tab">VecScreen</a></li>
+        <li><a href="#autofiltering-tab">Autofiltering</a></li>
+        <li><a href="#coverage-tab">Coverage</a></li>
+        <li><a href="#kmers-tab">K-mer Analysis</a></li>
+        <li><a href="#cobiont-tab">Cobiont Check Merged Table</a></li>
+    </ul>
+{% endblock %}
+
+{% block tab_panels %}
+    <div id="overview-tab">
+        {% include '_tab_overview.html.jinja' %}
+    </div>
+    <div id="input-tab">
+        {% include '_tab_input.html.jinja' %}
+    </div>
+    <div id="barcodes-tab">
+        {% include '_tab_barcodes.html.jinja' %}
+    </div>
+    <div id="fcs-adaptor-tab">
+        {% include '_tab_fcs_adaptor.html.jinja' %}
+    </div>
+    <div id="fcs-gx-tab">
+        {% include '_tab_fcs_gx.html.jinja' %}
+    </div>
+    <div id="trim-ns-tab">
+        {% include '_tab_trim_ns.html.jinja' %}
+    </div>
+    <div id="vecscreen-tab">
+        {% include '_tab_vecscreen.html.jinja' %}
+    </div>
+    <div id="autofiltering-tab">
+        {% include '_tab_autofiltering.html.jinja' %}
+    </div>
+    <div id="coverage-tab">
+        {% include '_tab_coverage.html.jinja' %}
+    </div>
+    <div id="kmers-tab">
+        {% include '_tab_kmers.html.jinja' %}
+    </div>
+    <div id="cobiont-tab">
+        {% include '_tab_cobiont.html.jinja' %}
+    </div>
+{% endblock %}

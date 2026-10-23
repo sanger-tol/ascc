@@ -1,0 +1,31 @@
+Changes in component 'nf-core/minimap2/align'
+'modules/nf-core/minimap2/align/meta.yml' is unchanged
+'modules/nf-core/minimap2/align/environment.yml' is unchanged
+Changes in 'minimap2/align/main.nf':
+--- modules/nf-core/minimap2/align/main.nf
++++ modules/nf-core/minimap2/align/main.nf
+@@ -50,20 +50,14 @@
+         $cigar_paf \\
+         $set_cigar_bam \\
+         $bam_output
+-
+-
+     """
+ 
+     stub:
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     def output_file = bam_format ? "${prefix}.bam" : "${prefix}.paf"
+     def bam_index = bam_index_extension ? "touch ${prefix}.bam.${bam_index_extension}" : ""
+-    def bam_input = "${reads.extension}".matches('sam|bam|cram')
+-    def target = reference ?: (bam_input ? error("BAM input requires reference") : reads)
+-
+     """
+     touch $output_file
+     ${bam_index}
+-
+     """
+ }
+
+'modules/nf-core/minimap2/align/tests/main.nf.test' is unchanged
+'modules/nf-core/minimap2/align/tests/main.nf.test.snap' is unchanged
+************************************************************

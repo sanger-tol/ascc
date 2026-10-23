@@ -17,6 +17,14 @@ include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
+// ASCC Custom param pre-processing
+include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
+include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
+include { CHECK_NT_BLAST_TAXONOMY   } from '../../../modules/local/check/nt_blast_taxonomy/main'
+include { FASTA_CLEAN_FAIDX         } from '../../nf-core/fasta_clean_faidx/main'
+
+include { validateRunParams        } from '../../../functions/local/run_param_validator'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     SUBWORKFLOW TO INITIALISE PIPELINE
@@ -54,8 +62,26 @@ workflow PIPELINE_INITIALISATION {
     // Validate parameters and generate parameter summary to stdout
     //
 
-    def before_text = ""
-    def after_text = ""
+    before_text = """
+-\033[2m----------------------------------------------------\033[0m-
+\033[0;34m   _____                               \033[0;32m _______   \033[0;31m _\033[0m
+\033[0;34m  / ____|                              \033[0;32m|__   __|  \033[0;31m| |\033[0m
+\033[0;34m | (___   __ _ _ __   __ _  ___ _ __ \033[0m ___ \033[0;32m| |\033[0;33m ___ \033[0;31m| |\033[0m
+\033[0;34m  \\___ \\ / _` | '_ \\ / _` |/ _ \\ '__|\033[0m|___|\033[0;32m| |\033[0;33m/ _ \\\033[0;31m| |\033[0m
+\033[0;34m  ____) | (_| | | | | (_| |  __/ |        \033[0;32m| |\033[0;33m (_) \033[0;31m| |____\033[0m
+\033[0;34m |_____/ \\__,_|_| |_|\\__, |\\___|_|        \033[0;32m|_|\033[0;33m\\___/\033[0;31m|______|\033[0m
+\033[0;34m                      __/ |\033[0m
+\033[0;34m                     |___/\033[0m
+\033[0;35m  ${workflow.manifest.name} ${workflow.manifest.version}\033[0m
+-\033[2m----------------------------------------------------\033[0m-
+        """
+    after_text = """${workflow.manifest.doi ? "\n* The pipeline\n" : ""}${workflow.manifest.doi.tokenize(",").collect { doi -> "    https://doi.org/${doi.trim().replace('https://doi.org/', '')}" }.join("\n")}${workflow.manifest.doi ? "\n" : ""}
+* The nf-core framework
+    https://doi.org/10.5281/zenodo.16754459
+
+* Software dependencies
+    https://github.com/sanger-tol/ascc/blob/main/CITATIONS.md
+"""
     if (monochrome_logs) {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
     }
@@ -82,33 +108,187 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
+
+    //
+    // FUNC: CHECK THE PARAMS
+    //
+    validateRunParams(params)
+
     //
     // Create channel from input file provided through params.input
     //
-
     channel
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
+            sample, type_of_assembly, assembly_file ->
+                return [
+                    [
+                        id: sample.id + '_' + type_of_assembly,
+                        assembly_type: type_of_assembly,
+                        single_end: true
+                    ],
+                    assembly_file
+                ]
         }
         .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
         .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
+            meta, fastas ->
+                return [ meta, fastas[0] ] // We are only expecting one fasta file per sample+haplo
         }
         .set { ch_samplesheet }
 
+
+    //
+    // MODULE: ENSURE THAT THE TAXID FOR THE INPUT GENOME IS INDEED IN THE TAXDUMP
+    //         MODULE DOES NOT OUTPUT ANYTHING BUT SHOULD KILL PIPELINE ON FAIL
+    //
+    VALIDATE_TAXID(
+        channel.of(params.taxid),
+        channel.of(params.ncbi_taxonomy_path)
+    )
+    ch_versions = ch_versions.mix(VALIDATE_TAXID.out.versions)
+
+
+    //
+    // SUBWORKFLOW: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
+    //
+    FASTA_CLEAN_FAIDX(
+        ch_samplesheet,
+        params.replace_dots,
+        false, // We do not need the sizes file, we generation one later on after second step of filtering.
+        params.get_dictionary
+    )
+
+
+    //
+    // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
+    //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
+    //
+    FASTA_CLEAN_FAIDX.out.reference
+        .branch{ meta, _fasta ->
+            organellar_genome: (meta.assembly_type in ["MITO", "PLASTID"])
+            genomic_genome: !(meta.assembly_type in ["MITO", "PLASTID"])
+            error: true
+        }
+        .set { branched_assemblies }
+
+
+    //
+    // NOTE: Setting the basic channels form the input
+    //
+    channel.fromPath(params.pacbio_barcode_file)
+        .set {barcode_data_file}
+
+    channel.of(params.fcs_gx_database_path)
+        .set { fcs_gx_database_path}
+
+
+    //
+    // SUBWORKFLOW: PREPARE THE MAKEBLASTDB INPUTS
+    //
+    ch_barcodes = params.pacbio_barcode_names ?
+        channel.of(params.pacbio_barcode_names) :
+        channel.empty()
+
+    PREPARE_BLASTDB (
+        params.sample_id,
+        params.reads_path,
+        params.reads_type,
+        barcode_data_file,
+        ch_barcodes
+    )
+    versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
+
+
+    //
+    // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
+    //
+    if ( params.run_coverage != "off" || params.run_btk != "off" ) {
+        ch_grabbed_reads_path       = channel.of(params.reads_path).collect()
+    } else {
+        ch_grabbed_reads_path       = []
+    }
+
+
+    //
+    // MODULE: CHECK IF NT BLAST DATABASE HAS TAXONOMY INCLUDED (ONLY IF NT BLAST IS INCLUDED)
+    // This check is specifically for the nt BLAST database used in the EXTRACT_NT_BLAST subworkflow,
+    // not for other BLAST databases used elsewhere in the pipeline (VecScreen, PacBio barcodes check, etc.)
+    //
+    if ( params.run_nt_blast != "off" ) {
+        CHECK_NT_BLAST_TAXONOMY(
+            params.nt_database_path
+        )
+        ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
+
+        // Check the result and fail if needed
+        CHECK_NT_BLAST_TAXONOMY.out.status
+            .map { blast_status_string -> blast_status_string.trim() }  // Trim any whitespace
+            .subscribe { status ->
+                if (status == "nt_database_taxonomy_files_not_found") {
+                    log.error "NT BLAST database taxonomy check failed"
+                    exit 1, "The NT BLAST database does not have taxonomy included. Please see the error message above for details."
+                }
+            }
+    }
+
+
+    //
+    // NOTE: FCS OVERRIDE - THIS SHOULD BE TEMPORARY
+    //          FCS DOESN'T LIKE COMPLETING WHEN USED IN THE PIPELINE
+    //          THIS IS LIKELY AN INFRASTRUCTURE ISSUE AND SO WE HAVE AN
+    //          OVERRIDE SO THAT WE CAN RUN FCS EXTERNALLY AND INGEST THE RESULTS
+    //
+
+    if (params.fcs_override) {
+        channel
+            .fromList(
+                samplesheetToList(params.fcs_override_samplesheet, "${projectDir}/assets/fcs_schema_input.json"))
+            .map {
+                sample, type_of_assembly, fcs_file ->
+                    return [[ id: sample.id + '_' + type_of_assembly, assembly_type: type_of_assembly, single_end:true ], fcs_file ]
+            }
+            .groupTuple()
+            .map {
+                meta, files ->
+                    def meta2 = meta + [process: "FCSGX_RESULT"]
+                    return [ meta2, files[0] ] // We are only expecting one fasta file per sample+haplo
+            }
+            .set { ch_fcs_samplesheet }
+
+        ch_fcs_samplesheet
+            .branch{ meta, _file ->
+                organellar_fcs: (meta.assembly_type in ["MITO", "PLASTID"])
+                genomic_fcs: !(meta.assembly_type in ["MITO", "PLASTID"])
+                error: true
+            }
+            .set { ch_fcs_final_samplesheet }
+
+        geno_fcs_samplesheet    = ch_fcs_final_samplesheet.genomic_fcs
+        orga_fcs_samplesheet    = ch_fcs_final_samplesheet.organellar_fcs
+
+    } else {
+        geno_fcs_samplesheet    = channel.empty()
+        orga_fcs_samplesheet    = channel.empty()
+    }
+
+
     emit:
-    samplesheet = ch_samplesheet
-    versions    = ch_versions
+    samplesheet             = ch_samplesheet
+    sample_id               = params.sample_id
+    main_genomes            = branched_assemblies.genomic_genome
+    organellar_genomes      = branched_assemblies.organellar_genome
+    samtools_dict           = FASTA_CLEAN_FAIDX.out.dict
+    stats_json              = FASTA_CLEAN_FAIDX.out.sequence_description
+    barcodes_file           = barcode_data_file
+    barcodes                = ch_barcodes
+    pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
+    fcs_gx_database         = fcs_gx_database_path
+    collected_reads         = ch_grabbed_reads_path
+    geno_fcs_samplesheet    = geno_fcs_samplesheet
+    orga_fcs_samplesheet    = orga_fcs_samplesheet
+
+    versions                = ch_versions
 }
 
 /*
@@ -174,6 +354,7 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs ]
 }
+
 //
 // Generate methods description for MultiQC
 //

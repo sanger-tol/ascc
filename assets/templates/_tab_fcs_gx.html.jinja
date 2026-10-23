@@ -1,0 +1,77 @@
+{% from "_macros.html.jinja" import source_files %}
+
+<div class="narrow-table-wrapper">
+<h2>FCS-GX Reports</h2>
+<div class="narrow-text-container">
+<p>FCS-GX (Foreign Contamination Screen with cross-species aligner) is NCBI software that detects contaminants in genome assemblies using cross-species alignment. It uses its own database provided by NCBI to identify sequences that may originate from species other than the target organism. The reports show potential contaminant locations and their taxonomic classification.</p>
+{% if fcsgx_override_note %}
+    <div class="no-data-message">
+        <p>{{ fcsgx_override_note }}</p>
+    </div>
+{% endif %}
+</div>
+
+{% set fcs_gx_files = [] %}
+{% if fcs_gx_report_file %}
+    {% set _ = fcs_gx_files.append(fcs_gx_report_file) %}
+{% endif %}
+{% if fcs_gx_taxonomy_file %}
+    {% set _ = fcs_gx_files.append(fcs_gx_taxonomy_file) %}
+{% endif %}
+{{ source_files(fcs_gx_files) }}
+
+{# FCS-GX Report Section #}
+<h3>FCS-GX Report ({{ sample_name }}{% if assembly_component %}_{{ assembly_component }}{% endif %}.fcs_gx_report.txt)</h3>
+
+{% if fcs_gx_report_metadata %}
+    <h4>Metadata</h4>
+    <div class="narrow-table-wrapper">
+        {{ fcs_gx_report_metadata|safe }}
+    </div>
+{% endif %}
+
+{% set no_data_message_report = "<p>No data rows found in the FCS-GX report file.</p>" %}
+{% if fcs_gx_report_table and fcs_gx_report_table|striptags|trim|length > 0 and fcs_gx_report_table != no_data_message_report %}
+    <h4>Data</h4>
+    <div class="table-responsive">
+        {{ fcs_gx_report_table|safe }}
+    </div>
+{% elif fcs_gx_report_content and not fcs_gx_report_metadata and fcs_gx_report_content|striptags|trim|length > 0 %}
+    <h4>Data</h4>
+    <pre><code>{{ fcs_gx_report_content }}</code></pre>
+{% else %}
+    {# If table is empty or not available, or contains the no_data_message, and content is also empty or not available #}
+    <h4>Data</h4>
+    <div id="fcs_gx_no_data_message" class="no-data-message">
+        <p>No data rows found in the FCS-GX report file.</p>
+    </div>
+{% endif %}
+
+{# FCS-GX Taxonomy Report Section #}
+<h3>FCS-GX Taxonomy Report ({{ sample_name }}{% if assembly_component %}_{{ assembly_component }}{% endif %}.taxonomy.rpt)</h3>
+
+{% if fcs_gx_taxonomy_metadata %}
+    <h4>Metadata</h4>
+    <div class="narrow-table-wrapper">
+        {{ fcs_gx_taxonomy_metadata|safe }}
+    </div>
+{% endif %}
+
+{% set no_data_message_taxonomy = "<p>No data rows found in the FCS-GX taxonomy report file.</p>" %}
+{% if fcs_gx_taxonomy_table and fcs_gx_taxonomy_table|striptags|trim|length > 0 and fcs_gx_taxonomy_table != no_data_message_taxonomy %}
+    <h4>Data</h4>
+    <div class="table-responsive">
+        {{ fcs_gx_taxonomy_table }}
+    </div>
+{% elif fcs_gx_taxonomy_content and fcs_gx_taxonomy_content|striptags|trim|length > 0 %}
+    {# Fallback for original content if it's not empty #}
+    <h4>Data</h4>
+    <pre><code>{{ fcs_gx_taxonomy_content }}</code></pre>
+{% else %}
+    {# If table is empty or not available, or contains the no_data_message, and content is also empty or not available #}
+    <h4>Data</h4>
+    <div id="fcs_gx_taxonomy_no_data_message" class="no-data-message">
+        <p>No data rows found in the FCS-GX taxonomy report file.</p>
+    </div>
+{% endif %}
+</div>
