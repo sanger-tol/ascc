@@ -3,6 +3,59 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - Blue Bowls [28/08/2025]
+
+Release 12 of sanger-tol/ascc and the first full release and folds in changes made to the pre-release 0.7.0 and 0.7.1 versions.
+
+### `Fixes`
+
+- Update the nf-core template to 4.1.0
+- Update NF-Schema to 2.7.3 to take advantage cli arg type casting
+- Add `busco_lineage_mapping_file` parameter to allow custom lineage mapping files
+  - These are stored in the `assets/` directory and are generated from the official busco mappings
+  - The two options are:
+    - `mapping_taxids-busco_dataset_name.eukaryota_odb10.2019-12-16.txt`
+    - `mapping_taxids-busco_dataset_name.eukaryota_odb12.2025-01-15.txt`
+- Updated `RUN_READ_COVERAGE` which utilises the `SANGER-TOL` subworkflow `FASTX_MAP_LONG_READS` for single end reads
+- Fixes to param evaluations which control process execution
+- Fixes to correct a `[ConcurrentModificationException]` stopping the use of FCS_ADAPTOR output
+- `KMER_COUNTER` has been replaced with `COBIONTID_KMERCOUNTER` to increase efficiency
+  - This required the addition of `REFORMAT_NPY_2_CSV` to generate the kmer table
+- `FCSGX_RUNGX` has been updated to not depend on `modulecmd` instead, production profiles will instead default to a local installation of fcs_gx. Avoiding containerised options provided in the module
+- Samtools modules have been updated to `1.23.1`
+- Updated the main workflow so that `ORGANELLAR` and `GENOMIC` subworkflows have been merged into a single `ASCC` workflow [#216](https://github.com/sanger-tol/ascc/issues/216)
+  - This was an artifact from when the two would have been doing significantly different processes
+- Updating `SANGER_TOL_BTK` to 0.11.1 (Bulbasaur H1) - NOTE: WILL NEED TO BE UPDATED TO 11.2
+- Created the `functions/local/ascc_utils.nf` containing some common utility functions for ASCC workflows
+- `run_*` params are now validated for any of the user input mix [#239](https://github.com/sanger-tol/ascc/issues/239)
+- Output from `AUTOFILTER` module has been further divided so that `REVIEW` and `INFO` lines in the `FCSGX` output are counted separately [#235](https://github.com/sanger-tol/ascc/issues/235)
+- Added `FASTA_CLEAN_FAIDX` nf-core subworkflow and added the output to tests
+- `countFasta` has been changed to, instead, use the `GENOME_STATS` json output which avoids some compute on the head
+- Cleaned the input channels to the major workflows by removing out-of-date/out-of-use channels
+
+### `Parameters`
+
+| Old Parameter | New Parameter                |
+| ------------- | ---------------------------- |
+| NA            | --busco_lineage_mapping_file |
+| NA            | --get_dictionary             |
+| NA            | --replace_dots               |
+
+### `Dependencies`
+
+| Module                  | Tool                | Old Version | New Versions  |
+| ----------------------- | ------------------- | ----------- | ------------- |
+| `KMER_COUNTER`          | kmer_counter.py     | 1.0         | NA            |
+| `COBIONTID_KMERCOUNTER` | kmer-counter        | NA          | 1.1.2         |
+| `REFORMAT_NPY_2_CSV`    | npy_2_csv.py        | NA          | 1.0.0         |
+| `SAMTOOLS_DICT`         | samtools            | 1.22.1      | 1.23.1        |
+| `SAMTOOLS_FAIDX`        | samtools            | 1.22.1      | 1.23.1        |
+| `SAMTOOLS_SORT`         | samtools            | 1.22.1      | 1.23.1        |
+| `MINIMAP2_ALIGN2`       | minimap2 + samtools | 2.29 + 1.21 | 2.30 + 1.23.1 |
+| `BLAST_BLASTN`          | blastn              | 2.16.0+     | 2.17.0+       |
+| `BLAST_MAKEBLASTDB`     | blastn              | 2.16.0+     | 2.17.0+       |
+| `DIAMOND_BLASTX`        | diamond             | 2.1.12      | 2.2.1         |
+
 ## [0.6.0] - Red Notebook [28/01/2025]
 
 THIS IS STILL AN IN-DEVELOPMENT PROJECT SO THERE MAY BE BUGS.
@@ -44,6 +97,7 @@ Release 10 of sanger-tol/ascc, addition of a report generator.
   - `CAT_CAT`
   - `GET_LARGEST_SCAFFOLD` as we now nolonger need a comparator to use TBI or CSI indexes.
 - Updated to NF-Core template 3.5.2
+- Update to param evaluation which was allowing certain subworkflows to run without needing to.
 
 ### `Bugs`
 

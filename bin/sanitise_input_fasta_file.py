@@ -40,14 +40,15 @@ Additional logging functionality added
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import general_purpose_functions as gpf
 import argparse
-import textwrap
-import sys
-import tempfile
-import re
 import json
 import os
+import re
+import sys
+import tempfile
+import textwrap
+
+import general_purpose_functions as gpf
 
 
 def is_all_n_sequence(seq):
@@ -65,7 +66,7 @@ def sanitise_header(header):
     """Replace problematic characters in FASTA headers with underscores."""
     # Remove the '>' character if present at the start
     if header.startswith(">"):
-        header = header[1:]
+        header = header.removeprefix(">")
 
     # Replace problematic characters with underscores
     sanitised = re.sub(r"[,;\s|:]", "_", header)
@@ -87,9 +88,7 @@ def parse_args(argv=None):
         help="Delimiter string for splitting FASTA headers. Default: any whitespace character",
         default="",
     )
-    parser.add_argument(
-        "--allow_duplicate_headers", dest="allow_duplicate_headers", action="store_true"
-    )
+    parser.add_argument("--allow_duplicate_headers", dest="allow_duplicate_headers", action="store_true")
     parser.add_argument(
         "--keep_n_sequences",
         action="store_true",
@@ -171,11 +170,7 @@ def main(
                             "details": "Sequence consisted entirely of N's and was skipped",
                         }
                     )
-                    sys.stderr.write(
-                        "Skipping all-N sequence: {}\n".format(
-                            current_header[1:].strip()
-                        )
-                    )
+                    sys.stderr.write("Skipping all-N sequence: {current_header[1:].strip()}\n")
                 else:
                     print(current_header)
                     print(sequence)
@@ -203,11 +198,7 @@ def main(
                         log_stats["has_issues"] = True
 
                         # Only log details for a limited number of headers
-                        if (
-                            max_detailed_changes > 0
-                            and len(log_stats["detailed_changes"])
-                            < max_detailed_changes
-                        ):
+                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
                             log_stats["detailed_changes"].append(
                                 {
                                     "header": header_content,
@@ -229,10 +220,7 @@ def main(
                 if shortened_header != original_header:
                     log_stats["headers_shortened"] += 1
                     log_stats["has_issues"] = True
-                    if (
-                        max_detailed_changes > 0
-                        and len(log_stats["detailed_changes"]) < max_detailed_changes
-                    ):
+                    if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
                         log_stats["detailed_changes"].append(
                             {
                                 "header": original_header[1:],
@@ -257,10 +245,7 @@ def main(
 
                 # Log the sanitised header if it differs from the shortened header
                 if current_header[1:] != shortened_header[1:]:
-                    if (
-                        max_detailed_changes > 0
-                        and len(log_stats["detailed_changes"]) < max_detailed_changes
-                    ):
+                    if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
                         log_stats["detailed_changes"].append(
                             {
                                 "header": shortened_header[1:],
@@ -275,11 +260,7 @@ def main(
                     if allow_duplicate_headers is False:
                         log_stats["duplicate_headers_detected"] += 1
                         log_stats["has_issues"] = True
-                        if (
-                            max_detailed_changes > 0
-                            and len(log_stats["detailed_changes"])
-                            < max_detailed_changes
-                        ):
+                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
                             log_stats["detailed_changes"].append(
                                 {
                                     "header": current_header[1:],
@@ -288,9 +269,7 @@ def main(
                                 }
                             )
                         sys.stderr.write(
-                            "Duplicate FASTA headers ({}) were found in the input file ({}) after truncating the headers with a delimiter\n".format(
-                                current_header[1:], fasta_path
-                            )
+                            "Duplicate FASTA headers ({current_header[1:]}) were found in the input file ({fasta_path}) after truncating the headers with a delimiter\n"
                         )
                         # Update log file before exiting if specified
                         if log_file:
@@ -301,11 +280,7 @@ def main(
                     else:
                         log_stats["duplicate_headers_detected"] += 1
                         log_stats["has_issues"] = True
-                        if (
-                            max_detailed_changes > 0
-                            and len(log_stats["detailed_changes"])
-                            < max_detailed_changes
-                        ):
+                        if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) < max_detailed_changes:
                             log_stats["detailed_changes"].append(
                                 {
                                     "header": current_header[1:],
@@ -323,9 +298,7 @@ def main(
                 non_atgc_count = sum(1 for c in line_upper if c not in "ATGCN\n\r")
 
                 if non_atgc_count > 0:
-                    if current_header not in log_stats.get(
-                        "sequences_with_changes", {}
-                    ):
+                    if current_header not in log_stats.get("sequences_with_changes", {}):
                         log_stats["sequences_with_non_atgc"] += 1
                         log_stats["has_issues"] = True
 
@@ -380,10 +353,7 @@ def main(
             sys.exit(125)
 
     # Add summary if we limited the detailed changes
-    if (
-        max_detailed_changes > 0
-        and len(log_stats["detailed_changes"]) >= max_detailed_changes
-    ):
+    if max_detailed_changes > 0 and len(log_stats["detailed_changes"]) >= max_detailed_changes:
         log_stats["detailed_changes_truncated"] = True
         log_stats["detailed_changes"].append(
             {

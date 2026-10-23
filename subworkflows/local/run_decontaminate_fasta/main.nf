@@ -55,7 +55,7 @@ workflow RUN_DECONTAMINATE_FASTA {
                 }
             }
         }
-        .set{ merge_input_channel}
+        .set{ merge_input_channel }
 
 
     //
@@ -63,7 +63,7 @@ workflow RUN_DECONTAMINATE_FASTA {
     //
     DECONTAMINATE_GENERATE_BED (
         merge_input_channel,
-        [[:],[]]
+        tuple([:], [])
     )
     ch_versions     = ch_versions.mix(DECONTAMINATE_GENERATE_BED.out.versions)
 

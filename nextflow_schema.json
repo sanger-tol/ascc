@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/sanger-tol/ascc/main/nextflow_schema.json",
     "title": "sanger-tol/ascc pipeline parameters",
     "description": "Assembly Screen for Cobionts and Contaminants",
     "type": "object",
@@ -62,7 +62,7 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/fasta",
-                    "pattern": "^\\S+\\.fa$",
+                    "pattern": "^\\S+\\.fa(sta)?$",
                     "description": "Fasta format file containing barcode data",
                     "fa_icon": "fas fa-file-lines"
                 },
@@ -119,6 +119,11 @@
                     "type": "string",
                     "description": "CSV list of lineages to use in run",
                     "fa_icon": "fas fa-input-text"
+                },
+                "busco_lineage_mapping_file": {
+                    "type": "string",
+                    "description": "Path to BUSCO lineage to taxid mapping file",
+                    "fa_icon": "fas fa-file-lines"
                 },
                 "fcs_gx_database_path": {
                     "type": "string",
@@ -178,6 +183,18 @@
                     "fa_icon": "fas fa-calculator",
                     "description": "Number of reads to map to a reference in a single chunk."
                 },
+                "get_dictionary": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fas fa-hashtag",
+                    "description": "Whether to get the samtools dictionary for the input FASTA file."
+                },
+                "replace_dots": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-dot-circle",
+                    "description": "Whether to replace dots in the input FASTA file with underscores."
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -191,16 +208,10 @@
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
-                "run_essentials": {
-                    "type": "string",
-                    "description": "Run essential jobs on assemblies",
-                    "enum": ["genomic", "organellar", "both", "off"],
-                    "default": "both"
-                },
                 "run_kmers": {
                     "type": "string",
                     "description": "Run kmer jobs on assemblies",
-                    "enum": ["genomic", "both", "off"],
+                    "enum": ["genomic", "off"],
                     "default": "genomic"
                 },
                 "run_tiara": {
@@ -285,7 +296,7 @@
                     "type": "string",
                     "description": "Run autofilter_assembly jobs on assemblies",
                     "enum": ["genomic", "both", "off"],
-                    "default": "genomic"
+                    "default": "both"
                 },
                 "run_create_btk_dataset": {
                     "type": "string",
@@ -421,13 +432,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "hidden": true
-                },
-                "hook_url": {
-                    "type": "string",
-                    "description": "Incoming hook URL for messaging service",
-                    "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "validate_params": {

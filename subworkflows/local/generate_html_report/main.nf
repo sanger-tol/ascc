@@ -32,8 +32,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     // LOGIC: COMBINE ALL INPUT CHANNELS AND ANNOTATE THEM WITH PROCESS TAGS
     //
     reference_fasta
-        .map{ meta, file -> [[id: meta.id], file] }
-
+        .map{ meta, file -> tuple([id: meta.id], file) }
         // REMAINDER means that if there isn't a matching
         // meta.id, it adds a [] in it's place therefore
         // retaining the empty channel
@@ -45,7 +44,11 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         .join(fcs_adaptor
             .map { meta, files ->
                         // LOGIC: SORT INTO PREDICTABLE ORDER
-                        def sorted_files = files.sort { file ->
+                        // NOTE: `sort(false)` returns a NEW list. The default `sort{}`
+                        //       mutates in place, and the list emitted by `groupTuple()`
+                        //       is the SAME instance shared with every other consumer of
+                        //       this channel -> `ConcurrentModificationException`.
+                        def sorted_files = (files ?: []).sort(false) { file ->
                             file.toString().contains('_euk') ? 0 :
                             file.toString().contains('_prok') ? 1 : 2
                         }

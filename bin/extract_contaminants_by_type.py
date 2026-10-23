@@ -4,13 +4,15 @@ Script from James Torrance (jt8)
 Minor modifications by Eerik Aunin (ea10) and Damon-Lee Pointon (@dp24/@DLBPointon)
 """
 
+import argparse
+import gzip
 import os
 import re
+import sys
+
 import BedTools
-from Bio import SeqIO
-import gzip
-import argparse
 import general_purpose_functions as gpf
+from Bio import SeqIO
 
 
 def main():
@@ -50,31 +52,22 @@ def main():
                 if section_name_match:
                     section_name = section_name_match.group(1)
                     if section_name in coord_list_for_section_and_sequence:
-                        exit("Duplicate section name: " + section_name + "\n")
+                        sys.exit("Duplicate section name: " + section_name + "\n")
 
                 if not (re.search("^[#=]", line)):
                     fields = line.split("\t")
                     if len(fields) > 7:
                         if section_name not in coord_list_for_section_and_sequence:
                             coord_list_for_section_and_sequence[section_name] = {}
-                        if (
-                            fields[0]
-                            not in coord_list_for_section_and_sequence[section_name]
-                        ):
-                            coord_list_for_section_and_sequence[section_name][
-                                fields[0]
-                            ] = []
+                        if fields[0] not in coord_list_for_section_and_sequence[section_name]:
+                            coord_list_for_section_and_sequence[section_name][fields[0]] = []
                         if fields[0] not in coord_list_for_section_and_sequence["ALL"]:
                             coord_list_for_section_and_sequence["ALL"][fields[0]] = []
 
                         coords = [int(fields[6]), int(fields[7])]
                         coords = sorted(coords)
-                        coord_list_for_section_and_sequence[section_name][
-                            fields[0]
-                        ].append(coords)
-                        coord_list_for_section_and_sequence["ALL"][fields[0]].append(
-                            coords
-                        )
+                        coord_list_for_section_and_sequence[section_name][fields[0]].append(coords)
+                        coord_list_for_section_and_sequence["ALL"][fields[0]].append(coords)
 
             # margins = [0,10000]
             margins = [0]
@@ -82,27 +75,14 @@ def main():
             # Write BED file
             for section_name in coord_list_for_section_and_sequence:
                 # Only print sections that have data- but always produce an "ALL" file
-                if (
-                    len(coord_list_for_section_and_sequence[section_name]) > 0
-                    or section_name == "ALL"
-                ):
+                if len(coord_list_for_section_and_sequence[section_name]) > 0 or section_name == "ALL":
                     output_section_name = section_name
                     output_section_name = re.sub("(\s|\:)", "_", section_name)
-                    bed_file = (
-                        args.extracts_dir
-                        + assembly_name
-                        + "."
-                        + output_section_name
-                        + ".bed"
-                    )
+                    bed_file = args.extracts_dir + assembly_name + "." + output_section_name + ".bed"
                     bedtools = BedTools.BedTools()
-                    bedtools.coords_to_bed(
-                        coord_list_for_section_and_sequence[section_name], bed_file
-                    )
+                    bedtools.coords_to_bed(coord_list_for_section_and_sequence[section_name], bed_file)
                     merged_bed_file = bedtools.sort_and_merge_bed_file(bed_file)
-                    merged_coord_list_for_sequence = bedtools.bed_to_coords(
-                        merged_bed_file
-                    )
+                    merged_coord_list_for_sequence = bedtools.bed_to_coords(merged_bed_file)
 
                     # Get lengths
                     length_file = args.extracts_dir + assembly_name + ".lengths"
@@ -111,9 +91,7 @@ def main():
                     fastalength(assembly_file, length_file)
                     length_for_sequence = parse_fastalength_file(length_file)
 
-                    coverage_file_base_name = (
-                        args.extracts_dir + assembly_name + "." + output_section_name
-                    )
+                    coverage_file_base_name = args.extracts_dir + assembly_name + "." + output_section_name
                     write_coverage_file(
                         coverage_file_base_name,
                         merged_bed_file,
@@ -122,13 +100,7 @@ def main():
                     )
 
                     for margin in margins:
-                        output_file = (
-                            args.extracts_dir
-                            + assembly_name
-                            + "."
-                            + output_section_name
-                            + ".extracts.2.fa"
-                        )
+                        output_file = args.extracts_dir + assembly_name + "." + output_section_name + ".extracts.2.fa"
                         output_handle = open(output_file, "w")
 
                         handle = None
@@ -140,21 +112,13 @@ def main():
 
                         for record in SeqIO.parse(handle, "fasta"):
                             if record.id in merged_coord_list_for_sequence:
-                                for coord_pair in merged_coord_list_for_sequence[
-                                    record.id
-                                ]:
-                                    extracted_sequence = extract_sequence(
-                                        record, coord_pair[0], coord_pair[1], margin
-                                    )
-                                    SeqIO.write(
-                                        [extracted_sequence], output_handle, "fasta"
-                                    )
+                                for coord_pair in merged_coord_list_for_sequence[record.id]:
+                                    extracted_sequence = extract_sequence(record, coord_pair[0], coord_pair[1], margin)
+                                    SeqIO.write([extracted_sequence], output_handle, "fasta")
                         handle.close()
 
 
-def write_coverage_file(
-    coverage_file_base_name, merged_bed_file, length_for_sequence, bedtools
-):
+def write_coverage_file(coverage_file_base_name, merged_bed_file, length_for_sequence, bedtools):
     # Record coverage
     merged_coord_list_for_sequence = bedtools.bed_to_coords(merged_bed_file)
     coverage_for_sequence = bedtools.coverage_for_bed_file_by_scaffold(merged_bed_file)
@@ -173,12 +137,8 @@ def write_coverage_file(
 
     # Take the stem name for the file, and print to various files, with c coverage threshold, without, and per line
 
-    filtered_coverage_scaffold_file = (
-        coverage_file_base_name + ".filtered_scaffold_coverage.bed"
-    )
-    unfiltered_coverage_scaffold_file = (
-        coverage_file_base_name + ".unfiltered_scaffold_coverage.bed"
-    )
+    filtered_coverage_scaffold_file = coverage_file_base_name + ".filtered_scaffold_coverage.bed"
+    unfiltered_coverage_scaffold_file = coverage_file_base_name + ".unfiltered_scaffold_coverage.bed"
 
     filtered_coverage_scaffold_handle = open(filtered_coverage_scaffold_file, "w")
     unfiltered_coverage_scaffold_handle = open(unfiltered_coverage_scaffold_file, "w")
@@ -216,12 +176,8 @@ def write_coverage_file(
     unfiltered_coverage_scaffold_handle.close()
     filtered_coverage_scaffold_handle.close()
 
-    filtered_coverage_region_file = (
-        coverage_file_base_name + ".filtered_region_coverage.bed"
-    )
-    unfiltered_coverage_region_file = (
-        coverage_file_base_name + ".unfiltered_region_coverage.bed"
-    )
+    filtered_coverage_region_file = coverage_file_base_name + ".filtered_region_coverage.bed"
+    unfiltered_coverage_region_file = coverage_file_base_name + ".unfiltered_region_coverage.bed"
 
     filtered_coverage_region_handle = open(filtered_coverage_region_file, "w")
     unfiltered_coverage_region_handle = open(unfiltered_coverage_region_file, "w")

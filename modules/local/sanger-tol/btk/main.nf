@@ -13,6 +13,7 @@ process SANGER_TOL_BTK {
     path blobtoolkit_trace_config
     val busco_lineages_folder
     val busco_lineages
+    val lineage_mapping_file
     val taxon
 
     output:
@@ -20,7 +21,7 @@ process SANGER_TOL_BTK {
     path("${prefix}_btk_out/blobtoolkit/plots"),                            emit: plots
     path("${prefix}_btk_out/blobtoolkit/${prefix}*/summary.json.gz"),       emit: summary_json
     path("${prefix}_btk_out/busco"),                                        emit: busco_data
-    path("${prefix}_btk_out/multiqc"),                                      emit: multiqc_report
+    path("${prefix}_btk_out/multiqc_report.html"),                          emit: multiqc_report
     path("blobtoolkit_pipeline_info"),                                      emit: pipeline_info
     path "versions.yml",                                                    emit: versions
 
@@ -53,16 +54,17 @@ process SANGER_TOL_BTK {
     mv $reference ${prefix}.fasta
 
     nextflow run ${pipeline} \\
-        -r $pipeline_version \\
-        -c $blobtoolkit_config_file \\
+        -r ${pipeline_version} \\
+        -c ${blobtoolkit_config_file} \\
         ${trace_config} \\
         -profile ${profiles} \\
         --input "\$(realpath $samplesheet_csv)" \\
         --outdir ${prefix}_btk_out \\
         --fasta ${prefix}.fasta \\
-        --busco $busco_lineages_folder \\
-        --busco_lineages $busco_lineages \\
-        --taxon $taxon \\
+        --busco ${busco_lineages_folder} \\
+        --busco_lineages ${busco_lineages} \\
+        --lineage_tax_ids ${lineage_mapping_file} \\
+        --taxon ${taxon} \\
         --taxdump "\$(realpath $tax_dump)" \\
         --blastp "\$(realpath blastp.dmnd)" \\
         --blastn "\$(realpath $blastn)" \\
@@ -97,10 +99,7 @@ process SANGER_TOL_BTK {
     touch ${prefix}_btk_out/busco/test.fasta.txt
     touch ${prefix}_btk_out/busco/test.json
 
-    mkdir ${prefix}_btk_out/multiqc
-    mkdir ${prefix}_btk_out/multiqc/multiqc_data
-    mkdir ${prefix}_btk_out/multiqc/multiqc_plots
-    touch ${prefix}_btk_out/multiqc/multiqc_report.html
+    touch ${prefix}_btk_out/multiqc_report.html
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
 
