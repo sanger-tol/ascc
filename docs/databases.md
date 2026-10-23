@@ -22,10 +22,10 @@ kraken2-build --build --threads 16 --db nt
 Warning: building this database requires hundreds of gigabytes of memory.
 See their Manual at: https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown
 
-## BUSCO5 database
+## BUSCO6 database
 
 Download from from:
-https://busco-data.ezlab.org/v5/data/.
+https://busco-data.ezlab.org/v6/data/
 
 ## NCBI taxdump, NCBI nt database and Uniprot Diamond database
 

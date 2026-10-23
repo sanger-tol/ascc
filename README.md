@@ -14,46 +14,29 @@
 
 ## Introduction
 
-**sanger-tol/ascc** is a bioinformatics pipeline that is meant for detecting cobionts and contaminants in genome assemblies. ASCC stands for Assembly Screen for Cobionts and Contaminants. The pipeline was initially made for the Aquatic Symbiosis Genomics project but is now used for more than just that. The pipeline aggregates tools such as BLAST, GC and coverage calculation, FCS-adaptor, FCS-GX, VecScreen, BlobToolKit, the BlobToolKit pipeline, Tiara, Kraken, Diamond BLASTX, and kmer counting and with kcounter+scipy. The main outputs are:
+**sanger-tol/ascc** is a bioinformatics pipeline developed to detect sequences from non-target species (cobionts and/or contaminants) in _de-novo_ genome assembly datasets. ASCC stands for Assembly Screen for Cobionts and Contaminants and was initially developed as part of the [Aquatic Symbiosis Genomics Project](https://www.aquaticsymbiosisgenomics.org/) but is now run routinely as part of the standard genome engine within the [Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/). ASCC aggregates key outputs such as taxonomic identification using BLAST, FCS-GX, Tiara, Diamond BLASTX and KRAKEN, adapter and barcode screening via FCS adapter and VecScreen, GC and coverage calculation, kmer composition, and visualisation via the BlobToolKit pipeline. The main outputs are:
 
-- A CSV table with taxonomic classifications of the sequences from the consitutent tools.
-- A BlobToolKit dataset that can contain variables that are not present in BlobToolKit datasets produced by the BlobToolKit pipeline (https://github.com/sanger-tol/blobtoolkit) on its own. For example, ASCC can incorporate FCS-GX results into a BlobToolKit dataset.
+- A CSV table with taxonomic classifications of the sequences from the constituent tools.
+- An augmented BlobToolKit dataset, containing the standard outputs from the [BlobToolKit](https://github.com/sanger-tol/blobtoolkit) alongside further taxonomic information, such as those identified by FCS-GX.
 - Individual report files for adapter, PacBio barcode and organellar contaminants.
-  The only required input file for ASCC is the assembly FASTA file. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species and comprehensive runs with assemblies with complex composition.
 
-![sanger-tol/ascc overview diagram](./docs/images/ASCC-diagram.png)
+The only required input file for ASCC is the assembly FASTA file, with the addition of the TaxID of the target species. Optional inputs are sequencing reads and organellar FASTA files. All individual components of the pipeline are optional, so it is possible to do lightweight runs with assemblies that have a simple composition of species, and comprehensive runs with assemblies with complex composition, such as those from metagenomic or symbiotic studies.
 
-The pipeline is in a raw state of development and has not yet been thorougly tested. Its components are functional, though, so it possible to run it.
+<img src="./docs/images/ASCC-diagram.png"
+     alt="sanger-tol/ascc overview diagram"
+     width="800">
 
-1. Run a selection of processes from the list below (pick any that you think will be useful).
+Watch a more in-depth introduction to the ASCC pipeline from this session at the [Biodiversity Genomics Academy](https://www.thebgacademy.org/)
 
-- FCS-GX
-- FCS-adaptor
-- VecScreen
-- Tiara
-- BlobToolKit Pipeline
-- nt BLAST
-- nr and Uniprot Diamond BLASTX
-- GC and coverage calculation
-- PacBio barcodes screen
-- Organellar BLAST
-- nt Kraken2
-- kmer counting + dimensionality reduction
-
-2. Postprocess the results of the previous step to produce summary files. What processes were run in the previous step determines what summary files can be generated. The possible outputs are:
-
-- CSV table of sequence classification results
-- BlobToolKit dataset
-- CSV table of average coverage per phylum
-- Adapter and organellar contamination report files
-
-There is a Biodiversity Genomics Academy video that introduces the ASCC pipeline on Youtube: https://www.youtube.com/watch?v=jrqjbwrg9-c.
+<a href="https://www.youtube.com/watch?v=jrqjbwrg9-c">
+  <img src="./docs/images/youtube_thumbnail.png" width="640" alt="ASCC">
+</a>
 
 ## Installation of the databases
 
-Instructions for installing the databases can be found [here](./docs/databases.md).
+ASCC relies on a number of databases, which must be installed for the respective tool to run. Instructions for installing the databases can be found [here](./docs/databases.md).
 
-For testing the pipeline with tiny files, there is a script that downloads a small assembly FASTA file (a fragment of a Plasmodium genome) and small database files. The script can be found [here](./assets/download_tiny_database_test_files.sh). This is just for testing if running the pipeline works without a crash. These database files a database files are just small fragments of real databases, so they are not meant for production runs.
+For testing the pipeline, download a small assembly FASTA file (a fragment of a Plasmodium genome) and small database files using the test script found [here](./assets/download_tiny_database_test_files.sh). Successful completion of this run should ensure that the pipeline is correctly installed on your system. The test databases should not be used for production run.
 
 ## Usage
 
@@ -74,18 +57,18 @@ test_sample1,MITO,/path/to/mitochondrial_assembly.fa
 test_sample1,PLASTID,/path/to/plastid_assembly.fa
 ```
 
-Each row represents an assembled haplotype or organelle of the sample. The sample ID (the first column) is up to the user to choose. `assembly_type` should be one of either `PRIMARY` (for primary assembly), `HAPLO` (for haplotigs assembly), `MITO` (for mitochondrial assembly) and `PLASTID` for plastid assembly.
+Each row represents an assembled haplotype or organelle of the sample. The sample ID (the first column) is defined by the user. `assembly_type` should be one of either `PRIMARY` (for primary assembly), `HAPLO` (for haplotigs assembly), `MITO` (for mitochondrial assembly) and `PLASTID` for plastid assembly.
 This setup assumes that you have an assembly where the primary contigs or scaffolds are in a separate file from the haplotype scaffolds or contigs. It also assumes that you have separated the organellar sequences out of the main assembly into separate files.
 
-It is okay to leave out assembly components from the run. E.g. if your assembly does not have a mitochondrial sequence, you can leave the row with the `MITO` tag out. If your assembly does not have a plastid sequence, you can leave the row with the `PLASTID` tag out.
-The params-input yaml will need to contain the following data will be detailed [here](./docs/usage.md).
+Assembly components are optional, e.g. if the assembly does not have a mitochondrial sequence, the row with the `MITO` tag can be omitted. The same is true of the `PLASTID` tag if the assembly does not contain any plastid sequences.
+The params-input yaml will need to contain the following data detailed [here](./docs/usage.md).
 
-The documentation of the kmers dimensionality reduction is covered in separate markdown files dedicated to this topic:
+The documentation of the kmers dimensionality reduction is covered in separate documents dedicated to this topic:
 
 - [Kmers Dimensionality Reduction](./docs/kmers_dim_reduction.md)
 - [Kmers Autoencoder](./docs/kmers_autoencoder.md)
 
-Now, you can run the pipeline using:
+Run the pipeline using the following command:
 
 ```bash
 nextflow run sanger-tol/ascc \
@@ -107,7 +90,7 @@ A description of the output files of the pipeline can be found [here](./docs/out
 
 ## Credits
 
-sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims) and [Will Eagles](https://github.com/weaglesBio).
+sanger-tol/ascc was written by [Eerik Aunin](https://github.com/eeaunin), [Damon Lee Pointon](https://github.com/DLBPointon), [James Torrance](https://github.com/jt8-sanger), [Ying Sims](https://github.com/yumisims), [Will Eagles](https://github.com/weaglesBio), [Tom Walters-Brown](https://github.com/tbrown91) and [Jim Downie](https://github.com/prototaxites).
 
 Pipeline development was supervised by [Shane A. McCarthy](https://github.com/mcshane) and [Matthieu Muffato](https://github.com/muffato).
 
