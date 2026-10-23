@@ -2,7 +2,6 @@
 // NF-CORE MODULE IMPORT
 //
 include { BLAST_BLASTN          } from '../../../modules/nf-core/blast/blastn/main'
-include { SEQKIT_SLIDING        } from '../../../modules/nf-core/seqkit/sliding/main'
 
 //
 // LOCAL MODULE IMPORT
@@ -14,7 +13,7 @@ include { GET_LINEAGE_FOR_TOP   } from '../../../modules/local/get/lineage_for_t
 
 workflow EXTRACT_NT_BLAST {
     take:
-    input_genome            // channel.of([ [ id: sample_id ], fasta ])
+    windowed_genome         // channel.of([ [ id: sample_id ], fasta ])
     blastn_db_path          // channel.fromPath( db )
     ncbi_lineage_path       // channel.fromPath( lineage_path )
 
@@ -28,24 +27,17 @@ workflow EXTRACT_NT_BLAST {
         .set { ch_blast }
 
     //
-    // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
-    //
-    SEQKIT_SLIDING ( input_genome )
-    ch_versions             = ch_versions.mix(SEQKIT_SLIDING.out.versions)
-
-
-    //
     // MODULE: BLASTS THE INPUT GENOME AGAINST A LOCAL NCBI DATABASE
     //
     BLAST_BLASTN (
-        SEQKIT_SLIDING.out.fastx,
+        windowed_genome,
         ch_blast,
         [],
         [],
         []
     )
 
-    input_genome
+    windowed_genome
         .map{ meta, _file ->
             meta.id
         }
