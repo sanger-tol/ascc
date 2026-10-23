@@ -242,7 +242,6 @@ workflow ASCC {
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
     diamond_input = SEQKIT_SLIDING.out.fastx
-        .combine()
         .filter { _meta, _file ->
             if (isOrganellar(_meta)) {
                 params.run_nr_diamond in organellarConditionals()
