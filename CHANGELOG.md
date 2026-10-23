@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - Blue Bowls [28/08/2025]
+## [1.0.0] - Blue Bowls [XX/XX/XXXX]
 
 Release 12 of sanger-tol/ascc and the first full release and folds in changes made to the pre-release 0.7.0 and 0.7.1 versions.
 
@@ -32,6 +32,7 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 - Added `FASTA_CLEAN_FAIDX` nf-core subworkflow and added the output to tests
 - `countFasta` has been changed to, instead, use the `GENOME_STATS` json output which avoids some compute on the head
 - Cleaned the input channels to the major workflows by removing out-of-date/out-of-use channels
+- Move SEQKIT_SLIDING to main workflow - prevent running in multiple modules.
 
 ### `Parameters`
 
