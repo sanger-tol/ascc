@@ -13,7 +13,7 @@ process BLAST_GET_TOP_HITS {
     output:
     tuple val(meta), path("*tophits.tsv"), emit: tophits
     tuple val("${task.process}"), val('python'), eval("python --version | sed 's/Python //g'"), topic: versions, emit: versions_python
-    tuple val("${task.process}"), val('v'), eval("blast_get_top_hits.py -v"), topic: versions, emit: versions_blast_get_top_hits
+    tuple val("${task.process}"), val('blast_get_top_hits.py'), eval("blast_get_top_hits.py -v"), topic: versions, emit: versions_blast_get_top_hits
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"

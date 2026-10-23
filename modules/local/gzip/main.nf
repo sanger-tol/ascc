@@ -12,7 +12,7 @@ process GZIP {
 
     output:
     tuple val(meta), path("*.gz"), emit: gzipped
-    tuple val("${task.process}"), val('gzip'), eval('gzip --version 2>&1 | head -1 | sed "s/^.*(gzip) //; s/ Copyright.*//"'), topic: versions, emit: versions_gunzip
+    tuple val("${task.process}"), val('gzip'), eval('gunzip --version 2>&1 | head -1 | sed "s/^.*(gzip) //; s/ Copyright.*//"'), topic: versions, emit: versions_gunzip
 
     when:
     task.ext.when == null || task.ext.when
