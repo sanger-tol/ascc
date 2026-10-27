@@ -16,6 +16,7 @@ include { BLOBTOOLKIT_GENERATECSV           } from '../modules/sanger-tol/blobto
 
 // NF-CORE MODULE IMPORTS
 include { TIARA_TIARA                       } from '../modules/nf-core/tiara/tiara/main'
+include { SEQKIT_SLIDING                    } from '../modules/nf-core/seqkit/sliding/main'
 
 // LOCAL SUBWORKFLOW IMPORTS
 include { ESSENTIAL_JOBS                    } from '../subworkflows/local/essential_jobs/main'
@@ -163,15 +164,8 @@ workflow ASCC {
                             .ifEmpty { [[:],[]] }
 
 
-    //-------------------------------------------------------------------------
-    //
-    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
-    //
-    //          Genomic assemblies: use ch_reference_tuple directly (no length gate)
-    //          Organellar assemblies: apply seqkit length filter first (valid_length_fasta)
-    //
 
-    //
+    //-------------------------------------------------------------------------
     // LOGIC: FOR ORGANELLAR ASSEMBLIES, WE NEED TO MAKE SURE THAT THE INPUT SEQUENCE
     //        IS OF AT LEAST LENGTH OF params.seqkit_window BEFORE RUNNING BLAST/DIAMOND
     //
@@ -192,8 +186,23 @@ workflow ASCC {
             }
         }
 
+    //-------------------------------------------------------------------------
+    //
+    // MODULE: CREATES A FASTA CONTAINING SLIDING WINDOWS OF THE INPUT GENOME
+    //
+    SEQKIT_SLIDING ( valid_length_fasta )
+    ch_versions = ch_versions.mix(SEQKIT_SLIDING.out.versions)
 
-    assemblies_to_blast = valid_length_fasta
+
+    //-------------------------------------------------------------------------
+    //
+    // SUBWORKFLOW: EXTRACT RESULTS HITS FROM NT-BLAST
+    //
+    //          Genomic assemblies: use ch_reference_tuple directly (no length gate)
+    //          Organellar assemblies: apply seqkit length filter first (valid_length_fasta)
+    //
+
+    assemblies_to_blast = SEQKIT_SLIDING.out.fastx
         .filter { _meta, _file ->
             if (isOrganellar(_meta)) {
                 params.run_nt_blast in organellarConditionals()
@@ -223,7 +232,7 @@ workflow ASCC {
     //
     // SUBWORKFLOW: DIAMOND BLAST FOR INPUT ASSEMBLY
     //
-    diamond_input = valid_length_fasta
+    diamond_input = SEQKIT_SLIDING.out.fastx
         .filter { _meta, _file ->
             if (isOrganellar(_meta)) {
                 params.run_nr_diamond in organellarConditionals()
@@ -254,7 +263,7 @@ workflow ASCC {
     //      qseqid sseqid pident length mismatch gapopen qstart qend sstart send
     //      evalue bitscore staxids sscinames sskingdoms sphylums salltitles
     //
-    up_diamond_input = valid_length_fasta
+    up_diamond_input = SEQKIT_SLIDING.out.fastx
         .filter { _meta, _file ->
             if (isOrganellar(_meta)) {
                 params.run_uniprot_diamond in organellarConditionals()

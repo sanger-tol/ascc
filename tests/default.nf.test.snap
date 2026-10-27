@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            150,
+            146,
             {
                 "ASCC_MERGE_TABLES": {
                     "ascc_merge_tables": "2.0.2",
@@ -809,7 +809,7 @@
             ],
             true
         ],
-        "timestamp": "2026-10-23T16:30:58.074011615",
+        "timestamp": "2026-10-23T13:37:29.202095534",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
