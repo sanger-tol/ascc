@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-import pandas as pd
-import textwrap
 import os
 import sys
+import textwrap
+
 import general_purpose_functions as gpf
+import pandas as pd
 
 VERSION = "2.0.2"
 DESCRIPTION = """
@@ -24,23 +25,17 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(DESCRIPTION),
     )
-    parser.add_argument(
-        "-gc", "--gc_cov", required=True, type=str, help="GC Coverage file"
-    )
+    parser.add_argument("-gc", "--gc_cov", required=True, type=str, help="GC Coverage file")
     parser.add_argument("-c", "--coverage", type=str, help="Coverage file")
     parser.add_argument("-t", "--tiara", type=str, help="Tiara file")
-    parser.add_argument(
-        "-bk", "--bacterial_kraken", type=str, help="Bacterial Kraken file"
-    )
+    parser.add_argument("-bk", "--bacterial_kraken", type=str, help="Bacterial Kraken file")
     parser.add_argument("-nk", "--nt_kraken", type=str, help="NT Kraken file")
     parser.add_argument("-nb", "--nt_blast", type=str, help="NT Blast file")
     parser.add_argument(
         "-dr", "--dim_reduction_embeddings", type=str, help="Dimensional Reduction file"
     )
     parser.add_argument("-nd", "--nr_diamond", type=str, help="NR Diamond file")
-    parser.add_argument(
-        "-ud", "--uniprot_diamond", type=str, help="Uniprot Diamond file"
-    )
+    parser.add_argument("-ud", "--uniprot_diamond", type=str, help="Uniprot Diamond file")
     parser.add_argument("-cv", "--contigviz", type=str, help="Contigviz file")
     parser.add_argument("-btk", "--blobtoolkit", type=str, help="Blobtoolkit file")
     parser.add_argument("-bb", "--btk_busco", type=str, help="Busco Blobtoolkit file")
@@ -76,19 +71,19 @@ def load_and_merge_dataframes(paths_dict):
         df.columns = ["scaff", "gc"]
         df["gc"] = df["gc"] * 100
     else:
-        sys.stderr.write(
-            "No rows were found in the GC content table ({})\n".format(gc_path)
-        )
+        sys.stderr.write("No rows were found in the GC content table ({})\n".format(gc_path))
         sys.exit(1)
 
     coverage_df = None
     if paths_dict["coverage"] is not None:
         coverage_df = pd.read_csv(paths_dict["coverage"], sep=",", header=None)
-        if coverage_df.shape[0] > 0:
+        row_count = coverage_df.shape[0]
+        col_count = coverage_df.shape[1]
+        if row_count > 0 and col_count == 2:
             coverage_df.columns = ["scaff", "coverage"]
         else:
             sys.stderr.write(
-                f"No rows were found in the coverages table ({paths_dict['coverage']})\n"
+                f"Input Dataframe from ({paths_dict['coverage']}) is the wrong shape == Rows ({row_count}) and Columns ({col_count})"
             )
             coverage_df = None
 
@@ -98,16 +93,14 @@ def load_and_merge_dataframes(paths_dict):
         if tiara_df.shape[0] > 0:
             tiara_df["tiara_classif"] = tiara_df["class_fst_stage"]
             tiara_snd_stage_hits = tiara_df.index[tiara_df["class_snd_stage"].notnull()]
-            tiara_df["tiara_classif"][tiara_snd_stage_hits] = tiara_df[
-                "class_snd_stage"
-            ][tiara_snd_stage_hits]
+            tiara_df["tiara_classif"][tiara_snd_stage_hits] = tiara_df["class_snd_stage"][
+                tiara_snd_stage_hits
+            ]
             tiara_df = tiara_df.iloc[:, [0, 3]]
             tiara_df.columns = ["scaff", "tiara_classif"]
         else:
             sys.stderr.write(
-                "No rows were found in Tiara output table ({})\n".format(
-                    paths_dict["tiara"]
-                )
+                "No rows were found in Tiara output table ({})\n".format(paths_dict["tiara"])
             )
             tiara_df = None
 
@@ -118,9 +111,7 @@ def load_and_merge_dataframes(paths_dict):
             bacterial_kraken_df.rename(
                 columns={bacterial_kraken_df.columns[0]: "scaff"}, inplace=True
             )
-            bacterial_kraken_df.rename(
-                columns={"taxid": "nt_kraken_taxid"}, inplace=True
-            )
+            bacterial_kraken_df.rename(columns={"taxid": "nt_kraken_taxid"}, inplace=True)
         else:
             sys.stderr.write(
                 "No rows were found in bacterial Kraken output table ({})\n".format(
@@ -133,9 +124,7 @@ def load_and_merge_dataframes(paths_dict):
     if paths_dict["nt_kraken"] is not None:
         nt_kraken_df = pd.read_csv(paths_dict["nt_kraken"], sep=",")
         if nt_kraken_df.shape[0] > 0:
-            nt_kraken_df.rename(
-                columns={nt_kraken_df.columns[0]: "scaff"}, inplace=True
-            )
+            nt_kraken_df.rename(columns={nt_kraken_df.columns[0]: "scaff"}, inplace=True)
             nt_kraken_df.rename(columns={"taxid": "nt_kraken_taxid"}, inplace=True)
         else:
             sys.stderr.write(
@@ -240,9 +229,7 @@ def load_and_merge_dataframes(paths_dict):
 
     uniprot_diamond_df = None
     if paths_dict["uniprot_diamond"] is not None:
-        uniprot_diamond_df = parse_or_pass(
-            paths_dict["uniprot_diamond"], "UNIPROT_DIAMOND"
-        )
+        uniprot_diamond_df = parse_or_pass(paths_dict["uniprot_diamond"], "UNIPROT_DIAMOND")
 
     cobiontid_markerscan_df = None
     if paths_dict["cobiontid_markerscan"] is not None:
@@ -333,9 +320,7 @@ def main(args):
     has_coverage = "coverage" in df.columns
 
     if has_taxonomy and has_coverage:
-        process_results_tables_command = (
-            f"process_result_tables.py . {args.sample_name}"
-        )
+        process_results_tables_command = f"process_result_tables.py . {args.sample_name}"
         gpf.run_system_command(process_results_tables_command)
     else:
         missing_data = []

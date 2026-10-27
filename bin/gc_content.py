@@ -8,6 +8,7 @@ Adapted by Damon-Lee Pointon @DLBPointon
 """
 
 import argparse
+
 import general_purpose_functions as gpf
 
 
@@ -16,9 +17,7 @@ def main(fasta_path):
     results = [
         (
             header.split()[0],
-            "{:.6f}".format(
-                (seq.upper().count("G") + seq.upper().count("C")) / max(1, len(seq))
-            ),
+            "{:.6f}".format((seq.upper().count("G") + seq.upper().count("C")) / max(1, len(seq))),
         )
         for header, seq in fasta_data
     ]

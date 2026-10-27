@@ -1,7 +1,11 @@
 //
-// MODULE IMPORT BLOCK
+// NF-CORE MODULE IMPORT BLOCK
 //
-include { GET_KMER_COUNTS                       } from '../../../modules/local/get/kmer_counts/main'
+include { COBIONTID_KMERCOUNTER                 } from '../../../modules/nf-core/cobiontid/kmercounter/main'
+
+//
+// LOCAL MODULE IMPORT BLOCK
+//
 include { REFORMAT_NPY_2_CSV                    } from '../../../modules/local/reformat/npy_2_csv/main'
 include { KMER_COUNT_DIM_REDUCTION              } from '../../../modules/local/kmer_count/dim_reduction/main'
 include { KMER_COUNT_DIM_REDUCTION_COMBINE_CSV  } from '../../../modules/local/kmer_count/dim_reduction_combine_csv/main'
@@ -22,7 +26,7 @@ workflow GET_KMERS_PROFILE {
     //
     assembly_fasta
         .map{ meta, file ->
-            [[id: meta.id, single_end: true], file]
+            tuple([id: meta.id, single_end: true], file)
         }
         .set { modified_input }
 
@@ -30,18 +34,22 @@ workflow GET_KMERS_PROFILE {
     //
     // MODULE: PRODUCE KMER COUNTS (USING KMER-COUNTER)
     //
-    GET_KMER_COUNTS (
+    COBIONTID_KMERCOUNTER (
         modified_input,      // val(meta), path(reads)
         kmer_size            // val kmer_size
     )
-    ch_versions = ch_versions.mix(GET_KMER_COUNTS.out.versions)
+
+    modified_input
+        .combine(COBIONTID_KMERCOUNTER.out.npy, by: 0)
+        .map { meta, fasta, npy -> tuple(meta, fasta, npy) }
+        .set { reformat_npy_input }
 
 
     //
     // MODULE: CONVERT NPY TO CSV FORMAT
     //
     REFORMAT_NPY_2_CSV (
-        GET_KMER_COUNTS.out.npy,  // val(meta), path(fasta), path(npy)
+        reformat_npy_input,  // val(meta), path(fasta), path(npy)
         kmer_size                  // val kmer_size
     )
     ch_versions = ch_versions.mix(REFORMAT_NPY_2_CSV.out.versions)
@@ -50,24 +58,21 @@ workflow GET_KMERS_PROFILE {
     //
     // LOGIC: CREATE CHANNEL OF LIST OF SELECTED METHODS
     //
-    channel.fromList(params.dimensionality_reduction_methods)
-        .set{dim_methods}
+    dim_methods     = channel.fromList(params.dimensionality_reduction_methods)
 
-    channel.from(params.n_neighbours)
-        .set{hey_neighbour}
+    hey_neighbour   = channel.from(params.n_neighbours)
 
-    dim_methods
+    dim_reduction   = dim_methods
         .combine(REFORMAT_NPY_2_CSV.out.csv)
         .combine(autoencoder_epochs_count.first())
         .combine(hey_neighbour)
         .multiMap { dr_method, csv_meta, csv_file, epochs, n_neighbours ->
             method_name: dr_method
-            kmer_csv: [csv_meta, csv_file]
+            kmer_csv: tuple(csv_meta, csv_file)
             epoch_count: epochs
             n_neighbors_setting: n_neighbours
 
         }
-        .set{ dim_reduction }
 
 
     //
@@ -91,8 +96,8 @@ workflow GET_KMERS_PROFILE {
         .set { collected_files_for_combine }
 
     kmers_results = collected_files_for_combine
-        .map { meta, file -> [[ id: meta.id ], file]  }
-        .ifEmpty { [[:],[]] }
+        .map { meta, file -> tuple([ id: meta.id ], file) }
+        .ifEmpty { tuple([:], []) }
 
 
     //
@@ -113,12 +118,12 @@ workflow GET_KMERS_PROFILE {
     )
     ch_versions     = ch_versions.mix(KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.versions)
     combined_csv    = KMER_COUNT_DIM_REDUCTION_COMBINE_CSV.out.csv
-                        .map { meta, file -> [[ id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
+                        .map { meta, file -> tuple([ id: meta.id ], file) }
+                        .ifEmpty { tuple([:], []) }
 
     emit:
     combined_csv
-    collected_dirs = collected_results_dirs
+    collected_dirs  = collected_results_dirs
     kmers_results
-    versions      = ch_versions
+    versions        = ch_versions
 }

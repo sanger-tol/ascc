@@ -9,8 +9,6 @@ workflow RUN_FCSADAPTOR {
     reference_tuple
 
     main:
-    ch_versions     = channel.empty()
-
 
     //
     // MODULE: FCS_FCSADAPTOR run on assembly fasta for prokaryote.
@@ -18,7 +16,6 @@ workflow RUN_FCSADAPTOR {
     FCS_FCSADAPTOR_PROK (
         reference_tuple      // val(meta), path(fasta)
     )
-    ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_PROK.out.versions)
 
 
     //
@@ -27,16 +24,21 @@ workflow RUN_FCSADAPTOR {
     FCS_FCSADAPTOR_EUK (
         reference_tuple      // val(meta), path(fasta)
     )
-    ch_versions     = ch_versions.mix(FCS_FCSADAPTOR_EUK.out.versions)
+
 
     FCS_FCSADAPTOR_EUK.out.adaptor_report
-        .map{ meta, file -> [meta.id, file] }
+        .map{ meta, file -> tuple(meta.id, file) }
         .mix(
             FCS_FCSADAPTOR_PROK.out.adaptor_report
-                .map{ meta, file -> [meta.id, file] }
+                .map{ meta, file -> tuple(meta.id, file) }
         )
         .groupTuple()
-        .map { id, files -> [[id: id], files] }
+        // NOTE: `groupTuple()` emits its internal ArrayBag, and that SAME instance is
+        //       handed to every consumer of this channel. Any in-place operation
+        //       (sort/unique/add) by one consumer corrupts it for the others, which
+        //       surfaces as `Unexpected error [ConcurrentModificationException]`.
+        //       Emit a defensive copy so each downstream branch owns its own list.
+        .map { id, files -> tuple([id: id], new ArrayList(files)) }
         .set { ch_fcsadapt }
 
     emit:
@@ -44,5 +46,5 @@ workflow RUN_FCSADAPTOR {
     ch_euk          = FCS_FCSADAPTOR_EUK.out.adaptor_report
     ch_prok         = FCS_FCSADAPTOR_PROK.out.adaptor_report
 
-    versions        = ch_versions
+
 }
