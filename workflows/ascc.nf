@@ -53,7 +53,7 @@ workflow ASCC {
     take:
     genomic_genomes         // channel: combined genomic + organellar assemblies; meta.assembly_type identifies each
     organellar_genomes      // channel: tuple(meta, reference) – organellar only, for ORGANELLAR_BLAST against genomic
-    samtools_dict           // samtools dictionary
+    _samtools_dict           // samtools dictionary
     stats_json              // sequence description json file
     _fcs_ov                 // params.fcs_override
     fcs_samplesheet         // The FCS override samplesheet (combined genomic + organellar entries)
@@ -75,6 +75,7 @@ workflow ASCC {
     btk_lineage_mapping_file
     ch_barcodes
     val_reads_per_chunk
+    outdir
 
     main:
     ch_versions = channel.empty()
@@ -87,16 +88,6 @@ workflow ASCC {
             def type = isOrganellar(meta) ? "ORGANELLAR" : "GENOMIC"
             log.info "[ASCC INFO]: ${type} WORKFLOW:\n\t-- $meta\n\t-- $sample\n"
         }
-
-
-    //
-    // LOGIC: BUILD ASSEMBLY TYPE LOOKUP FROM THE ORIGINAL SAMPLESHEET BEFORE ESSENTIAL_JOBS.
-    //          ESSENTIAL_JOBS rebuilds meta internally with only id/sliding/window/taxid,
-    //          stripping assembly_type. This lookup is joined back onto the output channels
-    //          so that all isOrganellar() checks and the type branch works correctly.
-    //
-    ch_assembly_type_lookup = genomic_genomes
-        .map { meta, _file -> tuple([id: meta.id], meta.assembly_type) }
 
 
     //-------------------------------------------------------------------------
@@ -132,7 +123,7 @@ workflow ASCC {
     //
     autoencoder_epochs_count = ch_type_branch.genomic
         .combine(stats_json, by: 0)
-        .map { _meta, file, stats ->
+        .map { _meta, _file, stats ->
             def stats_data = new groovy.json.JsonSlurper().parseText(stats.text)
             def fasta_counts = stats_data["n_sequences"]
             fasta_counts * 3
@@ -311,13 +302,13 @@ workflow ASCC {
     ch_versions     = ch_versions.mix(ORGANELLAR_BLAST.out.versions)
 
     ch_organellar_rprt = ORGANELLAR_BLAST.out.organelle_report
-        .branch { meta, file ->
+        .branch { meta, _file ->
             mito:       meta.organelle.endsWith("MITO")
             plastid:    meta.organelle.endsWith("PLASTID")
         }
 
     ch_organellar_full = ORGANELLAR_BLAST.out.full_organelle_report
-        .branch { meta, file ->
+        .branch { meta, _file ->
             mito:       meta.organelle.endsWith("MITO")
             plastid:    meta.organelle.endsWith("PLASTID")
         }
@@ -956,7 +947,7 @@ workflow ASCC {
     def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
         .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
+            storeDir: "${outdir}/pipeline_info",
             name:  'ascc_software_'  + 'versions.yml',
             sort: true,
             newLine: true
