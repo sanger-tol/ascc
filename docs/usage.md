@@ -186,27 +186,10 @@ diamond_nr_database_path: path to a Diamond database made from NCBI nr protein s
 seqkit_sliding: sliding window step size in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 100000
 seqkit_window: length of each sampled sequence in bp, when sampling sequences for ASCC's built-in BLAST and Diamond processes. Default: 6000
 n_neighbours: n_neighbours setting for the kmers dimensionality reduction. This applies to the dimensionality reduction methods that have a n_neighbours parameter, such as UMAP. Default: 13
-
-// The below params can have values of ['both','genomic','organellar','off'] unless the default value here is 'genomic', in that case their values are ONLY ['genomic','off']
-// These flags control which proccesses are run in any particular run of the pipeline.
-run_essentials: "both"
-run_kmers: "genomic"
-run_tiara: "both"
-run_coverage: "both"
-run_nt_blast: "both"
-run_nr_diamond: "both"
-run_uniprot_diamond: "both"
-run_kraken: "both"
-run_fcsgx: "both"
-run_fcs_adaptor: "both"
-run_vecscreen: "both"
-run_btk_busco: "genomic"
-run_pacbio_barcodes: "both"
-run_organellar_blast: "genomic"
-run_autofilter_assembly: "genomic"
-run_create_btk_dataset: "both"
-run_merge_datasets: "genomic"
 ```
+
+The list of which processes are run by default whether they apply to the genomic, organellar or all sequences in the input assembly can be found in the [production.config](../conf/production.config#L65)
+
 
 ### Updating the pipeline
 
