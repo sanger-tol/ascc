@@ -278,8 +278,6 @@ workflow PIPELINE_INITIALISATION {
     collected_reads         = ch_grabbed_reads_path
     geno_fcs_samplesheet    = geno_fcs_samplesheet
     orga_fcs_samplesheet    = orga_fcs_samplesheet
-
-    versions                = ch_versions
 }
 
 /*
