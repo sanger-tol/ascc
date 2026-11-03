@@ -1,8 +1,7 @@
 //
 // NF-CORE MODULE IMPORT
 //
-include { SEQKIT_SLIDING                                     } from '../../../modules/nf-core/seqkit/sliding/main'
-include { DIAMOND_BLASTX                                     } from '../../../modules/nf-core/diamond/blastx/main'
+include { DIAMOND_BLASTX                                      } from '../../../modules/nf-core/diamond/blastx/main'
 
 //
 // LOCAL MODULE IMPORTS
@@ -13,30 +12,20 @@ include { REFORMAT_DIAMOND_OUTFMT6                           } from '../../../mo
 
 workflow RUN_DIAMOND {
     take:
-    reference_tuple // tuple [[meta.id, meta.sliding, meta.window], reference]
-    diamond_db // val (path)
+    windowed_genome     // tuple [[meta.id, meta.sliding, meta.window], reference]
+    diamond_db          // val (path)
 
     main:
     ch_versions = channel.empty()
     ch_ext = channel.of("txt")
     ch_columns = channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
 
-
-    //
-    // MODULE: CREATE SLIDING WINDOW OF THE INPUT ASSEMBLY
-    //
-    SEQKIT_SLIDING(
-        reference_tuple
-    )
-    ch_versions = ch_versions.mix(SEQKIT_SLIDING.out.versions)
-
-
     //
     // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
     //
     diamond_db_path = diamond_db.map { file -> tuple([id: "db"], file) }
 
-    SEQKIT_SLIDING.out.fastx
+    windowed_genome
         .combine(ch_ext)
         .combine(ch_columns)
         .combine(diamond_db_path)
