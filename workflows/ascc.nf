@@ -916,7 +916,6 @@ workflow ASCC {
             ch_fcsgx_taxonomy,
             ch_create_btk_dataset
         )
-        ch_versions                 = ch_versions.mix(GENERATE_HTML_REPORT_WORKFLOW.out.versions)
     }
 
     //
