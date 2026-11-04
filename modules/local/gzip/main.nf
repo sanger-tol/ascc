@@ -12,7 +12,7 @@ process GZIP {
 
     output:
     tuple val(meta), path("*.gz"), emit: gzipped
-    path "versions.yml", emit: versions
+    tuple val("${task.process}"), val('gzip'), eval('gunzip --version 2>&1 | head -1 | sed "s/^.*(gzip) //; s/ Copyright.*//"'), topic: versions, emit: versions_gunzip
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,20 +24,11 @@ process GZIP {
         --force \\
         ${args} \\
         ${file}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        gunzip: \$(echo \$(gunzip --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//')
-    END_VERSIONS
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.gz
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        gunzip: \$(echo \$(gunzip --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//')
-    END_VERSIONS
     """
 }

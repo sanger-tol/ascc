@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+import argparse
 import sys
 import textwrap
-import argparse
-import numpy as np
 from itertools import product
+
+import numpy as np
 
 VERSION = "1.0.0"
 DESCRIPTION = f"""
@@ -56,9 +57,7 @@ def parse_args(argv=None):
         help="The kmer length used in kmer-counter.",
     )
 
-    parser.add_argument(
-        "-o", "--output", type=str, default="npy.csv", help="The output CSV file naming"
-    )
+    parser.add_argument("-o", "--output", type=str, default="npy.csv", help="The output CSV file naming")
 
     parser.add_argument("-v", "--version", action="version", version=VERSION)
 

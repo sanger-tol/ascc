@@ -11,18 +11,13 @@ workflow RUN_NT_KRAKEN {
     ncbi_rankedlineage_path
 
     main:
-    ch_versions     = channel.empty()
-
-
     //
     // LOGIC: MODIFY THE INPUT TUPLE TO INCLUDE THE single_end VALUE
     //
-    assembly_fasta
+    modified_input  = assembly_fasta
         .map{ meta, file ->
-            [[ id: meta.id, single_end: true ], file ]
+            tuple([ id: meta.id, single_end: true ], file)
         }
-        .set { modified_input }
-
 
     //
     // MODULE: RUN KRAKEN2 ON THE INPUT GENOME - GENERATES TAXONOMIC CLASSIFICATION.
@@ -34,13 +29,12 @@ workflow RUN_NT_KRAKEN {
         true                 // val save_reads_assignment
     )
     classified      = KRAKEN2_KRAKEN2.out.classified_reads_assignment
-                        .map { meta, file -> [[ id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
+                        .map { meta, file -> tuple([ id: meta.id ], file) }
+                        .ifEmpty { tuple([:], []) }
 
     report          = KRAKEN2_KRAKEN2.out.report
-                        .map { meta, file -> [[ id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
-
+                        .map { meta, file -> tuple([ id: meta.id ], file) }
+                        .ifEmpty { tuple([:], []) }
 
     //
     // MODULE: GET LINEAGE FOR THE KRAKEN OUTPUT.
@@ -49,15 +43,12 @@ workflow RUN_NT_KRAKEN {
         KRAKEN2_KRAKEN2.out.classified_reads_assignment,
         ncbi_rankedlineage_path
     )
-    ch_versions     = ch_versions.mix(GET_LINEAGE_FOR_KRAKEN.out.versions)
     lineage         = GET_LINEAGE_FOR_KRAKEN.out.txt
-                        .map { meta, file -> [[ id: meta.id ], file] }
-                        .ifEmpty { [[:],[]] }
-
+                        .map { meta, file -> tuple([ id: meta.id ], file) }
+                        .ifEmpty { tuple([:], []) }
 
     emit:
     classified
     report
     lineage
-    versions        = ch_versions
 }

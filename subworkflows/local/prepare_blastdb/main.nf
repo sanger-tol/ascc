@@ -14,19 +14,14 @@ workflow PREPARE_BLASTDB {
     barcode_names           // val      (csv-list-string)
 
     main:
-    ch_versions             = channel.empty()
-
-
     //
     // MODULE: CHECK FOR KNOWN BARCODES IN SAMPLE DATA
     //
     CHECK_BARCODE (
-        [[id: sample_id], pacbio_data],
+        tuple([id: sample_id], pacbio_data),
         barcodes_file,
         barcode_names
     )
-    ch_versions             = ch_versions.mix(CHECK_BARCODE.out.versions)
-
 
     //
     // LOGIC: ENSURE THE VALID CHANNEL IS MIXED WITH THE BARCODES CHANNEL
@@ -37,22 +32,21 @@ workflow PREPARE_BLASTDB {
         .filter { text -> text.contains('barcodes') } // Indicates it is a valid barcode
         .combine(barcodes_file)
         .map { str_info, file ->
-            [[id: 'BARCODE_TO_MAKEDB', info: str_info], file]
+            tuple(
+                [id: 'BARCODE_TO_MAKEDB', info: str_info],
+                file
+            )
         }
         .set { ch_new_barcodes }
-
 
     //
     // MODULE: GENERATE BLAST DB ON PACBIO BARCODES
     //
     BLAST_MAKEBLASTDB (
-        ch_new_barcodes
+        ch_new_barcodes,
+        []
     )
-    ch_versions             = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
-
 
     emit:
     barcodes_blast_db       = BLAST_MAKEBLASTDB.out.db
-    versions                = ch_versions
-
 }

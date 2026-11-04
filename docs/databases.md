@@ -59,4 +59,11 @@ To use this database, point the `vecscreen_database_path` variable in the input 
 
 ## PacBio barcodes
 
-A FASTA file with the sequences of PacBio multiplexing barcodes is included in the ASCC repository. It is the `pacbio_adaptors.fa` file in the `assets` directory of this pipeline ([pacbio_adaptors.fa](../assets/pacbio_adaptors.fa)).
+A FASTA file with PacBio adapter and multiplexing barcode sequences is included in the ASCC repository: [`SMRTbell_HiFi_adapter_DB.fasta`](../assets/ascc_database_fasta/SMRTbell_HiFi_adapter_DB.fasta) in `assets/ascc_database_fasta`.
+
+It combines two sources:
+
+- The official PacBio SMRTbell adapter indexes (`bc1001`–`bc1022` and `bc2001`–`bc2384`), downloaded as the [SMRTbell adapter indexes FASTA](https://www.pacb.com/wp-content/uploads/SMRTbell_adapter_indexes.fasta_.zip) from the [PacBio multiplexing page](https://www.pacb.com/multiplexing/).
+- Extra HiFi adapter sequences (PacBio blunt adapter, C2 primer, ULI adapter, and TruSeq indexes) from the [HiFi adapter database](https://github.com/sanger-tol/hifi-trimmer/blob/main/examples/HiFi_adapter_DB.fasta) in sanger-tol/hifi-trimmer.
+
+Barcodes that are identical in both files (`bc2001`–`bc2096`) are stored once. For `bc1001`–`bc1022`, the sequences differ between the two sources, and this file keeps the PacBio SMRTbell sequence.

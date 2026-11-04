@@ -31,11 +31,12 @@ workflow SANGERTOL_ASCC {
     take:
     genomic                     // Genomic fasta tuples
     organelles                  // Organellar fasta tuples
+    samtools_dict               // samtools dictionary
+    stats_json                  // sequence description json file
     fcs_override                // bool
     genomic_fcs_samplesheet     // genomic data tuple from fcs_override samplesheet generated from external fcs process
     organellar_fcs_samplesheet  // organellar data tuple from fcs_override samplesheet generated from external fcs process
     fcs_db                      // [path(path)]
-    read_files                  // Read files
     scientific_name             // Scientific name
     pacbio_db                   // Pacbio database
     ncbi_taxonomy_path          // NCBI taxonomy path
@@ -47,10 +48,10 @@ workflow SANGERTOL_ASCC {
     nt_kraken_db_path           // path to custom kraken database
     vecscreen_database_path     // Path to custom VECSCREEN database
     reads_path                  // tuple of paths to input read files
-    reads_layout                // Layout of input reads [SINGLE, PAIRED]
     reads_type                  // Type of input reads [HIFI, CLR, ILLUMINA, etc...]
     btk_lineages                // [1_odb10, 2_odb10] ODB10 lineages to run against the assembly
-    btk_lineages_path           // Path to the ODB10 lineages
+    btk_lineages_path           // Path to the ODB* lineages
+    btk_lineage_mapping_file    // Path to the ODB* lineage to taxid mapping file
     barcodes                    // ["barcode_1,barcode_2"]
     val_reads_per_chunk         // int: number of reads per chunk to map when estimating coverage
 
@@ -60,13 +61,15 @@ workflow SANGERTOL_ASCC {
     // WORKFLOW: Run pipeline
     //
     ASCC (
-        genomic,
+        params.genomic_only
+            ? genomic
+            : genomic.mix(organelles),
         organelles,
+        samtools_dict,
+        stats_json,
         fcs_override,
-        genomic_fcs_samplesheet,
-        organellar_fcs_samplesheet,
+        genomic_fcs_samplesheet.mix(organellar_fcs_samplesheet),
         fcs_db,
-        read_files,
         scientific_name,
         pacbio_db,
         ncbi_taxonomy_path,
@@ -78,10 +81,10 @@ workflow SANGERTOL_ASCC {
         nt_kraken_db_path,
         vecscreen_database_path,
         reads_path,
-        reads_layout,
         reads_type,
         btk_lineages,
         btk_lineages_path,
+        btk_lineage_mapping_file,
         barcodes,
         val_reads_per_chunk
     )
@@ -118,11 +121,12 @@ workflow {
     SANGERTOL_ASCC (
         PIPELINE_INITIALISATION.out.main_genomes,
         PIPELINE_INITIALISATION.out.organellar_genomes,
+        PIPELINE_INITIALISATION.out.samtools_dict,
+        PIPELINE_INITIALISATION.out.stats_json,
         params.fcs_override,
         PIPELINE_INITIALISATION.out.geno_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.orga_fcs_samplesheet,
         PIPELINE_INITIALISATION.out.fcs_gx_database,
-        PIPELINE_INITIALISATION.out.collected_reads,
         params.scientific_name,
         PIPELINE_INITIALISATION.out.pacbio_db,
         channel.fromPath(params.ncbi_taxonomy_path),
@@ -134,10 +138,10 @@ workflow {
         channel.fromPath(params.nt_kraken_database_path),
         channel.fromPath(params.vecscreen_database_path),
         channel.from(params.reads_path),
-        channel.of(params.reads_layout),
         params.reads_type,
         channel.of(params.busco_lineages),
         channel.fromPath(params.busco_lineages_folder),
+        channel.fromPath(params.busco_lineage_mapping_file),
         PIPELINE_INITIALISATION.out.barcodes,
         params.coverage_reads_per_chunk
     )
@@ -152,38 +156,40 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
     )
 
 
+    onComplete:
+        if (workflow.success) {
+            try {
+                def completionFile = file("${params.outdir}/workflow_completed.txt")
+                def du = ["du", "-sh", workflow.workDir.toString()].execute()
+                du.waitFor()
+                completionFile.text = """
+                    Workflow completed successfully!
+                    Completed at: ${workflow.complete}
+                    Duration: ${workflow.duration}
+                    Success: ${workflow.success}
+                    Work directory: ${workflow.workDir}
+                    Work directory size: ${du.text.trim()}
+                    Exit status: ${workflow.exitStatus}
+                    Run name: ${workflow.runName}
+                    Session ID: ${workflow.sessionId}
+                    Project directory: ${workflow.projectDir}
+                    Launch directory: ${workflow.launchDir}
+                    Command line: ${workflow.commandLine}
+                """.stripIndent()
+                log.info "[ASCC INFO] Completion file created: ${completionFile}"
+            } catch (Exception e) {
+                log.error "[ASCC ] Failed to create completion file: ${e.message}"
+            }
+        }
+
+    onError:
+        log.error "[ASCC ERROR] Workflow failed: ${workflow.error}"
 }
 
-workflow.onComplete {
-    if (workflow.success) {
-        try {
-            def completionFile = file("${params.outdir}/workflow_completed.txt")
-            def du = ["du", "-sh", workflow.workDir.toString()].execute()
-            du.waitFor()
-            completionFile.text = """
-                Workflow completed successfully!
-                Completed at: ${workflow.complete}
-                Duration: ${workflow.duration}
-                Success: ${workflow.success}
-                Work directory: ${workflow.workDir}
-                Work directory size: ${du.text.trim()}
-                Exit status: ${workflow.exitStatus}
-                Run name: ${workflow.runName}
-                Session ID: ${workflow.sessionId}
-                Project directory: ${workflow.projectDir}
-                Launch directory: ${workflow.launchDir}
-                Command line: ${workflow.commandLine}
-            """.stripIndent()
-            log.info "[ASCC INFO] Completion file created: ${completionFile}"
-        } catch (Exception e) {
-            log.warn "[ASCC WARN] Failed to create completion file: ${e.message}"
-        }
-    }
-}
+
 
 
 /*

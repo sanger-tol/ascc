@@ -14,16 +14,16 @@ include { samplesheetToList         } from 'plugin/nf-schema'
 include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
-include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
 // ASCC Custom param pre-processing
 include { VALIDATE_TAXID            } from '../../../modules/local/validate/taxid/main'
-include { GUNZIP                    } from '../../../modules/nf-core/gunzip/main'
 include { PREPARE_BLASTDB           } from '../../local/prepare_blastdb/main'
 include { CHECK_NT_BLAST_TAXONOMY   } from '../../../modules/local/check/nt_blast_taxonomy/main'
+include { FASTA_CLEAN_FAIDX         } from '../../nf-core/fasta_clean_faidx/main'
 
+include { validateRunParams        } from '../../../functions/local/run_param_validator'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,9 +45,6 @@ workflow PIPELINE_INITIALISATION {
     show_hidden       // boolean: Show hidden parameters in the help message
 
     main:
-
-    ch_versions = channel.empty()
-
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
     //
@@ -82,6 +79,9 @@ workflow PIPELINE_INITIALISATION {
 * Software dependencies
     https://github.com/sanger-tol/ascc/blob/main/CITATIONS.md
 """
+    if (monochrome_logs) {
+        before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
+    }
 
     command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
 
@@ -94,7 +94,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-        command
+        command,
+        null
     )
 
     //
@@ -104,10 +105,15 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
+
+    //
+    // FUNC: CHECK THE PARAMS
+    //
+    validateRunParams(params)
+
     //
     // Create channel from input file provided through params.input
     //
-
     channel
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
@@ -137,43 +143,24 @@ workflow PIPELINE_INITIALISATION {
         channel.of(params.taxid),
         channel.of(params.ncbi_taxonomy_path)
     )
-    ch_versions = ch_versions.mix(VALIDATE_TAXID.out.versions)
 
 
     //
-    // LOGIC: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
+    // SUBWORKFLOW: GUNZIP INPUT DATA IF GZIPPED, OTHERWISE PASS
     //
-    ch_samplesheet
-        .branch { _meta, file ->
-            zipped: file.name.endsWith('.gz')
-            unzipped: !file.name.endsWith('.gz')
-        }
-        .set {ch_input}
-
-
-    //
-    // MODULE: UNZIP INPUTS IF NEEDED
-    //
-    GUNZIP (
-        ch_input.zipped
+    FASTA_CLEAN_FAIDX(
+        ch_samplesheet,
+        params.replace_dots,
+        false, // We do not need the sizes file, we generation one later on after second step of filtering.
+        params.get_dictionary
     )
-
-
-    //
-    // LOGIC: MIX CHANELS WHICH MAY OR MAY NOT BE EMPTY INTO A SINGLE QUEUE CHANNEL
-    //
-    unzipped_input = channel.empty()
-
-    unzipped_input
-        .mix(ch_input.unzipped, GUNZIP.out.gunzip)
-        .set { standardised_unzipped_input }
 
 
     //
     // LOGIC: FILTER THE INPUT BASED ON THE assembly_type VALUE IN THE META
     //          DEPENDING ON THIS VALUE THE PIPELINE WILL NEED TO BE DIFFERENT
     //
-    standardised_unzipped_input
+    FASTA_CLEAN_FAIDX.out.reference
         .branch{ meta, _fasta ->
             organellar_genome: (meta.assembly_type in ["MITO", "PLASTID"])
             genomic_genome: !(meta.assembly_type in ["MITO", "PLASTID"])
@@ -206,8 +193,6 @@ workflow PIPELINE_INITIALISATION {
         barcode_data_file,
         ch_barcodes
     )
-    versions = ch_versions.mix(PREPARE_BLASTDB.out.versions)
-
 
     //
     // LOGIC: GETS PACBIO READ PATHS FROM READS_PATH IF (COVERAGE OR BTK SUBWORKFLOW IS ACTIVE) OR ALL
@@ -218,7 +203,6 @@ workflow PIPELINE_INITIALISATION {
         ch_grabbed_reads_path       = []
     }
 
-
     //
     // MODULE: CHECK IF NT BLAST DATABASE HAS TAXONOMY INCLUDED (ONLY IF NT BLAST IS INCLUDED)
     // This check is specifically for the nt BLAST database used in the EXTRACT_NT_BLAST subworkflow,
@@ -228,7 +212,6 @@ workflow PIPELINE_INITIALISATION {
         CHECK_NT_BLAST_TAXONOMY(
             params.nt_database_path
         )
-        ch_versions = ch_versions.mix(CHECK_NT_BLAST_TAXONOMY.out.versions)
 
         // Check the result and fail if needed
         CHECK_NT_BLAST_TAXONOMY.out.status
@@ -240,7 +223,6 @@ workflow PIPELINE_INITIALISATION {
                 }
             }
     }
-
 
     //
     // NOTE: FCS OVERRIDE - THIS SHOULD BE TEMPORARY
@@ -287,6 +269,8 @@ workflow PIPELINE_INITIALISATION {
     sample_id               = params.sample_id
     main_genomes            = branched_assemblies.genomic_genome
     organellar_genomes      = branched_assemblies.organellar_genome
+    samtools_dict           = FASTA_CLEAN_FAIDX.out.dict
+    stats_json              = FASTA_CLEAN_FAIDX.out.sequence_description
     barcodes_file           = barcode_data_file
     barcodes                = ch_barcodes
     pacbio_db               = PREPARE_BLASTDB.out.barcodes_blast_db
@@ -294,8 +278,6 @@ workflow PIPELINE_INITIALISATION {
     collected_reads         = ch_grabbed_reads_path
     geno_fcs_samplesheet    = geno_fcs_samplesheet
     orga_fcs_samplesheet    = orga_fcs_samplesheet
-
-    versions                = ch_versions
 }
 
 /*
@@ -312,7 +294,6 @@ workflow PIPELINE_COMPLETION {
     plaintext_email // boolean: Send plain-text email instead of HTML
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
-    hook_url        //  string: hook URL for notifications
 
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
@@ -334,13 +315,11 @@ workflow PIPELINE_COMPLETION {
         }
 
         completionSummary(monochrome_logs)
-        if (hook_url) {
-            imNotification(summary_params, hook_url)
-        }
+
     }
 
     workflow.onError {
-        log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
+        log.error "Pipeline failed. Please refer to troubleshooting docs for common issues: https://nf-co.re/docs/running/troubleshooting"
     }
 }
 

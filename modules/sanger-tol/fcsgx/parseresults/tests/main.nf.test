@@ -1,0 +1,101 @@
+nextflow_process {
+
+    name "Test Process FCSGX_PARSERESULTS"
+    script "../main.nf"
+    process "FCSGX_PARSERESULTS"
+
+    tag "modules"
+    tag "modules_sangertol"
+    tag "fcsgx"
+    tag "fcsgx/parseresults"
+
+    setup {
+        println "\nDownloading the new_taxdump..."
+        def new_taxdump_dir = new File("${launchDir}/new_taxdump/")
+        new_taxdump_dir.mkdirs()
+
+        def new_taxdump_url = "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz"
+
+        def command = ['bash', '-c', "curl ${new_taxdump_url} -o ${launchDir}/new_taxdump.tar.gz"]
+        def process = command.execute()
+        process.waitFor()
+
+        def command2 = ['bash', '-c', "gunzip -c ${launchDir}/new_taxdump.tar.gz | tar xf - -C ${new_taxdump_dir}/"]
+        def process2 = command2.execute()
+        process2.waitFor()
+
+        if (process2.exitValue() != 0) {
+            throw new RuntimeException("Error - failed to download new_taxdump: ${process2.err.text}")
+        }
+    }
+
+    test("Laetiporus_sulphureus - csv") {
+
+        config "../nextflow.config"
+
+        when {
+            process {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id: "Laetiporus_sulphureus" ],
+                        file(params.modules_testdata_base_path + "Laetiporus_sulphureus/analysis/gfLaeSulp1.1/fcsgx/gfLaeSulp1.1_PRIMARY.taxonomy.rpt", checkIfExists: true)
+                    ]
+                )
+                input[1] = channel.of(
+                    [
+                        [ id: "Laetiporus_sulphureus" ],
+                        file(params.modules_testdata_base_path + "Laetiporus_sulphureus/analysis/gfLaeSulp1.1/fcsgx/gfLaeSulp1.1_PRIMARY.fcs_gx_report.txt", checkIfExists: true)
+                    ]
+                )
+                input[2] = channel.of(
+                    file("${launchDir}/new_taxdump/rankedlineage.dmp", checkIfExists: true)
+                )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    test("Laetiporus_sulphureus - fasta - stub") {
+
+        options "-stub"
+
+        config "../nextflow.config"
+
+        when {
+            process {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id: "Laetiporus_sulphureus" ],
+                        file(params.modules_testdata_base_path + "Laetiporus_sulphureus/analysis/gfLaeSulp1.1/fcsgx/gfLaeSulp1.1_PRIMARY.taxonomy.rpt", checkIfExists: true)
+                    ]
+                )
+                input[1] = channel.of(
+                    [
+                        [ id: "Laetiporus_sulphureus" ],
+                        file(params.modules_testdata_base_path + "Laetiporus_sulphureus/analysis/gfLaeSulp1.1/fcsgx/gfLaeSulp1.1_PRIMARY.fcs_gx_report.txt", checkIfExists: true)
+                    ]
+                )
+                input[2] = channel.of(
+                    file("${launchDir}/new_taxdump/rankedlineage.dmp", checkIfExists: true)
+                )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+}

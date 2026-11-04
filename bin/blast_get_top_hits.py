@@ -10,8 +10,8 @@ Adapted by Damon-Lee Pointon @DLBPointon
 """
 
 import sys
-import pandas as pd
 
+import pandas as pd
 
 if sys.argv[1] == "-v":
     print("1.0.0")
