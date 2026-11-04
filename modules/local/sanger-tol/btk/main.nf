@@ -17,22 +17,24 @@ process SANGER_TOL_BTK {
     val taxon
 
     output:
-    tuple val(meta), path("${prefix}_btk_out/blobtoolkit/${prefix}*"),      emit: dataset
-    path("${prefix}_btk_out/blobtoolkit/plots"),                            emit: plots
-    path("${prefix}_btk_out/blobtoolkit/${prefix}*/summary.json.gz"),       emit: summary_json
-    path("${prefix}_btk_out/busco"),                                        emit: busco_data
-    path("${prefix}_btk_out/multiqc_report.html"),                          emit: multiqc_report
-    path("blobtoolkit_pipeline_info"),                                      emit: pipeline_info
-    path "versions.yml",                                                    emit: versions
+    tuple val(meta), path("${prefix}_btk_out/blobtoolkit/${prefix}*"), emit: dataset
+    path ("${prefix}_btk_out/blobtoolkit/plots"), emit: plots
+    path ("${prefix}_btk_out/blobtoolkit/${prefix}*/summary.json.gz"), emit: summary_json
+    path ("${prefix}_btk_out/busco"), emit: busco_data
+    path ("${prefix}_btk_out/multiqc_report.html"), emit: multiqc_report
+    path ("blobtoolkit_pipeline_info"), emit: pipeline_info
+    // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+    tuple val("${task.process}"), val('Blobtoolkit'), val(pipeline_version), topic: versions, emit: versions_blobtoolkit
+    tuple val("${task.process}"), val('Nextflow'), eval("nextflow -v | cut -d \" \" -f3"), topic: versions, emit: versions_nextflow
 
     script:
-    prefix                  =   task.ext.prefix             ?: "${meta.id}"
-    def args                =   task.ext.args               ?: ""
-    def profiles            =   task.ext.profiles           ?: ""
-    def get_version         =   task.ext.version_data       ?: "UNKNOWN - SETTING NOT SET"
-    def pipeline            =   task.ext.pipeline           ?: "sanger-tol/blobtoolkit"
-    def pipeline_version    =   task.ext.version            ?: "0.8.0"
-    def trace_config        =   blobtoolkit_trace_config    ? "-c ${blobtoolkit_trace_config}" : ""
+    prefix = task.ext.prefix ?: "${meta.id}"
+    def args = task.ext.args ?: ""
+    def profiles = task.ext.profiles ?: ""
+    def get_version = task.ext.version_data ?: "UNKNOWN - SETTING NOT SET"
+    def pipeline = task.ext.pipeline ?: "sanger-tol/blobtoolkit"
+    pipeline_version = task.ext.version ?: "0.8.0"
+    def trace_config = blobtoolkit_trace_config ? "-c ${blobtoolkit_trace_config}" : ""
     // Seems to be an issue where a nested pipeline can't see the files in the same directory
     // Running realpath gets around this but the files copied into the folder are
     // now just wasted space. Should be fixed with using Mahesh's method of nesting but
@@ -51,41 +53,34 @@ process SANGER_TOL_BTK {
     // both could be blank because of this.
     //
     """
-    mv $reference ${prefix}.fasta
+    mv ${reference} ${prefix}.fasta
 
     nextflow run ${pipeline} \\
         -r ${pipeline_version} \\
         -c ${blobtoolkit_config_file} \\
         ${trace_config} \\
         -profile ${profiles} \\
-        --input "\$(realpath $samplesheet_csv)" \\
+        --input "\$(realpath ${samplesheet_csv})" \\
         --outdir ${prefix}_btk_out \\
         --fasta ${prefix}.fasta \\
         --busco ${busco_lineages_folder} \\
         --busco_lineages ${busco_lineages} \\
         --lineage_tax_ids ${lineage_mapping_file} \\
         --taxon ${taxon} \\
-        --taxdump "\$(realpath $tax_dump)" \\
+        --taxdump "\$(realpath ${tax_dump})" \\
         --blastp "\$(realpath blastp.dmnd)" \\
-        --blastn "\$(realpath $blastn)" \\
-        --blastx "\$(realpath $blastx)" \\
+        --blastn "\$(realpath ${blastn})" \\
+        --blastx "\$(realpath ${blastx})" \\
         --use_work_dir_as_temp true \\
         --align \\
-        $args
+        ${args}
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        Blobtoolkit: $pipeline_version
-        Nextflow: \$(nextflow -v | cut -d " " -f3)
-        executor system: $get_version
-    END_VERSIONS
     """
 
     stub:
-    prefix              =   task.ext.prefix         ?: "${meta.id}"
-    def pipeline_version    =   task.ext.version        ?: "draft_assemblies"
+    prefix = task.ext.prefix ?: "${meta.id}"
+    pipeline_version = task.ext.version ?: "draft_assemblies"
 
     """
     mkdir -p ${prefix}_btk_out/blobtoolkit/${prefix}_out
@@ -102,11 +97,5 @@ process SANGER_TOL_BTK {
     touch ${prefix}_btk_out/multiqc_report.html
 
     mv ${prefix}_btk_out/pipeline_info blobtoolkit_pipeline_info
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        Blobtoolkit: $pipeline_version
-        Nextflow: \$(nextflow -v | cut -d " " -f3)
-    END_VERSIONS
     """
 }

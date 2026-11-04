@@ -18,8 +18,6 @@ workflow EXTRACT_NT_BLAST {
     ncbi_lineage_path       // channel.fromPath( lineage_path )
 
     main:
-    ch_versions             = channel.empty()
-
     blastn_db_path
         .map { db ->
             tuple([id: "db"], db)
@@ -34,7 +32,7 @@ workflow EXTRACT_NT_BLAST {
         ch_blast,
         [],
         [],
-        []
+        [],
     )
 
     windowed_genome
@@ -42,7 +40,6 @@ workflow EXTRACT_NT_BLAST {
             meta.id
         }
         .set { id }
-
 
     //
     // LOGIC: COLLECT THE BLAST OUTPUTS AND COLLECT THEM INTO ONE FILE
@@ -53,9 +50,9 @@ workflow EXTRACT_NT_BLAST {
         }
         .collectFile(
             name: 'FULL_blast_results.txt',
-            newLine: false
+            newLine: false,
         )
-        .combine( id )
+        .combine(id)
         .map { file, identity ->
             tuple([id: identity], file)
         }
@@ -65,20 +62,16 @@ workflow EXTRACT_NT_BLAST {
     //
     // MODULE: CONVERT CHUNK_COORDINATES TO FULL_COORINDATES
     //
-    BLAST_CHUNK_TO_FULL ( blast_results )
-    ch_versions             = ch_versions.mix(BLAST_CHUNK_TO_FULL.out.versions)
-    ch_btk_format           = BLAST_CHUNK_TO_FULL.out.full
-                                .map { meta, file -> tuple([id: meta.id], file) }
+    BLAST_CHUNK_TO_FULL(blast_results)
+    ch_btk_format = BLAST_CHUNK_TO_FULL.out.full.map { meta, file -> tuple([id: meta.id], file) }
 
-    ch_blast_hits           = BLAST_CHUNK_TO_FULL.out.full
-                                .map { meta, file -> tuple([id: meta.id], file) }
+    ch_blast_hits = BLAST_CHUNK_TO_FULL.out.full.map { meta, file -> tuple([id: meta.id], file) }
 
 
     //
     // MODULE: RE_ORDER THE DATA IN THE FULL_COORDINATE FILE
     //
-    REFORMAT_FULL_OUTFMT6 ( BLAST_CHUNK_TO_FULL.out.full )
-    ch_versions             = ch_versions.mix(REFORMAT_FULL_OUTFMT6.out.versions)
+    REFORMAT_FULL_OUTFMT6(BLAST_CHUNK_TO_FULL.out.full)
 
 
     //
@@ -86,8 +79,8 @@ workflow EXTRACT_NT_BLAST {
     //
     REFORMAT_FULL_OUTFMT6.out.full
         .branch { _meta, file ->
-            valid:      file.readLines().size() >= 1
-            invalid:    true
+            valid: file.readLines().size() >= 1
+            invalid: true
         }
         .set { gatekeeper }
 
@@ -95,30 +88,24 @@ workflow EXTRACT_NT_BLAST {
     //
     // MODULE: RETURN ONLY THE TOP HITS PER SEQUENCE
     //
-    BLAST_GET_TOP_HITS (
+    BLAST_GET_TOP_HITS(
         gatekeeper.valid
     )
-    ch_versions             = ch_versions.mix(BLAST_GET_TOP_HITS.out.versions)
 
 
     //
     // MODULE: RETRIEVE LINEAGE INFORMATION FOR TOP BLAST RESULTS USING TAXIDS
     //
-    GET_LINEAGE_FOR_TOP (
+    GET_LINEAGE_FOR_TOP(
         BLAST_GET_TOP_HITS.out.tophits,
-        ncbi_lineage_path
+        ncbi_lineage_path,
     )
-    ch_versions             = ch_versions.mix(GET_LINEAGE_FOR_TOP.out.versions)
-    ch_top_lineages         = GET_LINEAGE_FOR_TOP.out.full
-                                .map { meta, file -> tuple([id: meta.id], file) }
-
-    // No conversion needed - BLAST results are already in the format expected by BlobToolKit
+    ch_top_lineages = GET_LINEAGE_FOR_TOP.out.full.map { meta, file -> tuple([id: meta.id], file) }
 
     emit:
-    ch_blast_results        = BLAST_BLASTN.out.txt
-    ch_formatted_results    = REFORMAT_FULL_OUTFMT6.out.full
+    ch_blast_results     = BLAST_BLASTN.out.txt
+    ch_formatted_results = REFORMAT_FULL_OUTFMT6.out.full
     ch_top_lineages
     ch_blast_hits
-    ch_btk_format           // Format for BTK - full coordinates file
-    versions                = ch_versions
+    ch_btk_format // Format for BTK - full coordinates file
 }

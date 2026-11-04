@@ -33,6 +33,7 @@ Release 12 of sanger-tol/ascc and the first full release and folds in changes ma
 - `countFasta` has been changed to, instead, use the `GENOME_STATS` json output which avoids some compute on the head
 - Cleaned the input channels to the major workflows by removing out-of-date/out-of-use channels
 - Move SEQKIT_SLIDING to main workflow - prevent running in multiple modules. (#244 @weaglesBio)
+- [#257](https://github.com/sanger-tol/ascc/issues/238) Local modules now utilize the version topics (by @prototaxites)
 
 ### `Parameters`
 

@@ -23,8 +23,6 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     btk_dataset                // channel: [ val(meta), [ btk_dataset ] ]
 
     main:
-    ch_versions = channel.empty()
-
     // Convert params to JSON for passing to the HTML report
     def paramsJson = groovy.json.JsonOutput.toJson(params)
 
@@ -98,9 +96,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
         channel.value(paramsJson),                                             // JSON string can be used multiple times
         channel.fromPath("${projectDir}/assets/css/*.css").collect()           // channel.of one (CSS files)
     )
-    ch_versions = ch_versions.mix(GENERATE_HTML_REPORT.out.versions)
 
     emit:
     report    = GENERATE_HTML_REPORT.out.report
-    versions  = ch_versions
 }
