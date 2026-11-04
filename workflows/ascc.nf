@@ -887,7 +887,6 @@ workflow ASCC {
             ch_organellar_full.mito,
             ch_organellar_full.plastid
         )
-        ch_versions = ch_versions.mix(RUN_DECONTAMINATE_FASTA.out.versions)
     }
 
 
