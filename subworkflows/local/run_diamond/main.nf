@@ -6,9 +6,9 @@ include { DIAMOND_BLASTX                                      } from '../../../m
 //
 // LOCAL MODULE IMPORTS
 //
-include { BLAST_CHUNK_TO_FULL as DIAMOND_BLAST_CHUNK_TO_FULL  } from '../../../modules/local/blast/chunk_to_full/main'
-include { REFORMAT_TO_HITS_FILE                               } from '../../../modules/local/reformat/to_hits_file/main'
-include { REFORMAT_DIAMOND_OUTFMT6                            } from '../../../modules/local/reformat/diamond_outfmt6/main'
+include { BLAST_CHUNK_TO_FULL as DIAMOND_BLAST_CHUNK_TO_FULL } from '../../../modules/local/blast/chunk_to_full/main'
+include { REFORMAT_TO_HITS_FILE                              } from '../../../modules/local/reformat/to_hits_file/main'
+include { REFORMAT_DIAMOND_OUTFMT6                           } from '../../../modules/local/reformat/diamond_outfmt6/main'
 
 workflow RUN_DIAMOND {
     take:
@@ -16,21 +16,20 @@ workflow RUN_DIAMOND {
     diamond_db          // val (path)
 
     main:
-    ch_versions     = channel.empty()
-    ch_ext          = channel.of("txt")
-    ch_columns      = channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
+    ch_versions = channel.empty()
+    ch_ext = channel.of("txt")
+    ch_columns = channel.of("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames sskingdoms sphylums salltitles")
 
     //
     // LOGIC: GENERATE THE INPUT CHANNELS NEEDED FOR THE INPUT OF BLAST.
     //
-    diamond_db_path = diamond_db
-        .map{ file -> tuple([id: "db"], file) }
+    diamond_db_path = diamond_db.map { file -> tuple([id: "db"], file) }
 
     windowed_genome
         .combine(ch_ext)
         .combine(ch_columns)
         .combine(diamond_db_path)
-        .multiMap{ meta, reference, extensions, columns, meta2, db_path ->
+        .multiMap { meta, reference, extensions, columns, meta2, db_path ->
             reference: tuple(meta, reference)
             db_path: tuple(meta2, db_path)
             ext_ch: extensions
@@ -42,21 +41,20 @@ workflow RUN_DIAMOND {
     //
     // MODULE: BLAST THE SLIDING WINDOW FASTA AGAINST THE DIAMOND DB.
     //
-    DIAMOND_BLASTX (
+    DIAMOND_BLASTX(
         blast_input.reference,
         blast_input.db_path,
         blast_input.ext_ch,
-        blast_input.col_ch
+        blast_input.col_ch,
     )
 
 
     //
     // MODULE: COMBINE THE CHUNKS INTO THE FULL GENOME
     //
-    DIAMOND_BLAST_CHUNK_TO_FULL (
+    DIAMOND_BLAST_CHUNK_TO_FULL(
         DIAMOND_BLASTX.out.txt
     )
-    ch_versions     = ch_versions.mix(DIAMOND_BLAST_CHUNK_TO_FULL.out.versions)
 
 
     //
@@ -65,20 +63,18 @@ workflow RUN_DIAMOND {
     REFORMAT_TO_HITS_FILE(
         DIAMOND_BLAST_CHUNK_TO_FULL.out.full
     )
-    ch_versions     = ch_versions.mix(REFORMAT_TO_HITS_FILE.out.versions)
 
 
     //
     // MODULE: REFORMAT THE DIAMOND OUTPUT
     //
-    REFORMAT_DIAMOND_OUTFMT6 (
+    REFORMAT_DIAMOND_OUTFMT6(
         DIAMOND_BLAST_CHUNK_TO_FULL.out.full
     )
-    ch_versions     = ch_versions.mix(REFORMAT_DIAMOND_OUTFMT6.out.versions)
 
     emit:
-    full            = DIAMOND_BLAST_CHUNK_TO_FULL.out.full
-    reformed        = REFORMAT_DIAMOND_OUTFMT6.out.full
-    hits_file       = REFORMAT_TO_HITS_FILE.out.hits_file
-    versions        = ch_versions
+    full      = DIAMOND_BLAST_CHUNK_TO_FULL.out.full
+    reformed  = REFORMAT_DIAMOND_OUTFMT6.out.full
+    hits_file = REFORMAT_TO_HITS_FILE.out.hits_file
+    versions  = ch_versions
 }

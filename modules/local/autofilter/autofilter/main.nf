@@ -3,28 +3,28 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     label "process_medium"
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.9' :
-        'biocontainers/python:3.9' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/python:3.9'
+        : 'biocontainers/python:3.9'}"
 
     input:
-    tuple val(meta),        path(reference)
-    tuple val(tiara_meta),  path(tiara_txt)
-    tuple val(fcs_meta),    path(fcs_csv)
+    tuple val(meta), path(reference)
+    tuple val(tiara_meta), path(tiara_txt)
+    tuple val(fcs_meta), path(fcs_csv)
     path ncbi_rankedlineage
 
     output:
-    tuple val(meta), path("*autofiltered.fasta"),                       emit: decontaminated_assembly
-    tuple val(meta), path("*ABNORMAL_CHECK.csv"),                       emit: fcs_tiara_summary
-    tuple val(meta), path("assembly_filtering_removed_sequences.txt"),  emit: removed_seqs
-    tuple val(meta), path("fcs-gx_alarm_indicator_file.txt"),           emit: alarm_file
-    path("*raw_report.txt"),                                            emit: raw_report
-    path "versions.yml",                                                emit: versions
+    tuple val(meta), path("*autofiltered.fasta"), emit: decontaminated_assembly
+    tuple val(meta), path("*ABNORMAL_CHECK.csv"), emit: fcs_tiara_summary
+    tuple val(meta), path("assembly_filtering_removed_sequences.txt"), emit: removed_seqs
+    tuple val(meta), path("fcs-gx_alarm_indicator_file.txt"), emit: alarm_file
+    path ("*raw_report.txt"), emit: raw_report
+    tuple val("${task.process}"), val('python'), eval("python --version | sed 's/Python //g'"), topic: versions, emit: versions_python
 
     script:
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
-    def args    = task.ext.args     ?: ""
-    def args2   = task.ext.args2    ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def args = task.ext.args ?: ""
+    def args2 = task.ext.args2 ?: ""
     """
     autofilter.py \\
         ${reference} \\
@@ -40,11 +40,6 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
         ${args2} \\
         ${prefix}_ABNORMAL_CHECK.csv \\
         --out_prefix ${prefix}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
-    END_VERSIONS
     """
 
     stub:
@@ -53,10 +48,5 @@ process AUTOFILTER_AND_CHECK_ASSEMBLY {
     touch ABNORMAL_CHECK.csv
     touch assembly_filtering_removed_sequences.txt
     touch fcs-gx_alarm_indicator_file.txt
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
-    END_VERSIONS
     """
 }
