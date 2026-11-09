@@ -50,10 +50,10 @@ workflow ORGANELLAR_BLAST {
             BLAST_MAKEBLASTDB.out.db.map { meta, db -> [meta.id, db] },
             by: 0
         )
-        .map { og, meta, ref, db -> [meta, ref, db] }
-        .multiMap { meta, ref, blast_db ->
-            reference_tuple: [meta, ref]
-            blastdb_tuple: [meta, blast_db]
+        .map { _og, meta, ref, db -> [meta, ref, db] }
+        .multiMap{ meta, ref, blast_db ->
+            reference_tuple:    [meta, ref]
+            blastdb_tuple:      [meta, blast_db]
         }
 
     BLAST_BLASTN(

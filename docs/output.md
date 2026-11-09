@@ -92,10 +92,15 @@ This subworkflow uses BLAST against a user-provided plastid sequence to detect l
 <summary>Output files</summary>
 
 - `fcs_adaptor/`
+
   `*.fcs_adaptor_report.txt` - A text file containing potential adaptor sequences and locations.
+
   `*.cleaned_sequences.fa.gz` - Cleaned FASTA file.
+
   `*.fcs_adaptor.log` - Log of the FCS-adaptor run.
+
   `*.pipeline_args.yaml` - Arguments to FCS-adaptor
+
   `*.skipped_trims.jsonl` - Skipped sequences
 
 </details>

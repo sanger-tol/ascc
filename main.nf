@@ -54,6 +54,7 @@ workflow SANGERTOL_ASCC {
     btk_lineage_mapping_file    // Path to the ODB* lineage to taxid mapping file
     barcodes                    // ["barcode_1,barcode_2"]
     val_reads_per_chunk         // int: number of reads per chunk to map when estimating coverage
+    outdir                      // Output directory
 
     main:
 
@@ -86,7 +87,8 @@ workflow SANGERTOL_ASCC {
         btk_lineages_path,
         btk_lineage_mapping_file,
         barcodes,
-        val_reads_per_chunk
+        val_reads_per_chunk,
+        outdir
     )
 }
 
@@ -143,7 +145,8 @@ workflow {
         channel.fromPath(params.busco_lineages_folder),
         channel.fromPath(params.busco_lineage_mapping_file),
         PIPELINE_INITIALISATION.out.barcodes,
-        params.coverage_reads_per_chunk
+        params.coverage_reads_per_chunk,
+        params.outdir,
     )
 
 
@@ -183,6 +186,7 @@ workflow {
             } catch (Exception e) {
                 log.error "[ASCC ] Failed to create completion file: ${e.message}"
             }
+
         }
 
     onError:

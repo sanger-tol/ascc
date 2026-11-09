@@ -17,7 +17,7 @@ workflow GENERATE_HTML_REPORT_WORKFLOW {
     reference_fasta            // channel: [ val(meta), [ reference_fasta ] ]
     fasta_sanitation_log       // channel: [ val(meta), [ fasta_sanitation_log ] ]
     fasta_length_filtering_log // channel: [ val(meta), [ fasta_length_filtering_log ] ]
-    params_file                // channel: [ params_file ]
+    _params_file               // channel: [ params_file ]
     fcsgx_report_txt           // channel: [ val(meta), [ fcsgx_report_txt ] ]
     fcsgx_taxonomy_rpt         // channel: [ val(meta), [ fcsgx_taxonomy_rpt ] ]
     btk_dataset                // channel: [ val(meta), [ btk_dataset ] ]
